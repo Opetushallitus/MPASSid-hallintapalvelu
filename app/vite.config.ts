@@ -1,6 +1,6 @@
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import superTemplate from '@visma/vite-plugin-super-template';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [superTemplate()],
 });

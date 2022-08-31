@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "MPASSid"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com/v1"
+    }
+  ],
+  "paths": {
+    "/desserts": {
+      "get": {
+        "summary": "Search desserts",
+        "operationId": "searchDesserts",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "description": "The search query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of desserts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Desserts"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": [
+                      {
+                        "name": "Frozen yoghurt",
+                        "calories": 159,
+                        "fat": 6.0,
+                        "carbs": 24,
+                        "protein": 4.0
+                      },
+                      {
+                        "name": "Ice cream sandwich",
+                        "calories": 237,
+                        "fat": 9.0,
+                        "carbs": 37,
+                        "protein": 4.3
+                      },
+                      {
+                        "name": "Eclair",
+                        "calories": 262,
+                        "fat": 16.0,
+                        "carbs": 24,
+                        "protein": 6.0
+                      },
+                      {
+                        "name": "Cupcake",
+                        "calories": 305,
+                        "fat": 3.7,
+                        "carbs": 67,
+                        "protein": 4.3
+                      },
+                      {
+                        "name": "Gingerbread",
+                        "calories": 356,
+                        "fat": 16.0,
+                        "carbs": 49,
+                        "protein": 3.9
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Dessert": {
+        "type": "object",
+        "required": ["name", "calories", "fat", "carbs", "protein"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "calories": {
+            "type": "integer"
+          },
+          "fat": {
+            "type": "integer"
+          },
+          "carbs": {
+            "type": "integer"
+          },
+          "protein": {
+            "type": "integer"
+          }
+        }
+      },
+      "Desserts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Dessert"
+        }
+      }
+    }
+  }
+}

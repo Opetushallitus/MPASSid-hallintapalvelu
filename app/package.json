@@ -4,21 +4,29 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "npm run generate",
     "build": "tsc && vite build",
+    "predev": "npm run generate",
     "dev": "vite",
     "format": "prettier --write .",
+    "generate": "npm-run-all --parallel generate:*",
+    "generate:client": "react-openapi-client-generator src/api/schema.json src/api/client.ts",
+    "generate:messages": "formatjs-scripts",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@visma/react-app-super-template": "^1.1.3",
+    "date-fns": "^2.29.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-error-boundary": "^3.1.4"
   },
   "devDependencies": {
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "@visma/eslint-config-super-template": "^0.1.0",
     "@visma/tsconfig": "^1.1.0",
-    "@vitejs/plugin-react": "^2.0.1",
+    "@visma/vite-plugin-super-template": "^0.1.4",
     "eslint": "^8.23.0",
     "prettier": "^2.7.1",
     "typescript": "^4.6.4",
@@ -27,5 +35,8 @@
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
+  },
+  "msw": {
+    "workerDirectory": "public"
   }
 }
