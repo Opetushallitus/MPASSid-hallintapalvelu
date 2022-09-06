@@ -1,9 +1,11 @@
 import "@visma/public.config";
 
-import definition from "@/api/schema.json";
+import "./patchLocalhostApplyRaamit";
+
+import VirkailijaRaamit from "@opetushallitus/virkailija-ui-components/VirkailijaRaamit";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ErrorBoundary } from "react-error-boundary";
+import definition from "../../schema.json";
 import App from "./App";
 
 declare global {
@@ -12,9 +14,9 @@ declare global {
     BASENAME?: string;
     GIT_AUTHOR_DATE: string;
     GIT_VERSION: string;
+    LOCALES: string[];
     MOCK?: string;
     PROD: boolean;
-    RAAMIT_CSS_TEST_URL?: string;
     RAAMIT_PATH: string;
   };
 }
@@ -38,14 +40,13 @@ async function main() {
   }
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-    <React.StrictMode>
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <>
+      <VirkailijaRaamit scriptUrl={ENV.RAAMIT_PATH} />
+      <React.StrictMode>
         <App />
-      </ErrorBoundary>
-    </React.StrictMode>
+      </React.StrictMode>
+    </>
   );
 }
 
 main();
-
-const ErrorFallback = () => null;

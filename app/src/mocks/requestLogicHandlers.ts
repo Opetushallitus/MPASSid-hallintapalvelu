@@ -1,4 +1,4 @@
-import definition from "@/api/schema.json";
+import definition from "../../../schema.json";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 
 export { definition };
