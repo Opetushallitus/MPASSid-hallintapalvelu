@@ -5,15 +5,7 @@
 ### Kehitys
 
 ```sh
-cd app
+cd mpassid-voh-ui
 npm install
 npm run dev
-```
-
-### Tuotanto-build
-
-```sh
-cd app
-npm ci
-npm run build
 ```

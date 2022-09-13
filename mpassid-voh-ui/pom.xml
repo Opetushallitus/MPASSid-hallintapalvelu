@@ -11,8 +11,8 @@
 	<artifactId>mpassid-voh-ui</artifactId>
 
 	<properties>
-		<node.version>v16.15.0</node.version>
-		<yarn.version>v1.22.19</yarn.version>
+		<node.version>v16.17.0</node.version>
+		<npm.version>8.15.0</npm.version>
 		<frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
 	</properties>
 
@@ -39,44 +39,32 @@
 					<installDirectory>target</installDirectory>
 					<workingDirectory>${basedir}</workingDirectory>
 					<nodeVersion>${node.version}</nodeVersion>
-					<yarnVersion>${yarn.version}</yarnVersion>
+					<npmVersion>${npm.version}</npmVersion>
 				</configuration>
 
 				<executions>
 					<execution>
-						<id>install node and yarn</id>
+						<id>install node and npm</id>
 						<goals>
-							<goal>install-node-and-yarn</goal>
+							<goal>install-node-and-npm</goal>
 						</goals>
 					</execution>
 					<execution>
-						<id>config yarn</id>
+						<id>npm ci</id>
 						<goals>
-							<goal>yarn</goal>
+							<goal>npm</goal>
 						</goals>
 						<configuration>
-							<arguments>config set network-timeout 600000 -g</arguments>
+							<arguments>ci</arguments>
 						</configuration>
 					</execution>
-
 					<execution>
-						<id>yarn install</id>
+						<id>npm build</id>
 						<goals>
-							<goal>yarn</goal>
+							<goal>npm</goal>
 						</goals>
 						<configuration>
-							<arguments>install</arguments>
-						</configuration>
-					</execution>
-
-					<execution>
-						<id>yarn build</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>yarn</goal>
-						</goals>
-						<configuration>
-							<arguments>build</arguments>
+							<arguments>run build</arguments>
 						</configuration>
 					</execution>
 				</executions>
