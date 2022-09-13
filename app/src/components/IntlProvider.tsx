@@ -1,7 +1,7 @@
 import { IntlProvider as ReactIntlProvider } from "react-intl";
 
 // TODO: käännökset ladataan verkosta ja mergetään oletusteksteihin
-import messages from "../default-messages-export.json";
+import messages from "../../default-messages-export.json";
 
 function useMessages() {
   return Object.fromEntries(

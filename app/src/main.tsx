@@ -2,11 +2,11 @@ import "@visma/public.config";
 
 import "./patchLocalhostApplyRaamit";
 
+import App from "@/App";
 import VirkailijaRaamit from "@opetushallitus/virkailija-ui-components/VirkailijaRaamit";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import definition from "../../schema.json";
-import App from "./App";
 
 declare global {
   var ENV: {
