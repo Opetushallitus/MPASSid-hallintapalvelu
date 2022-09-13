@@ -1,0 +1,198 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "MPASSid virkailijan opintopolun hallintapalvelu",
+    "version": "0.1"
+  },
+  "servers": [
+    { "url": "https://mpassid-rr-test.csc.fi" },
+    { "url": "https://localhost:8081" }
+  ],
+  "paths": {
+    "/api/v1/integration/{id}": {
+      "put": {
+        "tags": ["integration-controller"],
+        "operationId": "updateIntegration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Integration" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/Integration" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["integration-controller"],
+        "operationId": "deleteIntegration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/v1/integration": {
+      "get": {
+        "tags": ["integration-controller"],
+        "summary": "Get all integrations",
+        "operationId": "getIntegrations",
+        "responses": {
+          "200": {
+            "description": "Provides a list of integrations",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Integration" },
+                "examples": {
+                  "integrations": {
+                    "description": "integrations",
+                    "value": [
+                      {
+                        "id": 5,
+                        "institutionTypes": [11, 15],
+                        "configurationEntity": {
+                          "type": "opinsys",
+                          "id": 5,
+                          "configurationEntityType": "Opinsys IdentityProvider",
+                          "idpId": "opinsys_kauniainen",
+                          "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                          "flowName": "OpinsysKauniainen"
+                        },
+                        "organization": {
+                          "oid": "1.2.246.562.10.98343673038",
+                          "name": "Kauniaisten kaupunki",
+                          "ytunnus": "0203026-2"
+                        },
+                        "deploymentPhase": 0
+                      },
+                      {
+                        "id": 18,
+                        "institutionTypes": [11, 15],
+                        "configurationEntity": {
+                          "type": "adfs",
+                          "id": 18,
+                          "configurationEntityType": "Adfs IdentityProvider",
+                          "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
+                          "idpId": "shib_grankulla",
+                          "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                          "flowName": "ShibGrankulla"
+                        },
+                        "organization": {
+                          "oid": "1.2.246.562.10.98343673038",
+                          "name": "Kauniaisten kaupunki",
+                          "ytunnus": "0203026-2"
+                        },
+                        "deploymentPhase": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["integration-controller"],
+        "operationId": "addIntegration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Integration" }
+            }
+          },
+          "required": true
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/v1/organization": {
+      "get": {
+        "tags": ["organization-controller"],
+        "operationId": "getOrganizations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Organization" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConfigurationEntity": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "configurationEntityType": { "type": "string" },
+          "entityId": {
+            "type": "string",
+            "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
+          },
+          "type": { "type": "string" }
+        },
+        "discriminator": { "propertyName": "type" }
+      },
+      "Integration": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "institutionTypes": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "type": "integer", "format": "int32" }
+          },
+          "configurationEntity": {
+            "$ref": "#/components/schemas/ConfigurationEntity"
+          },
+          "organization": { "$ref": "#/components/schemas/Organization" },
+          "deploymentPhase": { "type": "integer", "format": "int32" }
+        }
+      },
+      "Organization": {
+        "type": "object",
+        "properties": {
+          "oid": { "type": "string" },
+          "name": { "type": "string" },
+          "ytunnus": { "type": "string" },
+          "nimi": {
+            "type": "object",
+            "additionalProperties": { "type": "object" },
+            "writeOnly": true
+          }
+        }
+      }
+    }
+  }
+}

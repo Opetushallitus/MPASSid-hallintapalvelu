@@ -1,0 +1,18 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# translations
+# Messages for the default language are in the source code. Update the code instead of this file.
+/lang/fi-FI.json
+/.compiled-lang
+
+# generated
+/src/api/client.ts
+/default-messages-export.json
