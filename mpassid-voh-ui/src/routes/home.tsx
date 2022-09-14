@@ -13,7 +13,7 @@ export default function Home() {
         <FormattedMessage defaultMessage="Integraatiot" />
       </Typography>
       <Table
-        data={Array(4).fill(useIntegrations()).flat()}
+        data={useIntegrations() as any[]}
         columns={[
           {
             header: intl.formatMessage({
