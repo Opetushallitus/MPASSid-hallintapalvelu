@@ -1,7 +1,7 @@
 import NotFound from "@/components/NotFound";
+import Basic from "@/layouts/Basic";
 import { Route, Routes as ReactRouterRoutes } from "react-router-dom";
 import Home from "./home";
-import Basic from "./layouts/Basic";
 
 export default function Routes() {
   return (
