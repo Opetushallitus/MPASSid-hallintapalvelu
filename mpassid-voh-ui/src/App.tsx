@@ -16,7 +16,7 @@ export default function App() {
         <Suspense>
           <IntlProvider>
             <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <BrowserRouter basename={ENV.BASENAME}>
+              <BrowserRouter basename={(ENV.PROD && ENV.BASENAME) || undefined}>
                 <Routes />
               </BrowserRouter>
             </ErrorBoundary>
