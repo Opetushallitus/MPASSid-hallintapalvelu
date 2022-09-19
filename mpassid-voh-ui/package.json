@@ -15,18 +15,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@iconify/react": "^4.0.0",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.10.3",
+    "@mui/material": "^5.10.5",
     "@opetushallitus/virkailija-ui-components": "^0.4.7",
     "@rehooks/document-title": "^1.0.2",
-    "@tanstack/react-table": "^8.5.13",
     "@visma/react-app-super-template": "^1.1.3",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^3.1.4",
     "react-router-dom": "^6.3.0",
-    "react-select": "^5.4.0",
-    "styled-components": "^5.3.5"
+    "react-select": "^5.4.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.184",
@@ -48,5 +50,8 @@
   },
   "msw": {
     "workerDirectory": "public"
+  },
+  "overrides": {
+    "react": "$react"
   }
 }
