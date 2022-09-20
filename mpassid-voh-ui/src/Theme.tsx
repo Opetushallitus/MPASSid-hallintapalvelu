@@ -76,6 +76,13 @@ export default function Theme({ children }: Props) {
                 },
               },
             },
+            MuiInputBase: {
+              styleOverrides: {
+                root: ({ ownerState }) => ({
+                  height: { small: "1.8em", medium: "2.4em" }[ownerState.size!],
+                }),
+              },
+            },
             MuiPaper: {
               defaultProps: {
                 elevation: 4,
