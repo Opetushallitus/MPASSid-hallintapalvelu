@@ -1,7 +1,10 @@
 import { useIntegrations } from "@/api";
+import { Search } from "@mui/icons-material";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import {
   Divider,
+  IconButton,
+  InputAdornment,
   Paper,
   Table,
   TableBody,
@@ -9,17 +12,23 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
-import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
+import { FormattedMessage, useIntl } from "react-intl";
+import { Link, useSearchParams } from "react-router-dom";
 import { HeaderIcon } from "../components/HeaderIcon";
 
 export default function Home() {
   const integrations = useIntegrations() as any[];
+  const intl = useIntl();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   return (
     <>
+      <Typography variant="body1" gutterBottom>
+        <FormattedMessage defaultMessage="(palvelun lyhyt kuvaus)" />
+      </Typography>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
         <Typography variant="h2" gutterBottom>
           <HeaderIcon>
@@ -37,7 +46,43 @@ export default function Home() {
             }}
           />
         </Typography>
-        <Divider />
+        <Divider sx={{ marginBottom: 2 }} />
+
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+
+            setSearchParams(
+              new URLSearchParams(
+                new FormData(event.currentTarget) as URLSearchParams
+              )
+            );
+          }}
+        >
+          <TextField
+            placeholder={intl.formatMessage({
+              defaultMessage: "Etsi nimellä, OID:lla tai y-tunnuksella",
+            })}
+            name="query"
+            defaultValue={searchParams.get("query")}
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    aria-label={intl.formatMessage({
+                      defaultMessage: "etsi",
+                    })}
+                    type="submit"
+                  >
+                    <Search />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </form>
         <Table>
           <TableHead>
             <TableRow>
