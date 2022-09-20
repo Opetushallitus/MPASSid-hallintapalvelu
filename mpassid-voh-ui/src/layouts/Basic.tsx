@@ -1,8 +1,8 @@
 import useSetDocumentTitle from "@/hooks/useDocumentTitle";
+import StyleIcon from "@mui/icons-material/Style";
 import { Box, Container, Fab, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { Link, Outlet } from "react-router-dom";
-import StyleIcon from "@mui/icons-material/Style";
 
 export default function Basic() {
   useSetDocumentTitle();
