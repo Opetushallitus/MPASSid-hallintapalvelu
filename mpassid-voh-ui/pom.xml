@@ -14,11 +14,11 @@
 		<node.version>v16.17.0</node.version>
 		<npm.version>8.15.0</npm.version>
 		<frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
-		<build.outDir>dist</build.outDir>
+		<build.outDir>target/classes/public</build.outDir>
 	</properties>
 
 	<build>
-
+	<!--
 		<filters>
 			<filter>profiles/${build.profile.id}/config.properties</filter>
 		</filters>
@@ -30,7 +30,7 @@
 				<targetPath>${basedir}/src/main/frontend</targetPath>
 			</resource>
 		</resources>
-
+	-->
 		<plugins>
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
