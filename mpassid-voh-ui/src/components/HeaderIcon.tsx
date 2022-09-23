@@ -1,3 +1,4 @@
+import styleGuide from "@/utils/mui-theme/styleGuide";
 import { Fab, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { cloneElement } from "react";
@@ -22,7 +23,7 @@ export function HeaderIcon({ children }: Props) {
           height: size,
           minHWidth: size,
           width: size,
-          background: `${theme.palette.grey["100"]} !important`, // Tyylioppaan kuvissa #f0f3f7
+          background: `${styleGuide.colors.gray["lighten-6"]} !important`,
         }}
       >
         {cloneElement(children as React.ReactElement, {

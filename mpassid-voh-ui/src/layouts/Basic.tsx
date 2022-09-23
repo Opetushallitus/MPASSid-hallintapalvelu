@@ -21,7 +21,7 @@ export default function Basic() {
         <Fab
           size="small"
           component={Link}
-          to="theme-development-helpers"
+          to="Theme-showcase"
           sx={{
             position: "absolute",
             bottom: 16,

@@ -1,4 +1,4 @@
-import { Paper, Typography as MUITypography } from "@mui/material";
+import { Link, Paper, Typography as MUITypography } from "@mui/material";
 
 export default function Typography() {
   return (
@@ -23,7 +23,7 @@ export default function Typography() {
           quos eaque quo delectus, magnam necessitatibus, nihil in, placeat
           saepe.
         </MUITypography>
-        <a href="https://example.com">Text Link</a>
+        <Link href="https://example.com">Text Link</Link>
         <br />
         <MUITypography variant="caption" gutterBottom>
           Caption

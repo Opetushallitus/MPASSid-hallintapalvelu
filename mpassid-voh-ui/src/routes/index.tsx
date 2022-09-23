@@ -1,8 +1,8 @@
 import NotFound from "@/components/NotFound";
 import Basic from "@/layouts/Basic";
+import ThemeShowcase from "@/utils/mui-theme/Showcase";
 import { Route, Routes as ReactRouterRoutes } from "react-router-dom";
 import Home from "./home";
-import ThemeDevelopmentHelpers from "../utils/theme-development-helpers";
 
 export default function Routes() {
   return (
@@ -10,10 +10,7 @@ export default function Routes() {
       <Route element={<Basic />}>
         <Route index element={<Home />} />
         {!ENV.PROD && (
-          <Route
-            path="theme-development-helpers"
-            element={<ThemeDevelopmentHelpers />}
-          />
+          <Route path="theme-showcase" element={<ThemeShowcase />} />
         )}
         <Route path="*" element={<NotFound />} />
       </Route>

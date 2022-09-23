@@ -6,8 +6,15 @@ export default function Misc() {
       <Typography variant="h2" gutterBottom>
         Misc
       </Typography>
-      <Paper sx={{ marginBottom: 3, padding: 3 }}>
-        Divider
+      <Paper
+        sx={{
+          marginBottom: 3,
+          padding: 3,
+        }}
+      >
+        <Typography variant="h3" gutterBottom>
+          Divider
+        </Typography>
         <Divider />
       </Paper>
     </>
