@@ -67,6 +67,7 @@ export default function Home() {
             defaultValue={searchParams.get("query")}
             fullWidth
             InputProps={{
+              autoComplete: "off",
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
