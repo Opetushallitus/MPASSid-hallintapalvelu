@@ -1,4 +1,4 @@
-import { alpha, Theme, ThemeOptions } from "@mui/material";
+import type { Theme, ThemeOptions } from "@mui/material";
 
 const theme = (theme: Theme): ThemeOptions => {
   const paletteTextPrimary = {
@@ -54,6 +54,20 @@ const theme = (theme: Theme): ThemeOptions => {
           root: ({ ownerState }) => ({
             height: { small: "1.8em", medium: "2.4em" }[ownerState.size!],
           }),
+        },
+      },
+      MuiPagination: {
+        defaultProps: {
+          color: "primary",
+          size: "small",
+          shape: "rounded",
+        },
+      },
+      MuiPaginationItem: {
+        styleOverrides: {
+          root: {
+            fontWeight: 500,
+          },
         },
       },
       MuiPaper: {

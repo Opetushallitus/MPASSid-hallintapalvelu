@@ -1,4 +1,4 @@
-import { Divider, Paper, Typography } from "@mui/material";
+import { Divider, Pagination, Paper, Typography } from "@mui/material";
 
 export default function Misc() {
   return (
@@ -15,7 +15,11 @@ export default function Misc() {
         <Typography variant="h3" gutterBottom>
           Divider
         </Typography>
-        <Divider />
+        <Divider sx={{ marginBottom: 3 }} />
+        <Typography variant="h3" gutterBottom>
+          Pagination
+        </Typography>
+        <Pagination count={5} />
       </Paper>
     </>
   );
