@@ -2,6 +2,10 @@
   "openapi": "3.0.1",
   "info": {
     "title": "MPASSid virkailijan opintopolun hallintapalvelu",
+    "license": {
+      "name": "EUPL Version 1.1",
+      "url": "http://www.osor.eu/eupl/"
+    },
     "version": "0.1"
   },
   "servers": [
@@ -71,14 +75,42 @@
                     "value": [
                       {
                         "id": 5,
-                        "institutionTypes": [11, 15],
                         "configurationEntity": {
+                          "name": "(Palvelun nimi)",
                           "type": "opinsys",
                           "id": 5,
-                          "configurationEntityType": "Opinsys IdentityProvider",
+                          "role": "IdentityProvider",
                           "idpId": "opinsys_kauniainen",
                           "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
-                          "flowName": "OpinsysKauniainen"
+                          "flowName": "OpinsysKauniainen",
+                          "institutionTypes": [11, 15],
+                          "attributes": [
+                            {
+                              "id": 32,
+                              "name": "clientKey",
+                              "value": "{{opinsysKauniainen.clientKey}}"
+                            },
+                            {
+                              "id": 29,
+                              "name": "tenantId",
+                              "value": "kauniainen.opinsys.fi"
+                            },
+                            {
+                              "id": 33,
+                              "name": "class",
+                              "value": "OpinsysDataSource"
+                            },
+                            {
+                              "id": 31,
+                              "name": "clientId",
+                              "value": "{{opinsysKauniainen.clientId}}"
+                            },
+                            {
+                              "id": 35,
+                              "name": "datasource",
+                              "value": "datasources.opinsys"
+                            }
+                          ]
                         },
                         "organization": {
                           "oid": "1.2.246.562.10.98343673038",
@@ -93,11 +125,51 @@
                         "configurationEntity": {
                           "type": "adfs",
                           "id": 18,
+                          "role": "IdentityProvider",
                           "configurationEntityType": "Adfs IdentityProvider",
                           "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
                           "idpId": "shib_grankulla",
                           "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
-                          "flowName": "ShibGrankulla"
+                          "flowName": "ShibGrankulla",
+                          "attributes": [
+                            {
+                              "id": 158,
+                              "name": "surname",
+                              "value": "surname"
+                            },
+                            {
+                              "id": 152,
+                              "name": "groupLevels",
+                              "value": "classLevel"
+                            },
+                            { "id": 159, "name": "roles", "value": "userRole" },
+                            {
+                              "id": 160,
+                              "name": "learnerId",
+                              "value": "learnerId"
+                            },
+                            {
+                              "id": 153,
+                              "name": "firstName",
+                              "value": "firstName"
+                            },
+                            { "id": 157, "name": "groups", "value": "class" },
+                            {
+                              "id": 154,
+                              "name": "legacyId",
+                              "value": "legacyId"
+                            },
+                            {
+                              "id": 156,
+                              "name": "username",
+                              "value": "mpassAccountName"
+                            },
+                            {
+                              "id": 155,
+                              "name": "schoolIds",
+                              "value": "schoolCode"
+                            }
+                          ]
                         },
                         "organization": {
                           "oid": "1.2.246.562.10.98343673038",
@@ -150,6 +222,16 @@
   },
   "components": {
     "schemas": {
+      "Attribute": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "string" },
+          "configurationEntity": {
+            "$ref": "#/components/schemas/ConfigurationEntity"
+          }
+        }
+      },
       "ConfigurationEntity": {
         "required": ["type"],
         "type": "object",
@@ -159,6 +241,12 @@
           "entityId": {
             "type": "string",
             "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
+          },
+          "attributes": {
+            "uniqueItems": true,
+            "type": "array",
+            "readOnly": true,
+            "items": { "$ref": "#/components/schemas/Attribute" }
           },
           "type": { "type": "string" }
         },

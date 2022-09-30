@@ -6,6 +6,9 @@ const styleGuide = {
     secondary: {
       main: "#00526c",
     },
+    info: {
+      main: "#00b5f0",
+    },
     neutral: {
       black: "#2a2a2a",
     },
