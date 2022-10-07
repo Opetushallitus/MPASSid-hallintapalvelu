@@ -1,6 +1,6 @@
 import { Clear, Search } from "@mui/icons-material";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 
 const SEARCH_PARAM_NANE = "hae";
@@ -13,9 +13,22 @@ interface Props {
 export default function SearchForm({ formData, onSearch }: Props) {
   const intl = useIntl();
   const defaultValue = formData.get(SEARCH_PARAM_NANE);
-  const [disabled, setDisabled] = useState(!defaultValue);
+  const [isEmpty, setIsEmpty] = useState(!defaultValue);
+  const [isDirty, setIsDirty] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const updateFormState = useCallback(
+    function updateFormState() {
+      setIsEmpty(!inputRef.current!.value);
+      setIsDirty(inputRef.current!.value !== (defaultValue ?? ""));
+    },
+    [defaultValue]
+  );
+
+  useEffect(() => {
+    updateFormState();
+  }, [updateFormState]);
 
   return (
     <form
@@ -25,9 +38,7 @@ export default function SearchForm({ formData, onSearch }: Props) {
 
         onSearch(new FormData(event.currentTarget));
       }}
-      onChange={() => {
-        setDisabled(!inputRef.current!.value);
-      }}
+      onChange={updateFormState}
     >
       <TextField
         placeholder={intl.formatMessage({
@@ -43,7 +54,7 @@ export default function SearchForm({ formData, onSearch }: Props) {
         InputProps={{
           endAdornment: (
             <>
-              {!disabled && (
+              {!isEmpty && (
                 <InputAdornment position="end">
                   <IconButton
                     edge="end"
@@ -64,7 +75,7 @@ export default function SearchForm({ formData, onSearch }: Props) {
                 <IconButton
                   edge="end"
                   color="primary"
-                  disabled={disabled}
+                  disabled={!isDirty}
                   aria-label={intl.formatMessage({
                     defaultMessage: "etsi",
                   })}

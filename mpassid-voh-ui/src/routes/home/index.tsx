@@ -1,12 +1,21 @@
 import { useIntegrations } from "@/api";
-import PageHeader from "@/utils/components/PageHeader";
+import VirkailijaPageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
-import { secondary } from "@/utils/components/react-intl-values";
+import { secondary, suspense } from "@/utils/components/react-intl-values";
+import Suspense from "@/utils/components/Suspense";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
-import { Divider, Paper, TableContainer, Typography } from "@mui/material";
-import { FormattedMessage } from "react-intl";
+import {
+  Box,
+  Divider,
+  FormControlLabel,
+  Paper,
+  Switch,
+  TableContainer,
+  Typography,
+} from "@mui/material";
+import { FormattedMessage, useIntl } from "react-intl";
 import { useSearchParams } from "react-router-dom";
-import IntagrationsTable, { rowsPerPage } from "./IntagrationsTable";
+import IntagrationsTable from "./IntagrationsTable";
 import SearchForm from "./SearchForm";
 
 const copyFormDataToURLSearchParams =
@@ -23,13 +32,9 @@ const copyFormDataToURLSearchParams =
   };
 
 export default function Home() {
-  const integrations = Array(21).fill(useIntegrations()).flat();
-  const totalRows = integrations.length;
-  const [page, , { resetPage }] = usePaginationPage();
-  const start = (page - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
-  const rows = integrations.slice(start, end);
+  const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const intl = useIntl();
 
   function handleSearch(formData: FormData) {
     const copy = copyFormDataToURLSearchParams(formData);
@@ -42,19 +47,57 @@ export default function Home() {
         <FormattedMessage defaultMessage="(palvelun lyhyt kuvaus)" />
       </Typography>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
-        <PageHeader icon={<IntegrationInstructionsIcon />}>
-          <FormattedMessage
-            defaultMessage="Integraatiot <secondary>( {totalRows} )</secondary>"
-            values={{
-              totalRows,
-              secondary,
-            }}
+        <Box display="flex" alignItems="baseline">
+          <VirkailijaPageHeader
+            icon={<IntegrationInstructionsIcon />}
+            sx={{ flexGrow: 1 }}
+          >
+            <FormattedMessage
+              defaultMessage="Integraatiot <suspense><secondary>( {totalElements} )</secondary></suspense>"
+              values={{
+                totalElements: <TotalElements />,
+                secondary,
+                suspense,
+              }}
+            />
+          </VirkailijaPageHeader>
+          <FormControlLabel
+            control={
+              <Switch
+                color="warning"
+                checked={JSON.parse(searchParams.get("test") ?? "false")}
+                onChange={(event) => {
+                  setSearchParams((searchParams) => {
+                    if (event.target.checked) {
+                      searchParams.set("test", JSON.stringify(true));
+                    } else {
+                      searchParams.delete("test");
+                    }
+
+                    return resetPage(searchParams);
+                  });
+                }}
+              />
+            }
+            label={intl.formatMessage({ defaultMessage: "Testi-integraatiot" })}
           />
-        </PageHeader>
+        </Box>
         <Divider sx={{ marginBottom: 2 }} />
         <SearchForm formData={searchParams} onSearch={handleSearch} />
-        <IntagrationsTable rows={rows} totalRows={totalRows} />
+        <Suspense fallback={null}>
+          <IntagrationsTable />
+        </Suspense>
       </TableContainer>
     </>
   );
+}
+
+function TotalElements() {
+  const integrations = useIntegrations();
+
+  return integrations.page.totalElements;
+}
+
+function Suspender() {
+  throw new Promise(() => {});
 }

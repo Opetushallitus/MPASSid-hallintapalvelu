@@ -1,7 +1,8 @@
-import type { Components } from "@/api";
+import { useIntegrations } from "@/api";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import {
+  Box,
   Chip,
   Stack,
   Table,
@@ -9,13 +10,22 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
 } from "@mui/material";
-import { defineMessages, FormattedMessage } from "react-intl";
+import type { PropsWithChildren } from "react";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Link } from "react-router-dom";
 
-export const rowsPerPage = 5;
+const typeAbbreviations = defineMessages({
+  IdentityProvider: {
+    defaultMessage: "OKJ",
+  },
+  ServiceProvider: {
+    defaultMessage: "PT",
+  },
+});
 
-const types = defineMessages({
+const typeTooltips = defineMessages({
   IdentityProvider: {
     defaultMessage: "Koulutuksen järjestäjä",
   },
@@ -24,12 +34,13 @@ const types = defineMessages({
   },
 });
 
-interface Props {
-  rows: Components.Schemas.Integration[];
-  totalRows: number;
-}
+export default function IntagrationsTable() {
+  const intl = useIntl();
+  const {
+    elements,
+    page: { totalPages },
+  } = useIntegrations();
 
-export default function IntagrationsTable({ rows, totalRows }: Props) {
   return (
     <>
       <Table>
@@ -53,12 +64,22 @@ export default function IntagrationsTable({ rows, totalRows }: Props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((element, index) => (
+          {elements.map((element, index) => (
             <TableRow key={index}>
               <TableCell>
                 <Link to={`/integraatio/${element.id}`}>{element.id}</Link>
               </TableCell>
-              <TableCell>{element.configurationEntity.name}</TableCell>
+              <TableCell>
+                <Stack>
+                  {element.configurationEntity.name}
+                  <SecondaryCode>
+                    {element.configurationEntity.idpId}
+                  </SecondaryCode>
+                  <SecondaryCode>
+                    {element.configurationEntity.entityId}
+                  </SecondaryCode>
+                </Stack>
+              </TableCell>
               <TableCell>
                 <Chip
                   label={element.configurationEntity.type}
@@ -67,23 +88,27 @@ export default function IntagrationsTable({ rows, totalRows }: Props) {
                 />
               </TableCell>
               <TableCell>
-                <FormattedMessage
-                  {...types[
-                    element.configurationEntity.role as keyof typeof types
-                  ]}
-                />
+                <Tooltip
+                  title={intl.formatMessage(
+                    typeTooltips[
+                      element.configurationEntity
+                        .role as keyof typeof typeTooltips
+                    ]
+                  )}
+                >
+                  <span>
+                    <FormattedMessage
+                      {...typeAbbreviations[
+                        element.configurationEntity
+                          .role as keyof typeof typeAbbreviations
+                      ]}
+                    />
+                  </span>
+                </Tooltip>
               </TableCell>
               <TableCell>
                 <Stack>
                   {element.organization.name}
-                  <Secondary sx={{ lineHeight: "initial" }}>
-                    <small>
-                      <FormattedMessage
-                        defaultMessage="Y-tunnus: {value}"
-                        values={{ value: element.organization.ytunnus }}
-                      />
-                    </small>
-                  </Secondary>
                   <Secondary sx={{ lineHeight: "initial" }}>
                     <small>
                       <FormattedMessage
@@ -98,9 +123,48 @@ export default function IntagrationsTable({ rows, totalRows }: Props) {
           ))}
         </TableBody>
       </Table>
-      <TablePaginationWithRouterIntegration
-        count={Math.ceil(totalRows / rowsPerPage)}
-      />
+      {elements.length ? (
+        <TablePaginationWithRouterIntegration count={totalPages} />
+      ) : (
+        <Box display="flex" justifyContent="center" mt={3}>
+          <Secondary>
+            <FormattedMessage
+              defaultMessage={`Valitsemillasi hakuehdoilla ei löytynyt yhtään {type, select,
+                integration {integraatiota}
+                other {tietoa}
+            }.`}
+              values={{ type: "integration" }}
+            />
+          </Secondary>
+        </Box>
+      )}
     </>
+  );
+}
+
+function SecondaryCode({ children }: PropsWithChildren) {
+  return (
+    <Secondary
+      sx={{
+        lineHeight: "initial",
+        width: 250,
+        textOverflow: "ellipsis",
+        overflow: "hidden",
+        "&:hover": {
+          position: "relative",
+          overflow: "visible",
+        },
+      }}
+    >
+      <Box
+        component="small"
+        sx={{
+          backgroundColor: "var(--background-color)",
+          boxShadow: "0px 0px 5px 4px var(--background-color)",
+        }}
+      >
+        <code>{children}</code>
+      </Box>
+    </Secondary>
   );
 }
