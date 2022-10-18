@@ -12,7 +12,7 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
-import type { PropsWithChildren } from "react";
+import { get, last, toPath } from "lodash";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Link } from "react-router-dom";
 
@@ -27,7 +27,7 @@ const typeAbbreviations = defineMessages({
 
 const typeTooltips = defineMessages({
   IdentityProvider: {
-    defaultMessage: "Koulutuksen järjestäjä",
+    defaultMessage: "Opetuksen ja koulutuksen järjestäjä",
   },
   ServiceProvider: {
     defaultMessage: "Palveluntarjoaja",
@@ -72,12 +72,14 @@ export default function IntagrationsTable() {
               <TableCell>
                 <Stack>
                   {element.configurationEntity.name}
-                  <SecondaryCode>
-                    {element.configurationEntity.idpId}
-                  </SecondaryCode>
-                  <SecondaryCode>
-                    {element.configurationEntity.entityId}
-                  </SecondaryCode>
+                  <SecondaryCodeWithTooltip
+                    object={element}
+                    path={["configurationEntity", "flowName"]}
+                  />
+                  <SecondaryCodeWithTooltip
+                    object={element}
+                    path={["configurationEntity", "entityId"]}
+                  />
                 </Stack>
               </TableCell>
               <TableCell>
@@ -142,7 +144,23 @@ export default function IntagrationsTable() {
   );
 }
 
-function SecondaryCode({ children }: PropsWithChildren) {
+function SecondaryCodeWithTooltip({
+  object,
+  path,
+}: {
+  object: Parameters<typeof get>[0];
+  path: Parameters<typeof get>[1];
+}) {
+  const value = get(object, path, <span />);
+
+  const title = last(toPath(path));
+
+  let code = <code>{value}</code>;
+
+  if (title) {
+    code = <Tooltip title={title}>{code}</Tooltip>;
+  }
+
   return (
     <Secondary
       sx={{
@@ -163,7 +181,7 @@ function SecondaryCode({ children }: PropsWithChildren) {
           boxShadow: "0px 0px 5px 4px var(--background-color)",
         }}
       >
-        <code>{children}</code>
+        {code}
       </Box>
     </Secondary>
   );
