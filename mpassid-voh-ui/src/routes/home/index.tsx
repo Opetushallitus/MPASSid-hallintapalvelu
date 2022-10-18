@@ -1,5 +1,5 @@
 import { useIntegrations } from "@/api";
-import VirkailijaPageHeader from "@/utils/components/PageHeader";
+import PageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
 import { secondary, suspense } from "@/utils/components/react-intl-values";
 import Suspense from "@/utils/components/Suspense";
@@ -48,19 +48,20 @@ export default function Home() {
       </Typography>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
         <Box display="flex" alignItems="baseline">
-          <VirkailijaPageHeader
+          <PageHeader
             icon={<IntegrationInstructionsIcon />}
             sx={{ flexGrow: 1 }}
           >
             <FormattedMessage
-              defaultMessage="Integraatiot <suspense><secondary>( {totalElements} )</secondary></suspense>"
+              defaultMessage="Integraatiot <secondary><suspense>( {totalElements} )</suspense></secondary>"
+              description="Otsikko (<suspense> estää sivun välkkymisen, kun käyttäjä vaihtaa hakuparametreja tai siirtyy toiselle tulossivulle)"
               values={{
                 totalElements: <TotalElements />,
                 secondary,
                 suspense,
               }}
             />
-          </VirkailijaPageHeader>
+          </PageHeader>
           <FormControlLabel
             control={
               <Switch
@@ -84,7 +85,7 @@ export default function Home() {
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
         <SearchForm formData={searchParams} onSearch={handleSearch} />
-        <Suspense fallback={null}>
+        <Suspense>
           <IntagrationsTable />
         </Suspense>
       </TableContainer>
@@ -96,8 +97,4 @@ function TotalElements() {
   const integrations = useIntegrations();
 
   return integrations.page.totalElements;
-}
-
-function Suspender() {
-  throw new Promise(() => {});
 }

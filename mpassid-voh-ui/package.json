@@ -29,7 +29,7 @@
     "react-error-boundary": "^3.1.4",
     "react-router-dom": "^6.3.0",
     "react-select": "^5.4.0",
-    "suspense-overlay": "^0.1.2"
+    "suspense-overlay": "^1.0.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.184",

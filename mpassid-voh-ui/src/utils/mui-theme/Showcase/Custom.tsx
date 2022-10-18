@@ -7,16 +7,14 @@ import {
 import { Secondary } from "@/utils/components/react-intl-values";
 import Suspense from "@/utils/components/Suspense";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
-import { Paper, Stack, Typography } from "@mui/material";
+import { Grid, Paper, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 export default function Custom() {
-  const [suspend, setSuspend] = useState(false);
+  const [update, setUpdate] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => {
-      setSuspend(true);
-    }, 100);
+    setUpdate(true);
   }, []);
 
   return (
@@ -54,29 +52,53 @@ export default function Custom() {
         <Typography variant="h3" gutterBottom>
           Suspense
         </Typography>
-        <Stack direction="row" spacing={2}>
-          <Suspense>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa minus,
-            rem temporibus eaque vel veritatis. Fuga, tempore reiciendis
-            officiis incidunt commodi dignissimos, dolorum, harum eum vitae
-            facere maxime perferendis quos.
-          </Suspense>
-          <Suspense>
-            {
-              // Simulate suspend
-              suspend && <Suspender />
-            }
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa minus,
-            rem temporibus eaque vel veritatis. Fuga, tempore reiciendis
-            officiis incidunt commodi dignissimos, dolorum, harum eum vitae
-            facere maxime perferendis quos.
-          </Suspense>
-        </Stack>
+        <Grid container spacing={2}>
+          {[
+            { title: "Load", children: <Suspend /> },
+            { title: "Ready" },
+            { title: "Update", children: update && <Suspend /> },
+          ].map(({ title, children }, index) => (
+            <Grid key={index} item xs={4}>
+              <Typography variant="subtitle1" gutterBottom>
+                {title}
+              </Typography>
+              <Suspense>
+                {children}
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ipsa
+                minus, rem temporibus eaque vel veritatis. Fuga, tempore
+                reiciendis officiis incidunt commodi dignissimos, dolorum, harum
+                eum vitae facere maxime perferendis quos.
+              </Suspense>
+            </Grid>
+          ))}
+        </Grid>
+        <Typography variant="h3" gutterBottom>
+          Suspense: <code>inline=true</code>
+        </Typography>
+        <Grid container spacing={2}>
+          {[
+            { title: "Load", children: <Suspend /> },
+            { title: "Ready" },
+            { title: "Update", children: update && <Suspend /> },
+          ].map(({ title, children }, index) => (
+            <Grid key={index} item xs={4}>
+              <Typography variant="subtitle1" gutterBottom>
+                {title}
+              </Typography>
+              Number of results:{" "}
+              <Suspense inline>
+                {children}
+                99
+              </Suspense>
+            </Grid>
+          ))}
+        </Grid>
       </Paper>
     </>
   );
 }
 
-function Suspender(): null {
+// Simulate suspend
+export function Suspend(): null {
   throw new Promise(() => {});
 }

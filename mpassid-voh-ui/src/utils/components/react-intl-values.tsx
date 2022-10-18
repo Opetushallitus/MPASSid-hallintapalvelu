@@ -15,11 +15,4 @@ export const suspense = (chunks: React.ReactNode[]) => (
 
 export const Suspense = (
   props: React.ComponentProps<typeof VirkailijaSuspense>
-) => (
-  <VirkailijaSuspense
-    fallback={null}
-    containerComponent="span"
-    wrapperComponent="span"
-    {...props}
-  />
-);
+) => <VirkailijaSuspense inline {...props} />;
