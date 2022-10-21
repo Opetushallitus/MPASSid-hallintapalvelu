@@ -1,3 +1,4 @@
+import { getRole } from "@/routes/home/IntagrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get } from "lodash";
 import definition from "../../../schema.json";
@@ -5,19 +6,19 @@ import definition from "../../../schema.json";
 export { definition };
 
 const { integrations } =
-  definition.paths["/api/v1/integration"].get.responses["200"].content[
-    "application/json"
+  definition.paths["/api/v1/integration/page"].get.responses["200"].content[
+    "*/*"
   ].examples;
 
-let { elements } = integrations.value;
+let { content: allContent } = integrations.value;
 
-elements = Array(21).fill(elements).flat();
+allContent = Array(21).fill(allContent).flat();
 
-elements.push(
-  ...elements.map((element) => ({
+allContent.push(
+  ...allContent.map((element) => ({
     ...element,
-    id: element.id + 100,
     configurationEntity: {
+      entityId: undefined as unknown as string,
       ...element.configurationEntity,
       test: true,
     },
@@ -28,45 +29,91 @@ elements.push(
   }))
 );
 
+let id = 1000;
+allContent = allContent.map((row) => ({
+  ...row,
+  id: id++,
+}));
+
 const defaults = {
   page: 1,
-  limit: 25,
+  size: 25,
 };
 
 export default {
-  getIntegrations(request) {
+  getIntegrationsPageable(request) {
     const page = Number(request.query.page ?? defaults.page);
-    const limit = Number(request.query.limit ?? defaults.limit);
-    const query = request.query.query?.toLowerCase();
-    let filteredElements = elements;
-    if (request.query.query) {
+    const size = Number(request.query.size ?? defaults.size);
+    const query = request.query as { [key: string]: string };
+    const find = query.find?.toLowerCase();
+
+    let filteredElements = allContent;
+    if (find) {
       filteredElements = filteredElements.filter((element) =>
         [
           "configurationEntity.name",
           "organization.oid",
           "organization.name",
           "organization.ytunnus",
-        ].some((path) => get(element, path)?.toLowerCase().includes(query))
+        ].some((path) => get(element, path)?.toLowerCase().includes(find))
       );
     }
-    const test = JSON.parse(request.query.test ?? "false");
+    const test = JSON.parse(query.test ?? "false");
 
     filteredElements = filteredElements.filter(
-      (element) => Boolean(element.configurationEntity.test) === test
+      (row) => Boolean(row.configurationEntity.test) === test
     );
 
-    const start = (page - 1) * limit;
-    const end = start + limit;
+    if ("type" in query) {
+      const types = query.type.split(",").filter(Boolean);
+
+      filteredElements = filteredElements.filter((row) =>
+        types.includes(row.configurationEntity[getRole(row)].type)
+      );
+    }
+
+    if ("role" in query) {
+      const roles = query.role.split(",").filter(Boolean);
+
+      filteredElements = filteredElements.filter((row) =>
+        roles.includes(getRole(row))
+      );
+    }
+
+    filteredElements = filteredElements.filter(
+      (row) => Boolean(row.configurationEntity.test) === test
+    );
+
+    const start = (page - 1) * size;
+    const end = start + size;
+    const content = filteredElements.slice(start, end);
+    const empty = Boolean(filteredElements.length);
 
     // Update mock data in place
     integrations.value = {
-      elements: filteredElements.slice(start, end),
-      page: {
-        totalPages: Math.ceil(filteredElements.length / limit),
-        totalElements: filteredElements.length,
-        size: limit,
-        number: page,
+      totalPages: Math.ceil(filteredElements.length / size),
+      totalElements: filteredElements.length,
+      size,
+      content,
+      number: page,
+      sort: {
+        empty,
+        sorted: true,
+        unsorted: false,
       },
+      pageable: {
+        offset: 0,
+        //        "sort": { "$ref": "#/components/schemas/Sort" },
+        sort: [""],
+        pageNumber: page,
+        pageSize: size,
+        paged: true,
+        unpaged: false,
+      },
+      numberOfElements: content.length,
+      first: start === 0,
+      last: filteredElements.length <= end,
+      empty,
     };
   },
 } as RequestLogicHandlers;

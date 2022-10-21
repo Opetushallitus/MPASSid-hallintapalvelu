@@ -9,6 +9,7 @@
     "version": "0.1"
   },
   "servers": [
+    { "url": "https://virkailija.testiopintopolku.fi/mpassid" },
     { "url": "https://mpassid-rr-test.csc.fi" },
     { "url": "https://localhost:8081" }
   ],
@@ -59,14 +60,62 @@
       }
     },
     "/api/v1/integration": {
+      "post": {
+        "tags": ["integration-controller"],
+        "operationId": "addIntegration",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Integration" }
+            }
+          },
+          "required": true
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/v1/organization": {
+      "get": {
+        "tags": ["organization-controller"],
+        "operationId": "getOrganizations",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Organization" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integration/page": {
       "get": {
         "tags": ["integration-controller"],
-        "summary": "Get all integrations",
-        "operationId": "getIntegrations",
+        "summary": "Get paged integrations",
+        "operationId": "getIntegrationsPageable",
         "parameters": [
           {
             "in": "query",
-            "name": "query",
+            "name": "find",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
             "schema": {
               "type": "string"
             }
@@ -79,42 +128,79 @@
             }
           },
           {
+            "name": "pageable",
+            "in": "query",
+            "schema": { "$ref": "#/components/schemas/Pageable" }
+          },
+          {
             "in": "query",
             "name": "page",
             "schema": {
-              "type": "integer"
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
             }
           },
           {
             "in": "query",
-            "name": "limit",
+            "name": "size",
             "schema": {
-              "type": "integer"
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "array",
+              "items": { "type": "string" }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Provides a list of integrations",
+            "description": "OK",
             "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/Integration" },
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/PageIntegration" },
                 "examples": {
                   "integrations": {
-                    "description": "integrations",
+                    "description": "paged integrations",
                     "value": {
-                      "elements": [
+                      "totalPages": 1,
+                      "totalElements": 2,
+                      "size": 5,
+                      "number": 1,
+                      "sort": {
+                        "empty": false,
+                        "sorted": true,
+                        "unsorted": false
+                      },
+                      "pageable": {
+                        "offset": 0,
+                        "sort": ["foo", "bar"],
+                        "pageNumber": 1,
+                        "pageSize": 5,
+                        "paged": true,
+                        "unpaged": false
+                      },
+                      "numberOfElements": 2,
+                      "first": true,
+                      "last": true,
+                      "empty": false,
+                      "content": [
                         {
                           "id": 5,
+                          "institutionTypes": [11, 15],
                           "configurationEntity": {
-                            "name": "(Palvelun nimi)",
                             "type": "opinsys",
                             "id": 5,
-                            "role": "IdentityProvider",
+                            "configurationEntityType": "Opinsys IdentityProvider",
                             "idpId": "opinsys_kauniainen",
                             "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
                             "flowName": "OpinsysKauniainen",
-                            "institutionTypes": [11, 15],
                             "attributes": [
                               {
                                 "id": 32,
@@ -141,7 +227,14 @@
                                 "name": "datasource",
                                 "value": "datasources.opinsys"
                               }
-                            ]
+                            ],
+                            "idp": {
+                              "type": "opinsys",
+                              "idpId": "opinsys_espoonsteinerkoulu",
+                              "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-espoonsteinerkoulu.png",
+                              "flowName": "OpinsysEspoonSteinerkoulu",
+                              "entityId": null
+                            }
                           },
                           "organization": {
                             "oid": "1.2.246.562.10.98343673038",
@@ -156,7 +249,6 @@
                           "configurationEntity": {
                             "type": "adfs",
                             "id": 18,
-                            "role": "IdentityProvider",
                             "configurationEntityType": "Adfs IdentityProvider",
                             "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
                             "idpId": "shib_grankulla",
@@ -204,7 +296,14 @@
                                 "name": "schoolIds",
                                 "value": "schoolCode"
                               }
-                            ]
+                            ],
+                            "idp": {
+                              "type": "adfs",
+                              "idpId": "shib_grankulla",
+                              "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                              "flowName": "ShibGrankulla",
+                              "entityId": null
+                            }
                           },
                           "organization": {
                             "oid": "1.2.246.562.10.98343673038",
@@ -213,13 +312,7 @@
                           },
                           "deploymentPhase": 0
                         }
-                      ],
-                      "page": {
-                        "size": 1,
-                        "totalElements": 2,
-                        "totalPages": 1,
-                        "number": 0
-                      }
+                      ]
                     }
                   }
                 }
@@ -227,34 +320,19 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": ["integration-controller"],
-        "operationId": "addIntegration",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": { "$ref": "#/components/schemas/Integration" }
-            }
-          },
-          "required": true
-        },
-        "responses": { "200": { "description": "OK" } }
       }
     },
-    "/api/v1/organization": {
+    "/api/v1/integration/list": {
       "get": {
-        "tags": ["organization-controller"],
-        "operationId": "getOrganizations",
+        "tags": ["integration-controller"],
+        "summary": "Get all integrations",
+        "operationId": "getIntegrations",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Provides a list of integrations",
             "content": {
-              "*/*": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Organization" }
-                }
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Integration" }
               }
             }
           }
@@ -275,21 +353,26 @@
         }
       },
       "ConfigurationEntity": {
-        "required": ["type"],
         "type": "object",
         "properties": {
-          "id": { "type": "integer", "format": "int64" },
-          "configurationEntityType": { "type": "string" },
-          "entityId": {
-            "type": "string",
-            "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
-          },
           "attributes": {
             "uniqueItems": true,
             "type": "array",
             "readOnly": true,
             "items": { "$ref": "#/components/schemas/Attribute" }
           },
+          "idp": { "$ref": "#/components/schemas/IdentityProvider" },
+          "sp": { "$ref": "#/components/schemas/ServiceProvider" },
+          "test": { "type": "boolean" }
+        }
+      },
+      "IdentityProvider": {
+        "required": ["type"],
+        "type": "object",
+        "properties": {
+          "idpId": { "type": "string" },
+          "logoUrl": { "type": "string" },
+          "flowName": { "type": "string" },
           "type": { "type": "string" }
         },
         "discriminator": { "propertyName": "type" }
@@ -323,15 +406,51 @@
           }
         }
       },
-      "Paging": {
+      "ServiceProvider": { "type": "object" },
+      "Pageable": {
         "type": "object",
         "properties": {
-          "page": {
-            "type": "integer"
+          "page": { "minimum": 0, "type": "integer", "format": "int32" },
+          "size": { "minimum": 1, "type": "integer", "format": "int32" },
+          "sort": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "PageIntegration": {
+        "type": "object",
+        "properties": {
+          "totalPages": { "type": "integer", "format": "int32" },
+          "totalElements": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int32" },
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Integration" }
           },
-          "limit": {
-            "type": "integer"
-          }
+          "number": { "type": "integer", "format": "int32" },
+          "sort": { "$ref": "#/components/schemas/Sort" },
+          "pageable": { "$ref": "#/components/schemas/PageableObject" },
+          "numberOfElements": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
+          "empty": { "type": "boolean" }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": { "type": "integer", "format": "int64" },
+          "sort": { "$ref": "#/components/schemas/Sort" },
+          "pageNumber": { "type": "integer", "format": "int32" },
+          "pageSize": { "type": "integer", "format": "int32" },
+          "paged": { "type": "boolean" },
+          "unpaged": { "type": "boolean" }
+        }
+      },
+      "Sort": {
+        "type": "object",
+        "properties": {
+          "empty": { "type": "boolean" },
+          "sorted": { "type": "boolean" },
+          "unsorted": { "type": "boolean" }
         }
       }
     }

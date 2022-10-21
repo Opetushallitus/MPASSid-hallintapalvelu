@@ -1,4 +1,4 @@
-import { useIntegrations } from "@/api";
+import { useIntegrationsPageable } from "@/api";
 import PageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
 import { secondary, suspense } from "@/utils/components/react-intl-values";
@@ -66,13 +66,13 @@ export default function Home() {
             control={
               <Switch
                 color="warning"
-                checked={JSON.parse(searchParams.get("test") ?? "false")}
+                checked={JSON.parse(searchParams.get("testi") ?? "false")}
                 onChange={(event) => {
                   setSearchParams((searchParams) => {
                     if (event.target.checked) {
-                      searchParams.set("test", JSON.stringify(true));
+                      searchParams.set("testi", JSON.stringify(true));
                     } else {
-                      searchParams.delete("test");
+                      searchParams.delete("testi");
                     }
 
                     return resetPage(searchParams);
@@ -94,7 +94,7 @@ export default function Home() {
 }
 
 function TotalElements() {
-  const integrations = useIntegrations();
+  const integrations = useIntegrationsPageable();
 
-  return integrations.page.totalElements;
+  return integrations.totalElements;
 }
