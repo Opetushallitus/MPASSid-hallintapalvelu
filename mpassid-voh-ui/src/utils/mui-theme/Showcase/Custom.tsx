@@ -5,6 +5,7 @@ import {
   TablePaginationWithRouterIntegration,
 } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
+import SecondaryCodeWithTooltip from "@/utils/components/SecondaryCodeWithTooltip";
 import Suspense from "@/utils/components/Suspense";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
 import { Grid, Paper, Typography } from "@mui/material";
@@ -32,10 +33,12 @@ export default function Custom() {
           TablePaginationWithRouterIntegration
         </Typography>
         <TablePaginationWithRouterIntegration count={5} />
+
         <Typography variant="h3" gutterBottom>
           TablePagination
         </Typography>
         <TablePagination count={5} />
+
         <Typography variant="h3" gutterBottom>
           PageHeader
         </Typography>
@@ -43,12 +46,14 @@ export default function Custom() {
           Page header with icon and secondary text{" "}
           <Secondary>( secondary text )</Secondary>
         </PageHeader>
+
         <Typography variant="h3" gutterBottom>
           HeaderIcon
         </Typography>
         <HeaderIcon>
           <EmojiPeopleIcon />
         </HeaderIcon>
+
         <Typography variant="h3" gutterBottom>
           Suspense
         </Typography>
@@ -72,6 +77,7 @@ export default function Custom() {
             </Grid>
           ))}
         </Grid>
+
         <Typography variant="h3" gutterBottom>
           Suspense: <code>inline=true</code>
         </Typography>
@@ -93,6 +99,20 @@ export default function Custom() {
             </Grid>
           ))}
         </Grid>
+
+        <Typography variant="h3" gutterBottom>
+          SecondaryCodeWithTooltip
+        </Typography>
+        <SecondaryCodeWithTooltip
+          object={{
+            a: {
+              b: {
+                c: "0123456789012345678901234567890123456789012345678901234567890123456789",
+              },
+            },
+          }}
+          path="a.b.c"
+        />
       </Paper>
     </>
   );
