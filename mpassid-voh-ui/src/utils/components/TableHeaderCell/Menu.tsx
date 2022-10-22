@@ -10,7 +10,7 @@ interface Props extends Omit<React.ComponentProps<typeof MuiMenu>, "open"> {
   onOpen?: () => void;
 }
 
-export function Menu({
+export default function Menu({
   headerName,
   children,
   hover,

@@ -38,7 +38,7 @@ const typeTooltips = defineMessages({
   },
 });
 
-export default function IntagrationsTable() {
+export default function IntegrationsTable() {
   const { content, totalPages } = useIntegrationsPageable();
   const intl = useIntl();
 
@@ -60,16 +60,23 @@ export default function IntagrationsTable() {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>
+            <TableHeaderCell sort="id">
               <FormattedMessage defaultMessage="Tunniste" />
-            </TableCell>
-            <TableCell>
-              <FormattedMessage defaultMessage="Palvelu" />
-            </TableCell>
+            </TableHeaderCell>
             <TableHeaderCell
-              headerName={intl.formatMessage({
-                defaultMessage: "Tyyppi",
-              })}
+              sort={[
+                "configurationEntity.name",
+                "configurationEntity.flowName",
+                "configurationEntity.entityId",
+              ]}
+            >
+              <FormattedMessage defaultMessage="Palvelu" />
+            </TableHeaderCell>
+            <TableHeaderCell
+              sort={[
+                "configurationEntity.idp.type",
+                "configurationEntity.sp.type",
+              ]}
               menuProps={{
                 MenuListProps: {
                   subheader: (
@@ -81,11 +88,11 @@ export default function IntagrationsTable() {
                 active: typeFilter.modified,
                 children: typeFilter.children,
               }}
-            />
+            >
+              <FormattedMessage defaultMessage="Tyyppi" />
+            </TableHeaderCell>
             <TableHeaderCell
-              headerName={intl.formatMessage({
-                defaultMessage: "Rooli",
-              })}
+              sort="configurationEntity.role"
               menuProps={{
                 MenuListProps: {
                   subheader: (
@@ -97,10 +104,12 @@ export default function IntagrationsTable() {
                 active: roleFilter.modified,
                 children: roleFilter.children,
               }}
-            />
-            <TableCell>
+            >
+              <FormattedMessage defaultMessage="Rooli" />
+            </TableHeaderCell>
+            <TableHeaderCell sort="organization.name">
               <FormattedMessage defaultMessage="Organisaatio" />
-            </TableCell>
+            </TableHeaderCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -118,7 +127,7 @@ export default function IntagrationsTable() {
               defaultMessage={`Valitsemillasi hakuehdoilla ei löytynyt yhtään {type, select,
                 integration {integraatiota}
                 other {tietoa}
-            }.`}
+              }.`}
               values={{ type: "integration" }}
             />
           </Secondary>
@@ -131,31 +140,31 @@ export default function IntagrationsTable() {
 export const getRole = (row) =>
   roles.find((role) => role in row.configurationEntity)!;
 
-function Row(element) {
+function Row(row) {
   const intl = useIntl();
-  const role = getRole(element);
+  const role = getRole(row);
 
   return (
     <TableRow>
       <TableCell>
-        <Link to={`/integraatio/${element.id}`}>{element.id}</Link>
+        <Link to={`/integraatio/${row.id}`}>{row.id}</Link>
       </TableCell>
       <TableCell>
         <Stack>
-          {element.configurationEntity.name}
+          {row.configurationEntity.name}
           <SecondaryCodeWithTooltip
-            object={element}
+            object={row}
             path={["configurationEntity", "flowName"]}
           />
           <SecondaryCodeWithTooltip
-            object={element}
+            object={row}
             path={["configurationEntity", "entityId"]}
           />
         </Stack>
       </TableCell>
       <TableCell>
         <Chip
-          label={element.configurationEntity.type}
+          label={row.configurationEntity[role].type}
           size="small"
           color="primary"
         />
@@ -169,12 +178,12 @@ function Row(element) {
       </TableCell>
       <TableCell>
         <Stack>
-          {element.organization.name}
+          {row.organization.name}
           <Secondary sx={{ lineHeight: "initial" }}>
             <small>
               <FormattedMessage
                 defaultMessage="OID: {value}"
-                values={{ value: element.organization.oid }}
+                values={{ value: row.organization.oid }}
               />
             </small>
           </Secondary>

@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useSearchParams } from "react-router-dom";
-import IntagrationsTable from "./IntagrationsTable";
+import IntegrationsTable from "./IntegrationsTable";
 import SearchForm from "./SearchForm";
 
 const copyFormDataToURLSearchParams =
@@ -86,7 +86,7 @@ export default function Home() {
         <Divider sx={{ marginBottom: 2 }} />
         <SearchForm formData={searchParams} onSearch={handleSearch} />
         <Suspense>
-          <IntagrationsTable />
+          <IntegrationsTable />
         </Suspense>
       </TableContainer>
     </>

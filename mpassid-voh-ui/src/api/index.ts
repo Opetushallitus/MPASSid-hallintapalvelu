@@ -12,6 +12,7 @@ export function useIntegrationsPageable(size = 5) {
   return client.useIntegrationsPageable({
     page,
     size,
+    sort: searchParams.getAll("sort") ?? undefined,
     find: searchParams.get("hae") ?? undefined,
     role: searchParams.get("rooli") ?? undefined,
     type: searchParams.get("tyyppi") ?? undefined,

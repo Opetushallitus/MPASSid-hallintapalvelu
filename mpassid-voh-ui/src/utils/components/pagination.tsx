@@ -17,16 +17,16 @@ export function TablePagination(
   );
 }
 
-interface PaginationWithRouterIntagrationProps
+interface PaginationWithRouterIntegrationProps
   extends UsePaginationPageParams,
     React.ComponentProps<typeof Pagination> {}
 
 export const withRouterIntegration = (Component: typeof Pagination) =>
-  function PaginationWithRouterIntagration({
+  function PaginationWithRouterIntegration({
     searchParamName = defaults.searchParamName,
     defaultPage = defaults.defaultPage,
     ...other
-  }: PaginationWithRouterIntagrationProps) {
+  }: PaginationWithRouterIntegrationProps) {
     const [page, setPage] = usePaginationPage();
 
     return (

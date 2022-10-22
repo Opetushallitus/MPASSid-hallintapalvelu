@@ -1,6 +1,6 @@
-import { getRole } from "@/routes/home/IntagrationsTable";
+import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
-import { get } from "lodash";
+import { get, orderBy } from "lodash";
 import definition from "../../../schema.json";
 
 export { definition };
@@ -47,7 +47,7 @@ export default {
     const query = request.query as { [key: string]: string };
     const find = query.find?.toLowerCase();
 
-    let filteredElements = allContent;
+    let filteredElements = [...allContent];
     if (find) {
       filteredElements = filteredElements.filter((element) =>
         [
@@ -83,6 +83,11 @@ export default {
     filteredElements = filteredElements.filter(
       (row) => Boolean(row.configurationEntity.test) === test
     );
+
+    if ("sort" in query) {
+      const [path, direction] = query.sort.split(",").slice(0, 2);
+      filteredElements = orderBy(filteredElements, [path], [direction]);
+    }
 
     const start = (page - 1) * size;
     const end = start + size;
