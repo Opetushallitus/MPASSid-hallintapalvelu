@@ -20,7 +20,7 @@ import {
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Link } from "react-router-dom";
 
-const typeAbbreviations = defineMessages({
+export const typeAbbreviations = defineMessages({
   idp: {
     defaultMessage: "OKJ",
   },
@@ -29,7 +29,7 @@ const typeAbbreviations = defineMessages({
   },
 });
 
-const typeTooltips = defineMessages({
+export const typeTooltips = defineMessages({
   idp: {
     defaultMessage: "Opetuksen ja koulutuksen järjestäjä",
   },

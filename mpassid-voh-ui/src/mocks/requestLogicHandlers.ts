@@ -5,6 +5,11 @@ import definition from "../../../schema.json";
 
 export { definition };
 
+const { integration } =
+  definition.paths["/api/v1/integration/{id}"].get.responses["200"].content[
+    "*/*"
+  ].examples;
+
 const { integrations } =
   definition.paths["/api/v1/integration/page"].get.responses["200"].content[
     "*/*"
@@ -41,6 +46,10 @@ const defaults = {
 };
 
 export default {
+  getIntegration(request) {
+    const id = Number(request.params.id);
+    integration.value = allContent.find((row) => row.id === id);
+  },
   getIntegrationsPageable(request) {
     const page = Number(request.query.page ?? defaults.page);
     const size = Number(request.query.size ?? defaults.size);

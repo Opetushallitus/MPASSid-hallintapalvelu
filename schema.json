@@ -15,6 +15,32 @@
   ],
   "paths": {
     "/api/v1/integration/{id}": {
+      "get": {
+        "tags": ["integration-controller"],
+        "summary": "Get integration",
+        "operationId": "getIntegration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/Integration" },
+                "examples": {
+                  "integration": {}
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
         "tags": ["integration-controller"],
         "operationId": "updateIntegration",
