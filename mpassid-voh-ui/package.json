@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "generate": "concurrently 'npm:generate:*'",
     "generate:client": "react-openapi-client-generator ../schema.json src/api/client.ts",
+    "generate:koodisto-client": "react-openapi-client-generator ./schemas/koodisto.json src/api/koodisto.ts",
     "generate:messages": "formatjs-scripts && node scripts/export-messages.js",
     "preview": "vite preview"
   },

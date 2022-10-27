@@ -15,4 +15,5 @@ dist-ssr
 
 # generated
 /src/api/client.ts
+/src/api/koodisto.ts
 /default-messages-export.json

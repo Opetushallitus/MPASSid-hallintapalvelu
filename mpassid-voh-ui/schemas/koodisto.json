@@ -1,0 +1,4001 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Koodisto API",
+    "description": "Koodiston tarjoamat rajapinnat",
+    "version": "0"
+  },
+  "servers": [
+    { "url": "https://virkailija.testiopintopolku.fi/koodisto-service" }
+  ],
+  "paths": {
+    "/rest/codesgroup": {
+      "put": {
+        "tags": ["codes-group-resource"],
+        "description": "Päivittää koodistoryhmää",
+        "operationId": "update",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoodistoRyhmaDto_Basic"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["codes-group-resource"],
+        "description": "Luo uuden koodistoryhmän",
+        "operationId": "insert",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoodistoRyhmaDto_Basic"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes": {
+      "get": {
+        "tags": ["codes-resource"],
+        "description": "Palauttaa kaikki koodistoryhmät",
+        "operationId": "listAllCodesGroups",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } },
+              "text/plain": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["codes-resource"],
+        "description": "Päivittää koodistoa",
+        "operationId": "update_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KoodistoDto_Basic" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["codes-resource"],
+        "description": "Lisää koodiston",
+        "operationId": "insert_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KoodistoDto_Basic" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/save": {
+      "put": {
+        "tags": ["codes-resource"],
+        "summary": "Lisää ja poistaa koodistonsuhteita",
+        "description": "Päivittää koodiston kokonaisuutena",
+        "operationId": "save",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KoodistoDto_Basic" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement": {
+      "put": {
+        "tags": ["code-element-resource"],
+        "description": "Päivittää koodin",
+        "operationId": "update_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KoodiDto_Extended" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/save": {
+      "put": {
+        "tags": ["code-element-resource"],
+        "summary": "Lisää ja poistaa koodinsuhteita vastaamaan annettua koodia.",
+        "description": "Päivittää koodin kokonaisuutena",
+        "operationId": "save_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtendedKoodiDto_Basic"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "text/plain": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/rest/json/{koodistoUri}/koodi/{koodiUri}/kieli/{lang}/metadata": {
+      "post": {
+        "tags": ["koodisto-resource"],
+        "summary": "Jos koodilla on jo nimi ja kuvaus annetulla kielellä, ne päivitetään. Muussa tapauksessa koodille luodaan kyseiset kielitiedot.",
+        "description": "Päivitä tai luo koodin kielitiedot",
+        "operationId": "updateKoodiLangMetaData",
+        "parameters": [
+          {
+            "name": "koodistoUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lang",
+            "in": "path",
+            "description": "Kieli (FI, SV tai EN)",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "nimi",
+            "in": "query",
+            "description": "Koodin nimi",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "kuvaus",
+            "in": "query",
+            "description": "Koodin kuvaus",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codesgroup/delete/{id}": {
+      "post": {
+        "tags": ["codes-group-resource"],
+        "description": "Poistaa koodistoryhmän",
+        "operationId": "deleteKoodistoryhmä",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Koodistoryhmän id",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/removerelation/{codesUri}/{codesUriToRemove}/{relationType}": {
+      "post": {
+        "tags": ["codes-resource"],
+        "description": "Poistaa relaatio koodistojen väliltä",
+        "operationId": "removeRelation",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codesUriToRemove",
+            "in": "path",
+            "description": "Irrotettavan koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "relationType",
+            "in": "path",
+            "description": "Relaation tyyppi (SISALTYY, RINNASTEINEN)",
+            "required": true,
+            "schema": { "type": "string", "enum": ["SISALTYY", "RINNASTEINEN"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/delete/{codesUri}/{codesVersion}": {
+      "post": {
+        "tags": ["codes-resource"],
+        "description": "Poistaa koodiston",
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codesVersion",
+            "in": "path",
+            "description": "Koodiston Versio",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/addrelation/{codesUri}/{codesUriToAdd}/{relationType}": {
+      "post": {
+        "tags": ["codes-resource"],
+        "description": "Lisää relaatio koodistojen välille",
+        "operationId": "addRelation",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codesUriToAdd",
+            "in": "path",
+            "description": "Linkitettävän koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "relationType",
+            "in": "path",
+            "description": "Relaation tyyppi (SISALTYY, RINNASTEINEN)",
+            "required": true,
+            "schema": { "type": "string", "enum": ["SISALTYY", "RINNASTEINEN"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/{codesUri}": {
+      "post": {
+        "tags": ["code-element-resource"],
+        "description": "Lisää uuden koodin",
+        "operationId": "insert_2",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/removerelations": {
+      "post": {
+        "tags": ["code-element-resource"],
+        "description": "Poistaa koodien välisiä relaatioita, massatoiminto",
+        "operationId": "removeRelations",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoodiRelaatioListaDto_Extended"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/removerelation/{codeElementUri}/{codeElementUriToRemove}/{relationType}": {
+      "post": {
+        "tags": ["code-element-resource"],
+        "description": "Poistaa koodien välisen relaation",
+        "operationId": "removeRelation_1",
+        "parameters": [
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codeElementUriToRemove",
+            "in": "path",
+            "description": "Irroitettavan koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "relationType",
+            "in": "path",
+            "description": "Relaation tyyppi (SISALTYY, RINNASTEINEN)",
+            "required": true,
+            "schema": { "type": "string", "enum": ["SISALTYY", "RINNASTEINEN"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/delete/{codeElementUri}/{codeElementVersion}": {
+      "post": {
+        "tags": ["code-element-resource"],
+        "description": "Poistaa koodin",
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codeElementVersion",
+            "in": "path",
+            "description": "Koodin versio",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/addrelations": {
+      "post": {
+        "tags": ["code-element-resource"],
+        "description": "Lisää koodien välisiä relaatioita, massatoiminto",
+        "operationId": "addRelations",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KoodiRelaatioListaDto_Extended"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/addrelation/{codeElementUri}/{codeElementUriToAdd}/{relationType}": {
+      "post": {
+        "tags": ["code-element-resource"],
+        "description": "Lisää relaation koodien välille",
+        "operationId": "addRelation_1",
+        "parameters": [
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codeElementUriToAdd",
+            "in": "path",
+            "description": "Linkitettävän koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "relationType",
+            "in": "path",
+            "description": "Relaation tyyppi (SISALTYY, RINNASTEINEN)",
+            "required": true,
+            "schema": { "type": "string", "enum": ["SISALTYY", "RINNASTEINEN"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/session/maxinactiveinterval": {
+      "get": {
+        "tags": ["session-resource"],
+        "operationId": "maxInactiveInterval",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "text/plain": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/rest/json": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palauttaa kaikki koodistoryhmät ja niiden sisältämät koodistot",
+        "description": "Listaa kaikki koodistoryhmät",
+        "operationId": "listAllKoodistoRyhmas",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KoodistoRyhmaListDto_Basic"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/{koodistoUri}": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palautaa koodiston, jonka URI on {koodistouri}. Versionumeron voi antaa URL-parametrina",
+        "description": "Lataa koodisto URIn perusteella",
+        "operationId": "getKoodistoByUri",
+        "parameters": [
+          {
+            "name": "koodistoUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodistoVersio",
+            "in": "query",
+            "description": "Koodiston Versio",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/KoodistoDto_Basic" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/{koodistoUri}/koodi": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palauttaa koodiston, jonka URI on {koodistouri} koodit. Koodiston versionumeron voi antaa URL-parametrina",
+        "description": "Listaa koodiston kaikki koodit",
+        "operationId": "getKoodisByKoodisto",
+        "parameters": [
+          {
+            "name": "koodistoUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodistoVersio",
+            "in": "query",
+            "description": "Koodiston Versio",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "onlyValidKoodis",
+            "in": "query",
+            "description": "Palauta vain voimassa olevia koodeja",
+            "required": false,
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+                },
+                "examples": {
+                  "koodisto": {
+                    "value": [
+                      {
+                        "koodiUri": "oppilaitostyyppi_28",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_28",
+                        "version": 4,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "28",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Palo-, poliisi- ja vartiointialojen oppilaitokset",
+                            "kuvaus": "Palo-, poliisi- ja vartiointialojen oppilaitokset",
+                            "lyhytNimi": "Palo-, poliisi- ja vartiointialojen oppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Läroanstalter inom brand-, polis- och bevakningsväsendet",
+                            "kuvaus": "Läroanstalter inom brand-, polis- och bevakningsväsendet",
+                            "lyhytNimi": "Läroanstalter inom brand-, polis- och bevakningsväsendet",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Fire, police and security service institutes",
+                            "kuvaus": "Fire, police and security service institutes",
+                            "lyhytNimi": "Fire, police and security service institutesitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_93",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_93",
+                        "version": 8,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "93",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Muut koulutuksen järjestäjät",
+                            "kuvaus": "Koodiarvo ei sisälly viralliseen Tilastokeskuksen ylläpitämään oppilaitostyyppiluokitukseen",
+                            "lyhytNimi": "Muut koulutuksen järjestäjät",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Övriga utbildningsanordnare",
+                            "kuvaus": "Övriga utbildningsanordnare",
+                            "lyhytNimi": "Övriga utbildningsanordnare",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Muut koulutuksen järjestäjät",
+                            "kuvaus": "Muut koulutuksen järjestäjät",
+                            "lyhytNimi": "Muut koulutuksen järjestäjät",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_12",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_12",
+                        "version": 5,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "12",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Peruskouluasteen erityiskoulut",
+                            "kuvaus": "Peruskouluasteen erityiskoulut",
+                            "lyhytNimi": "Peruskouluasteen erityiskoulut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Special education schools",
+                            "kuvaus": "Special education schools",
+                            "lyhytNimi": "Special education schools",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Specialskolor på grundskolenivå",
+                            "kuvaus": "Specialskolor på grundskolenivå",
+                            "lyhytNimi": "Specialskolor på grundskolenivå",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_64",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_64",
+                        "version": 8,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "64",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Kansalaisopistot",
+                            "kuvaus": "Kansalaisopistot",
+                            "lyhytNimi": "Kansalaisopistot",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Medborgarinstitut",
+                            "kuvaus": "Medborgarinstitut",
+                            "lyhytNimi": "Medborgarinstitut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Adult education centres",
+                            "kuvaus": "Adult education centres",
+                            "lyhytNimi": "Adult education centres",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_91",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_91",
+                        "version": 6,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "91",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": "2014-01-01",
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Correspondence schools",
+                            "kuvaus": "Correspondence schools",
+                            "lyhytNimi": "Correspondence schools",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Brevinstitut",
+                            "kuvaus": "Brevinstitut",
+                            "lyhytNimi": "Brevinstitut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Kirjeoppilaitokset",
+                            "kuvaus": "Koodiarvo ei sisälly viralliseen Tilastokeskuksen ylläpitämään oppilaitostyyppiluokitukseen",
+                            "lyhytNimi": "Kirjeoppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_45",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_45",
+                        "version": 4,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "45",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": "1994-12-31",
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Kindergarten teachers' colleges",
+                            "kuvaus": "Kindergarten teachers' colleges",
+                            "lyhytNimi": "Kindergarten teachers' colleges",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Barnträdgårdslärarinstitut",
+                            "kuvaus": "Barnträdgårdslärarinstitut",
+                            "lyhytNimi": "Barnträdgårdslärarinstitut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Lastentarhanopettajaopistot",
+                            "kuvaus": "Lastentarhanopettajaopistot",
+                            "lyhytNimi": "Lastentarhanopettajaopistot",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_19",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_19",
+                        "version": 10,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "19",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Skolor som omfattar grundskole- och gymnasienivå",
+                            "kuvaus": "Skolor som omfattar grundskole- och gymnasienivå",
+                            "lyhytNimi": "Skolor som omfattar grundskole- och gymnasienivå",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Perus- ja lukioasteen koulut",
+                            "kuvaus": "Perus- ja lukioasteen koulut",
+                            "lyhytNimi": "Perus- ja lukioasteen koulut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Basic and general upper secondary schools",
+                            "kuvaus": "Basic and general upper secondary schools",
+                            "lyhytNimi": "Basic and general upper secondary schools",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_xx",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_xx",
+                        "version": 8,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "XX",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Okänd läroanstaltstyp",
+                            "kuvaus": "Okänd läroanstaltstyp",
+                            "lyhytNimi": "Okänd läroanstaltstyp",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Ei tiedossa (oppilaitostyyppi)",
+                            "kuvaus": "Ei tiedossa (oppilaitostyyppi)",
+                            "lyhytNimi": "Ei tiedossa (oppilaitostyyppi)",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Not known (type of institution)",
+                            "kuvaus": "Not known (type of institution)",
+                            "lyhytNimi": "Not known (type of institution)",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_11",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_11",
+                        "version": 6,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "11",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Grundskolor",
+                            "kuvaus": "Grundskolor",
+                            "lyhytNimi": "Grundskolor",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Comprehensive schools",
+                            "kuvaus": "Comprehensive schools",
+                            "lyhytNimi": "Comprehensive schools",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Peruskoulut",
+                            "kuvaus": "Peruskoulut",
+                            "lyhytNimi": "Peruskoulut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_42",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_42",
+                        "version": 6,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "42",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Universities",
+                            "kuvaus": "Universities",
+                            "lyhytNimi": "Universities",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Universitet",
+                            "kuvaus": "Universitet",
+                            "lyhytNimi": "Universitet",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Yliopistot",
+                            "kuvaus": "Yliopistot",
+                            "lyhytNimi": "Yliopistot",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_43",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_43",
+                        "version": 5,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "43",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Sotilaskorkeakoulut",
+                            "kuvaus": "Sotilaskorkeakoulut",
+                            "lyhytNimi": "Sotilaskorkeakoulut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Military universities",
+                            "kuvaus": "Military universities",
+                            "lyhytNimi": "Military universities",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Militära högskolor",
+                            "kuvaus": "Militära högskolor",
+                            "lyhytNimi": "Militära högskolor",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_15",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_15",
+                        "version": 12,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "15",
+                        "paivitysPvm": "2019-09-25",
+                        "paivittajaOid": "1.2.246.562.24.51707373173",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "General upper secondary schools",
+                            "kuvaus": "General upper secondary schools",
+                            "lyhytNimi": "General upper secondary schools",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Lukiot",
+                            "kuvaus": "Lukiot",
+                            "lyhytNimi": "Lukiot",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Gymnasier",
+                            "kuvaus": "Gymnasier",
+                            "lyhytNimi": "Gymnasier",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_29",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_29",
+                        "version": 3,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "29",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Military vocational institutes",
+                            "kuvaus": "Military vocational institutes",
+                            "lyhytNimi": "Military vocational institutes",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Sotilasalan ammatilliset oppilaitokset",
+                            "kuvaus": "Sotilasalan ammatilliset oppilaitokset",
+                            "lyhytNimi": "Sotilasalan ammatilliset oppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Militära yrkesläroanstalter",
+                            "kuvaus": "Militära yrkesläroanstalter",
+                            "lyhytNimi": "Militära yrkesläroanstalter",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_66",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_66",
+                        "version": 5,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "66",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Sommaruniversitet",
+                            "kuvaus": "Sommaruniversitet",
+                            "lyhytNimi": "Sommaruniversitet",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Kesäyliopistot",
+                            "kuvaus": "Kesäyliopistot",
+                            "lyhytNimi": "Kesäyliopistot",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Summer universities",
+                            "kuvaus": "Summer universities",
+                            "lyhytNimi": "Summer universities",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_22",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_22",
+                        "version": 12,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "22",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Specialyrkesläroanstalter",
+                            "kuvaus": "Specialyrkesläroanstalter",
+                            "lyhytNimi": "Specialyrkesläroanstalter",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Vocational special education institutions",
+                            "kuvaus": "Vocational special education institutions",
+                            "lyhytNimi": "Vocational special education institutions",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Ammatilliset erityisoppilaitokset",
+                            "kuvaus": "Ammatilliset erityisoppilaitokset",
+                            "lyhytNimi": "Ammatilliset erityisoppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_46",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_46",
+                        "version": 4,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "46",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": "1999-12-31",
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Temporära yrkeshögskolor",
+                            "kuvaus": "Temporary polytechnics",
+                            "lyhytNimi": "Temporära yrkeshögskolor",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Temporary polytechnics",
+                            "kuvaus": "Väliaikaiset ammattikorkeakoulut",
+                            "lyhytNimi": "Temporary polytechnics",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Väliaikaiset ammattikorkeakoulut",
+                            "kuvaus": "Väliaikaiset ammattikorkeakoulut",
+                            "lyhytNimi": "Väliaikaiset ammattikorkeakoulut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_41",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_41",
+                        "version": 5,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "41",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Polytechnics",
+                            "kuvaus": "Polytechnics",
+                            "lyhytNimi": "Polytechnics",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Yrkeshögskolor",
+                            "kuvaus": "Yrkeshögskolor",
+                            "lyhytNimi": "Yrkeshögskolor",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Ammattikorkeakoulut",
+                            "kuvaus": "Ammattikorkeakoulut",
+                            "lyhytNimi": "Ammattikorkeakoulut",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_01",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_01",
+                        "version": 4,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "01",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "2015-10-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Taiteen perusopetuksen oppilaitokset (ei musiikki)",
+                            "kuvaus": "Taiteen perusopetuksen oppilaitokset (ei musiikki)",
+                            "lyhytNimi": "Taiteen perusopetuksen oppilaitokset (ei musiikki)",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Art schools (not music)",
+                            "kuvaus": "Art schools (not music)",
+                            "lyhytNimi": "Art schools (not music)",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Läroanstalt inom grundläggande konstundervisning (inte musik)",
+                            "kuvaus": "Läroanstalt inom grundläggande konstundervisning (inte musik)",
+                            "lyhytNimi": "Läroanstalt inom grundläggande konstundervisning (inte musik)",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_61",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_61",
+                        "version": 8,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "61",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Musikläroanstalter",
+                            "kuvaus": "Musikläroanstalter",
+                            "lyhytNimi": "Musikläroanstalter",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Music institutes",
+                            "kuvaus": "Music institutes",
+                            "lyhytNimi": "Music institutes",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Musiikkioppilaitokset",
+                            "kuvaus": "Musiikkioppilaitokset",
+                            "lyhytNimi": "Musiikkioppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_21",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_21",
+                        "version": 14,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "21",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Vocational institutions",
+                            "kuvaus": "Vocational institutions",
+                            "lyhytNimi": "Vocational institutions",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Yrkesläroanstalter",
+                            "kuvaus": "Yrkesläroanstalter",
+                            "lyhytNimi": "Yrkesläroanstalter",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Ammatilliset oppilaitokset",
+                            "kuvaus": "Ammatilliset oppilaitokset",
+                            "lyhytNimi": "Ammatilliset oppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_24",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_24",
+                        "version": 10,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "24",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Vocational adult education centres",
+                            "kuvaus": "Vocational adult education centres",
+                            "lyhytNimi": "Vocational adult education centres",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Ammatilliset aikuiskoulutuskeskukset",
+                            "kuvaus": "Ammatilliset aikuiskoulutuskeskukset",
+                            "lyhytNimi": "Ammatilliset aikuiskoulutuskeskukset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Yrkesutbildningscentrer för vuxna",
+                            "kuvaus": "Yrkesutbildningscentrer för vuxna",
+                            "lyhytNimi": "Yrkesutbildningscentrer för vuxna",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_92",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_92",
+                        "version": 6,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "92",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": "1999-01-01",
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Neuvontajärjestöt",
+                            "kuvaus": "Koodiarvo ei sisälly viralliseen Tilastokeskuksen ylläpitämään oppilaitostyyppiluokitukseen",
+                            "lyhytNimi": "Neuvontajärjestöt",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Advisory body",
+                            "kuvaus": "Advisory body",
+                            "lyhytNimi": "Advisory body",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Rådgivningsorganisationer",
+                            "kuvaus": "Rådgivningsorganisationer",
+                            "lyhytNimi": "Rådgivningsorganisationer",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_62",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_62",
+                        "version": 11,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "62",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Liikunnan koulutuskeskukset",
+                            "kuvaus": "Liikunnan koulutuskeskukset",
+                            "lyhytNimi": "Liikunnan koulutuskeskukset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Idrottsutbildningscentrer",
+                            "kuvaus": "Idrottsutbildningscentrer",
+                            "lyhytNimi": "Idrottsutbildningscentrer",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Sports institutes",
+                            "kuvaus": "Sports institutes",
+                            "lyhytNimi": "Sports institutes",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_63",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_63",
+                        "version": 18,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "63",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Folk high schools",
+                            "kuvaus": "Folk high schools",
+                            "lyhytNimi": "Folk high schools",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Folkhögskolor",
+                            "kuvaus": "Folkhögskolor",
+                            "lyhytNimi": "Folkhögskolor",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Kansanopistot",
+                            "kuvaus": "Kansanopistot",
+                            "lyhytNimi": "Kansanopistot",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_65",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_65",
+                        "version": 3,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "65",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Study circle centres",
+                            "kuvaus": "Study circle centres",
+                            "lyhytNimi": "Study circle centres",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Studiecentraler",
+                            "kuvaus": "Studiecentraler",
+                            "lyhytNimi": "Studiecentraler",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Opintokeskukset",
+                            "kuvaus": "Opintokeskukset",
+                            "lyhytNimi": "Opintokeskukset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_23",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_23",
+                        "version": 8,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "23",
+                        "paivitysPvm": "2018-02-06",
+                        "paivittajaOid": null,
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Specialised vocational education and training institutions",
+                            "kuvaus": "Specialised vocational education and training institutions",
+                            "lyhytNimi": "Specialised vocational education and training institutions",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Ammatilliset erikoisoppilaitokset",
+                            "kuvaus": "Ammatilliset erikoisoppilaitokset",
+                            "lyhytNimi": "Ammatilliset erikoisoppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          },
+                          {
+                            "nimi": "Särskilda yrkesläroanstalter",
+                            "kuvaus": "Särskilda yrkesläroanstalter",
+                            "lyhytNimi": "Särskilda yrkesläroanstalter",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          }
+                        ]
+                      },
+                      {
+                        "koodiUri": "oppilaitostyyppi_99",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/oppilaitostyyppi_99",
+                        "version": 8,
+                        "versio": 1,
+                        "koodisto": {
+                          "koodistoUri": "oppilaitostyyppi",
+                          "organisaatioOid": "1.2.246.562.10.00000000001",
+                          "koodistoVersios": [1]
+                        },
+                        "koodiArvo": "99",
+                        "paivitysPvm": "2020-11-04",
+                        "paivittajaOid": "1.2.246.562.24.25909319372",
+                        "voimassaAlkuPvm": "1990-01-01",
+                        "voimassaLoppuPvm": null,
+                        "tila": "LUONNOS",
+                        "metadata": [
+                          {
+                            "nimi": "Övriga läroanstalter",
+                            "kuvaus": "Övriga läroanstalter",
+                            "lyhytNimi": "Övriga läroanstalter",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "SV"
+                          },
+                          {
+                            "nimi": "Other educational institutions",
+                            "kuvaus": "Other educational institutions",
+                            "lyhytNimi": "Other educational institutions",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "EN"
+                          },
+                          {
+                            "nimi": "Muut oppilaitokset",
+                            "kuvaus": "Muut oppilaitokset",
+                            "lyhytNimi": "Muut oppilaitokset",
+                            "kayttoohje": "",
+                            "kasite": "",
+                            "sisaltaaMerkityksen": "",
+                            "eiSisallaMerkitysta": "",
+                            "huomioitavaKoodi": "",
+                            "sisaltaaKoodiston": "",
+                            "kieli": "FI"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/{koodistoUri}/koodi/{koodiUri}": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palauttaa koodistosto, jonka URI on {koodistouri}, koodin, jonka URI on {koodiuri}. Koodiston ja koodin versionumerot voi antaa URL-parametreina",
+        "description": "Lataa koodi URIn perusteella",
+        "operationId": "getKoodiByUri",
+        "parameters": [
+          {
+            "name": "koodistoUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodistoVersio",
+            "in": "query",
+            "description": "Koodiston Versio",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/{koodistoUri}/koodi/arvo/{koodiArvo}": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palauttaa koodistosta, jonka URI on {koodistouri}, koodin, jonka arvo on {koodiArvo}. Koodiston ja koodin versionumerot voi antaa URL-parametreina. Nykyisellä toteutuksella palauttaa vain yhden koodin.",
+        "description": "Listaa koodit arvon perusteella",
+        "operationId": "getKoodisByArvo",
+        "parameters": [
+          {
+            "name": "koodistoUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiArvo",
+            "in": "path",
+            "description": "Koodiston Arvo",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodistoVersio",
+            "in": "query",
+            "description": "Koodiston Versio",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/{koodistoUri}.properties": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Sisältää listan koodiston koodiarvoista ja niiden nimistä.",
+        "description": "Hae koodiston tiedot suomeksi",
+        "operationId": "getKoodistoAsPropertiesDefaultLang",
+        "parameters": [
+          {
+            "name": "koodistoUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "text/plain": { "schema": { "type": "string" } } }
+          }
+        }
+      }
+    },
+    "/rest/json/searchKoodis": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Haun rajaamiseksi ainakin jokin seuraavista parametreistä pitää olla annettu: koodiUris, koodiArvo, validAt",
+        "description": "Listaa koodit hakukriteerien perusteella",
+        "operationId": "searchKoodis",
+        "parameters": [
+          {
+            "name": "koodiUris",
+            "in": "query",
+            "description": "Lista koodi URI:ja",
+            "required": false,
+            "schema": { "type": "array", "items": { "type": "string" } }
+          },
+          {
+            "name": "koodiArvo",
+            "in": "query",
+            "description": "Koodin arvo",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiTilas",
+            "in": "query",
+            "description": "Koodin tila: PASIIVINEN, LUONNOS, HYVAKSYTTY",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+              }
+            }
+          },
+          {
+            "name": "validAtDate",
+            "in": "query",
+            "description": "Päiväys, jolloin koodi on voimassa",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiVersio",
+            "in": "query",
+            "description": "Koodin versio, ainoastaan, jos version valinta on SPECIFIC",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "koodiVersioSelection",
+            "in": "query",
+            "description": "Koodin version valinta: ALL, LATEST, SPECIFIC",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["ALL", "LATEST", "SPECIFIC"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/relaatio/sisaltyy-ylakoodit/{koodiUri}": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palauttaa koodille, jonka URI on {koodiuri}, sisältyvyyssuhteessa yläpuolelle määritellyt koodit. Koodin versionumeron voi antaa URL-parametrina.",
+        "description": "Listaa koodit, joihin koodi sisältyy",
+        "operationId": "getYlakoodis",
+        "parameters": [
+          {
+            "name": "koodiUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiVersio",
+            "in": "query",
+            "description": "Koodin Versio",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/relaatio/sisaltyy-alakoodit/{koodiUri}": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palauttaa koodille, jonka URI on {koodiuri}, sisältyvyyssuhteessa alapuolelle määritellyt koodit. Koodin versionumeron voi antaa URL-parametrina.",
+        "description": "Listaa koodin sisältämät koodit",
+        "operationId": "getAlakoodis",
+        "parameters": [
+          {
+            "name": "koodiUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiVersio",
+            "in": "query",
+            "description": "Koodiston Versio",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/json/relaatio/rinnasteinen/{koodiUri}": {
+      "get": {
+        "tags": ["koodisto-resource"],
+        "summary": "Palauttaa koodille, jonka URI on {koodiuri}, rinnastuvuussuhteessa määritellyt koodit. Koodin versionumeron voi antaa URL-parametrina.",
+        "description": "Listaa koodiin rinnastuvat koodit",
+        "operationId": "getRinnasteinenKoodis",
+        "parameters": [
+          {
+            "name": "koodiUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiVersio",
+            "in": "query",
+            "description": "Koodin Versio",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codesgroup/{id}": {
+      "get": {
+        "tags": ["codes-group-resource"],
+        "description": "Palauttaa koodistoryhmän",
+        "operationId": "getCodesByCodesUri",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Koodistoryhman id",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/{codesUri}": {
+      "get": {
+        "tags": ["codes-resource"],
+        "description": "Palauttaa koodiston",
+        "operationId": "getCodesByCodesUri_1",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/{codesUri}/{codesVersion}": {
+      "get": {
+        "tags": ["codes-resource"],
+        "description": "Palauttaa tietyn koodistoversion",
+        "operationId": "getCodesByCodesUriAndVersion",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codesVersion",
+            "in": "path",
+            "description": "Koodiston Versio",
+            "required": true,
+            "schema": { "minimum": 0, "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/changes/{codesUri}/{codesVersion}": {
+      "get": {
+        "tags": ["codes-resource"],
+        "summary": "Toimii vain, jos koodisto on versioitunut muutoksista, eli sitä ei ole jätetty luonnostilaan.",
+        "description": "Palauttaa muutokset uusimpaan koodistoversioon verrattaessa",
+        "operationId": "getChangesToCodes",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codesVersion",
+            "in": "path",
+            "description": "Koodiston Versio",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "compareToLatestAccepted",
+            "in": "query",
+            "description": "Verrataanko viimeiseen hyväksyttyyn versioon",
+            "required": false,
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/changes/withdate/{codesUri}/{dayofmonth}/{month}/{year}/{hour}/{minute}/{second}": {
+      "get": {
+        "tags": ["codes-resource"],
+        "summary": "Toimii vain, jos koodisto on versioitunut muutoksista, eli sitä ei ole jätetty luonnostilaan.",
+        "description": "Palauttaa tehdyt muutokset uusimpaan koodistoversioon käyttäen lähintä päivämäärään osuvaa koodistoversiota vertailussa",
+        "operationId": "getChangesToCodesWithDate",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "dayofmonth",
+            "in": "path",
+            "description": "Kuukauden päivä",
+            "required": true,
+            "schema": {
+              "maximum": 31,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "month",
+            "in": "path",
+            "description": "Kuukausi",
+            "required": true,
+            "schema": {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "description": "Vuosi",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "hour",
+            "in": "path",
+            "description": "Tunti",
+            "required": true,
+            "schema": {
+              "maximum": 23,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "minute",
+            "in": "path",
+            "description": "Minuutti",
+            "required": true,
+            "schema": {
+              "maximum": 59,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "second",
+            "in": "path",
+            "description": "Sekunti",
+            "required": true,
+            "schema": {
+              "maximum": 59,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "compareToLatestAccepted",
+            "in": "query",
+            "description": "Verrataanko viimeiseen hyväksyttyyn versioon",
+            "required": false,
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codes/all": {
+      "get": {
+        "tags": ["codes-resource"],
+        "description": "Palauttaa kaikki koodistoryhmät ja niiden sisältämät koodistot",
+        "operationId": "listAllCodesInAllCodeGroups",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/{koodiUri}/{koodiVersio}": {
+      "get": {
+        "tags": ["code-element-resource"],
+        "summary": "sisältää koodiversion koodinsuhteet",
+        "description": "Palauttaa tietyn koodiversion",
+        "operationId": "getCodeElementByUriAndVersion",
+        "parameters": [
+          {
+            "name": "koodiUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "koodiVersio",
+            "in": "path",
+            "description": "Koodin versio",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/{codesUri}/{codesVersion}/{codeElementUri}": {
+      "get": {
+        "tags": ["code-element-resource"],
+        "description": "Palauttaa koodin tietystä koodistoversiosta",
+        "operationId": "getCodeElementByCodeElementUri",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodiston URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codesVersion",
+            "in": "path",
+            "description": "Koodiston versio",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } },
+              "text/plain": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/{codeElementUri}": {
+      "get": {
+        "tags": ["code-element-resource"],
+        "description": "Palauttaa koodiversiot tietystä koodista",
+        "operationId": "getAllCodeElementVersionsByCodeElementUri",
+        "parameters": [
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/latest/{codeElementUri}": {
+      "get": {
+        "tags": ["code-element-resource"],
+        "description": "Palauttaa uusimman koodiversion",
+        "operationId": "getLatestCodeElementVersionsByCodeElementUri",
+        "parameters": [
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/codes/{codesUri}/{codesVersion}": {
+      "get": {
+        "tags": ["code-element-resource"],
+        "description": "Palauttaa koodin tietystä koodistoversiosta",
+        "operationId": "getAllCodeElementsByCodesUriAndVersion",
+        "parameters": [
+          {
+            "name": "codesUri",
+            "in": "path",
+            "description": "Koodisto URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codesVersion",
+            "in": "path",
+            "description": "Koodiston versio",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } },
+              "text/plain": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/changes/{codeElementUri}/{codeElementVersion}": {
+      "get": {
+        "tags": ["code-element-resource"],
+        "summary": "Palauttaa muutokset uusimpaan koodiversioon",
+        "description": "Toimii vain, jos koodi on versioitunut muutoksista, eli sitä ei ole jätetty luonnostilaan.",
+        "operationId": "getChangesToCodeElement",
+        "parameters": [
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "description": "Koodin URI",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "codeElementVersion",
+            "in": "path",
+            "description": "Koodin versio",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "compareToLatestAccepted",
+            "in": "query",
+            "description": "Verrataanko viimeiseen hyväksyttyyn versioon",
+            "required": false,
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/rest/codeelement/changes/withdate/{codeElementUri}/{dayofmonth}/{month}/{year}/{hour}/{minute}/{second}": {
+      "get": {
+        "tags": ["code-element-resource"],
+        "summary": "Toimii vain, jos koodi on versioitunut muutoksista, eli sitä ei ole jätetty luonnostilaan.",
+        "description": "Palauttaa tehdyt muutokset uusimpaan koodiversioon käyttäen lähintä päivämäärään osuvaa koodiversiota vertailussa",
+        "operationId": "getChangesToCodeElementWithDate",
+        "parameters": [
+          {
+            "name": "codeElementUri",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "dayofmonth",
+            "in": "path",
+            "description": "Kuukauden päivä",
+            "required": true,
+            "schema": {
+              "maximum": 31,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "month",
+            "in": "path",
+            "description": "Kuukausi",
+            "required": true,
+            "schema": {
+              "maximum": 12,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "description": "Vuosi",
+            "required": true,
+            "schema": { "minimum": 1, "type": "integer", "format": "int32" }
+          },
+          {
+            "name": "hour",
+            "in": "path",
+            "description": "Tunti",
+            "required": true,
+            "schema": {
+              "maximum": 23,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "minute",
+            "in": "path",
+            "description": "Minuutti",
+            "required": true,
+            "schema": {
+              "maximum": 59,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "second",
+            "in": "path",
+            "description": "Sekunti",
+            "required": true,
+            "schema": {
+              "maximum": 59,
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "compareToLatestAccepted",
+            "in": "query",
+            "description": "Verrataanko viimeiseen hyväksyttyyn versioon",
+            "required": false,
+            "schema": { "type": "boolean", "default": false }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "KoodiMetadata_Basic": {
+        "required": ["kieli", "koodiVersio", "nimi"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "nimi": { "maxLength": 512, "minLength": 0, "type": "string" },
+          "kuvaus": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "lyhytNimi": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "kayttoohje": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "kasite": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "sisaltaaMerkityksen": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "eiSisallaMerkitysta": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "huomioitavaKoodi": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sisaltaaKoodiston": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "koodiVersio": { "$ref": "#/components/schemas/KoodiVersio_Basic" }
+        }
+      },
+      "KoodiVersio_Basic": {
+        "required": [
+          "koodi",
+          "koodiarvo",
+          "luotu",
+          "metadatas",
+          "tila",
+          "versio",
+          "voimassaAlkuPvm"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodi": { "$ref": "#/components/schemas/Koodi_Basic" },
+          "koodiarvo": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "luotu": { "type": "string", "format": "date-time" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "koodistoVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoVersioKoodiVersio_Basic"
+            }
+          },
+          "metadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodiMetadata_Basic" }
+          },
+          "ylakoodis": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodinSuhde_Basic" }
+          },
+          "alakoodis": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodinSuhde_Basic" }
+          },
+          "startDateBeforeEndDate": { "type": "boolean" },
+          "nimi": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "kuvaus": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "koodistoNimi": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "locked": { "type": "boolean" }
+        }
+      },
+      "Koodi_Basic": {
+        "required": ["koodiUri", "koodisto"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodisto": { "$ref": "#/components/schemas/Koodisto_Basic" },
+          "koodiUri": { "type": "string" },
+          "koodiVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodiVersio_Basic" }
+          }
+        }
+      },
+      "KoodinSuhde_Basic": {
+        "required": [
+          "alaKoodiPassive",
+          "alakoodiVersio",
+          "suhteenTyyppi",
+          "versio",
+          "ylaKoodiPassive",
+          "ylakoodiVersio"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "ylakoodiVersio": {
+            "$ref": "#/components/schemas/KoodiVersio_Basic"
+          },
+          "alakoodiVersio": {
+            "$ref": "#/components/schemas/KoodiVersio_Basic"
+          },
+          "suhteenTyyppi": {
+            "type": "string",
+            "enum": ["SISALTYY", "RINNASTEINEN"]
+          },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "ylaKoodiPassive": { "type": "boolean" },
+          "alaKoodiPassive": { "type": "boolean" },
+          "passive": { "type": "boolean" }
+        }
+      },
+      "KoodistoMetadata_Basic": {
+        "required": ["kieli", "koodistoVersio", "nimi"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "nimi": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "kuvaus": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "kayttoohje": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "kasite": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "kohdealue": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "sitovuustaso": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "kohdealueenOsaAlue": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "toimintaymparisto": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "tarkentaaKoodistoa": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "huomioitavaKoodisto": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "koodistonLahde": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "koodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Basic"
+          }
+        }
+      },
+      "KoodistoRyhmaDto_Basic": {
+        "required": ["koodistoRyhmaMetadatas"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "koodistoRyhmaUri": { "type": "string" },
+          "koodistoRyhmaMetadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoRyhmaMetadataDto_Basic"
+            }
+          },
+          "koodistos": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Koodisto_Basic" }
+          }
+        },
+        "description": "Koodistoryhmä"
+      },
+      "KoodistoRyhmaMetadataDto_Basic": {
+        "required": ["kieli", "nimi"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "uri": { "type": "string" },
+          "nimi": { "type": "string" },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] }
+        }
+      },
+      "KoodistoRyhmaMetadata_Basic": {
+        "required": ["kieli", "koodistoRyhma", "nimi"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "nimi": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "koodistoRyhma": {
+            "$ref": "#/components/schemas/KoodistoRyhma_Basic"
+          }
+        }
+      },
+      "KoodistoRyhma_Basic": {
+        "required": ["koodistoRyhmaMetadatas", "koodistoRyhmaUri"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodistos": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Koodisto_Basic" }
+          },
+          "koodistoRyhmaMetadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoRyhmaMetadata_Basic"
+            }
+          },
+          "koodistoRyhmaUri": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "koodistoJoukkoMetadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoRyhmaMetadata_Basic"
+            }
+          }
+        }
+      },
+      "KoodistoVersioKoodiVersio_Basic": {
+        "required": ["koodiVersio", "koodistoVersio"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Basic"
+          },
+          "koodiVersio": { "$ref": "#/components/schemas/KoodiVersio_Basic" }
+        }
+      },
+      "KoodistoVersio_Basic": {
+        "required": [
+          "koodisto",
+          "luotu",
+          "metadatas",
+          "tila",
+          "versio",
+          "voimassaAlkuPvm"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodisto": { "$ref": "#/components/schemas/Koodisto_Basic" },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "luotu": { "type": "string", "format": "date-time" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "koodiVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoVersioKoodiVersio_Basic"
+            }
+          },
+          "metadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistoMetadata_Basic" }
+          },
+          "ylakoodistos": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistonSuhde_Basic" }
+          },
+          "alakoodistos": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistonSuhde_Basic" }
+          },
+          "startDateBeforeEndDate": { "type": "boolean" },
+          "koodiCount": { "type": "integer", "format": "int32" }
+        }
+      },
+      "Koodisto_Basic": {
+        "required": ["koodistoUri", "organisaatioOid"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodistoUri": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "omistaja": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "organisaatioOid": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "lukittu": { "type": "boolean" },
+          "koodistoRyhmas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistoRyhma_Basic" }
+          },
+          "koodistoVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistoVersio_Basic" }
+          },
+          "koodis": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Koodi_Basic" }
+          },
+          "latestKoodistoVersioNumber": { "type": "integer", "format": "int32" }
+        }
+      },
+      "KoodistonSuhde_Basic": {
+        "required": [
+          "alaKoodistoPassive",
+          "alakoodistoVersio",
+          "suhteenTyyppi",
+          "versio",
+          "ylaKoodistoPassive",
+          "ylakoodistoVersio"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "ylakoodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Basic"
+          },
+          "alakoodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Basic"
+          },
+          "suhteenTyyppi": {
+            "type": "string",
+            "enum": ["SISALTYY", "RINNASTEINEN"]
+          },
+          "ylaKoodistoPassive": { "type": "boolean" },
+          "alaKoodistoPassive": { "type": "boolean" },
+          "passive": { "type": "boolean" }
+        }
+      },
+      "KoodistoDto_Basic": {
+        "required": [
+          "codesGroupUri",
+          "koodistoUri",
+          "metadata",
+          "organisaatioOid",
+          "tila",
+          "voimassaAlkuPvm"
+        ],
+        "type": "object",
+        "properties": {
+          "koodistoUri": { "type": "string" },
+          "resourceUri": { "type": "string" },
+          "omistaja": { "type": "string" },
+          "organisaatioOid": { "type": "string" },
+          "lukittu": { "type": "boolean" },
+          "codesGroupUri": { "type": "string" },
+          "version": { "minimum": 0, "type": "integer", "format": "int64" },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoMetadataDto_Basic"
+            }
+          }
+        },
+        "description": "Koodisto"
+      },
+      "KoodistoMetadataDto_Basic": {
+        "required": ["kieli", "nimi"],
+        "type": "object",
+        "properties": {
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "nimi": { "type": "string" },
+          "kuvaus": { "type": "string" },
+          "kayttoohje": { "type": "string" },
+          "kasite": { "type": "string" },
+          "kohdealue": { "type": "string" },
+          "sitovuustaso": { "type": "string" },
+          "kohdealueenOsaAlue": { "type": "string" },
+          "toimintaymparisto": { "type": "string" },
+          "tarkentaaKoodistoa": { "type": "string" },
+          "huomioitavaKoodisto": { "type": "string" },
+          "koodistonLahde": { "type": "string" },
+          "koodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Basic"
+          }
+        }
+      },
+      "KoodiDto_Extended": {
+        "required": ["koodiArvo", "metadata", "voimassaAlkuPvm"],
+        "type": "object",
+        "properties": {
+          "koodiUri": { "type": "string" },
+          "resourceUri": { "type": "string" },
+          "version": { "type": "integer", "format": "int64" },
+          "versio": { "type": "integer", "format": "int32" },
+          "koodisto": {
+            "$ref": "#/components/schemas/KoodistoItemDto_Extended"
+          },
+          "koodiArvo": { "type": "string" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodiMetadataDto_Extended"
+            }
+          }
+        },
+        "description": "Koodi"
+      },
+      "KoodiMetadataDto_Extended": {
+        "required": ["kieli", "nimi"],
+        "type": "object",
+        "properties": {
+          "nimi": { "type": "string" },
+          "kuvaus": { "type": "string" },
+          "lyhytNimi": { "type": "string" },
+          "kayttoohje": { "type": "string" },
+          "kasite": { "type": "string" },
+          "sisaltaaMerkityksen": { "type": "string" },
+          "eiSisallaMerkitysta": { "type": "string" },
+          "huomioitavaKoodi": { "type": "string" },
+          "sisaltaaKoodiston": { "type": "string" },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "koodiVersio": { "$ref": "#/components/schemas/KoodiVersio_Extended" }
+        }
+      },
+      "KoodiMetadata_Extended": {
+        "required": ["kieli", "koodiVersio", "nimi"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "nimi": { "maxLength": 512, "minLength": 0, "type": "string" },
+          "kuvaus": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "lyhytNimi": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "kayttoohje": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "kasite": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "sisaltaaMerkityksen": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "eiSisallaMerkitysta": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "huomioitavaKoodi": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "sisaltaaKoodiston": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "koodiVersio": { "$ref": "#/components/schemas/KoodiVersio_Extended" }
+        }
+      },
+      "KoodiVersio_Extended": {
+        "required": [
+          "koodi",
+          "koodiarvo",
+          "luotu",
+          "metadatas",
+          "tila",
+          "versio",
+          "voimassaAlkuPvm"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodi": { "$ref": "#/components/schemas/Koodi_Extended" },
+          "koodiarvo": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "luotu": { "type": "string", "format": "date-time" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "koodistoVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoVersioKoodiVersio_Extended"
+            }
+          },
+          "metadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodiMetadata_Extended" }
+          },
+          "ylakoodis": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodinSuhde_Extended" }
+          },
+          "alakoodis": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodinSuhde_Extended" }
+          },
+          "startDateBeforeEndDate": { "type": "boolean" },
+          "nimi": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "kuvaus": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "koodistoNimi": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "locked": { "type": "boolean" }
+        }
+      },
+      "Koodi_Extended": {
+        "required": ["koodiUri", "koodisto"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodisto": { "$ref": "#/components/schemas/Koodisto_Extended" },
+          "koodiUri": { "type": "string" },
+          "koodiVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodiVersio_Extended" }
+          }
+        }
+      },
+      "KoodinSuhde_Extended": {
+        "required": [
+          "alaKoodiPassive",
+          "alakoodiVersio",
+          "suhteenTyyppi",
+          "versio",
+          "ylaKoodiPassive",
+          "ylakoodiVersio"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "ylakoodiVersio": {
+            "$ref": "#/components/schemas/KoodiVersio_Extended"
+          },
+          "alakoodiVersio": {
+            "$ref": "#/components/schemas/KoodiVersio_Extended"
+          },
+          "suhteenTyyppi": {
+            "type": "string",
+            "enum": ["SISALTYY", "RINNASTEINEN"]
+          },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "ylaKoodiPassive": { "type": "boolean" },
+          "alaKoodiPassive": { "type": "boolean" },
+          "passive": { "type": "boolean" }
+        }
+      },
+      "KoodistoItemDto_Extended": {
+        "type": "object",
+        "properties": {
+          "koodistoUri": { "type": "string" },
+          "organisaatioOid": { "type": "string" },
+          "koodistoVersios": {
+            "type": "array",
+            "items": { "type": "integer", "format": "int32" }
+          }
+        }
+      },
+      "KoodistoMetadata_Extended": {
+        "required": ["kieli", "koodistoVersio", "nimi"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "nimi": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "kuvaus": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "kayttoohje": { "maxLength": 2048, "minLength": 0, "type": "string" },
+          "kasite": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "kohdealue": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "sitovuustaso": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "kohdealueenOsaAlue": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "toimintaymparisto": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "tarkentaaKoodistoa": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "huomioitavaKoodisto": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "koodistonLahde": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "koodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Extended"
+          }
+        }
+      },
+      "KoodistoRyhmaMetadata_Extended": {
+        "required": ["koodistoRyhma"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodistoRyhma": {
+            "$ref": "#/components/schemas/KoodistoRyhma_Extended"
+          }
+        }
+      },
+      "KoodistoRyhma_Extended": {
+        "required": ["koodistoRyhmaMetadatas", "koodistoRyhmaUri"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodistos": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Koodisto_Extended" }
+          },
+          "koodistoRyhmaMetadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoRyhmaMetadata_Extended"
+            }
+          },
+          "koodistoRyhmaUri": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "koodistoJoukkoMetadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoRyhmaMetadata_Extended"
+            }
+          }
+        }
+      },
+      "KoodistoVersioKoodiVersio_Extended": {
+        "required": ["koodiVersio", "koodistoVersio"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Extended"
+          },
+          "koodiVersio": { "$ref": "#/components/schemas/KoodiVersio_Extended" }
+        }
+      },
+      "KoodistoVersio_Extended": {
+        "required": [
+          "koodisto",
+          "luotu",
+          "metadatas",
+          "tila",
+          "versio",
+          "voimassaAlkuPvm"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodisto": { "$ref": "#/components/schemas/Koodisto_Extended" },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "luotu": { "type": "string", "format": "date-time" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "koodiVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoVersioKoodiVersio_Extended"
+            }
+          },
+          "metadatas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoMetadata_Extended"
+            }
+          },
+          "ylakoodistos": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistonSuhde_Extended" }
+          },
+          "alakoodistos": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistonSuhde_Extended" }
+          },
+          "startDateBeforeEndDate": { "type": "boolean" },
+          "koodiCount": { "type": "integer", "format": "int32" }
+        }
+      },
+      "Koodisto_Extended": {
+        "required": ["koodistoUri", "organisaatioOid"],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "koodistoUri": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "omistaja": { "maxLength": 256, "minLength": 0, "type": "string" },
+          "organisaatioOid": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "lukittu": { "type": "boolean" },
+          "koodistoRyhmas": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistoRyhma_Extended" }
+          },
+          "koodistoVersios": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistoVersio_Extended" }
+          },
+          "koodis": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Koodi_Extended" }
+          },
+          "latestKoodistoVersioNumber": { "type": "integer", "format": "int32" }
+        }
+      },
+      "KoodistonSuhde_Extended": {
+        "required": [
+          "alaKoodistoPassive",
+          "alakoodistoVersio",
+          "suhteenTyyppi",
+          "versio",
+          "ylaKoodistoPassive",
+          "ylakoodistoVersio"
+        ],
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" },
+          "versio": { "minimum": 1, "type": "integer", "format": "int32" },
+          "ylakoodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Extended"
+          },
+          "alakoodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersio_Extended"
+          },
+          "suhteenTyyppi": {
+            "type": "string",
+            "enum": ["SISALTYY", "RINNASTEINEN"]
+          },
+          "ylaKoodistoPassive": { "type": "boolean" },
+          "alaKoodistoPassive": { "type": "boolean" },
+          "passive": { "type": "boolean" }
+        }
+      },
+      "ExtendedKoodiDto_Basic": {
+        "required": [
+          "koodiArvo",
+          "koodiUri",
+          "metadata",
+          "tila",
+          "voimassaAlkuPvm"
+        ],
+        "type": "object",
+        "properties": {
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "metadata": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodiMetadataDto_Basic" }
+          },
+          "koodiUri": { "type": "string" },
+          "resourceUri": { "type": "string" },
+          "version": { "type": "integer", "format": "int64" },
+          "versio": { "minimum": 0, "type": "integer", "format": "int32" },
+          "koodisto": { "$ref": "#/components/schemas/KoodistoItemDto_Basic" },
+          "koodiArvo": { "type": "string" }
+        },
+        "description": "Koodi"
+      },
+      "KoodiMetadataDto_Basic": {
+        "required": ["kieli", "nimi"],
+        "type": "object",
+        "properties": {
+          "nimi": { "type": "string" },
+          "kuvaus": { "type": "string" },
+          "lyhytNimi": { "type": "string" },
+          "kayttoohje": { "type": "string" },
+          "kasite": { "type": "string" },
+          "sisaltaaMerkityksen": { "type": "string" },
+          "eiSisallaMerkitysta": { "type": "string" },
+          "huomioitavaKoodi": { "type": "string" },
+          "sisaltaaKoodiston": { "type": "string" },
+          "kieli": { "type": "string", "enum": ["FI", "SV", "EN"] },
+          "koodiVersio": { "$ref": "#/components/schemas/KoodiVersio_Basic" }
+        }
+      },
+      "KoodistoItemDto_Basic": {
+        "type": "object",
+        "properties": {
+          "koodistoUri": { "type": "string" },
+          "organisaatioOid": { "type": "string" },
+          "koodistoVersios": {
+            "type": "array",
+            "items": { "type": "integer", "format": "int32" }
+          }
+        }
+      },
+      "KoodiDto_Basic": {
+        "required": ["koodiArvo", "metadata", "voimassaAlkuPvm"],
+        "type": "object",
+        "properties": {
+          "koodiUri": { "type": "string" },
+          "resourceUri": { "type": "string" },
+          "version": { "type": "integer", "format": "int64" },
+          "versio": { "type": "integer", "format": "int32" },
+          "koodisto": { "$ref": "#/components/schemas/KoodistoItemDto_Basic" },
+          "koodiArvo": { "type": "string" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "paivittajaOid": { "type": "string" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "metadata": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodiMetadataDto_Basic" }
+          }
+        },
+        "description": "Koodi"
+      },
+      "KoodiRelaatioListaDto_Extended": {
+        "required": ["codeElementUri", "relationType", "relations"],
+        "type": "object",
+        "properties": {
+          "codeElementUri": { "type": "string" },
+          "relationType": {
+            "type": "string",
+            "enum": ["SISALTYY", "RINNASTEINEN"]
+          },
+          "isChild": { "type": "boolean" },
+          "relations": { "type": "array", "items": { "type": "string" } },
+          "child": { "type": "boolean" }
+        },
+        "description": "Relaation tiedot JSON muodossa"
+      },
+      "KoodistoListDto_Basic": {
+        "required": ["koodistoUri", "organisaatioOid"],
+        "type": "object",
+        "properties": {
+          "koodistoUri": { "type": "string" },
+          "resourceUri": { "type": "string" },
+          "omistaja": { "type": "string" },
+          "organisaatioOid": { "type": "string" },
+          "lukittu": { "type": "boolean" },
+          "latestKoodistoVersio": {
+            "$ref": "#/components/schemas/KoodistoVersioListDto_Basic"
+          },
+          "koodistoVersios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoVersioListDto_Basic"
+            }
+          }
+        }
+      },
+      "KoodistoRyhmaListDto_Basic": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "koodistoRyhmaUri": { "type": "string" },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KoodistoRyhmaMetadata_Basic"
+            }
+          },
+          "koodistos": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistoListDto_Basic" }
+          }
+        }
+      },
+      "KoodistoVersioListDto_Basic": {
+        "type": "object",
+        "properties": {
+          "versio": { "type": "integer", "format": "int32" },
+          "paivitysPvm": { "type": "string", "format": "date-time" },
+          "voimassaAlkuPvm": { "type": "string", "format": "date-time" },
+          "voimassaLoppuPvm": { "type": "string", "format": "date-time" },
+          "tila": {
+            "type": "string",
+            "enum": ["PASSIIVINEN", "LUONNOS", "HYVAKSYTTY"]
+          },
+          "version": { "type": "integer", "format": "int64" },
+          "metadata": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/KoodistoMetadata_Basic" }
+          }
+        }
+      }
+    }
+  }
+}

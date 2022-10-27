@@ -1,7 +1,8 @@
 import { useIntegration } from "@/api";
+import { useKoodisByKoodisto } from "@/api/koodisto";
 import { Grid, Typography } from "@mui/material";
 import { Fragment } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import RoleInformation from "./RoleInformation";
 
 interface Props {
@@ -10,6 +11,8 @@ interface Props {
 
 export default function IntegrationDetails({ id }: Props) {
   const integration = useIntegration({ id });
+  const institutionTypes = useKoodisByKoodisto("oppilaitostyyppi");
+  const language = useIntl().locale.split("-")[0];
 
   return (
     <>
@@ -41,6 +44,23 @@ export default function IntegrationDetails({ id }: Props) {
         <FormattedMessage defaultMessage="Konfiguraation perustiedot" />
       </Typography>
       <Grid container spacing={2} mb={3}>
+        <Grid item xs={4}>
+          <FormattedMessage defaultMessage="Oppilaitostyypit" />
+        </Grid>
+        <Grid item xs={8}>
+          {integration.institutionTypes
+            .map(
+              (institutionType) =>
+                institutionTypes
+                  .find(
+                    ({ koodiArvo }) => Number(koodiArvo) === institutionType
+                  )
+                  .metadata.find(
+                    (data) => data.kieli.toLowerCase() === language
+                  ).nimi
+            )
+            .join(", ") || "–"}
+        </Grid>
         <Grid item xs={4}>
           <FormattedMessage defaultMessage="entityId" />
         </Grid>
