@@ -16,6 +16,17 @@ const theme = (theme: Theme): ThemeOptions => {
           },
         },
       },
+      MuiAppBar: {
+        defaultProps: {
+          position: "static",
+        },
+        styleOverrides: {
+          root: {
+            backgroundColor: theme.palette.common.white,
+            color: theme.palette.grey["800"],
+          },
+        },
+      },
       MuiButton: {
         defaultProps: {
           // TODO: focus outline
@@ -139,6 +150,15 @@ const theme = (theme: Theme): ThemeOptions => {
             "&:nth-of-type(even)": {
               backgroundColor: theme.palette.grey["50"],
               "--background-color": theme.palette.grey["50"],
+            },
+          },
+        },
+      },
+      MuiTabs: {
+        styleOverrides: {
+          scrollButtons: {
+            [`&.${switchClasses.disabled}`]: {
+              opacity: 0.3,
             },
           },
         },

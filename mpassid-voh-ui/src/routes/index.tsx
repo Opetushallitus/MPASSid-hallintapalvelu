@@ -12,7 +12,7 @@ export default function Routes() {
         <Route index element={<Home />} />
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
         {!ENV.PROD && (
-          <Route path="theme-showcase" element={<ThemeShowcase />} />
+          <Route path="theme-showcase/*" element={<ThemeShowcase />} />
         )}
         <Route path="*" element={<NotFound />} />
       </Route>

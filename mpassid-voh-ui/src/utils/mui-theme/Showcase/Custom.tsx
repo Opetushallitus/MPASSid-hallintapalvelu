@@ -1,3 +1,4 @@
+import AppBarNavLinkTabs from "@/utils/components/AppBarNavLinkTabs";
 import { HeaderIcon } from "@/utils/components/HeaderIcon";
 import PageHeader from "@/utils/components/PageHeader";
 import {
@@ -7,8 +8,9 @@ import {
 import { Secondary } from "@/utils/components/react-intl-values";
 import SecondaryCodeWithTooltip from "@/utils/components/SecondaryCodeWithTooltip";
 import Suspense from "@/utils/components/Suspense";
+import TabLink from "@/utils/components/TabLink";
 import EmojiPeopleIcon from "@mui/icons-material/EmojiPeople";
-import { Grid, Paper, Typography } from "@mui/material";
+import { AppBar, Grid, Paper, Toolbar, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 
 export default function Custom() {
@@ -113,6 +115,31 @@ export default function Custom() {
           }}
           path="a.b.c"
         />
+
+        <Typography variant="h3" gutterBottom>
+          AppBarNavLinkTabs
+        </Typography>
+        <AppBar>
+          <Toolbar disableGutters>
+            <AppBarNavLinkTabs>
+              <TabLink
+                label="Tab 1"
+                value="/theme-showcase"
+                to="/theme-showcase"
+              />
+              <TabLink
+                label="Tab 2"
+                value="/theme-showcase/tab-2"
+                to="/theme-showcase/tab-2"
+              />
+              <TabLink
+                label="Tab 3"
+                value="/theme-showcase/tab-3"
+                to="/theme-showcase/tab-3"
+              />
+            </AppBarNavLinkTabs>
+          </Toolbar>
+        </AppBar>
       </Paper>
     </>
   );

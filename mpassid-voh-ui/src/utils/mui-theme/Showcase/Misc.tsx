@@ -28,14 +28,17 @@ export default function Misc() {
           Divider
         </Typography>
         <Divider sx={{ marginBottom: 3 }} />
+
         <Typography variant="h3" gutterBottom>
           Pagination
         </Typography>
         <Pagination count={5} />
+
         <Typography variant="h3" gutterBottom>
           CircularProgress
         </Typography>
         <CircularProgress />
+
         <Typography variant="h3" gutterBottom>
           Tooltip
         </Typography>
@@ -44,6 +47,7 @@ export default function Misc() {
             <Delete />
           </IconButton>
         </Tooltip>
+
         <Typography variant="h3" gutterBottom>
           Switch
         </Typography>
