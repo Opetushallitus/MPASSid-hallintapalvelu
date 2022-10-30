@@ -132,12 +132,6 @@
             "schema": { "type": "string" }
           },
           {
-            "name": "pageable",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/Pageable" }
-          },
-          {
             "in": "query",
             "name": "role",
             "schema": {

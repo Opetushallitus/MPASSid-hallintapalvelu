@@ -12,7 +12,6 @@ export function useIntegrationsSearchPageable(size = 5) {
 
   return client.useIntegrationsSearchPageable({
     search: searchParams.get("hae") ?? "",
-    pageable: {},
     role: searchParams.get("rooli") ?? undefined,
     type: searchParams.get("tyyppi") ?? undefined,
     deploymentPhase: searchParams.has("testi")
