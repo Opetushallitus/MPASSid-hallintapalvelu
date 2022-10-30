@@ -300,6 +300,22 @@
                           "ytunnus": "0203026-2"
                         },
                         "deploymentPhase": 0
+                      },
+                      {
+                        "id": 28,
+                        "institutionTypes": [],
+                        "configurationEntity": {
+                          "sp": {
+                            "type": "saml2"
+                          },
+                          "attributes": []
+                        },
+                        "organization": {
+                          "oid": "1.2.246.562.10.98343673038",
+                          "name": "Kauniaisten kaupunki",
+                          "ytunnus": "0203026-2"
+                        },
+                        "deploymentPhase": 0
                       }
                     ]
                   }

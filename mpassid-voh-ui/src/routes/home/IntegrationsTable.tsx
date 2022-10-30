@@ -39,6 +39,11 @@ export const typeTooltips = defineMessages({
   },
 });
 
+const typeColors = {
+  idp: "primary",
+  sp: "success",
+} as const;
+
 export default function IntegrationsTable() {
   const { content, totalPages } = useIntegrationsSearchPageable();
   const intl = useIntl();
@@ -169,7 +174,7 @@ function Row(row: Components.Schemas.Integration) {
         <Chip
           label={row.configurationEntity[role]?.type}
           size="small"
-          color="primary"
+          color={typeColors[role]}
         />
       </TableCell>
       <TableCell>
