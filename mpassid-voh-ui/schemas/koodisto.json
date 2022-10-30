@@ -664,10 +664,7 @@
             "description": "OK",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
-                },
+                "schema": { "$ref": "#/components/schemas/KoodiDtos_Basic" },
                 "examples": {
                   "koodisto": {
                     "value": [
@@ -3900,6 +3897,10 @@
             "items": { "type": "integer", "format": "int32" }
           }
         }
+      },
+      "KoodiDtos_Basic": {
+        "type": "array",
+        "items": { "$ref": "#/components/schemas/KoodiDto_Basic" }
       },
       "KoodiDto_Basic": {
         "required": ["koodiArvo", "metadata", "voimassaAlkuPvm"],

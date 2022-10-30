@@ -5,9 +5,9 @@ export const secondary = (chunks: React.ReactNode[]) => (
   <Secondary>{chunks}</Secondary>
 );
 
-export const Secondary = (props: React.ComponentProps<typeof Typography>) => (
+export const Secondary = ((props: React.ComponentProps<typeof Typography>) => (
   <Typography color="text.secondary" component="span" {...props} />
-);
+)) as unknown as typeof Typography;
 
 export const suspense = (chunks: React.ReactNode[]) => (
   <Suspense>{chunks}</Suspense>

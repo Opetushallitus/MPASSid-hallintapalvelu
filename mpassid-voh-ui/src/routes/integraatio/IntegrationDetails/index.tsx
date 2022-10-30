@@ -1,9 +1,54 @@
 import { useIntegration } from "@/api";
 import { useKoodisByKoodisto } from "@/api/koodisto";
-import { Grid, Typography } from "@mui/material";
+import { Grid, Tooltip, Typography } from "@mui/material";
 import { Fragment } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
-import RoleInformation from "./RoleInformation";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
+import Role from "./Role";
+
+const attributes = defineMessages({
+  surname: {
+    defaultMessage: "Sukunimi",
+  },
+  groupLevels: {
+    defaultMessage: "Luokka-aste",
+  },
+  roles: {
+    defaultMessage: "Käyttäjän rooli",
+  },
+  learnerId: {
+    defaultMessage: "Yksilöintitunnus",
+  },
+  firstName: {
+    defaultMessage: "Etunimi",
+  },
+  groups: {
+    defaultMessage: "Luokka tai ryhmä",
+  },
+  legacyId: {
+    defaultMessage: "Tilastokeskuksen oppilaitostunnus",
+  },
+  username: {
+    defaultMessage: "Oppijanumero",
+  },
+  schoolIds: {
+    defaultMessage: "Oppimateriaalien maksullisuuskoodi",
+  },
+  tenantId: {
+    defaultMessage: "Tenant ID",
+  },
+  datasource: {
+    defaultMessage: "Data source",
+  },
+  clientId: {
+    defaultMessage: "Client ID",
+  },
+  class: {
+    defaultMessage: "Class",
+  },
+  clientKey: {
+    defaultMessage: "Client Key",
+  },
+});
 
 interface Props {
   id: number;
@@ -55,48 +100,50 @@ export default function IntegrationDetails({ id }: Props) {
                   .find(
                     ({ koodiArvo }) => Number(koodiArvo) === institutionType
                   )
-                  .metadata.find(
+                  ?.metadata.find(
                     (data) => data.kieli.toLowerCase() === language
-                  ).nimi
+                  )?.nimi
             )
             .join(", ") || "–"}
         </Grid>
         <Grid item xs={4}>
-          <FormattedMessage defaultMessage="entityId" />
-        </Grid>
-        <Grid item xs={8}>
-          {integration.configurationEntity.entityId}
-        </Grid>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="flowName" />
-        </Grid>
-        <Grid item xs={8}>
-          {integration.configurationEntity.flowName}
-        </Grid>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="id" />
+          <Tooltip title="id">
+            <span>
+              <FormattedMessage defaultMessage="Hallintapalvelun sisäinen tunnus" />
+            </span>
+          </Tooltip>
         </Grid>
         <Grid item xs={8}>
           {integration.id}
         </Grid>
       </Grid>
 
-      <RoleInformation integration={integration} />
+      <Role integration={integration} />
 
       <Typography variant="h2" gutterBottom>
         <FormattedMessage defaultMessage="Konfiguraation määritteet" />
       </Typography>
-      <Grid container spacing={2} mb={3}>
-        {integration.configurationEntity.attributes.map((attribute) => (
-          <Fragment key={attribute.name}>
-            <Grid item xs={4}>
-              {attribute.name}
-            </Grid>
-            <Grid item xs={8}>
-              {attribute.value}
-            </Grid>
-          </Fragment>
-        ))}
+      <Grid container spacing={2}>
+        {integration.configurationEntity.attributes?.map((attribute) => {
+          const name = attribute.name as keyof typeof attributes;
+
+          return (
+            <Fragment key={name}>
+              <Grid item xs={4}>
+                {attributes[name] ? (
+                  <Tooltip title={name}>
+                    <span>{<FormattedMessage {...attributes[name]} />}</span>
+                  </Tooltip>
+                ) : (
+                  name
+                )}
+              </Grid>
+              <Grid item xs={8}>
+                {attribute.value}
+              </Grid>
+            </Fragment>
+          );
+        })}
       </Grid>
     </>
   );

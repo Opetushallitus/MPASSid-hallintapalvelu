@@ -31,7 +31,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": { "$ref": "#/components/schemas/Integration" },
                 "examples": {
                   "integration": {}
@@ -64,7 +64,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": { "$ref": "#/components/schemas/Integration" }
               }
             }
@@ -108,7 +108,7 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": {
                   "type": "array",
                   "items": { "$ref": "#/components/schemas/Organization" }
@@ -119,18 +119,23 @@
         }
       }
     },
-    "/api/v1/integration/page": {
+    "/api/v1/integration/search": {
       "get": {
         "tags": ["integration-controller"],
-        "summary": "Get paged integrations",
-        "operationId": "getIntegrationsPageable",
+        "summary": "Search paged integrations",
+        "operationId": "getIntegrationsSearchPageable",
         "parameters": [
           {
+            "name": "search",
             "in": "query",
-            "name": "find",
-            "schema": {
-              "type": "string"
-            }
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           },
           {
             "in": "query",
@@ -148,15 +153,10 @@
           },
           {
             "in": "query",
-            "name": "test",
+            "name": "deploymentPhase",
             "schema": {
-              "type": "boolean"
+              "type": "number"
             }
-          },
-          {
-            "name": "pageable",
-            "in": "query",
-            "schema": { "$ref": "#/components/schemas/Pageable" }
           },
           {
             "in": "query",
@@ -189,159 +189,36 @@
           "200": {
             "description": "OK",
             "content": {
-              "*/*": {
+              "application/json": {
                 "schema": { "$ref": "#/components/schemas/PageIntegration" },
                 "examples": {
-                  "integrations": {
-                    "description": "paged integrations",
-                    "value": {
-                      "totalPages": 1,
-                      "totalElements": 2,
-                      "size": 5,
-                      "number": 1,
-                      "sort": {
-                        "empty": false,
-                        "sorted": true,
-                        "unsorted": false
-                      },
-                      "pageable": {
-                        "offset": 0,
-                        "sort": ["foo", "bar"],
-                        "pageNumber": 1,
-                        "pageSize": 5,
-                        "paged": true,
-                        "unpaged": false
-                      },
-                      "numberOfElements": 2,
-                      "first": true,
-                      "last": true,
-                      "empty": false,
-                      "content": [
-                        {
-                          "id": 5,
-                          "institutionTypes": [11, 15],
-                          "configurationEntity": {
-                            "type": "opinsys",
-                            "id": 5,
-                            "configurationEntityType": "Opinsys IdentityProvider",
-                            "idpId": "opinsys_kauniainen",
-                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
-                            "flowName": "OpinsysKauniainen",
-                            "attributes": [
-                              {
-                                "id": 32,
-                                "name": "clientKey",
-                                "value": "{{opinsysKauniainen.clientKey}}"
-                              },
-                              {
-                                "id": 29,
-                                "name": "tenantId",
-                                "value": "kauniainen.opinsys.fi"
-                              },
-                              {
-                                "id": 33,
-                                "name": "class",
-                                "value": "OpinsysDataSource"
-                              },
-                              {
-                                "id": 31,
-                                "name": "clientId",
-                                "value": "{{opinsysKauniainen.clientId}}"
-                              },
-                              {
-                                "id": 35,
-                                "name": "datasource",
-                                "value": "datasources.opinsys"
-                              }
-                            ],
-                            "idp": {
-                              "type": "opinsys",
-                              "idpId": "opinsys_espoonsteinerkoulu",
-                              "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-espoonsteinerkoulu.png",
-                              "flowName": "OpinsysEspoonSteinerkoulu",
-                              "entityId": null
-                            }
-                          },
-                          "organization": {
-                            "oid": "1.2.246.562.10.98343673038",
-                            "name": "Kauniaisten kaupunki",
-                            "ytunnus": "0203026-2"
-                          },
-                          "deploymentPhase": 0
-                        },
-                        {
-                          "id": 18,
-                          "institutionTypes": [11, 15],
-                          "configurationEntity": {
-                            "type": "adfs",
-                            "id": 18,
-                            "configurationEntityType": "Adfs IdentityProvider",
-                            "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
-                            "idpId": "shib_grankulla",
-                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
-                            "flowName": "ShibGrankulla",
-                            "attributes": [
-                              {
-                                "id": 158,
-                                "name": "surname",
-                                "value": "surname"
-                              },
-                              {
-                                "id": 152,
-                                "name": "groupLevels",
-                                "value": "classLevel"
-                              },
-                              {
-                                "id": 159,
-                                "name": "roles",
-                                "value": "userRole"
-                              },
-                              {
-                                "id": 160,
-                                "name": "learnerId",
-                                "value": "learnerId"
-                              },
-                              {
-                                "id": 153,
-                                "name": "firstName",
-                                "value": "firstName"
-                              },
-                              { "id": 157, "name": "groups", "value": "class" },
-                              {
-                                "id": 154,
-                                "name": "legacyId",
-                                "value": "legacyId"
-                              },
-                              {
-                                "id": 156,
-                                "name": "username",
-                                "value": "mpassAccountName"
-                              },
-                              {
-                                "id": 155,
-                                "name": "schoolIds",
-                                "value": "schoolCode"
-                              }
-                            ],
-                            "idp": {
-                              "type": "adfs",
-                              "idpId": "shib_grankulla",
-                              "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
-                              "flowName": "ShibGrankulla",
-                              "entityId": null
-                            }
-                          },
-                          "organization": {
-                            "oid": "1.2.246.562.10.98343673038",
-                            "name": "Kauniaisten kaupunki",
-                            "ytunnus": "0203026-2"
-                          },
-                          "deploymentPhase": 0
-                        }
-                      ]
-                    }
-                  }
+                  "searchIntegrations": {}
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/integration/page": {
+      "get": {
+        "tags": ["integration-controller"],
+        "summary": "Get paged integrations",
+        "operationId": "getIntegrationsPageable",
+        "parameters": [
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PageIntegration" }
               }
             }
           }
@@ -358,7 +235,81 @@
             "description": "Provides a list of integrations",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Integration" }
+                "schema": { "$ref": "#/components/schemas/Integration" },
+                "examples": {
+                  "integrations": {
+                    "description": "integrations",
+                    "value": [
+                      {
+                        "id": 5,
+                        "institutionTypes": [11, 15],
+                        "configurationEntity": {
+                          "idp": {
+                            "type": "opinsys",
+                            "idpId": "opinsys_kauniainen",
+                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                            "flowName": "OpinsysKauniainen"
+                          },
+                          "attributes": [
+                            {
+                              "name": "clientKey",
+                              "value": "{{opinsysKauniainen.clientKey}}"
+                            },
+                            {
+                              "name": "tenantId",
+                              "value": "kauniainen.opinsys.fi"
+                            },
+                            { "name": "class", "value": "OpinsysDataSource" },
+                            {
+                              "name": "clientId",
+                              "value": "{{opinsysKauniainen.clientId}}"
+                            },
+                            {
+                              "name": "datasource",
+                              "value": "datasources.opinsys"
+                            }
+                          ]
+                        },
+                        "organization": {
+                          "oid": "1.2.246.562.10.98343673038",
+                          "name": "Kauniaisten kaupunki",
+                          "ytunnus": "0203026-2"
+                        },
+                        "deploymentPhase": 0
+                      },
+                      {
+                        "id": 18,
+                        "institutionTypes": [11, 15],
+                        "configurationEntity": {
+                          "idp": {
+                            "type": "adfs",
+                            "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
+                            "idpId": "shib_grankulla",
+                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                            "flowName": "ShibGrankulla"
+                          },
+                          "attributes": [
+                            { "name": "surname", "value": "surname" },
+                            { "name": "groupLevels", "value": "classLevel" },
+                            { "name": "roles", "value": "userRole" },
+                            { "name": "learnerId", "value": "learnerId" },
+                            { "name": "firstName", "value": "firstName" },
+                            { "name": "groups", "value": "class" },
+                            { "name": "legacyId", "value": "legacyId" },
+                            { "name": "username", "value": "mpassAccountName" },
+                            { "name": "schoolIds", "value": "schoolCode" }
+                          ]
+                        },
+                        "organization": {
+                          "oid": "1.2.246.562.10.98343673038",
+                          "name": "Kauniaisten kaupunki",
+                          "ytunnus": "0203026-2"
+                        },
+                        "deploymentPhase": 0
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
@@ -376,7 +327,8 @@
           "configurationEntity": {
             "$ref": "#/components/schemas/ConfigurationEntity"
           }
-        }
+        },
+        "required": ["name", "value"]
       },
       "ConfigurationEntity": {
         "type": "object",
@@ -388,8 +340,7 @@
             "items": { "$ref": "#/components/schemas/Attribute" }
           },
           "idp": { "$ref": "#/components/schemas/IdentityProvider" },
-          "sp": { "$ref": "#/components/schemas/ServiceProvider" },
-          "test": { "type": "boolean" }
+          "sp": { "$ref": "#/components/schemas/ServiceProvider" }
         }
       },
       "IdentityProvider": {
@@ -399,7 +350,8 @@
           "idpId": { "type": "string" },
           "logoUrl": { "type": "string" },
           "flowName": { "type": "string" },
-          "type": { "type": "string" }
+          "type": { "type": "string" },
+          "entityId": { "type": "string" }
         },
         "discriminator": { "propertyName": "type" }
       },
@@ -417,7 +369,14 @@
           },
           "organization": { "$ref": "#/components/schemas/Organization" },
           "deploymentPhase": { "type": "integer", "format": "int32" }
-        }
+        },
+        "required": [
+          "id",
+          "configurationEntity",
+          "institutionTypes",
+          "organization",
+          "deploymentPhase"
+        ]
       },
       "Organization": {
         "type": "object",
@@ -432,7 +391,12 @@
           }
         }
       },
-      "ServiceProvider": { "type": "object" },
+      "ServiceProvider": {
+        "required": ["type"],
+        "type": "object",
+        "properties": { "type": { "type": "string" } },
+        "discriminator": { "propertyName": "type" }
+      },
       "Pageable": {
         "type": "object",
         "properties": {

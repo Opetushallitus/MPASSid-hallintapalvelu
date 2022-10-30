@@ -1,4 +1,4 @@
-import { useIntegrationsPageable } from "@/api";
+import { useIntegrationsSearchPageable } from "@/api";
 import PageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
 import { secondary, suspense } from "@/utils/components/react-intl-values";
@@ -94,7 +94,7 @@ export default function Home() {
 }
 
 function TotalElements() {
-  const integrations = useIntegrationsPageable();
+  const integrations = useIntegrationsSearchPageable();
 
-  return integrations.totalElements;
+  return <>{integrations.totalElements}</>;
 }

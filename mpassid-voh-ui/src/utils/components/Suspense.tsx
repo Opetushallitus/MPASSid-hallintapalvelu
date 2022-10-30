@@ -2,11 +2,6 @@ import { alpha, Backdrop, Box, CircularProgress } from "@mui/material";
 import React from "react";
 import { SuspenseOverlayCore } from "suspense-overlay";
 
-// Omit prop `open`. The prop is set by SuspenseOverlayCore.
-const BackdropFallback = Backdrop as (
-  props: Omit<React.ComponentProps<typeof Backdrop>, "open">
-) => ReturnType<typeof Backdrop>;
-
 export default function Suspense({
   children,
   inline,
@@ -17,7 +12,8 @@ export default function Suspense({
     >
       <SuspenseOverlayCore
         fallback={
-          <BackdropFallback
+          <Backdrop
+            open={false} // Just to remove the error from the console. SuspenseOverlayCore sets the prop.
             sx={{
               position: "relative",
               gridArea: "1 / 1",
@@ -26,7 +22,7 @@ export default function Suspense({
             }}
           >
             {!inline && <CircularProgress />}
-          </BackdropFallback>
+          </Backdrop>
         }
       >
         <Box sx={{ gridArea: "1 / 1" }}>{children}</Box>

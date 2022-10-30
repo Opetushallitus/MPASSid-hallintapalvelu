@@ -1,4 +1,5 @@
-import { useIntegrationsPageable } from "@/api";
+import type { Components } from "@/api";
+import { useIntegrationsSearchPageable } from "@/api";
 import { roles, types } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
@@ -39,7 +40,7 @@ export const typeTooltips = defineMessages({
 });
 
 export default function IntegrationsTable() {
-  const { content, totalPages } = useIntegrationsPageable();
+  const { content, totalPages } = useIntegrationsSearchPageable();
   const intl = useIntl();
 
   const typeFilter = useFilterMenuItems({
@@ -113,12 +114,12 @@ export default function IntegrationsTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {content.map((element, index) => (
-            <Row key={index} {...element} />
+          {content?.map((row, index) => (
+            <Row key={index} {...row} />
           ))}
         </TableBody>
       </Table>
-      {content.length ? (
+      {content?.length ? (
         <TablePaginationWithRouterIntegration count={totalPages} />
       ) : (
         <Box display="flex" justifyContent="center" mt={3}>
@@ -137,10 +138,10 @@ export default function IntegrationsTable() {
   );
 }
 
-export const getRole = (row) =>
+export const getRole = (row: Components.Schemas.Integration) =>
   roles.find((role) => role in row.configurationEntity)!;
 
-function Row(row) {
+function Row(row: Components.Schemas.Integration) {
   const intl = useIntl();
   const role = getRole(row);
 
@@ -151,20 +152,22 @@ function Row(row) {
       </TableCell>
       <TableCell>
         <Stack>
-          {row.configurationEntity.name}
+          {
+            //row.configurationEntity.name
+          }
           <SecondaryCodeWithTooltip
             object={row}
-            path={["configurationEntity", "flowName"]}
+            path={["configurationEntity", role, "flowName"]}
           />
           <SecondaryCodeWithTooltip
             object={row}
-            path={["configurationEntity", "entityId"]}
+            path={["configurationEntity", role, "entityId"]}
           />
         </Stack>
       </TableCell>
       <TableCell>
         <Chip
-          label={row.configurationEntity[role].type}
+          label={row.configurationEntity[role]?.type}
           size="small"
           color="primary"
         />
