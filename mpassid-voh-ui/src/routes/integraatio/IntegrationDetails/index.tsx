@@ -16,7 +16,7 @@ const attributes = defineMessages({
     defaultMessage: "Käyttäjän rooli",
   },
   learnerId: {
-    defaultMessage: "Yksilöintitunnus",
+    defaultMessage: "Oppijanumero",
   },
   firstName: {
     defaultMessage: "Etunimi",
@@ -25,12 +25,15 @@ const attributes = defineMessages({
     defaultMessage: "Luokka tai ryhmä",
   },
   legacyId: {
-    defaultMessage: "Tilastokeskuksen oppilaitostunnus",
+    defaultMessage: "Salattu yksilöintitunnus",
   },
   username: {
-    defaultMessage: "Oppijanumero",
+    defaultMessage: "Yksilöintitunnus",
   },
   schoolIds: {
+    defaultMessage: "Oppilaitostunnus",
+  },
+  learningMaterialsCharges: {
     defaultMessage: "Oppimateriaalien maksullisuuskoodi",
   },
   tenantId: {

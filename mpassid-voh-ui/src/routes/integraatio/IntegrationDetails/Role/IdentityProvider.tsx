@@ -12,7 +12,7 @@ export default function IdentityProvider({ configurationEntity }: Props) {
         <Grid item xs={4}>
           <Tooltip title="entityId">
             <span>
-              <FormattedMessage defaultMessage="Palveluntarjoajan palvelun tekninen tunniste" />
+              <FormattedMessage defaultMessage="Entity ID" />
             </span>
           </Tooltip>
         </Grid>
@@ -22,7 +22,7 @@ export default function IdentityProvider({ configurationEntity }: Props) {
         <Grid item xs={4}>
           <Tooltip title="flowName">
             <span>
-              <FormattedMessage defaultMessage="Flow-nimi" />
+              <FormattedMessage defaultMessage="Flow name" />
             </span>
           </Tooltip>
         </Grid>
