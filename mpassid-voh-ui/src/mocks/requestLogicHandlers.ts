@@ -57,8 +57,8 @@ export default {
   getIntegrationsSearchPageable(request) {
     const page = Number(request.query.page ?? defaults.page);
     const size = Number(request.query.size ?? defaults.size);
-    const query = request.query as { [key: string]: string };
-    const search = query.search?.toLowerCase();
+    const query = request.query;
+    const search = (query.search as string)?.toLowerCase();
 
     let filteredElements = [...allIntegrations];
     if (search) {
@@ -71,14 +71,16 @@ export default {
         ].some((path) => get(element, path)?.toLowerCase().includes(search))
       );
     }
-    const deploymentPhase = JSON.parse(query.deploymentPhase ?? "1");
+    const deploymentPhase = JSON.parse(
+      (query.deploymentPhase as string) ?? "1"
+    );
 
     filteredElements = filteredElements.filter(
       (row) => row.deploymentPhase === deploymentPhase
     );
 
     if ("type" in query) {
-      const types = query.type.split(",").filter(Boolean);
+      const types = (query.type as string).split(",").filter(Boolean);
 
       filteredElements = filteredElements.filter((row) =>
         types.includes(row.configurationEntity![getRole(row)]!.type!)
@@ -86,7 +88,7 @@ export default {
     }
 
     if ("role" in query) {
-      const roles = query.role.split(",").filter(Boolean);
+      const roles = (query.role as string).split(",").filter(Boolean);
 
       filteredElements = filteredElements.filter((row) =>
         roles.includes(getRole(row))
@@ -94,7 +96,8 @@ export default {
     }
 
     if ("sort" in query) {
-      const [path, direction] = query.sort.split(",").slice(0, 2);
+      const sort = Array.isArray(query.sort) ? query.sort[0] : query.sort;
+      const [path, direction] = sort.split(",").slice(0, 2);
       filteredElements = orderBy(
         filteredElements,
         [path],
