@@ -1,5 +1,6 @@
 import { useIntegration } from "@/api";
 import { useKoodisByKoodisto } from "@/api/koodisto";
+import { attributePreferredOrder } from "@/config";
 import { Grid, Tooltip, Typography } from "@mui/material";
 import { Fragment } from "react";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
@@ -61,6 +62,7 @@ export default function IntegrationDetails({ id }: Props) {
   const integration = useIntegration({ id });
   const institutionTypes = useKoodisByKoodisto("oppilaitostyyppi");
   const language = useIntl().locale.split("-")[0];
+  const intl = useIntl();
 
   return (
     <>
@@ -89,7 +91,7 @@ export default function IntegrationDetails({ id }: Props) {
       </Grid>
 
       <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Konfiguraation perustiedot" />
+        <FormattedMessage defaultMessage="Perustiedot" />
       </Typography>
       <Grid container spacing={2} mb={3}>
         <Grid item xs={4}>
@@ -131,26 +133,41 @@ export default function IntegrationDetails({ id }: Props) {
         <FormattedMessage defaultMessage="Konfiguraation määritteet" />
       </Typography>
       <Grid container spacing={2}>
-        {integration.configurationEntity.attributes?.map((attribute) => {
-          const name = attribute.name as keyof typeof attributes;
+        {(integration.configurationEntity.attributes ?? [])
+          .map((attribute) => {
+            const attributeMessageDescriptor =
+              attributes[attribute.name as keyof typeof attributes];
 
-          return (
+            return {
+              ...attribute,
+              label:
+                attributeMessageDescriptor &&
+                intl.formatMessage(attributeMessageDescriptor),
+            };
+          })
+          .sort(
+            (a, b) =>
+              2 *
+                (attributePreferredOrder.indexOf(b.name) -
+                  attributePreferredOrder.indexOf(a.name)) -
+              (b.label ?? b.name).localeCompare(a.label ?? a.name)
+          )
+          .map(({ name, value, label }) => (
             <Fragment key={name}>
               <Grid item xs={4}>
-                {attributes[name] ? (
+                {label ? (
                   <Tooltip title={name}>
-                    <span>{<FormattedMessage {...attributes[name]} />}</span>
+                    <span>{label}</span>
                   </Tooltip>
                 ) : (
                   name
                 )}
               </Grid>
               <Grid item xs={8}>
-                {attribute.value}
+                {value}
               </Grid>
             </Fragment>
-          );
-        })}
+          ))}
       </Grid>
     </>
   );
