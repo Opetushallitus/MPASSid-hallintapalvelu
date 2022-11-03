@@ -96,18 +96,22 @@ export default function IntegrationDetails({ id }: Props) {
           <FormattedMessage defaultMessage="Oppilaitostyypit" />
         </Grid>
         <Grid item xs={8}>
-          {integration.institutionTypes
-            .map(
-              (institutionType) =>
-                institutionTypes
-                  .find(
-                    ({ koodiArvo }) => Number(koodiArvo) === institutionType
-                  )
-                  ?.metadata.find(
-                    (data) => data.kieli.toLowerCase() === language
-                  )?.nimi
-            )
-            .join(", ") || "–"}
+          {integration.institutionTypes.length
+            ? integration.institutionTypes.map((institutionType) => (
+                <div key={institutionType}>
+                  {
+                    institutionTypes
+                      .find(
+                        ({ koodiArvo }) => Number(koodiArvo) === institutionType
+                      )
+                      ?.metadata.find(
+                        (data) => data.kieli.toLowerCase() === language
+                      )?.nimi
+                  }{" "}
+                  ({institutionType})
+                </div>
+              ))
+            : "–"}
         </Grid>
         <Grid item xs={4}>
           <Tooltip title="id">
