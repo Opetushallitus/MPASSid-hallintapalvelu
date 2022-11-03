@@ -1,46 +1,31 @@
 import type { Components } from "@/api";
-import { Grid, Tooltip } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
+import { DataRow } from "../DataRow";
 
 interface Props {
   configurationEntity: Components.Schemas.IdentityProvider;
 }
+
 export default function IdentityProvider({ configurationEntity }: Props) {
   return (
     <>
       <Grid container spacing={2} mb={3}>
-        <Grid item xs={4}>
-          <Tooltip title="entityId">
-            <span>
-              <FormattedMessage defaultMessage="Entity ID" />
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={8}>
-          {configurationEntity.entityId}
-        </Grid>
-        <Grid item xs={4}>
-          <Tooltip title="flowName">
-            <span>
-              <FormattedMessage defaultMessage="Flow name" />
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item xs={8}>
-          {configurationEntity.flowName}
-        </Grid>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="Logon URL" />
-        </Grid>
-        <Grid item xs={8}>
-          {configurationEntity.logoUrl}
-        </Grid>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="Tyyppi" />
-        </Grid>
-        <Grid item xs={8}>
-          {configurationEntity.type}
-        </Grid>
+        <DataRow object={configurationEntity} path="entityId" />
+        <DataRow object={configurationEntity} path="flowName" />
+        <DataRow object={configurationEntity} path="type" />
+      </Grid>
+
+      <Typography variant="h2" gutterBottom>
+        <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />
+      </Typography>
+      <Grid container spacing={2} mb={3}>
+        <DataRow object={configurationEntity} path="logoUrl" />
+        <DataRow object={configurationEntity} path="customDisplayName" />
+        <DataRow object={configurationEntity} path="showSchools" />
+        <DataRow object={configurationEntity} path="schools" />
+        <DataRow object={configurationEntity} path="excludedSchools" />
+        <DataRow object={configurationEntity} path="customTitle" />
       </Grid>
     </>
   );

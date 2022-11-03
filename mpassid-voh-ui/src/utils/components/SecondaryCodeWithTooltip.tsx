@@ -16,7 +16,7 @@ export default function SecondaryCodeWithTooltip({
   let code = <code>{value}</code>;
 
   if (title) {
-    code = <Tooltip title={title}>{code}</Tooltip>;
+    code = <Tooltip title={<code>{title}</code>}>{code}</Tooltip>;
   }
 
   return (
