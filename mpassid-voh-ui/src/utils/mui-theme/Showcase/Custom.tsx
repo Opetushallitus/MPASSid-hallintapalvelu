@@ -6,6 +6,7 @@ import {
   TablePaginationWithRouterIntegration,
 } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
+import RowsPerPage from "@/utils/components/RowsPerPage";
 import SecondaryCodeWithTooltip from "@/utils/components/SecondaryCodeWithTooltip";
 import Suspense from "@/utils/components/Suspense";
 import TabLink from "@/utils/components/TabLink";
@@ -140,6 +141,11 @@ export default function Custom() {
             </AppBarNavLinkTabs>
           </Toolbar>
         </AppBar>
+
+        <Typography variant="h3" gutterBottom>
+          RowsPerPage
+        </Typography>
+        <RowsPerPage />
       </Paper>
     </>
   );

@@ -2,6 +2,7 @@ import { useIntegrationsSearchPageable } from "@/api";
 import PageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
+import RowsPerPage from "@/utils/components/RowsPerPage";
 import Suspense from "@/utils/components/Suspense";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import {
@@ -9,6 +10,7 @@ import {
   Divider,
   FormControlLabel,
   Paper,
+  Stack,
   Switch,
   TableContainer,
   Typography,
@@ -81,7 +83,12 @@ export default function Home() {
           />
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
-        <SearchForm formData={searchParams} onSearch={handleSearch} />
+        <Stack direction="row" alignItems="center">
+          <Box flex={1} sx={{ mr: { md: 10 } }}>
+            <SearchForm formData={searchParams} onSearch={handleSearch} />
+          </Box>
+          <RowsPerPage />
+        </Stack>
         <Suspense>
           <IntegrationsTable />
         </Suspense>
