@@ -63,10 +63,10 @@ export default function IntegrationsTable() {
 
   return (
     <>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableHeaderCell sort="id">
+      <Table component="div">
+        <TableHead component="div">
+          <TableRow component="div">
+            <TableHeaderCell sort="id" component="div">
               <FormattedMessage defaultMessage="Tunniste" />
             </TableHeaderCell>
             <TableHeaderCell
@@ -75,6 +75,7 @@ export default function IntegrationsTable() {
                 "configurationEntity.flowName",
                 "configurationEntity.entityId",
               ]}
+              component="div"
             >
               <FormattedMessage defaultMessage="Palvelu" />
             </TableHeaderCell>
@@ -94,6 +95,7 @@ export default function IntegrationsTable() {
                 active: typeFilter.modified,
                 children: typeFilter.children,
               }}
+              component="div"
             >
               <FormattedMessage defaultMessage="Tyyppi" />
             </TableHeaderCell>
@@ -110,15 +112,16 @@ export default function IntegrationsTable() {
                 active: roleFilter.modified,
                 children: roleFilter.children,
               }}
+              component="div"
             >
               <FormattedMessage defaultMessage="Rooli" />
             </TableHeaderCell>
-            <TableHeaderCell sort="organization.name">
+            <TableHeaderCell sort="organization.name" component="div">
               <FormattedMessage defaultMessage="Organisaatio" />
             </TableHeaderCell>
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody component="div">
           {content?.map((row, index) => (
             <Row key={index} {...row} />
           ))}
@@ -151,11 +154,14 @@ function Row(row: Components.Schemas.Integration) {
   const role = getRole(row);
 
   return (
-    <TableRow>
-      <TableCell>
-        <Link to={`/integraatio/${row.id}`}>{row.id}</Link>
-      </TableCell>
-      <TableCell>
+    <TableRow
+      component={Link}
+      to={`/integraatio/${row.id}`}
+      hover
+      sx={{ textDecorationLine: "inherit" }}
+    >
+      <TableCell component="div">{row.id}</TableCell>
+      <TableCell component="div">
         <Stack>
           {
             //row.configurationEntity.name
@@ -170,21 +176,22 @@ function Row(row: Components.Schemas.Integration) {
           />
         </Stack>
       </TableCell>
-      <TableCell>
+      <TableCell component="div">
         <Chip
           label={row.configurationEntity[role]?.type}
           size="small"
           color={typeColors[role]}
+          sx={{ cursor: "inherit" }}
         />
       </TableCell>
-      <TableCell>
+      <TableCell component="div">
         <Tooltip title={intl.formatMessage(typeTooltips[role])}>
           <span>
             <FormattedMessage {...typeAbbreviations[role]} />
           </span>
         </Tooltip>
       </TableCell>
-      <TableCell>
+      <TableCell component="div">
         <Stack>
           {row.organization.name}
           <Secondary sx={{ lineHeight: "initial" }}>
