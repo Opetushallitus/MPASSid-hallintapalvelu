@@ -1,7 +1,7 @@
 import { useIntegrationsSearchPageable } from "@/api";
 import PageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
-import { secondary, suspense } from "@/utils/components/react-intl-values";
+import { Secondary } from "@/utils/components/react-intl-values";
 import Suspense from "@/utils/components/Suspense";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import {
@@ -52,15 +52,12 @@ export default function Home() {
             icon={<IntegrationInstructionsIcon />}
             sx={{ flexGrow: 1 }}
           >
-            <FormattedMessage
-              defaultMessage="Integraatiot <secondary><suspense>( {totalElements} )</suspense></secondary>"
-              description="Otsikko (<suspense> estää sivun välkkymisen, kun käyttäjä vaihtaa hakuparametreja tai siirtyy toiselle tulossivulle)"
-              values={{
-                totalElements: <TotalElements />,
-                secondary,
-                suspense,
-              }}
-            />
+            <FormattedMessage defaultMessage="Integraatiot" />{" "}
+            <Secondary>
+              <Suspense inline>
+                ( <TotalElements /> )
+              </Suspense>
+            </Secondary>
           </PageHeader>
           <FormControlLabel
             control={
