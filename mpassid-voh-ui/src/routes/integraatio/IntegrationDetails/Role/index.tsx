@@ -25,9 +25,6 @@ export default function Role({ integration }: Props) {
 
   return (
     <>
-      <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Roolin tiedot" />
-      </Typography>
       <Grid container spacing={2} mb={2}>
         <Grid item xs={4}>
           <FormattedMessage defaultMessage="Rooli" />

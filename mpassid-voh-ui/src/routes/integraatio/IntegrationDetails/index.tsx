@@ -19,7 +19,7 @@ export default function IntegrationDetails({ id }: Props) {
   return (
     <>
       <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Oppilaitoksen tiedot" />
+        <FormattedMessage defaultMessage="Organisaation tiedot" />
       </Typography>
       <Grid container spacing={2} mb={3}>
         <DataRow object={integration} path="organization.name" />
@@ -30,7 +30,7 @@ export default function IntegrationDetails({ id }: Props) {
       <Typography variant="h2" gutterBottom>
         <FormattedMessage defaultMessage="Integraation perustiedot" />
       </Typography>
-      <Grid container spacing={2} mb={3}>
+      <Grid container spacing={2} mb={2}>
         <Grid item xs={4}>
           <FormattedMessage defaultMessage="Oppilaitostyypit" />
         </Grid>
@@ -58,7 +58,7 @@ export default function IntegrationDetails({ id }: Props) {
       <Role integration={integration} />
 
       <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Konfiguraation määritteet" />
+        <FormattedMessage defaultMessage="Attribuutit" />
       </Typography>
       <Grid container spacing={2}>
         {(integration.configurationEntity.attributes ?? [])
