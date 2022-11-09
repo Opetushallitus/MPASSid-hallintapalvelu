@@ -1,9 +1,9 @@
 import { useIntegration } from "@/api";
 import { useKoodisByKoodisto } from "@/api/koodisto";
-import { attributePreferredOrder } from "@/config";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
-import { DataRow, labels } from "./DataRow";
+import Attributes from "./Attributes";
+import { DataRow } from "./DataRow";
 import Role from "./Role";
 
 interface Props {
@@ -14,7 +14,6 @@ export default function IntegrationDetails({ id }: Props) {
   const integration = useIntegration({ id });
   const institutionTypes = useKoodisByKoodisto("oppilaitostyyppi");
   const language = useIntl().locale.split("-")[0];
-  const intl = useIntl();
 
   return (
     <>
@@ -57,33 +56,9 @@ export default function IntegrationDetails({ id }: Props) {
 
       <Role integration={integration} />
 
-      <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Attribuutit" />
-      </Typography>
-      <Grid container spacing={2}>
-        {(integration.configurationEntity.attributes ?? [])
-          .map((attribute) => {
-            const attributeMessageDescriptor =
-              labels[attribute.name as keyof typeof labels];
-
-            return {
-              ...attribute,
-              label:
-                attributeMessageDescriptor &&
-                intl.formatMessage(attributeMessageDescriptor),
-            };
-          })
-          .sort(
-            (a, b) =>
-              2 *
-                (attributePreferredOrder.indexOf(b.name) -
-                  attributePreferredOrder.indexOf(a.name)) -
-              (b.label ?? b.name).localeCompare(a.label ?? a.name)
-          )
-          .map(({ name, value }) => (
-            <DataRow key={name} object={{ [name]: value }} path={name} />
-          ))}
-      </Grid>
+      <Attributes
+        attributes={integration.configurationEntity.attributes ?? []}
+      />
     </>
   );
 }
