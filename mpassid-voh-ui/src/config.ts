@@ -2,6 +2,7 @@ export const types = [
   "azure",
   "adfs",
   "google",
+  "gsuite",
   "opinsys",
   "wilma",
   "saml2",
