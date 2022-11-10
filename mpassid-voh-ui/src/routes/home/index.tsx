@@ -1,4 +1,5 @@
 import { useIntegrationsSearchPageable } from "@/api";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import PageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
@@ -90,7 +91,9 @@ export default function Home() {
           <RowsPerPage />
         </Stack>
         <Suspense>
-          <IntegrationsTable />
+          <ErrorBoundary>
+            <IntegrationsTable />
+          </ErrorBoundary>
         </Suspense>
       </TableContainer>
     </>

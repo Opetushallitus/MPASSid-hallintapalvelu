@@ -1,5 +1,5 @@
 import type { Components } from "@/api";
-import { Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import {
   getRole,

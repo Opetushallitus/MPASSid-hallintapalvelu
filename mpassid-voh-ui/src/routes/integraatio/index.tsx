@@ -1,3 +1,4 @@
+import ErrorBoundary from "@/components/ErrorBoundary";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
@@ -30,7 +31,9 @@ export default function Integraatio() {
         </PageHeader>
         <Divider sx={{ marginBottom: 2 }} />
         <Suspense>
-          <IntegrationDetails id={Number(integrationId)} />
+          <ErrorBoundary>
+            <IntegrationDetails id={Number(integrationId)} />
+          </ErrorBoundary>
         </Suspense>
       </TableContainer>
     </>

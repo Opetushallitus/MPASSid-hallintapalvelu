@@ -1,5 +1,6 @@
 import { useIntegration } from "@/api";
 import { useKoodisByKoodisto } from "@/api/koodisto";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import Attributes from "./Attributes";
@@ -56,9 +57,14 @@ export default function IntegrationDetails({ id }: Props) {
 
       <Role integration={integration} />
 
-      <Attributes
-        attributes={integration.configurationEntity.attributes ?? []}
-      />
+      <Typography variant="h2" gutterBottom>
+        <FormattedMessage defaultMessage="Attribuutit" />
+      </Typography>
+      <ErrorBoundary>
+        <Attributes
+          attributes={integration.configurationEntity.attributes ?? []}
+        />
+      </ErrorBoundary>
     </>
   );
 }

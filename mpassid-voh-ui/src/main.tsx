@@ -18,6 +18,7 @@ declare global {
     MOCK?: string;
     PROD: boolean;
     RAAMIT_PATH: string;
+    SUPPORT_URI?: string;
   };
 }
 

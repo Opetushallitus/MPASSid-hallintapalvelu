@@ -1,3 +1,4 @@
+import ErrorBoundary from "@/components/ErrorBoundary";
 import useSetDocumentTitle from "@/hooks/useDocumentTitle";
 import StyleIcon from "@mui/icons-material/Style";
 import { Box, Container, Fab, Typography } from "@mui/material";
@@ -16,7 +17,10 @@ export default function Basic() {
           <Typography variant="h1" gutterBottom>
             <FormattedMessage defaultMessage="MPASSid-hallinta" />
           </Typography>
-          <Outlet />
+
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </Box>
       </Container>
       {!ENV.PROD && (
