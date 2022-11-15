@@ -1,6 +1,8 @@
 import { useIntegration } from "@/api";
 import { useKoodisByKoodisto } from "@/api/koodisto";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import getKoodistoValue from "@/utils/getKoodistoValue";
+import toLanguage from "@/utils/toLanguage";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import Attributes from "./Attributes";
@@ -14,7 +16,7 @@ interface Props {
 export default function IntegrationDetails({ id }: Props) {
   const integration = useIntegration({ id });
   const institutionTypes = useKoodisByKoodisto("oppilaitostyyppi");
-  const language = useIntl().locale.split("-")[0];
+  const language = toLanguage(useIntl().locale).toUpperCase();
 
   return (
     <>
@@ -38,15 +40,11 @@ export default function IntegrationDetails({ id }: Props) {
           {integration.institutionTypes.length
             ? integration.institutionTypes.map((institutionType) => (
                 <div key={institutionType}>
-                  {
-                    institutionTypes
-                      .find(
-                        ({ koodiArvo }) => Number(koodiArvo) === institutionType
-                      )
-                      ?.metadata.find(
-                        (data) => data.kieli.toLowerCase() === language
-                      )?.nimi
-                  }{" "}
+                  {getKoodistoValue(
+                    institutionTypes,
+                    String(institutionType),
+                    language
+                  )}{" "}
                   ({institutionType})
                 </div>
               ))

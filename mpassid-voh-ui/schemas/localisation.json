@@ -1,0 +1,101 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Lokalisointi API",
+    "description": "Lokalisoinnin tarjoamat rajapinnat",
+    "version": "0"
+  },
+  "servers": [
+    { "url": "https://virkailija.testiopintopolku.fi/lokalisointi/cxf/rest" }
+  ],
+  "paths": {
+    "/v1/localisation": {
+      "get": {
+        "operationId": "getLocalisation",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LocalisationRDTOs" },
+                "examples": {
+                  "localisation": {
+                    "value": [
+                      {
+                        "accesscount": 0,
+                        "force": false,
+                        "modified": 1668499951090,
+                        "modifiedBy": "1.2.246.562.24.31079436519",
+                        "accessed": 1668499915727,
+                        "category": "mpassid",
+                        "created": 1668499915727,
+                        "createdBy": "1.2.246.562.24.31079436519",
+                        "key": "yleinen;+2IAHp",
+                        "id": 42583,
+                        "locale": "fi",
+                        "value": "(palvelun lyhyt kuvaus, mock)"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LocalisationRDTO": {
+        "description": "Lokalisointiarvo.",
+        "properties": {
+          "modified": { "type": "string", "format": "date-time" },
+          "modifiedBy": { "type": "string" },
+          "accesscount": { "type": "integer", "format": "int64" },
+          "accessed": { "type": "string", "format": "date-time" },
+          "created": { "type": "string", "format": "date-time" },
+          "createdBy": { "type": "string" },
+          "force": { "type": "boolean", "description": "Tallennuksen pakotus" },
+          "category": { "type": "string", "description": "Kategoria" },
+          "description": {
+            "type": "string",
+            "description": "Käännöksen kuvaus"
+          },
+          "locale": {
+            "type": "string",
+            "description": "Käännöksen kielikoodi"
+          },
+          "value": { "type": "string", "description": "käännösarvo" },
+          "key": { "type": "string", "description": "Käännösavain" },
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Tietokanta-avain"
+          }
+        }
+      },
+      "LocalisationRDTOs": {
+        "type": "array",
+        "items": { "$ref": "#/components/schemas/LocalisationRDTO" }
+      }
+    }
+  }
+}

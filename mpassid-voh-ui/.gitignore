@@ -14,6 +14,7 @@ dist-ssr
 /.compiled-lang
 
 # generated
+/public/default-messages-*
 /src/api/client.ts
 /src/api/koodisto.ts
-/default-messages-export.json
+/src/api/localisation.ts

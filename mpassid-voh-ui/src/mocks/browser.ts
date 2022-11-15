@@ -3,6 +3,7 @@ import { mapValues } from "lodash";
 import { setupWorker } from "msw";
 import type { Document } from "openapi-backend";
 import koodistoDefinition from "../../schemas/koodisto.json";
+import localisationDefinition from "../../schemas/localisation.json";
 import requestLogicHandlers, { definition } from "./requestLogicHandlers.js";
 
 function mapDeep(object: any, callback: any): any {
@@ -17,12 +18,13 @@ function mapDeep(object: any, callback: any): any {
 }
 
 // Fixes: unknown format "date-time" ignored in schema at path
-const koodistoDefinition_ = mapDeep(koodistoDefinition, (value: any) => {
-  if (typeof value === "object" && value?.format === "date-time") {
-    delete value.format;
-  }
-  return value;
-});
+const patchSchema = (schema: Document) =>
+  mapDeep(schema, (value: any) => {
+    if (typeof value === "object" && value?.format === "date-time") {
+      delete value.format;
+    }
+    return value;
+  });
 
 export const worker = setupWorker(
   ...handlers(
@@ -32,6 +34,9 @@ export const worker = setupWorker(
     requestLogicHandlers
   ),
   ...handlers({
-    definition: koodistoDefinition_ as unknown as Document,
+    definition: patchSchema(koodistoDefinition as Document),
+  }),
+  ...handlers({
+    definition: patchSchema(localisationDefinition as Document),
   })
 );

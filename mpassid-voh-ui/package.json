@@ -12,6 +12,7 @@
     "generate": "concurrently 'npm:generate:*'",
     "generate:client": "react-openapi-client-generator ../schema.json src/api/client.ts",
     "generate:koodisto-client": "react-openapi-client-generator ./schemas/koodisto.json src/api/koodisto.ts",
+    "generate:localisation-client": "react-openapi-client-generator ./schemas/localisation.json src/api/localisation.ts",
     "generate:messages": "formatjs-scripts && node scripts/export-messages.js",
     "preview": "vite preview",
     "postinstall": "patch-package"
@@ -25,6 +26,7 @@
     "@opetushallitus/virkailija-ui-components": "^0.4.7",
     "@rehooks/document-title": "^1.0.2",
     "@visma/react-app-super-template": "^1.1.3",
+    "csv-stringify": "^6.2.1",
     "lodash": "^4.17.21",
     "patch-package": "^6.5.0",
     "react": "^18.2.0",
