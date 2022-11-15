@@ -6,6 +6,6 @@
 
 ```sh
 cd mpassid-voh-ui
-npm install
+npm ci
 npm run dev
 ```
