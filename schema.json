@@ -255,20 +255,20 @@
                           "attributes": [
                             {
                               "name": "clientKey",
-                              "value": "{{opinsysKauniainen.clientKey}}"
+                              "content": "{{opinsysKauniainen.clientKey}}"
                             },
                             {
                               "name": "tenantId",
-                              "value": "kauniainen.opinsys.fi"
+                              "content": "kauniainen.opinsys.fi"
                             },
-                            { "name": "class", "value": "OpinsysDataSource" },
+                            { "name": "class", "content": "OpinsysDataSource" },
                             {
                               "name": "clientId",
-                              "value": "{{opinsysKauniainen.clientId}}"
+                              "content": "{{opinsysKauniainen.clientId}}"
                             },
                             {
                               "name": "datasource",
-                              "value": "datasources.opinsys"
+                              "content": "datasources.opinsys"
                             }
                           ]
                         },
@@ -291,15 +291,18 @@
                             "flowName": "ShibGrankulla"
                           },
                           "attributes": [
-                            { "name": "surname", "value": "surname" },
-                            { "name": "groupLevels", "value": "classLevel" },
-                            { "name": "roles", "value": "userRole" },
-                            { "name": "learnerId", "value": "learnerId" },
-                            { "name": "firstName", "value": "firstName" },
-                            { "name": "groups", "value": "class" },
-                            { "name": "legacyId", "value": "legacyId" },
-                            { "name": "username", "value": "mpassAccountName" },
-                            { "name": "schoolIds", "value": "schoolCode" }
+                            { "name": "surname", "content": "surname" },
+                            { "name": "groupLevels", "content": "classLevel" },
+                            { "name": "roles", "content": "userRole" },
+                            { "name": "learnerId", "content": "learnerId" },
+                            { "name": "firstName", "content": "firstName" },
+                            { "name": "groups", "content": "class" },
+                            { "name": "legacyId", "content": "legacyId" },
+                            {
+                              "name": "username",
+                              "content": "mpassAccountName"
+                            },
+                            { "name": "schoolIds", "content": "schoolCode" }
                           ]
                         },
                         "organization": {
