@@ -18,7 +18,12 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
-import { defineMessages, FormattedMessage, useIntl } from "react-intl";
+import {
+  defineMessage,
+  defineMessages,
+  FormattedMessage,
+  useIntl,
+} from "react-intl";
 import { Link } from "react-router-dom";
 
 export const typeAbbreviations = defineMessages({
@@ -39,6 +44,54 @@ export const typeTooltips = defineMessages({
   },
 });
 
+defineMessage({
+  defaultMessage: "Azure",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.azure",
+});
+
+defineMessage({
+  defaultMessage: "ADFS",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.adfs",
+});
+
+defineMessage({
+  defaultMessage: "Google",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.google",
+});
+
+defineMessage({
+  defaultMessage: "Google: Gsuite",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.gsuite",
+});
+
+defineMessage({
+  defaultMessage: "Opinsys",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.opinsys",
+});
+
+defineMessage({
+  defaultMessage: "Wilma",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.wilma",
+});
+
+defineMessage({
+  defaultMessage: "SAML 2.0",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.saml2",
+});
+
+defineMessage({
+  defaultMessage: "OpenID Connect",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.oidc",
+});
+
 const typeColors = {
   idp: "primary",
   sp: "success",
@@ -51,6 +104,14 @@ export default function IntegrationsTable() {
   const typeFilter = useFilterMenuItems({
     options: types,
     searchParamName: "tyyppi",
+    optionsLabels: Object.fromEntries(
+      types
+        .filter((type) => `tyyppi.${type}` in intl.messages)
+        .map((type) => {
+          const messageDescriptor = { id: `tyyppi.${type}` };
+          return [type, intl.formatMessage(messageDescriptor)];
+        })
+    ),
   });
 
   const roleFilter = useFilterMenuItems({
@@ -153,6 +214,10 @@ function Row(row: Components.Schemas.Integration) {
   const intl = useIntl();
   const role = getRole(row);
 
+  const type = row.configurationEntity[role]?.type;
+
+  const messageDescriptor = { id: `tyyppi.${type}` };
+
   return (
     <TableRow
       component={Link}
@@ -178,7 +243,11 @@ function Row(row: Components.Schemas.Integration) {
       </TableCell>
       <TableCell component="div">
         <Chip
-          label={row.configurationEntity[role]?.type}
+          label={
+            intl.messages[`tyyppi.${type}`]
+              ? intl.formatMessage(messageDescriptor)
+              : type
+          }
           size="small"
           color={typeColors[role]}
           sx={{ cursor: "inherit" }}

@@ -80,7 +80,7 @@ export default function useFilterMenuItems({
             buttonProps={{ onClick: () => handleToggle(value) }}
             checkboxProps={{ checked: checked.includes(value) }}
             textProps={{
-              primary: optionsLabels ? optionsLabels[value] : value,
+              primary: optionsLabels?.[value] ?? value,
             }}
           />
         ))}
