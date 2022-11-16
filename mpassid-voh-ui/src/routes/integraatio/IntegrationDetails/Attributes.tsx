@@ -1,5 +1,5 @@
 import type { Components } from "@/api";
-import { attributePreferredOrder } from "@/config";
+import { useAppConfig } from "@/api";
 import { Grid } from "@mui/material";
 import { useIntl } from "react-intl";
 import { DataRow, labels } from "./DataRow";
@@ -10,6 +10,10 @@ interface Props {
 
 export default function Attributes({ attributes }: Props) {
   const intl = useIntl();
+  const appConfig = useAppConfig();
+  const attributePreferredOrder = [
+    ...appConfig.attributePreferredOrder,
+  ].reverse();
 
   return (
     <Grid container spacing={2}>

@@ -1,6 +1,6 @@
 import type { Components } from "@/api";
-import { useIntegrationsSearchPageable } from "@/api";
-import { roles, types } from "@/config";
+import { useAppConfig, useIntegrationsSearchPageable } from "@/api";
+import { roles } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import SecondaryCodeWithTooltip from "@/utils/components/SecondaryCodeWithTooltip";
@@ -47,6 +47,7 @@ const typeColors = {
 export default function IntegrationsTable() {
   const { content, totalPages } = useIntegrationsSearchPageable();
   const intl = useIntl();
+  const { types } = useAppConfig();
 
   const typeFilter = useFilterMenuItems({
     options: types,

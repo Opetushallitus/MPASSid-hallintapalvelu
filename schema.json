@@ -336,10 +336,54 @@
           }
         }
       }
+    },
+    "/api/v1/app-config": {
+      "get": {
+        "summary": "Get app config",
+        "operationId": "getAppConfig",
+        "responses": {
+          "200": {
+            "description": "app config",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AppConfig" },
+                "examples": {
+                  "app-config": {
+                    "value": {
+                      "types": [
+                        "azure",
+                        "adfs",
+                        "google",
+                        "gsuite",
+                        "opinsys",
+                        "wilma",
+                        "saml2",
+                        "oidc"
+                      ],
+                      "attributePreferredOrder": ["firstName", "surname"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AppConfig": {
+        "type": "object",
+        "properties": {
+          "types": { "type": "array", "items": { "type": "string" } },
+          "attributePreferredOrder": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["types", "attributePreferredOrder"]
+      },
       "Attribute": {
         "type": "object",
         "properties": {
