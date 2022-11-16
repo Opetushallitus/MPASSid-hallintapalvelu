@@ -33,8 +33,8 @@ export default function Attributes({ attributes }: Props) {
                   attributePreferredOrder.indexOf(a.name)) -
               (b.label ?? b.name).localeCompare(a.label ?? a.name)
           )
-          .map(({ name, value }) => (
-            <DataRow key={name} object={{ [name]: value }} path={name} />
+          .map(({ name, content }) => (
+            <DataRow key={name} object={{ [name]: content }} path={name} />
           ))
       ) : (
         <Grid item>–</Grid>

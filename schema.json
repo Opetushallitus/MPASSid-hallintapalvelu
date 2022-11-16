@@ -17,7 +17,7 @@
     "/api/v1/integration/{id}": {
       "get": {
         "tags": ["integration-controller"],
-        "summary": "Get integration",
+        "summary": "Get specific integration",
         "operationId": "getIntegration",
         "parameters": [
           {
@@ -224,6 +224,14 @@
         "tags": ["integration-controller"],
         "summary": "Get all integrations",
         "operationId": "getIntegrations",
+        "parameters": [
+          {
+            "name": "sc",
+            "in": "query",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/SecurityContext" }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provides a list of integrations",
@@ -333,12 +341,12 @@
         "type": "object",
         "properties": {
           "name": { "type": "string" },
-          "value": { "type": "string" },
+          "content": { "type": "string" },
           "configurationEntity": {
             "$ref": "#/components/schemas/ConfigurationEntity"
           }
         },
-        "required": ["name", "value"]
+        "required": ["name", "content"]
       },
       "ConfigurationEntity": {
         "type": "object",
@@ -360,8 +368,12 @@
           "idpId": { "type": "string" },
           "logoUrl": { "type": "string" },
           "flowName": { "type": "string" },
-          "type": { "type": "string" },
-          "entityId": { "type": "string" }
+          "entityId": {
+            "type": "string",
+            "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
+          },
+          "metadataUrl": { "type": "string" },
+          "type": { "type": "string" }
         },
         "discriminator": { "propertyName": "type" }
       },
@@ -451,6 +463,30 @@
           "empty": { "type": "boolean" },
           "sorted": { "type": "boolean" },
           "unsorted": { "type": "boolean" }
+        }
+      },
+      "Authentication": {
+        "type": "object",
+        "properties": {
+          "details": { "type": "object" },
+          "principal": { "type": "object" },
+          "authorities": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GrantedAuthority" }
+          },
+          "credentials": { "type": "object" },
+          "authenticated": { "type": "boolean" },
+          "name": { "type": "string" }
+        }
+      },
+      "GrantedAuthority": {
+        "type": "object",
+        "properties": { "authority": { "type": "string" } }
+      },
+      "SecurityContext": {
+        "type": "object",
+        "properties": {
+          "authentication": { "$ref": "#/components/schemas/Authentication" }
         }
       }
     }
