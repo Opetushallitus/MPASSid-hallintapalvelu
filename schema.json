@@ -336,6 +336,57 @@
           }
         }
       }
+    },
+    "/api/v1/idp/types": {
+      "get": {
+        "tags": ["identity-provider-controller"],
+        "summary": "Get a list of distinct IdentityProvider types",
+        "operationId": "getIdentityProviderTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "string" } },
+                "examples": {
+                  "types": {
+                    "value": [
+                      "azure",
+                      "adfs",
+                      "google",
+                      "gsuite",
+                      "opinsys",
+                      "wilma"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sp/types": {
+      "get": {
+        "tags": ["service-provider-controller"],
+        "summary": "Get a list of distinct ServiceProvider types",
+        "operationId": "getServiceProviderTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "string" } },
+                "examples": {
+                  "types": {
+                    "value": ["saml2", "oidc"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -368,6 +419,7 @@
         "required": ["type"],
         "type": "object",
         "properties": {
+          "type": { "type": "string" },
           "idpId": { "type": "string" },
           "logoUrl": { "type": "string" },
           "flowName": { "type": "string" },
@@ -375,8 +427,7 @@
             "type": "string",
             "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
           },
-          "metadataUrl": { "type": "string" },
-          "type": { "type": "string" }
+          "metadataUrl": { "type": "string" }
         },
         "discriminator": { "propertyName": "type" }
       },
