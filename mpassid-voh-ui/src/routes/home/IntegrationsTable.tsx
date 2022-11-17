@@ -48,48 +48,56 @@ defineMessage({
   defaultMessage: "Azure",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.azure",
+  description: "tyyppi",
 });
 
 defineMessage({
   defaultMessage: "ADFS",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.adfs",
+  description: "tyyppi",
 });
 
 defineMessage({
   defaultMessage: "Google",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.google",
+  description: "tyyppi",
 });
 
 defineMessage({
   defaultMessage: "Google: Gsuite",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.gsuite",
+  description: "tyyppi",
 });
 
 defineMessage({
   defaultMessage: "Opinsys",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.opinsys",
+  description: "tyyppi",
 });
 
 defineMessage({
   defaultMessage: "Wilma",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.wilma",
+  description: "tyyppi",
 });
 
 defineMessage({
   defaultMessage: "SAML 2.0",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.saml2",
+  description: "tyyppi",
 });
 
 defineMessage({
   defaultMessage: "OpenID Connect",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.oidc",
+  description: "tyyppi",
 });
 
 const typeColors = {
