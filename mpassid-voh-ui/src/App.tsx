@@ -1,4 +1,3 @@
-import APIRedirectResponseHandler from "@/components/APIRedirectResponseHandler";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import IntlProvider from "@/components/IntlProvider";
 import Routes from "@/routes";
@@ -16,7 +15,6 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <MUIThemeProvider>
         <Suspense>
-          <APIRedirectResponseHandler />
           <IntlProvider>
             <ErrorBoundary>
               <BrowserRouter basename={(ENV.PROD && ENV.BASENAME) || undefined}>
