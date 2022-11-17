@@ -14,7 +14,8 @@ const messages = JSON.parse(messagesJSON);
 const messagesList = Object.entries(messages).map(
   ([key, { defaultMessage, description }]) => ({
     category: "mpassid",
-    key: `${description ?? "yleinen"};${key}`,
+    key,
+    description,
     locale: "fi",
     value: defaultMessage,
   })

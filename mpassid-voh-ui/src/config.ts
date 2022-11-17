@@ -14,3 +14,6 @@ export const openIntegrationsSessionStorageKey =
 export const attributePreferredOrder = ["firstName", "surname"]
   // Tallennetaan käännetty järjestys, jotta järjestäminen on optimaalisempi ja puuttuvat arvot järjestetään loppuun.
   .reverse();
+
+// Lokalisointi
+export const category = "mpassid";

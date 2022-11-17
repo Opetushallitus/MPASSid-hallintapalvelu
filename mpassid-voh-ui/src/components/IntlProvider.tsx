@@ -1,4 +1,5 @@
-import { useLocalisation } from "@/api/localisation";
+import { useLocalisations } from "@/api/localisation";
+import { category } from "@/config";
 import toLanguage from "@/utils/toLanguage";
 import type { PropsWithChildren } from "react";
 import { IntlProvider as ReactIntlProvider } from "react-intl";
@@ -24,24 +25,13 @@ function MessagesLoader({
 }) {
   return children(
     Object.fromEntries(
-      useLocalisation({
-        category: "mpassid",
+      useLocalisations({
+        category,
         locale: language,
-      }).map(keyWithoutDescription)
+      }).map(({ key, value }) => [key, value])
     )
   );
 }
-
-const keyWithoutDescription = ({
-  key = "",
-  value,
-}: {
-  key?: string;
-  value?: string;
-}) => {
-  const [, id] = key.split(";");
-  return [id, value];
-};
 
 export default function IntlProvider({ children }: PropsWithChildren) {
   const locale = ENV.LOCALES[0]; // TODO: hae jostain

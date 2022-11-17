@@ -11,7 +11,7 @@
   "paths": {
     "/v1/localisation": {
       "get": {
-        "operationId": "getLocalisation",
+        "operationId": "getLocalisations",
         "parameters": [
           {
             "name": "key",
@@ -39,24 +39,67 @@
                   "localisation": {
                     "value": [
                       {
-                        "accesscount": 0,
-                        "force": false,
-                        "modified": 1668499951090,
-                        "modifiedBy": "1.2.246.562.24.31079436519",
-                        "accessed": 1668499915727,
                         "category": "mpassid",
-                        "created": 1668499915727,
-                        "createdBy": "1.2.246.562.24.31079436519",
-                        "key": "yleinen;+2IAHp",
-                        "id": 42583,
+                        "key": "+2IAHp",
+                        "id": 123,
                         "locale": "fi",
-                        "value": "(palvelun lyhyt kuvaus, mock)"
+                        "value": "(palvelun lyhyt kuvaus, muokattu)",
+                        "description": "etusivu"
+                      },
+                      {
+                        "category": "mpassid",
+                        "key": "foo",
+                        "id": 456,
+                        "locale": "fi",
+                        "value": "Foo"
                       }
                     ]
                   }
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/v1/localisation/update": {
+      "post": {
+        "operationId": "updateLocalisations",
+        "responses": {
+          "200": {
+            "description": "Null response"
+          }
+        }
+      }
+    },
+    "/v1/localisation/{id}": {
+      "delete": {
+        "operationId": "deleteLocalisation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Null response"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateLocalisation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Null response"
           }
         }
       }
