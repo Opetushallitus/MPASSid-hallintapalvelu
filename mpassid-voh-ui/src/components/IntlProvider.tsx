@@ -1,3 +1,4 @@
+import { useMe } from "@/api/käyttöoikeus";
 import { useLocalisations } from "@/api/localisation";
 import { category } from "@/config";
 import toLanguage from "@/utils/toLanguage";
@@ -34,17 +35,17 @@ function MessagesLoader({
 }
 
 export default function IntlProvider({ children }: PropsWithChildren) {
-  const locale = ENV.LOCALES[0]; // TODO: hae jostain
+  const me = useMe();
 
   const defaultLanguage = toLanguage(ENV.LOCALES[0]);
-  const currentLanguage = toLanguage(locale);
+  const currentLanguage = me.lang ?? defaultLanguage;
 
   const renderIntlProvider =
     // eslint-disable-next-line react/display-name
     (defaultMessages: Messages) => (messages: Messages) =>
       (
         <ReactIntlProvider
-          locale={locale}
+          locale={currentLanguage}
           messages={{
             ...defaultMessages,
             ...messages,

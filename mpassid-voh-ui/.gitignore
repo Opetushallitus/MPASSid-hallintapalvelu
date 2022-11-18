@@ -16,5 +16,6 @@ dist-ssr
 # generated
 /public/default-messages-*
 /src/api/client.ts
+/src/api/käyttöoikeus.ts
 /src/api/koodisto.ts
 /src/api/localisation.ts

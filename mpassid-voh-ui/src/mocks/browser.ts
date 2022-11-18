@@ -2,6 +2,7 @@ import { handlers } from "@visma/msw-openapi-backend-integration";
 import { mapValues } from "lodash";
 import { setupWorker } from "msw";
 import type { Document } from "openapi-backend";
+import käyttöoikeusDefinition from "../../schemas/käyttöoikeus.json";
 import koodistoDefinition from "../../schemas/koodisto.json";
 import localisationDefinition from "../../schemas/localisation.json";
 import requestLogicHandlers, { definition } from "./requestLogicHandlers.js";
@@ -33,6 +34,9 @@ export const worker = setupWorker(
     },
     requestLogicHandlers
   ),
+  ...handlers({
+    definition: patchSchema(käyttöoikeusDefinition as unknown as Document),
+  }),
   ...handlers({
     definition: patchSchema(koodistoDefinition as Document),
   }),
