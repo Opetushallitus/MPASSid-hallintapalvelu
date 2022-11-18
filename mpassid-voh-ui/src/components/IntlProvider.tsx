@@ -5,6 +5,7 @@ import toLanguage from "@/utils/toLanguage";
 import type { PropsWithChildren } from "react";
 import { IntlProvider as ReactIntlProvider } from "react-intl";
 import defaultMessages_ from "../../lang/fi-FI.json";
+import useDocumentLang from "../utils/useDocumentLang";
 
 interface Messages {
   [id: string]: string;
@@ -39,6 +40,8 @@ export default function IntlProvider({ children }: PropsWithChildren) {
 
   const defaultLanguage = toLanguage(ENV.LOCALES[0]);
   const currentLanguage = me.lang ?? defaultLanguage;
+
+  useDocumentLang(currentLanguage);
 
   const renderIntlProvider =
     // eslint-disable-next-line react/display-name
