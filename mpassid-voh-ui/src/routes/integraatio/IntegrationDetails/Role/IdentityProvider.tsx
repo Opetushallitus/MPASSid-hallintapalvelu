@@ -1,31 +1,45 @@
 import type { Components } from "@/api";
-import { Grid, Typography } from "@mui/material";
-import { FormattedMessage } from "react-intl";
-import { DataRow } from "../DataRow";
+import { useKoodisByKoodisto } from "@/api/koodisto";
+import getKoodistoValue from "@/utils/getKoodistoValue";
+import toLanguage from "@/utils/toLanguage";
+import { Grid } from "@mui/material";
+import { FormattedMessage, useIntl } from "react-intl";
+import { DataRow, TextList } from "../DataRow";
 
 interface Props {
   configurationEntity: Components.Schemas.IdentityProvider;
 }
 
 export default function IdentityProvider({ configurationEntity }: Props) {
+  const institutionTypes = useKoodisByKoodisto("oppilaitostyyppi");
+  const language = toLanguage(useIntl().locale).toUpperCase();
+
   return (
     <>
       <Grid container spacing={2} mb={3}>
         <DataRow object={configurationEntity} path="entityId" />
         <DataRow object={configurationEntity} path="flowName" />
         <DataRow object={configurationEntity} path="type" />
-      </Grid>
 
-      <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />
-      </Typography>
-      <Grid container spacing={2} mb={3}>
-        <DataRow object={configurationEntity} path="logoUrl" />
-        <DataRow object={configurationEntity} path="customDisplayName" />
-        <DataRow object={configurationEntity} path="showSchools" />
-        <DataRow object={configurationEntity} path="schools" />
-        <DataRow object={configurationEntity} path="excludedSchools" />
-        <DataRow object={configurationEntity} path="customTitle" />
+        <Grid item xs={4}>
+          <FormattedMessage defaultMessage="Oppilaitostyypit" />
+        </Grid>
+        <Grid item xs={8}>
+          <TextList
+            value={
+              configurationEntity.institutionTypes?.length
+                ? configurationEntity.institutionTypes.map(
+                    (institutionType) =>
+                      `${getKoodistoValue(
+                        institutionTypes,
+                        String(institutionType),
+                        language
+                      )} (${institutionType})`
+                  )
+                : []
+            }
+          />
+        </Grid>
       </Grid>
     </>
   );

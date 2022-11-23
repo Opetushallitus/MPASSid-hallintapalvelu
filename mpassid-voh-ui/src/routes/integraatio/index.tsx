@@ -27,7 +27,7 @@ export default function Integraatio() {
     <>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
         <PageHeader icon={<IntegrationInstructionsIcon />}>
-          <FormattedMessage defaultMessage="Integraatio" />
+          <FormattedMessage defaultMessage="Jäsenen integraatiotiedot" />
         </PageHeader>
         <Divider sx={{ marginBottom: 2 }} />
         <Suspense>

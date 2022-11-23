@@ -1,6 +1,6 @@
-import { Box, Grid, Tooltip } from "@mui/material";
+import { Box, Checkbox, Grid, Paper, Tooltip } from "@mui/material";
 import { get, last, toPath } from "lodash";
-import { defineMessages, FormattedMessage } from "react-intl";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 
 export const tooltips = defineMessages({
   customDisplayName: {
@@ -117,7 +117,7 @@ export const labels = defineMessages({
     description: "nimiö",
   },
   logoUrl: {
-    defaultMessage: "Logo-URL",
+    defaultMessage: "Logo",
     description: "nimiö",
   },
   customDisplayName: {
@@ -133,14 +133,18 @@ export const labels = defineMessages({
 export function DataRow({
   object,
   path,
+  type = "text",
 }: {
   object: Parameters<typeof get>[0];
   path: Parameters<typeof get>[1];
+  type?: keyof typeof types;
 }) {
   const value = get(object, path);
   const key = last(toPath(path));
   const label = labels[key as keyof typeof labels];
   const tooltip = tooltips[key as keyof typeof tooltips];
+
+  const TypeComponent = types[type];
 
   return (
     <>
@@ -161,8 +165,48 @@ export function DataRow({
         </Tooltip>
       </Grid>
       <Grid item xs={8}>
-        {value}
+        <TypeComponent value={value} />
       </Grid>
     </>
   );
 }
+
+export function Boolean({ value }: { value?: boolean }) {
+  return <Checkbox disabled checked={value} size="small" sx={{ padding: 0 }} />;
+}
+
+export function Image({ value }: { value?: string }) {
+  const intl = useIntl();
+  return value ? (
+    <Paper variant="outlined" sx={{ display: "inline-flex" }}>
+      <img
+        src={value}
+        alt={intl.formatMessage({
+          defaultMessage: "organisaation logo",
+          description: "saavutettavuus",
+        })}
+      />
+    </Paper>
+  ) : null;
+}
+
+export function Text({ value }: { value?: string }) {
+  return <>{value}</>;
+}
+
+export function TextList({ value = [] }: { value?: string[] }) {
+  return (
+    <>
+      {value.length
+        ? value.map((value, index) => <div key={index}>{value}</div>)
+        : "–"}
+    </>
+  );
+}
+
+const types = {
+  boolean: Boolean,
+  image: Image,
+  text: Text,
+  "text-list": TextList,
+};

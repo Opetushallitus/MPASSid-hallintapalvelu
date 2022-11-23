@@ -34,7 +34,7 @@ export default function Role({ integration }: Props) {
           <FormattedMessage {...typeTooltips[role]} />)
         </Grid>
       </Grid>
-      <Component configurationEntity={integration.configurationEntity[role]!} />
+      <Component configurationEntity={integration.configurationEntity?.[role]!} />
     </>
   );
 }

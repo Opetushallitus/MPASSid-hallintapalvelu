@@ -223,13 +223,13 @@ export default function IntegrationsTable() {
 }
 
 export const getRole = (row: Components.Schemas.Integration) =>
-  roles.find((role) => role in row.configurationEntity)!;
+  roles.find((role) => row.configurationEntity?.[role])!;
 
 function Row(row: Components.Schemas.Integration) {
   const intl = useIntl();
   const role = getRole(row);
 
-  const type = row.configurationEntity[role]?.type;
+  const type = row.configurationEntity?.[role]?.type;
 
   const messageDescriptor = { id: `tyyppi.${type}` };
 
@@ -277,12 +277,12 @@ function Row(row: Components.Schemas.Integration) {
       </TableCell>
       <TableCell component="div">
         <Stack>
-          {row.organization.name}
+          {row.organization?.name}
           <Secondary sx={{ lineHeight: "initial" }}>
             <small>
               <FormattedMessage
                 defaultMessage="OID: {value}"
-                values={{ value: row.organization.oid }}
+                values={{ value: row.organization?.oid }}
               />
             </small>
           </Secondary>

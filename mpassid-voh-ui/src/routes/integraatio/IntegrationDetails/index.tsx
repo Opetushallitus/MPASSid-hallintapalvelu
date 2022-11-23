@@ -1,10 +1,8 @@
 import { useIntegration } from "@/api";
-import { useKoodisByKoodisto } from "@/api/koodisto";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import getKoodistoValue from "@/utils/getKoodistoValue";
-import toLanguage from "@/utils/toLanguage";
+import { getRole } from "@/routes/home/IntegrationsTable";
 import { Grid, Typography } from "@mui/material";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import Attributes from "./Attributes";
 import { DataRow } from "./DataRow";
 import Role from "./Role";
@@ -15,8 +13,7 @@ interface Props {
 
 export default function IntegrationDetails({ id }: Props) {
   const integration = useIntegration({ id });
-  const institutionTypes = useKoodisByKoodisto("oppilaitostyyppi");
-  const language = toLanguage(useIntl().locale).toUpperCase();
+  const role = getRole(integration);
 
   return (
     <>
@@ -27,29 +24,52 @@ export default function IntegrationDetails({ id }: Props) {
         <DataRow object={integration} path="organization.name" />
         <DataRow object={integration} path="organization.oid" />
         <DataRow object={integration} path="organization.ytunnus" />
+        {role === "idp" && (
+          <DataRow
+            object={integration}
+            path="configurationEntity.idp.logoUrl"
+            type="image"
+          />
+        )}
       </Grid>
+
+      {role === "idp" && (
+        <>
+          <Typography variant="h2" gutterBottom>
+            <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />
+          </Typography>
+          <Grid container spacing={2} mb={3}>
+            <DataRow
+              object={integration}
+              path="discoveryInformation.customDisplayName"
+            />
+            <DataRow
+              object={integration}
+              path="discoveryInformation.showSchools"
+              type="boolean"
+            />
+            <DataRow
+              object={integration}
+              path="discoveryInformation.schools"
+              type="text-list"
+            />
+            <DataRow
+              object={integration}
+              path="discoveryInformation.excludedSchools"
+              type="text-list"
+            />
+            <DataRow
+              object={integration}
+              path="discoveryInformation.customTitle"
+            />
+          </Grid>
+        </>
+      )}
 
       <Typography variant="h2" gutterBottom>
         <FormattedMessage defaultMessage="Integraation perustiedot" />
       </Typography>
       <Grid container spacing={2} mb={2}>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="Oppilaitostyypit" />
-        </Grid>
-        <Grid item xs={8}>
-          {integration.institutionTypes.length
-            ? integration.institutionTypes.map((institutionType) => (
-                <div key={institutionType}>
-                  {getKoodistoValue(
-                    institutionTypes,
-                    String(institutionType),
-                    language
-                  )}{" "}
-                  ({institutionType})
-                </div>
-              ))
-            : "–"}
-        </Grid>
         <DataRow object={integration} path="id" />
       </Grid>
 
@@ -60,7 +80,7 @@ export default function IntegrationDetails({ id }: Props) {
       </Typography>
       <ErrorBoundary>
         <Attributes
-          attributes={integration.configurationEntity.attributes ?? []}
+          attributes={integration.configurationEntity?.attributes ?? []}
         />
       </ErrorBoundary>
     </>

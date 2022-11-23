@@ -26,15 +26,16 @@ export default function Attributes({ attributes }: Props) {
                 intl.formatMessage(attributeMessageDescriptor),
             };
           })
+          .filter(({ name }) => name)
           .sort(
             (a, b) =>
               2 *
-                (attributePreferredOrder.indexOf(b.name) -
-                  attributePreferredOrder.indexOf(a.name)) -
+                (attributePreferredOrder.indexOf(b.name!) -
+                  attributePreferredOrder.indexOf(a.name!)) -
               (b.label ?? b.name).localeCompare(a.label ?? a.name)
           )
           .map(({ name, content }) => (
-            <DataRow key={name} object={{ [name]: content }} path={name} />
+            <DataRow key={name} object={{ [name!]: content }} path={name!} />
           ))
       ) : (
         <Grid item>–</Grid>

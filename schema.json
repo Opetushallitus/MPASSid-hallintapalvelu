@@ -17,7 +17,7 @@
     "/api/v1/integration/{id}": {
       "get": {
         "tags": ["integration-controller"],
-        "summary": "Get specific integration",
+        "summary": "Get the specific integration",
         "operationId": "getIntegration",
         "parameters": [
           {
@@ -29,7 +29,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Provides the specific integration",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/Integration" },
@@ -98,6 +98,28 @@
           "required": true
         },
         "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/v1/sp/types": {
+      "get": {
+        "tags": ["service-provider-controller"],
+        "summary": "Get a list of distinct ServiceProvider types",
+        "operationId": "getServiceProviderTypes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "string" } },
+                "examples": {
+                  "types": {
+                    "value": ["saml2", "oidc"]
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/organization": {
@@ -209,10 +231,16 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Provides paged integrations",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PageIntegration" }
+                "schema": { "$ref": "#/components/schemas/Integration" },
+                "examples": {
+                  "integrations": {
+                    "description": "integrations",
+                    "externalValue": "https://mpassid-rr-test.csc.fi/integrations.json"
+                  }
+                }
               }
             }
           }
@@ -224,44 +252,37 @@
         "tags": ["integration-controller"],
         "summary": "Get all integrations",
         "operationId": "getIntegrations",
-        "parameters": [
-          {
-            "name": "sc",
-            "in": "query",
-            "required": true,
-            "schema": { "$ref": "#/components/schemas/SecurityContext" }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Provides a list of integrations",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Integration" },
+                "schema": { "$ref": "#/components/schemas/Integrations" },
                 "examples": {
                   "integrations": {
                     "description": "integrations",
+                    "externalValue": "https://mpassid-rr-test.csc.fi/integrations.json",
                     "value": [
                       {
                         "id": 5,
-                        "institutionTypes": [11, 15],
                         "configurationEntity": {
-                          "idp": {
-                            "type": "opinsys",
-                            "idpId": "opinsys_kauniainen",
-                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
-                            "flowName": "OpinsysKauniainen"
-                          },
                           "attributes": [
                             {
                               "name": "clientKey",
                               "content": "{{opinsysKauniainen.clientKey}}"
                             },
                             {
+                              "name": "class",
+                              "content": "OpinsysDataSource"
+                            },
+                            {
+                              "name": "municipality",
+                              "content": "Kauniainen"
+                            },
+                            {
                               "name": "tenantId",
                               "content": "kauniainen.opinsys.fi"
                             },
-                            { "name": "class", "content": "OpinsysDataSource" },
                             {
                               "name": "clientId",
                               "content": "{{opinsysKauniainen.clientId}}"
@@ -269,41 +290,108 @@
                             {
                               "name": "datasource",
                               "content": "datasources.opinsys"
+                            },
+                            {
+                              "name": "municipalityCode",
+                              "content": "235"
                             }
-                          ]
+                          ],
+                          "idp": {
+                            "type": "opinsys",
+                            "institutionTypes": [11, 15],
+                            "idpId": "opinsys_kauniainen",
+                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                            "flowName": "OpinsysKauniainen"
+                          }
                         },
                         "organization": {
                           "oid": "1.2.246.562.10.98343673038",
                           "name": "Kauniaisten kaupunki",
                           "ytunnus": "0203026-2"
+                        },
+                        "discoveryInformation": {
+                          "showSchools": true
                         },
                         "deploymentPhase": 0
                       },
                       {
                         "id": 18,
-                        "institutionTypes": [11, 15],
                         "configurationEntity": {
-                          "idp": {
-                            "type": "adfs",
-                            "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
-                            "idpId": "shib_grankulla",
-                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
-                            "flowName": "ShibGrankulla"
-                          },
                           "attributes": [
-                            { "name": "surname", "content": "surname" },
-                            { "name": "groupLevels", "content": "classLevel" },
-                            { "name": "roles", "content": "userRole" },
-                            { "name": "learnerId", "content": "learnerId" },
-                            { "name": "firstName", "content": "firstName" },
-                            { "name": "groups", "content": "class" },
-                            { "name": "legacyId", "content": "legacyId" },
                             {
                               "name": "username",
                               "content": "mpassAccountName"
                             },
-                            { "name": "schoolIds", "content": "schoolCode" }
-                          ]
+                            {
+                              "name": "roles",
+                              "content": "userRole"
+                            },
+                            {
+                              "name": "schoolIds",
+                              "content": "schoolCode"
+                            },
+                            {
+                              "name": "firstName",
+                              "content": "firstName"
+                            },
+                            {
+                              "name": "legacyId",
+                              "content": "legacyId"
+                            },
+                            {
+                              "name": "groupLevels",
+                              "content": "classLevel"
+                            },
+                            {
+                              "name": "groups",
+                              "content": "class"
+                            },
+                            {
+                              "name": "surname",
+                              "content": "surname"
+                            },
+                            {
+                              "name": "learnerId",
+                              "content": "learnerId"
+                            }
+                          ],
+                          "idp": {
+                            "type": "adfs",
+                            "institutionTypes": [11, 15],
+                            "idpId": "shib_grankulla",
+                            "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                            "flowName": "ShibGrankulla",
+                            "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust"
+                          }
+                        },
+                        "organization": {
+                          "oid": "1.2.246.562.10.98343673038",
+                          "name": "Kauniaisten kaupunki",
+                          "ytunnus": "0203026-2"
+                        },
+                        "discoveryInformation": {
+                          "customDisplayName": "Grankulla stad",
+                          "showSchools": true
+                        },
+                        "deploymentPhase": 0
+                      },
+                      {
+                        "id": 99,
+                        "configurationEntity": {
+                          "sp": {
+                            "type": "oidc",
+                            "metadata": {
+                              "scope": "openid profile",
+                              "redirect_uris": [
+                                "https://maailmanparaspalvelu.fi/oidc/callback/"
+                              ],
+                              "client_id": "abc_123",
+                              "response_types": ["code"],
+                              "grant_types": ["authorization_code"]
+                            },
+                            "clientSecret": "secret"
+                          },
+                          "attributes": []
                         },
                         "organization": {
                           "oid": "1.2.246.562.10.98343673038",
@@ -313,11 +401,14 @@
                         "deploymentPhase": 0
                       },
                       {
-                        "id": 28,
-                        "institutionTypes": [],
+                        "id": 9999,
                         "configurationEntity": {
                           "sp": {
-                            "type": "saml2"
+                            "type": "saml",
+                            "metadata": {
+                              "encoding": "base64",
+                              "content": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPG1kOkVudGl0eURlc2NyaXB0b3IgeG1sbnM6bWQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDptZXRhZGF0YSIgZW50aXR5SUQ9Imh0dHBzOi8vc2FudGEuY2xhdXMuZmkiPgogICAgPG1kOlNQU1NPRGVzY3JpcHRvciBBdXRoblJlcXVlc3RzU2lnbmVkPSJ0cnVlIiBwcm90b2NvbFN1cHBvcnRFbnVtZXJhdGlvbj0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0ic2lnbmluZyI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0iZW5jcnlwdGlvbiI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpOYW1lSURGb3JtYXQ+dXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6IDIuMDpuYW1laWQtZm9ybWF0OnRyYW5zaWVudDwvbWQ6TmFtZUlERm9ybWF0PgogICAgPG1kOkFzc2VydGlvbkNvbnN1bWVyU2VydmljZSBCaW5kaW5nPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YmluZGluZ3M6SFRUUC1QT1NUIiBMb2NhdGlvbj0iaHR0cHM6Ly9zYW50YS5jbGF1cy5maS9hY3MiIGluZGV4PSIwIiBpc0RlZmF1bHQ9InRydWUiLz4KICAgIDwvbWQ6U1BTU09EZXNjcmlwdG9yPgo8L21kOkVudGl0eURlc2NyaXB0b3I+"
+                            }
                           },
                           "attributes": []
                         },
@@ -344,7 +435,7 @@
         "operationId": "getIdentityProviderTypes",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Provides a list of distinct IdentityProvider types",
             "content": {
               "application/json": {
                 "schema": { "type": "array", "items": { "type": "string" } },
@@ -365,28 +456,6 @@
           }
         }
       }
-    },
-    "/api/v1/sp/types": {
-      "get": {
-        "tags": ["service-provider-controller"],
-        "summary": "Get a list of distinct ServiceProvider types",
-        "operationId": "getServiceProviderTypes",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": { "type": "array", "items": { "type": "string" } },
-                "examples": {
-                  "types": {
-                    "value": ["saml2", "oidc"]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -399,8 +468,7 @@
           "configurationEntity": {
             "$ref": "#/components/schemas/ConfigurationEntity"
           }
-        },
-        "required": ["name", "content"]
+        }
       },
       "ConfigurationEntity": {
         "type": "object",
@@ -415,10 +483,36 @@
           "sp": { "$ref": "#/components/schemas/ServiceProvider" }
         }
       },
-      "IdentityProvider": {
-        "required": ["type"],
+      "DiscoveryInformation": {
         "type": "object",
         "properties": {
+          "integration": { "$ref": "#/components/schemas/Integration" },
+          "customDisplayName": { "type": "string" },
+          "customTitle": { "type": "string" },
+          "showSchools": { "type": "boolean" },
+          "schools": {
+            "uniqueItems": true,
+            "type": "array",
+            "readOnly": true,
+            "items": { "type": "string" }
+          },
+          "excludedSchools": {
+            "uniqueItems": true,
+            "type": "array",
+            "readOnly": true,
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "IdentityProvider": {
+        "type": "object",
+        "properties": {
+          "institutionTypes": {
+            "uniqueItems": true,
+            "type": "array",
+            "readOnly": true,
+            "items": { "type": "integer", "format": "int32" }
+          },
           "type": { "type": "string" },
           "idpId": { "type": "string" },
           "logoUrl": { "type": "string" },
@@ -435,24 +529,21 @@
         "type": "object",
         "properties": {
           "id": { "type": "integer", "format": "int64" },
-          "institutionTypes": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": { "type": "integer", "format": "int32" }
-          },
           "configurationEntity": {
             "$ref": "#/components/schemas/ConfigurationEntity"
           },
           "organization": { "$ref": "#/components/schemas/Organization" },
+          "discoveryInformation": {
+            "$ref": "#/components/schemas/DiscoveryInformation"
+          },
           "deploymentPhase": { "type": "integer", "format": "int32" }
-        },
-        "required": [
-          "id",
-          "configurationEntity",
-          "institutionTypes",
-          "organization",
-          "deploymentPhase"
-        ]
+        }
+      },
+      "Integrations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Integration"
+        }
       },
       "Organization": {
         "type": "object",
@@ -468,9 +559,11 @@
         }
       },
       "ServiceProvider": {
-        "required": ["type"],
         "type": "object",
-        "properties": { "type": { "type": "string" } },
+        "properties": {
+          "type": { "type": "string" },
+          "name": { "type": "string" }
+        },
         "discriminator": { "propertyName": "type" }
       },
       "Pageable": {
@@ -517,30 +610,6 @@
           "empty": { "type": "boolean" },
           "sorted": { "type": "boolean" },
           "unsorted": { "type": "boolean" }
-        }
-      },
-      "Authentication": {
-        "type": "object",
-        "properties": {
-          "details": { "type": "object" },
-          "principal": { "type": "object" },
-          "authorities": {
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/GrantedAuthority" }
-          },
-          "credentials": { "type": "object" },
-          "authenticated": { "type": "boolean" },
-          "name": { "type": "string" }
-        }
-      },
-      "GrantedAuthority": {
-        "type": "object",
-        "properties": { "authority": { "type": "string" } }
-      },
-      "SecurityContext": {
-        "type": "object",
-        "properties": {
-          "authentication": { "$ref": "#/components/schemas/Authentication" }
         }
       }
     }
