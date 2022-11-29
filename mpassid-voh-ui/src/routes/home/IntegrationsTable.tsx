@@ -91,6 +91,13 @@ defineMessage({
 });
 
 defineMessage({
+  defaultMessage: "SAML",
+  // eslint-disable-next-line formatjs/no-id
+  id: "tyyppi.saml",
+  description: "tyyppi",
+});
+
+defineMessage({
   defaultMessage: "SAML 2.0",
   // eslint-disable-next-line formatjs/no-id
   id: "tyyppi.saml2",

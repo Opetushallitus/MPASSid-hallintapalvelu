@@ -113,7 +113,7 @@
                 "schema": { "type": "array", "items": { "type": "string" } },
                 "examples": {
                   "types": {
-                    "value": ["saml2", "oidc"]
+                    "value": ["saml", "saml2", "oidc"]
                   }
                 }
               }
@@ -310,9 +310,14 @@
                           "ytunnus": "0203026-2"
                         },
                         "discoveryInformation": {
-                          "showSchools": true
+                          "showSchools": true,
+                          "schools": [],
+                          "excludedSchools": []
                         },
-                        "deploymentPhase": 0
+                        "deploymentPhase": 0,
+                        "deploymentDate": "2023-01-31",
+                        "acceptanceDate": "2022-11-29",
+                        "serviceContactAddress": "example290@example.org"
                       },
                       {
                         "id": 18,
@@ -371,9 +376,14 @@
                         },
                         "discoveryInformation": {
                           "customDisplayName": "Grankulla stad",
-                          "showSchools": true
+                          "showSchools": true,
+                          "schools": [],
+                          "excludedSchools": []
                         },
-                        "deploymentPhase": 0
+                        "deploymentPhase": 0,
+                        "deploymentDate": "2023-06-30",
+                        "acceptanceDate": "2022-11-29",
+                        "serviceContactAddress": "examplesp2@example.org"
                       },
                       {
                         "id": 99,
@@ -394,11 +404,14 @@
                           "attributes": []
                         },
                         "organization": {
-                          "oid": "1.2.246.562.10.98343673038",
-                          "name": "Kauniaisten kaupunki",
-                          "ytunnus": "0203026-2"
+                          "oid": "1.2.246.562.10.48587687889",
+                          "name": "Palveluntarjoaja",
+                          "ytunnus": "2769790-1"
                         },
-                        "deploymentPhase": 0
+                        "deploymentPhase": 0,
+                        "deploymentDate": "2023-03-02",
+                        "acceptanceDate": "2022-11-29",
+                        "serviceContactAddress": "example287@example.org"
                       },
                       {
                         "id": 9999,
@@ -413,11 +426,14 @@
                           "attributes": []
                         },
                         "organization": {
-                          "oid": "1.2.246.562.10.98343673038",
-                          "name": "Kauniaisten kaupunki",
-                          "ytunnus": "0203026-2"
+                          "oid": "1.2.246.562.10.48587687889",
+                          "name": "Palveluntarjoaja",
+                          "ytunnus": "2769790-1"
                         },
-                        "deploymentPhase": 0
+                        "deploymentPhase": 0,
+                        "deploymentDate": "2023-10-19",
+                        "acceptanceDate": "2022-11-29",
+                        "serviceContactAddress": "example285@example.org"
                       }
                     ]
                   }
@@ -536,7 +552,10 @@
           "discoveryInformation": {
             "$ref": "#/components/schemas/DiscoveryInformation"
           },
-          "deploymentPhase": { "type": "integer", "format": "int32" }
+          "deploymentPhase": { "type": "integer", "format": "int32" },
+          "deploymentDate": { "type": "string", "format": "date" },
+          "acceptanceDate": { "type": "string", "format": "date" },
+          "serviceContactAddress": { "type": "string" }
         }
       },
       "Integrations": {
@@ -562,7 +581,11 @@
         "type": "object",
         "properties": {
           "type": { "type": "string" },
-          "name": { "type": "string" }
+          "name": { "type": "string" },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": { "type": "object" }
+          }
         },
         "discriminator": { "propertyName": "type" }
       },
