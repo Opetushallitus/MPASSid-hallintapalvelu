@@ -105,7 +105,7 @@ export default {
       );
     }
 
-    const start = (page - 1) * size;
+    const start = page * size;
     const end = start + size;
     const content = filteredElements.slice(start, end);
     const empty = Boolean(filteredElements.length);

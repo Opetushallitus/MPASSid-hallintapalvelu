@@ -20,7 +20,7 @@ export function useIntegrationsSearchPageable() {
         ? 0
         : 1
       : undefined,
-    page,
+    page: page - 1,
     size: searchParams.has(defaults.searchParamName)
       ? JSON.parse(searchParams.get(defaults.searchParamName)!)
       : defaults.default,
