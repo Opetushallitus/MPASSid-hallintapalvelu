@@ -154,9 +154,9 @@ export default function IntegrationsTable() {
             </TableHeaderCell>
             <TableHeaderCell
               sort={[
-                "configurationEntity.name",
-                "configurationEntity.flowName",
-                "configurationEntity.entityId",
+                "configurationEntity.idp.flowName",
+                "configurationEntity.idp.entityId",
+                "configurationEntity.sp.name",
               ]}
               component="div"
             >
@@ -183,7 +183,7 @@ export default function IntegrationsTable() {
               <FormattedMessage defaultMessage="Tyyppi" />
             </TableHeaderCell>
             <TableHeaderCell
-              sort="configurationEntity.role"
+              sort={["configurationEntity.idp", "configurationEntity.sp"]}
               menuProps={{
                 MenuListProps: {
                   subheader: (
