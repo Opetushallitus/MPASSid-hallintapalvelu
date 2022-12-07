@@ -1,13 +1,8 @@
 import type { Components } from "@/api";
-import {
-  useIdentityProviderTypes,
-  useIntegrationsSearchPageable,
-  // useServiceProviderTypes,
-} from "@/api";
+import { useIdentityProviderTypes, useIntegrationsSearchPageable } from "@/api";
 import { roles } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
-import SecondaryCodeWithTooltip from "@/utils/components/SecondaryCodeWithTooltip";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
 import useFilterMenuItems from "@/utils/useFilterMenuItems";
 import {
@@ -29,6 +24,9 @@ import {
   useIntl,
 } from "react-intl";
 import { Link } from "react-router-dom";
+import type { DataRowProps } from "../integraatio/IntegrationDetails/DataRow";
+import { DataRowContainer } from "../integraatio/IntegrationDetails/DataRow";
+import UniqueId from "../integraatio/IntegrationDetails/UniqueId";
 
 export const typeAbbreviations = defineMessages({
   idp: {
@@ -240,6 +238,8 @@ function Row(row: Components.Schemas.Integration) {
 
   const messageDescriptor = { id: `tyyppi.${type}` };
 
+  const PalveluCellContent = palveluCellContents[role];
+
   return (
     <TableRow
       component={Link}
@@ -249,19 +249,7 @@ function Row(row: Components.Schemas.Integration) {
     >
       <TableCell component="div">{row.id}</TableCell>
       <TableCell component="div">
-        <Stack>
-          {
-            //row.configurationEntity.name
-          }
-          <SecondaryCodeWithTooltip
-            object={row}
-            path={["configurationEntity", role, "flowName"]}
-          />
-          <SecondaryCodeWithTooltip
-            object={row}
-            path={["configurationEntity", role, "entityId"]}
-          />
-        </Stack>
+        <PalveluCellContent {...row.configurationEntity!} />
       </TableCell>
       <TableCell component="div">
         <Chip
@@ -296,5 +284,68 @@ function Row(row: Components.Schemas.Integration) {
         </Stack>
       </TableCell>
     </TableRow>
+  );
+}
+
+const palveluCellContents = {
+  idp: function Idp(props: Components.Schemas.ConfigurationEntity) {
+    return (
+      <Stack>
+        <DataRowContainer object={props} path="idp.flowName">
+          <UniqueIdValue />
+        </DataRowContainer>
+        <UniqueId
+          configurationEntity={props}
+          role="idp"
+          ValueComponent={UniqueIdValue}
+        />
+      </Stack>
+    );
+  },
+  sp: function Sp(props: Components.Schemas.ConfigurationEntity) {
+    return (
+      <Stack>
+        {props.sp!.name}
+        <UniqueId
+          configurationEntity={props}
+          role="sp"
+          ValueComponent={UniqueIdValue}
+        />
+      </Stack>
+    );
+  },
+};
+
+function UniqueIdValue({ name, label, children }: DataRowProps) {
+  return (
+    <>
+      {(children as JSX.Element)?.props?.value ? (
+        <Box
+          component="div"
+          sx={{
+            lineHeight: "initial",
+            maxWidth: 200,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            "&:hover": {
+              position: "relative",
+              overflow: "visible",
+            },
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              backgroundColor: "var(--background-color)",
+              boxShadow: "0px 0px 5px 4px var(--background-color)",
+            }}
+          >
+            <Tooltip title={label ? <FormattedMessage {...label} /> : name}>
+              <span>{children}</span>
+            </Tooltip>
+          </Box>
+        </Box>
+      ) : null}
+    </>
   );
 }

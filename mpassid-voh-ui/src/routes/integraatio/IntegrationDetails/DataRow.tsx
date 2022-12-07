@@ -1,5 +1,8 @@
-import { Box, Checkbox, Grid, Paper, Tooltip } from "@mui/material";
+import { Box, Grid, Paper, Tooltip } from "@mui/material";
 import { get, last, toPath } from "lodash";
+import type { PropsWithChildren } from "react";
+import { cloneElement } from "react";
+import type { MessageDescriptor } from "react-intl";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 
 export const tooltips = defineMessages({
@@ -88,6 +91,10 @@ export const labels = defineMessages({
     defaultMessage: "Client Key",
     description: "nimiö,attribuutti",
   },
+  clientSecret: {
+    defaultMessage: "Client Secret",
+    description: "nimiö",
+  },
   id: {
     defaultMessage: "Hallintapalvelun sisäinen tunnus",
     description: "nimiö",
@@ -128,24 +135,68 @@ export const labels = defineMessages({
     defaultMessage: "Näytetäänkö koulut",
     description: "nimiö",
   },
+  deploymentDate: {
+    defaultMessage: "Käyttöönoton päivämäärä",
+    description: "nimiö",
+  },
+  acceptanceDate: {
+    defaultMessage: "OPH:n hyväksymispäivämäärä",
+    description: "nimiö",
+  },
+  serviceContactAddress: {
+    defaultMessage: "Palveluosoite",
+    description: "nimiö",
+  },
 });
 
-export function DataRow({
+export function DataRowContainer({
+  children,
   object,
   path,
   type = "text",
-}: {
+}: PropsWithChildren<Props>) {
+  const value = get(object, path);
+  const name = last(toPath(path));
+  const label = labels[name as keyof typeof labels];
+  const tooltip = tooltips[name as keyof typeof tooltips];
+
+  const TypeComponent =
+    typeof type === "function" ? type : typeComponents[type];
+
+  return cloneElement(
+    children as React.ReactElement,
+    {
+      name,
+      label,
+      tooltip,
+    },
+    <TypeComponent value={value} />
+  );
+}
+
+interface Props {
   object: Parameters<typeof get>[0];
   path: Parameters<typeof get>[1];
-  type?: keyof typeof types;
-}) {
-  const value = get(object, path);
-  const key = last(toPath(path));
-  const label = labels[key as keyof typeof labels];
-  const tooltip = tooltips[key as keyof typeof tooltips];
+  type?:
+    | keyof typeof typeComponents
+    | (({ value }: { value: any }) => JSX.Element);
+}
 
-  const TypeComponent = types[type];
+export function DataRow(props: Props) {
+  return (
+    <DataRowContainer {...props}>
+      <DataRowBase />
+    </DataRowContainer>
+  );
+}
 
+export type DataRowProps = PropsWithChildren<{
+  name?: string;
+  label?: MessageDescriptor;
+  tooltip?: MessageDescriptor;
+}>;
+
+export function DataRowBase({ name, label, tooltip, children }: DataRowProps) {
   return (
     <>
       <Grid item xs={4}>
@@ -157,22 +208,38 @@ export function DataRow({
                   <FormattedMessage {...tooltip} />
                 </Box>
               )}
-              <code>{key}</code>
+              <code>{name}</code>
             </>
           }
         >
-          <span>{label ? <FormattedMessage {...label} /> : key}</span>
+          <span>{label ? <FormattedMessage {...label} /> : name}</span>
         </Tooltip>
       </Grid>
       <Grid item xs={8}>
-        <TypeComponent value={value} />
+        {children}
       </Grid>
     </>
   );
 }
 
 export function Boolean({ value }: { value?: boolean }) {
-  return <Checkbox disabled checked={value} size="small" sx={{ padding: 0 }} />;
+  return value ? (
+    <FormattedMessage defaultMessage="Kyllä" />
+  ) : (
+    <FormattedMessage defaultMessage="Ei" />
+  );
+}
+
+export function Date({ value }: { value?: string }) {
+  const intl = useIntl();
+
+  return (
+    <>
+      {value
+        ? new Intl.DateTimeFormat(intl.locale).format(new window.Date(value))
+        : "–"}
+    </>
+  );
 }
 
 export function Image({ value }: { value?: string }) {
@@ -204,9 +271,10 @@ export function TextList({ value = [] }: { value?: string[] }) {
   );
 }
 
-const types = {
+export const typeComponents = {
   boolean: Boolean,
   image: Image,
+  date: Date,
   text: Text,
   "text-list": TextList,
 };

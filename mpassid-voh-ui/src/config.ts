@@ -7,3 +7,7 @@ export const attributePreferredOrder = ["firstName", "surname"]
 
 // Lokalisointi
 export const category = "mpassid-hallinta";
+
+export const testLink =
+  // eslint-disable-next-line no-template-curly-in-string
+  "https://firmitas.csc.fi/mpass/Shibboleth.sso/Login?entityID=https://mpass-proxy.csc.fi/idp/shibboleth&authnContextClassRef=urn:mpass.id:authnsource:${flowName}";

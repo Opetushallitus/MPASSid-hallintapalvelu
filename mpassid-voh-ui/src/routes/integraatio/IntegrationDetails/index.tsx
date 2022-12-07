@@ -1,11 +1,17 @@
 import { useIntegration } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { getRole } from "@/routes/home/IntegrationsTable";
+import {
+  getRole,
+  typeAbbreviations,
+  typeTooltips,
+} from "@/routes/home/IntegrationsTable";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import Attributes from "./Attributes";
+import type { DataRowProps } from "./DataRow";
 import { DataRow } from "./DataRow";
 import Role from "./Role";
+import UniqueId from "./UniqueId";
 
 interface Props {
   id: number;
@@ -69,8 +75,28 @@ export default function IntegrationDetails({ id }: Props) {
       <Typography variant="h2" gutterBottom>
         <FormattedMessage defaultMessage="Integraation perustiedot" />
       </Typography>
-      <Grid container spacing={2} mb={2}>
+      <Grid container spacing={2} mb={3}>
         <DataRow object={integration} path="id" />
+        <Grid item xs={4}>
+          <FormattedMessage defaultMessage="Jäsentyyppi" />
+        </Grid>
+        <Grid item xs={8}>
+          <FormattedMessage {...typeAbbreviations[role]} /> (
+          <FormattedMessage {...typeTooltips[role]} />)
+        </Grid>
+        <Grid item xs={4}>
+          <FormattedMessage defaultMessage="Yksilöllinen tunniste" />
+        </Grid>
+        <Grid item xs={8}>
+          <UniqueId
+            configurationEntity={integration.configurationEntity!}
+            role={role}
+            ValueComponent={UniqueIdValue}
+          />
+        </Grid>
+        <DataRow object={integration} path="deploymentDate" type="date" />
+        <DataRow object={integration} path="acceptanceDate" type="date" />
+        <DataRow object={integration} path="serviceContactAddress" />
       </Grid>
 
       <Role integration={integration} />
@@ -83,6 +109,15 @@ export default function IntegrationDetails({ id }: Props) {
           attributes={integration.configurationEntity?.attributes ?? []}
         />
       </ErrorBoundary>
+    </>
+  );
+}
+
+export function UniqueIdValue({ name, label, children }: DataRowProps) {
+  return (
+    <>
+      {(children as JSX.Element)?.props?.value ? children : "–"} (
+      <span>{label ? <FormattedMessage {...label} /> : name}</span>)
     </>
   );
 }
