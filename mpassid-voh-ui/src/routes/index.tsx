@@ -15,7 +15,7 @@ export default function Routes() {
         <Route index element={<Home />} />
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
         <Route
-          path={"__lokalisointi"}
+          path={encodeURI("__käännöstekstit")}
           element={
             <Localisations
               category={category}
