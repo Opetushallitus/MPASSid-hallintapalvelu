@@ -15,12 +15,12 @@ export default function InlineEditor({ children, onChange, value }: Props) {
   const intl = useIntl();
   const [isSubmtting, setIsSubmitting] = useState(false);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-    setTimeout(() => {
-      inputRef.current?.select();
-    });
-  };
+  // const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  //   setAnchorEl(event.currentTarget);
+  //   setTimeout(() => {
+  //     inputRef.current?.select();
+  //   });
+  // };
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -31,8 +31,8 @@ export default function InlineEditor({ children, onChange, value }: Props) {
   return (
     <>
       {cloneElement(children, {
-        onClick: handleClick,
-        sx: { cursor: "pointer" },
+        // onClick: handleClick,
+        // sx: { cursor: "pointer" },
       })}
       <Popover open={open} anchorEl={anchorEl} onClose={handleClose}>
         <form
