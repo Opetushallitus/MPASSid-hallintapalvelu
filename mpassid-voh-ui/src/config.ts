@@ -6,4 +6,4 @@ export const attributePreferredOrder = ["firstName", "surname"]
   .reverse();
 
 // Lokalisointi
-export const category = "mpassid";
+export const category = "mpassid-hallinta";
