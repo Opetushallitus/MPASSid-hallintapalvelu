@@ -145,9 +145,9 @@ export default function Localisations({ category, defaultMessages }: Props) {
                   <FormattedMessage {...messageDescriptor} />
                 </TableCell>
               ))}
-              <TableCell>
+              {/* <TableCell>
                 <FormattedMessage defaultMessage="Toiminnot" />
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -201,7 +201,7 @@ export default function Localisations({ category, defaultMessages }: Props) {
                     </TableCell>
                   </InlineEditor>
                 ))}
-                <TableCell>
+                {/* <TableCell>
                   {!defaultMessage && (
                     <LoadingStateButton
                       color="error"
@@ -230,7 +230,7 @@ export default function Localisations({ category, defaultMessages }: Props) {
                       <FormattedMessage defaultMessage="Poista" />
                     </LoadingStateButton>
                   )}
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>
