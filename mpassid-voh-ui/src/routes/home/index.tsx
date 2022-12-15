@@ -1,5 +1,6 @@
 import { useIntegrationsSearchPageable } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import { usePaginationPage } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
@@ -82,6 +83,7 @@ export default function Home() {
             }
             label={intl.formatMessage({ defaultMessage: "Testi-integraatiot" })}
           />
+          <HelpLinkButton />
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
         <Stack direction="row" alignItems="center">
