@@ -1,5 +1,9 @@
 import type { Components } from "@/api";
-import { useIdentityProviderTypes, useIntegrationsSearchPageable } from "@/api";
+import {
+  useIdentityProviderTypes,
+  useIntegrationsSearchPageable,
+  useServiceProviderTypes,
+} from "@/api";
 import { roles } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
@@ -117,9 +121,7 @@ const typeColors = {
 export default function IntegrationsTable() {
   const { content, totalPages } = useIntegrationsSearchPageable();
   const intl = useIntl();
-  const types = [
-    ...useIdentityProviderTypes() /*, ...useServiceProviderTypes()*/,
-  ];
+  const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
 
   const typeFilter = useFilterMenuItems({
     options: types,
