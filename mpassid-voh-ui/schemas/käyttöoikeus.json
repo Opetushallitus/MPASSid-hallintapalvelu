@@ -25,6 +25,12 @@
                   "localisation": {
                     "value": {
                       "firstName": "Foo",
+                      "groups": [
+                        "APP_MPASSID",
+                        "APP_MPASSID_TALLENTAJA",
+                        "APP_MPASSID_TALLENTAJA_1.2.246.562.10.00000000001",
+                        "VIRKAILIJA"
+                      ],
                       "lastName": "Bar",
                       "lang": "fi"
                     }

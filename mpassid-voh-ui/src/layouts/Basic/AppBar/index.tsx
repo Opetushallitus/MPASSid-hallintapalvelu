@@ -1,4 +1,8 @@
-import { openIntegrationsSessionStorageKey } from "@/config";
+import { useMe } from "@/api/käyttöoikeus";
+import {
+  openIntegrationsSessionStorageKey,
+  tallentajaOphGroup,
+} from "@/config";
 import AppBarNavLinkTabs from "@/utils/components/AppBarNavLinkTabs";
 import TabLink from "@/utils/components/TabLink";
 import MuiAppBar from "@mui/material/AppBar";
@@ -16,6 +20,30 @@ export default function AppBar() {
     []
   );
 
+  const mainNavLinkTabs = [
+    <TabLink
+      key="home"
+      label={intl.formatMessage({
+        defaultMessage: "Integraatiot",
+      })}
+      value=""
+      to=""
+    />,
+  ];
+
+  if (useMe().groups?.includes(tallentajaOphGroup)) {
+    mainNavLinkTabs.push(
+      <TabLink
+        key="localisations"
+        label={intl.formatMessage({
+          defaultMessage: "Lokalisointi",
+        })}
+        value="lokalisointi"
+        to="lokalisointi"
+      />
+    );
+  }
+
   return (
     <MuiAppBar>
       <Container>
@@ -27,13 +55,7 @@ export default function AppBar() {
             })}
             sx={{ flex: "none" }}
           >
-            <TabLink
-              label={intl.formatMessage({
-                defaultMessage: "Integraatiot",
-              })}
-              value=""
-              to=""
-            />
+            {mainNavLinkTabs}
           </AppBarNavLinkTabs>
           <AppBarNavLinkTabs
             aria-label={intl.formatMessage({
