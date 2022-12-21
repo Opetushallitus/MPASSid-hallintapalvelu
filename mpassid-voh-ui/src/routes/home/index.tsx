@@ -87,7 +87,7 @@ export default function Home() {
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
         <Stack direction="row" alignItems="center">
-          <Box flex={1} sx={{ mr: { md: 10 } }}>
+          <Box flex={1} sx={{ mr: 2 }}>
             <SearchForm formData={searchParams} onSearch={handleSearch} />
           </Box>
           <RowsPerPage />
