@@ -40,7 +40,7 @@ export default function UniqueId({
       opinsys: () => (
         <AttributeRowContainer
           configurationEntity={configurationEntity}
-          name="wilmaHostName"
+          name="idp.tenantId"
         >
           <ValueComponent />
         </AttributeRowContainer>
