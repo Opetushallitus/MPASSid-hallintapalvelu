@@ -101,14 +101,28 @@ export default function IntegrationDetails({ id }: Props) {
 
       <Role integration={integration} />
 
-      <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Attribuutit" />
-      </Typography>
-      <ErrorBoundary>
-        <Attributes
-          attributes={integration.configurationEntity?.attributes ?? []}
-        />
-      </ErrorBoundary>
+      <Grid mb={role === "idp" ? 3 : undefined}>
+        <ErrorBoundary>
+          <Attributes
+            attributes={integration.configurationEntity?.attributes ?? []}
+            type="data"
+          />
+        </ErrorBoundary>
+      </Grid>
+
+      {role === "idp" && (
+        <>
+          <Typography variant="h2" gutterBottom>
+            <FormattedMessage defaultMessage="Attribuutit" />
+          </Typography>
+          <ErrorBoundary>
+            <Attributes
+              attributes={integration.configurationEntity?.attributes ?? []}
+              type="user"
+            />
+          </ErrorBoundary>
+        </>
+      )}
     </>
   );
 }
