@@ -6,10 +6,9 @@ import definition from "../../../schema.json";
 
 export { definition };
 
-let allIntegrations: Components.Schemas.Integration[] =
-  definition.paths["/api/v1/integration/list"].get.responses["200"].content[
-    "application/json"
-  ].examples.integrations.value;
+let allIntegrations = definition.paths["/api/v1/integration/list"].get
+  .responses["200"].content["application/json"].examples.integrations
+  .value as Components.Schemas.Integration[];
 
 const integration: { value?: Components.Schemas.Integration } =
   definition.paths["/api/v1/integration/{id}"].get.responses["200"].content[

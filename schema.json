@@ -113,7 +113,7 @@
                 "schema": { "type": "array", "items": { "type": "string" } },
                 "examples": {
                   "types": {
-                    "value": ["saml", "saml2", "oidc"]
+                    "value": ["saml2", "oidc"]
                   }
                 }
               }
@@ -150,19 +150,24 @@
           {
             "name": "search",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": { "type": "string" }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           },
           {
             "in": "query",
             "name": "role",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "type",
             "schema": {
               "type": "string"
             }
@@ -269,31 +274,38 @@
                           "attributes": [
                             {
                               "name": "clientKey",
-                              "content": "{{opinsysKauniainen.clientKey}}"
+                              "content": "{{opinsysKauniainen.clientKey}}",
+                              "type": "user"
                             },
                             {
                               "name": "class",
-                              "content": "OpinsysDataSource"
+                              "content": "OpinsysDataSource",
+                              "type": "user"
                             },
                             {
                               "name": "municipality",
-                              "content": "Kauniainen"
+                              "content": "Kauniainen",
+                              "type": "user"
                             },
                             {
                               "name": "tenantId",
-                              "content": "kauniainen.opinsys.fi"
+                              "content": "kauniainen.opinsys.fi",
+                              "type": "data"
                             },
                             {
                               "name": "clientId",
-                              "content": "{{opinsysKauniainen.clientId}}"
+                              "content": "{{opinsysKauniainen.clientId}}",
+                              "type": "data"
                             },
                             {
                               "name": "datasource",
-                              "content": "datasources.opinsys"
+                              "content": "datasources.opinsys",
+                              "type": "data"
                             },
                             {
                               "name": "municipalityCode",
-                              "content": "235"
+                              "content": "235",
+                              "type": "user"
                             }
                           ],
                           "idp": {
@@ -325,39 +337,48 @@
                           "attributes": [
                             {
                               "name": "username",
-                              "content": "mpassAccountName"
+                              "content": "mpassAccountName",
+                              "type": "user"
                             },
                             {
                               "name": "roles",
-                              "content": "userRole"
+                              "content": "userRole",
+                              "type": "user"
                             },
                             {
                               "name": "schoolIds",
-                              "content": "schoolCode"
+                              "content": "schoolCode",
+                              "type": "user"
                             },
                             {
                               "name": "firstName",
-                              "content": "firstName"
+                              "content": "firstName",
+                              "type": "user"
                             },
                             {
                               "name": "legacyId",
-                              "content": "legacyId"
+                              "content": "legacyId",
+                              "type": "data"
                             },
                             {
                               "name": "groupLevels",
-                              "content": "classLevel"
+                              "content": "classLevel",
+                              "type": "data"
                             },
                             {
                               "name": "groups",
-                              "content": "class"
+                              "content": "class",
+                              "type": "data"
                             },
                             {
                               "name": "surname",
-                              "content": "surname"
+                              "content": "surname",
+                              "type": "user"
                             },
                             {
                               "name": "learnerId",
-                              "content": "learnerId"
+                              "content": "learnerId",
+                              "type": "data"
                             }
                           ],
                           "idp": {
@@ -457,14 +478,7 @@
                 "schema": { "type": "array", "items": { "type": "string" } },
                 "examples": {
                   "types": {
-                    "value": [
-                      "azure",
-                      "adfs",
-                      "google",
-                      "gsuite",
-                      "opinsys",
-                      "wilma"
-                    ]
+                    "value": ["adfs", "wilma", "gsuite", "azure", "opinsys"]
                   }
                 }
               }
@@ -476,15 +490,48 @@
   },
   "components": {
     "schemas": {
+      "Adfs": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/IdentityProvider" },
+          {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea33"
+              },
+              "metadataUrl": { "type": "string" }
+            }
+          }
+        ]
+      },
       "Attribute": {
         "type": "object",
         "properties": {
+          "type": { "type": "string", "enum": ["data", "user"] },
           "name": { "type": "string" },
           "content": { "type": "string" },
           "configurationEntity": {
             "$ref": "#/components/schemas/ConfigurationEntity"
           }
         }
+      },
+      "Azure": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/IdentityProvider" },
+          {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
+              },
+              "metadataUrl": { "type": "string" }
+            }
+          }
+        ]
       },
       "ConfigurationEntity": {
         "type": "object",
@@ -520,6 +567,22 @@
           }
         }
       },
+      "Gsuite": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/IdentityProvider" },
+          {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string",
+                "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
+              },
+              "metadataUrl": { "type": "string" }
+            }
+          }
+        ]
+      },
       "IdentityProvider": {
         "type": "object",
         "properties": {
@@ -529,17 +592,27 @@
             "readOnly": true,
             "items": { "type": "integer", "format": "int32" }
           },
+          "allowedServiceProviders": {
+            "uniqueItems": true,
+            "type": "array",
+            "readOnly": true,
+            "items": { "$ref": "#/components/schemas/ServiceProvider" }
+          },
           "type": { "type": "string" },
           "idpId": { "type": "string" },
           "logoUrl": { "type": "string" },
-          "flowName": { "type": "string" },
-          "entityId": {
-            "type": "string",
-            "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
-          },
-          "metadataUrl": { "type": "string" }
+          "flowName": { "type": "string" }
         },
-        "discriminator": { "propertyName": "type" }
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "adfs": "#/components/schemas/Adfs",
+            "azure": "#/components/schemas/Azure",
+            "gsuite": "#/components/schemas/Gsuite",
+            "opinsys": "#/components/schemas/Opinsys",
+            "wilma": "#/components/schemas/Wilma"
+          }
+        }
       },
       "Integration": {
         "type": "object",
@@ -564,6 +637,29 @@
           "$ref": "#/components/schemas/Integration"
         }
       },
+      "OidcServiceProvider": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/ServiceProvider" },
+          {
+            "type": "object",
+            "properties": {
+              "clientSecret": { "type": "string" },
+              "clientId": { "type": "string" }
+            }
+          }
+        ]
+      },
+      "Opinsys": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/IdentityProvider" },
+          {
+            "type": "object",
+            "properties": { "tenantId": { "type": "string" } }
+          }
+        ]
+      },
       "Organization": {
         "type": "object",
         "properties": {
@@ -577,16 +673,48 @@
           }
         }
       },
+      "SamlServiceProvider": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/ServiceProvider" },
+          {
+            "type": "object",
+            "properties": { "entityId": { "type": "string" } }
+          }
+        ]
+      },
       "ServiceProvider": {
         "type": "object",
         "properties": {
+          "allowingIdentityProviders": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/IdentityProvider" }
+          },
           "type": { "type": "string" },
           "name": { "type": "string" },
           "metadata": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": { "type": "object" }
           }
         },
-        "discriminator": { "propertyName": "type" }
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "oidc": "#/components/schemas/OidcServiceProvider",
+            "saml": "#/components/schemas/SamlServiceProvider"
+          }
+        }
+      },
+      "Wilma": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/IdentityProvider" },
+          {
+            "type": "object",
+            "properties": { "hostname": { "type": "string" } }
+          }
+        ]
       },
       "Pageable": {
         "type": "object",
@@ -608,8 +736,8 @@
           },
           "number": { "type": "integer", "format": "int32" },
           "sort": { "$ref": "#/components/schemas/Sort" },
-          "pageable": { "$ref": "#/components/schemas/PageableObject" },
           "numberOfElements": { "type": "integer", "format": "int32" },
+          "pageable": { "$ref": "#/components/schemas/PageableObject" },
           "first": { "type": "boolean" },
           "last": { "type": "boolean" },
           "empty": { "type": "boolean" }
