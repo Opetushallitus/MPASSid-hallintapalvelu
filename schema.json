@@ -387,7 +387,8 @@
                             "idpId": "shib_grankulla",
                             "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
                             "flowName": "ShibGrankulla",
-                            "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust"
+                            "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
+                            "metadataUrl": "https://login.example.com/dfghdfghdfghdfgh/FederationMetadata/2007-06/FederationMetadata.xml"
                           }
                         },
                         "organization": {
@@ -411,6 +412,7 @@
                         "configurationEntity": {
                           "sp": {
                             "type": "oidc",
+                            "clientId": "{{ example_clientId }}",
                             "metadata": {
                               "scope": "openid profile",
                               "redirect_uris": [
@@ -439,6 +441,7 @@
                         "configurationEntity": {
                           "sp": {
                             "type": "saml",
+                            "entityId": "mpass-prod.example.com",
                             "metadata": {
                               "encoding": "base64",
                               "content": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPG1kOkVudGl0eURlc2NyaXB0b3IgeG1sbnM6bWQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDptZXRhZGF0YSIgZW50aXR5SUQ9Imh0dHBzOi8vc2FudGEuY2xhdXMuZmkiPgogICAgPG1kOlNQU1NPRGVzY3JpcHRvciBBdXRoblJlcXVlc3RzU2lnbmVkPSJ0cnVlIiBwcm90b2NvbFN1cHBvcnRFbnVtZXJhdGlvbj0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0ic2lnbmluZyI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0iZW5jcnlwdGlvbiI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpOYW1lSURGb3JtYXQ+dXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6IDIuMDpuYW1laWQtZm9ybWF0OnRyYW5zaWVudDwvbWQ6TmFtZUlERm9ybWF0PgogICAgPG1kOkFzc2VydGlvbkNvbnN1bWVyU2VydmljZSBCaW5kaW5nPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YmluZGluZ3M6SFRUUC1QT1NUIiBMb2NhdGlvbj0iaHR0cHM6Ly9zYW50YS5jbGF1cy5maS9hY3MiIGluZGV4PSIwIiBpc0RlZmF1bHQ9InRydWUiLz4KICAgIDwvbWQ6U1BTU09EZXNjcmlwdG9yPgo8L21kOkVudGl0eURlc2NyaXB0b3I+"
@@ -598,6 +601,11 @@
             "readOnly": true,
             "items": { "$ref": "#/components/schemas/ServiceProvider" }
           },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": { "type": "object" }
+          },
+          "metadataUrl": { "type": "string" },
           "type": { "type": "string" },
           "idpId": { "type": "string" },
           "logoUrl": { "type": "string" },
@@ -696,7 +704,8 @@
           "metadata": {
             "type": "object",
             "additionalProperties": { "type": "object" }
-          }
+          },
+          "metadataUrl": { "type": "string" }
         },
         "discriminator": {
           "propertyName": "type",

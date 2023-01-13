@@ -10,6 +10,7 @@ import { FormattedMessage } from "react-intl";
 import Attributes from "./Attributes";
 import type { DataRowProps } from "./DataRow";
 import { DataRow } from "./DataRow";
+import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";
 
@@ -100,6 +101,11 @@ export default function IntegrationDetails({ id }: Props) {
       </Grid>
 
       <Role integration={integration} />
+
+      <Metadata
+        configurationEntity={integration.configurationEntity!}
+        role={role}
+      />
 
       <Grid mb={role === "idp" ? 3 : undefined}>
         <ErrorBoundary>

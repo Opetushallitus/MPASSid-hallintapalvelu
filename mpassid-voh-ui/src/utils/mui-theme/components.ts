@@ -69,9 +69,12 @@ const theme = (theme: Theme): ThemeOptions => {
       },
       MuiInputBase: {
         styleOverrides: {
-          root: ({ ownerState }) => ({
-            height: { small: "1.8em", medium: "2.4em" }[ownerState.size!],
-          }),
+          root: ({ ownerState }) =>
+            ownerState.multiline
+              ? undefined
+              : {
+                  height: { small: "1.8em", medium: "2.4em" }[ownerState.size!],
+                },
         },
       },
       MuiPagination: {
