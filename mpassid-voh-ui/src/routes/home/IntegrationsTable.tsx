@@ -21,12 +21,7 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
-import {
-  defineMessage,
-  defineMessages,
-  FormattedMessage,
-  useIntl,
-} from "react-intl";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Link } from "react-router-dom";
 import type { DataRowProps } from "../integraatio/IntegrationDetails/DataRow";
 import { DataRowContainer } from "../integraatio/IntegrationDetails/DataRow";
@@ -50,69 +45,6 @@ export const typeTooltips = defineMessages({
   },
 });
 
-defineMessage({
-  defaultMessage: "Azure",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.azure",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "ADFS",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.adfs",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "Google",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.google",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "Google: Gsuite",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.gsuite",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "Opinsys",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.opinsys",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "Wilma",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.wilma",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "SAML",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.saml",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "SAML 2.0",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.saml2",
-  description: "tyyppi",
-});
-
-defineMessage({
-  defaultMessage: "OpenID Connect",
-  // eslint-disable-next-line formatjs/no-id
-  id: "tyyppi.oidc",
-  description: "tyyppi",
-});
-
 const typeColors = {
   idp: "primary",
   sp: "success",
@@ -128,9 +60,10 @@ export default function IntegrationsTable() {
     searchParamName: "tyyppi",
     optionsLabels: Object.fromEntries(
       types
-        .filter((type) => `tyyppi.${type}` in intl.messages)
-        .map((type) => {
-          const messageDescriptor = { id: `tyyppi.${type}` };
+        .map((type) => ({ id: `tyyppi.${type}`, type }))
+        .filter(({ id }) => id in intl.messages)
+        .map(({ id, type }) => {
+          const messageDescriptor = { id };
           return [type, intl.formatMessage(messageDescriptor)];
         })
     ),

@@ -30,125 +30,6 @@ export const tooltips = defineMessages({
   },
 });
 
-export const labels = defineMessages({
-  surname: {
-    defaultMessage: "Sukunimi",
-    description: "nimiö,attribuutti",
-  },
-  groupLevels: {
-    defaultMessage: "Luokka-aste",
-    description: "nimiö,attribuutti",
-  },
-  roles: {
-    defaultMessage: "Käyttäjän rooli",
-    description: "nimiö,attribuutti",
-  },
-  learnerId: {
-    defaultMessage: "Oppijanumero",
-    description: "nimiö,attribuutti",
-  },
-  firstName: {
-    defaultMessage: "Etunimi",
-    description: "nimiö,attribuutti",
-  },
-  groups: {
-    defaultMessage: "Luokka tai ryhmä",
-    description: "nimiö,attribuutti",
-  },
-  legacyId: {
-    defaultMessage: "Salattu yksilöintitunnus",
-    description: "nimiö,attribuutti",
-  },
-  username: {
-    defaultMessage: "Yksilöintitunnus",
-    description: "nimiö,attribuutti",
-  },
-  schoolIds: {
-    defaultMessage: "Oppilaitostunnus",
-    description: "nimiö,attribuutti",
-  },
-  learningMaterialsCharges: {
-    defaultMessage: "Oppimateriaalien maksullisuuskoodi",
-    description: "nimiö,attribuutti",
-  },
-  tenantId: {
-    defaultMessage: "Tenant ID",
-    description: "nimiö,attribuutti",
-  },
-  datasource: {
-    defaultMessage: "Data source",
-    description: "nimiö,attribuutti",
-  },
-  clientId: {
-    defaultMessage: "Client ID",
-    description: "nimiö,attribuutti",
-  },
-  class: {
-    defaultMessage: "Class",
-    description: "nimiö,attribuutti",
-  },
-  clientKey: {
-    defaultMessage: "Client Key",
-    description: "nimiö,attribuutti",
-  },
-  clientSecret: {
-    defaultMessage: "Client Secret",
-    description: "nimiö",
-  },
-  id: {
-    defaultMessage: "Hallintapalvelun sisäinen tunnus",
-    description: "nimiö",
-  },
-  name: {
-    defaultMessage: "Nimi",
-    description: "nimiö",
-  },
-  oid: {
-    defaultMessage: "OID",
-    description: "nimiö",
-  },
-  ytunnus: {
-    defaultMessage: "Y-tunnus",
-    description: "nimiö",
-  },
-  entityId: {
-    defaultMessage: "Entity-ID",
-    description: "nimiö",
-  },
-  flowName: {
-    defaultMessage: "Flow-name",
-    description: "nimiö",
-  },
-  type: {
-    defaultMessage: "Tyyppi",
-    description: "nimiö",
-  },
-  logoUrl: {
-    defaultMessage: "Logo",
-    description: "nimiö",
-  },
-  customDisplayName: {
-    defaultMessage: "OKJ:n näyttönimi",
-    description: "nimiö",
-  },
-  showSchools: {
-    defaultMessage: "Näytetäänkö koulut",
-    description: "nimiö",
-  },
-  deploymentDate: {
-    defaultMessage: "Käyttöönoton päivämäärä",
-    description: "nimiö",
-  },
-  acceptanceDate: {
-    defaultMessage: "OPH:n hyväksymispäivämäärä",
-    description: "nimiö",
-  },
-  serviceContactAddress: {
-    defaultMessage: "Palveluosoite",
-    description: "nimiö",
-  },
-});
-
 export function DataRowContainer({
   children,
   object,
@@ -157,7 +38,10 @@ export function DataRowContainer({
 }: PropsWithChildren<Props>) {
   const value = get(object, path);
   const name = last(toPath(path));
-  const label = labels[name as keyof typeof labels];
+  const intl = useIntl();
+  const id = `attribuutti.${name}`;
+  const label = id in intl.messages ? { id } : undefined;
+
   const tooltip = tooltips[name as keyof typeof tooltips];
 
   const TypeComponent =

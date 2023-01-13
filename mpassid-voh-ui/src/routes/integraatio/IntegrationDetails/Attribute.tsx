@@ -1,7 +1,8 @@
 import type { Components } from "@/api";
 import type { PropsWithChildren } from "react";
 import { cloneElement } from "react";
-import { DataRowBase, labels, tooltips, typeComponents } from "./DataRow";
+import { DataRowBase, tooltips, typeComponents } from "./DataRow";
+import { useIntl } from "react-intl";
 
 export function AttributeRowContainer({
   children,
@@ -12,7 +13,11 @@ export function AttributeRowContainer({
   const value = configurationEntity.attributes?.find(
     (attribute) => attribute.name === name
   )?.content as any;
-  const label = labels[name as keyof typeof labels];
+
+  const intl = useIntl();
+  const id = `attribuutti.${name}`;
+  const label = id in intl.messages ? { id } : undefined;
+
   const tooltip = tooltips[name as keyof typeof tooltips];
 
   const TypeComponent =
