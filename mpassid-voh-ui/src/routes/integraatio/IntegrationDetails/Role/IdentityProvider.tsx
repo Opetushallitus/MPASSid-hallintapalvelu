@@ -3,9 +3,10 @@ import { useKoodisByKoodisto } from "@/api/koodisto";
 import { testLink } from "@/config";
 import getKoodistoValue from "@/utils/getKoodistoValue";
 import toLanguage from "@/utils/toLanguage";
-import { Grid, Link, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import { DataRow, TextList } from "../DataRow";
+import LinkValue from "../LinkValue";
 import Type from "./Type";
 
 interface Props {
@@ -57,19 +58,7 @@ export default function IdentityProvider({ integration }: Props) {
           <FormattedMessage defaultMessage="Testauslinkki" />
         </Grid>
         <Grid item xs={8} zeroMinWidth>
-          <Link
-            href={testLinkHref}
-            sx={{
-              display: "inline-block",
-              maxWidth: 400,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              verticalAlign: "top",
-            }}
-          >
-            {testLinkHref}
-          </Link>
+          <LinkValue href={testLinkHref} />
         </Grid>
       </Grid>
     </>
