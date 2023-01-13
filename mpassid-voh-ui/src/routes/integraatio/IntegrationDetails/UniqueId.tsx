@@ -1,7 +1,6 @@
 import type { Components } from "@/api";
 import type { roles } from "@/config";
 import type { UniqueIdValue } from ".";
-import { AttributeRowContainer } from "./Attribute";
 import { DataRowContainer } from "./DataRow";
 
 export default function UniqueId({
@@ -14,6 +13,12 @@ export default function UniqueId({
   ValueComponent: typeof UniqueIdValue;
 }) {
   const { type } = configurationEntity[role]!;
+
+  const saml = () => (
+    <DataRowContainer object={configurationEntity} path="sp.entityId">
+      <ValueComponent />
+    </DataRowContainer>
+  );
 
   const provider = {
     idp: {
@@ -38,27 +43,18 @@ export default function UniqueId({
         </DataRowContainer>
       ),
       opinsys: () => (
-        <AttributeRowContainer
-          configurationEntity={configurationEntity}
-          name="idp.tenantId"
-        >
-          <ValueComponent />
-        </AttributeRowContainer>
-      ),
-    },
-    sp: {
-      saml2: () => (
-        <DataRowContainer object={configurationEntity} path="sp.entityId">
+        <DataRowContainer object={configurationEntity} path="idp.tenantId">
           <ValueComponent />
         </DataRowContainer>
       ),
+    },
+    sp: {
+      saml,
+      saml2: saml,
       oidc: () => (
-        <AttributeRowContainer
-          configurationEntity={configurationEntity}
-          name="clientId"
-        >
+        <DataRowContainer object={configurationEntity} path="sp.clientId">
           <ValueComponent />
-        </AttributeRowContainer>
+        </DataRowContainer>
       ),
     },
   }[role];
