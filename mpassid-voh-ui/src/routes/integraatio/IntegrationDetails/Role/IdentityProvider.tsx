@@ -13,7 +13,9 @@ interface Props {
 }
 
 export default function IdentityProvider({ integration }: Props) {
-  const institutionTypes = useKoodisByKoodisto("oppilaitostyyppi");
+  const institutionTypes = useKoodisByKoodisto(
+    "mpassidnsallimatoppilaitostyypit"
+  );
   const language = toLanguage(useIntl().locale).toUpperCase();
 
   const identityProvider = integration.configurationEntity!.idp!;
