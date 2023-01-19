@@ -52,6 +52,13 @@
                         "id": 456,
                         "locale": "fi",
                         "value": "Foo"
+                      },
+                      {
+                        "category": "mpassid",
+                        "key": "attribuutti.foo",
+                        "id": 789,
+                        "locale": "fi",
+                        "value": "Foo"
                       }
                     ]
                   }

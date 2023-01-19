@@ -1,9 +1,5 @@
 import * as localisations from "@/api/localisation";
-import {
-  deleteLocalisation,
-  refetchLocalisations,
-  useLocalisations,
-} from "@/api/localisation";
+import { refetchLocalisations, useLocalisations } from "@/api/localisation";
 import { LoadingButton } from "@mui/lab";
 import type { LoadingButtonProps } from "@mui/lab/LoadingButton";
 import {
@@ -99,6 +95,9 @@ export default function Localisations({ category, defaultMessages }: Props) {
   // Add any unknown messages to list
   messages.forEach(([, messages]) => {
     messages.forEach(({ key, description }) => {
+      if (key?.includes(".")) {
+        description ??= key?.slice(0, key.indexOf("."));
+      }
       if (!messageList.some((message) => message.key === key)) {
         messageList.push({ key, description });
       }
@@ -175,7 +174,11 @@ export default function Localisations({ category, defaultMessages }: Props) {
                       color="text.secondary"
                       component="em"
                     >
-                      <FormattedMessage defaultMessage="Arvo puuttuu. Teksti on mahdollisesti poistunut käytöstä." />
+                      {key?.includes(".") ? (
+                        <FormattedMessage defaultMessage="Arvo puuttuu. Teksti on lisätty myöhemmin." />
+                      ) : (
+                        <FormattedMessage defaultMessage="Arvo puuttuu. Teksti on poistunut käytöstä." />
+                      )}
                     </Typography>
                   )}
                 </TableCell>
