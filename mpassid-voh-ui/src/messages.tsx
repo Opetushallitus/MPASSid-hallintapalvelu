@@ -149,6 +149,21 @@ defineMessage({
   id: "attribuutti.serviceContactAddress",
   description: "attribuutti",
 });
+defineMessage({
+  defaultMessage: "Metadatan voimassaolo",
+  id: "attribuutti.metadataValidUntil",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "SAML-allekirjoitusvarmenteen voimassaolo",
+  id: "attribuutti.signingCertificateValidUntil",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "SAML-salausvarmenteen voimassaolo",
+  id: "attribuutti.encryptionCertificateValidUntil",
+  description: "attribuutti",
+});
 
 // Tyypit
 defineMessage({

@@ -1,4 +1,4 @@
-import { useIntegrationsSearchPageable } from "@/api";
+import { useIntegrationsSpecSearchPageable } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
@@ -103,7 +103,7 @@ export default function Home() {
 }
 
 function TotalElements() {
-  const integrations = useIntegrationsSearchPageable();
+  const integrations = useIntegrationsSpecSearchPageable();
 
   return <>{integrations.totalElements}</>;
 }

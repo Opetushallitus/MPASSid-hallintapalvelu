@@ -6,7 +6,7 @@
       "name": "EUPL Version 1.1",
       "url": "http://www.osor.eu/eupl/"
     },
-    "version": "0.1"
+    "version": "0.1.0"
   },
   "servers": [
     { "url": "https://virkailija.testiopintopolku.fi/mpassid" },
@@ -34,7 +34,10 @@
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/Integration" },
                 "examples": {
-                  "integration": {}
+                  "integration": {
+                    "description": "integrations",
+                    "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
+                  }
                 }
               }
             }
@@ -113,7 +116,7 @@
                 "schema": { "type": "array", "items": { "type": "string" } },
                 "examples": {
                   "types": {
-                    "value": ["saml2", "oidc"]
+                    "value": ["oidc", "saml"]
                   }
                 }
               }
@@ -145,7 +148,7 @@
       "get": {
         "tags": ["integration-controller"],
         "summary": "Search paged integrations",
-        "operationId": "getIntegrationsSearchPageable",
+        "operationId": "getIntegrationsSpecSearchPageable",
         "parameters": [
           {
             "name": "search",
@@ -160,24 +163,16 @@
             "schema": { "type": "string" }
           },
           {
-            "name": "pageable",
+            "name": "role",
             "in": "query",
             "required": false,
-            "schema": { "$ref": "#/components/schemas/Pageable" }
+            "schema": { "type": "string" }
           },
           {
-            "in": "query",
-            "name": "role",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "deploymentPhase",
-            "schema": {
-              "type": "number"
-            }
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
           },
           {
             "in": "query",
@@ -204,6 +199,12 @@
               "type": "array",
               "items": { "type": "string" }
             }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": false,
+            "schema": { "$ref": "#/components/schemas/Pageable" }
           }
         ],
         "responses": {
@@ -274,38 +275,38 @@
                           "attributes": [
                             {
                               "name": "clientKey",
-                              "content": "{{opinsysKauniainen.clientKey}}",
-                              "type": "user"
+                              "type": "user",
+                              "content": "{{opinsysKauniainen.clientKey}}"
                             },
                             {
                               "name": "class",
-                              "content": "OpinsysDataSource",
-                              "type": "user"
+                              "type": "user",
+                              "content": "OpinsysDataSource"
                             },
                             {
                               "name": "municipality",
-                              "content": "Kauniainen",
-                              "type": "user"
+                              "type": "user",
+                              "content": "Kauniainen"
                             },
                             {
                               "name": "tenantId",
-                              "content": "kauniainen.opinsys.fi",
-                              "type": "data"
+                              "type": "data",
+                              "content": "kauniainen.opinsys.fi"
                             },
                             {
                               "name": "clientId",
-                              "content": "{{opinsysKauniainen.clientId}}",
-                              "type": "data"
+                              "type": "data",
+                              "content": "{{opinsysKauniainen.clientId}}"
                             },
                             {
                               "name": "datasource",
-                              "content": "datasources.opinsys",
-                              "type": "data"
+                              "type": "data",
+                              "content": "datasources.opinsys"
                             },
                             {
                               "name": "municipalityCode",
-                              "content": "235",
-                              "type": "user"
+                              "type": "user",
+                              "content": "235"
                             }
                           ],
                           "idp": {
@@ -337,48 +338,48 @@
                           "attributes": [
                             {
                               "name": "username",
-                              "content": "mpassAccountName",
-                              "type": "user"
+                              "type": "user",
+                              "content": "mpassAccountName"
                             },
                             {
                               "name": "roles",
-                              "content": "userRole",
-                              "type": "user"
+                              "type": "user",
+                              "content": "userRole"
                             },
                             {
                               "name": "schoolIds",
-                              "content": "schoolCode",
-                              "type": "user"
+                              "type": "user",
+                              "content": "schoolCode"
                             },
                             {
                               "name": "firstName",
-                              "content": "firstName",
-                              "type": "user"
+                              "type": "user",
+                              "content": "firstName"
                             },
                             {
                               "name": "legacyId",
-                              "content": "legacyId",
-                              "type": "data"
+                              "type": "data",
+                              "content": "legacyId"
                             },
                             {
                               "name": "groupLevels",
-                              "content": "classLevel",
-                              "type": "data"
+                              "type": "data",
+                              "content": "classLevel"
                             },
                             {
                               "name": "groups",
-                              "content": "class",
-                              "type": "data"
+                              "type": "data",
+                              "content": "class"
                             },
                             {
                               "name": "surname",
-                              "content": "surname",
-                              "type": "user"
+                              "type": "user",
+                              "content": "surname"
                             },
                             {
                               "name": "learnerId",
-                              "content": "learnerId",
-                              "type": "data"
+                              "type": "data",
+                              "content": "learnerId"
                             }
                           ],
                           "idp": {
@@ -387,8 +388,11 @@
                             "idpId": "shib_grankulla",
                             "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
                             "flowName": "ShibGrankulla",
+                            "metadataUrl": "https://login.example.com/dfghdfghdfghdfgh/FederationMetadata/2007-06/FederationMetadata.xml",
                             "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
-                            "metadataUrl": "https://login.example.com/dfghdfghdfghdfgh/FederationMetadata/2007-06/FederationMetadata.xml"
+                            "metadataValidUntil": "2023-12-31",
+                            "signingCertificateValidUntil": "2023-12-31",
+                            "encryptionCertificateValidUntil": "2023-12-31"
                           }
                         },
                         "organization": {
@@ -504,6 +508,15 @@
                 "type": "string",
                 "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea33"
               },
+              "metadataValidUntil": { "type": "string", "format": "date" },
+              "signingCertificateValidUntil": {
+                "type": "string",
+                "format": "date"
+              },
+              "encryptionCertificateValidUntil": {
+                "type": "string",
+                "format": "date"
+              },
               "metadataUrl": { "type": "string" }
             }
           }
@@ -530,6 +543,15 @@
               "entityId": {
                 "type": "string",
                 "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
+              },
+              "metadataValidUntil": { "type": "string", "format": "date" },
+              "signingCertificateValidUntil": {
+                "type": "string",
+                "format": "date"
+              },
+              "encryptionCertificateValidUntil": {
+                "type": "string",
+                "format": "date"
               },
               "metadataUrl": { "type": "string" }
             }
@@ -580,6 +602,15 @@
               "entityId": {
                 "type": "string",
                 "example": "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32"
+              },
+              "metadataValidUntil": { "type": "string", "format": "date" },
+              "signingCertificateValidUntil": {
+                "type": "string",
+                "format": "date"
+              },
+              "encryptionCertificateValidUntil": {
+                "type": "string",
+                "format": "date"
               },
               "metadataUrl": { "type": "string" }
             }
@@ -652,8 +683,8 @@
           {
             "type": "object",
             "properties": {
-              "clientSecret": { "type": "string" },
-              "clientId": { "type": "string" }
+              "clientId": { "type": "string" },
+              "clientSecret": { "type": "string" }
             }
           }
         ]
@@ -701,11 +732,11 @@
           },
           "type": { "type": "string" },
           "name": { "type": "string" },
+          "metadataUrl": { "type": "string" },
           "metadata": {
             "type": "object",
             "additionalProperties": { "type": "object" }
-          },
-          "metadataUrl": { "type": "string" }
+          }
         },
         "discriminator": {
           "propertyName": "type",

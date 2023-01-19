@@ -7,18 +7,18 @@ export * from "./client";
 
 // https://www.npmjs.com/package/@visma/react-openapi-client-generator#mutations-and-updates
 
-export function useIntegrationsSearchPageable() {
+export function useIntegrationsSpecSearchPageable() {
   const [page] = usePaginationPage();
   const [searchParams] = useSearchParams();
 
-  return client.useIntegrationsSearchPageable({
+  return client.useIntegrationsSpecSearchPageable({
     search: searchParams.get("hae") ?? "",
     role: searchParams.get("rooli") ?? undefined,
     type: searchParams.get("tyyppi") ?? undefined,
     deploymentPhase: searchParams.has("testi")
       ? JSON.parse(searchParams.get("testi")!)
-        ? 0
-        : 1
+        ? "0"
+        : "1"
       : undefined,
     page: page - 1,
     size: searchParams.has(defaults.searchParamName)

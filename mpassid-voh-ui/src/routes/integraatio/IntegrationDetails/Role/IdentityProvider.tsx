@@ -54,6 +54,25 @@ export default function IdentityProvider({ integration }: Props) {
             }
           />
         </Grid>
+        {["adfs", "azure", "gsuite"].includes(identityProvider.type!) && (
+          <>
+            <DataRow
+              object={identityProvider}
+              path="metadataValidUntil"
+              type="date"
+            />
+            <DataRow
+              object={identityProvider}
+              path="signingCertificateValidUntil"
+              type="date"
+            />
+            <DataRow
+              object={identityProvider}
+              path="encryptionCertificateValidUntil"
+              type="date"
+            />
+          </>
+        )}
         <Grid item xs={4}>
           <FormattedMessage defaultMessage="Testauslinkki" />
         </Grid>

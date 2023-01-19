@@ -1,7 +1,7 @@
 import type { Components } from "@/api";
 import {
+  useIntegrationsSpecSearchPageable,
   useIdentityProviderTypes,
-  useIntegrationsSearchPageable,
   useServiceProviderTypes,
 } from "@/api";
 import { roles } from "@/config";
@@ -51,7 +51,7 @@ const typeColors = {
 } as const;
 
 export default function IntegrationsTable() {
-  const { content, totalPages } = useIntegrationsSearchPageable();
+  const { content, totalPages } = useIntegrationsSpecSearchPageable();
   const intl = useIntl();
   const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
 

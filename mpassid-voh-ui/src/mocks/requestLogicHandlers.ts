@@ -10,10 +10,11 @@ let allIntegrations = definition.paths["/api/v1/integration/list"].get
   .responses["200"].content["application/json"].examples.integrations
   .value as Components.Schemas.Integration[];
 
-const integration: { value?: Components.Schemas.Integration } =
-  definition.paths["/api/v1/integration/{id}"].get.responses["200"].content[
-    "application/json"
-  ].examples.integration;
+const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
 
 const searchIntegrations: { value?: Components.Schemas.PageIntegration } =
   definition.paths["/api/v1/integration/search"].get.responses["200"].content[
@@ -53,7 +54,7 @@ export default {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);
   },
-  getIntegrationsSearchPageable(request) {
+  getIntegrationsSpecSearchPageable(request) {
     const page = Number(request.query.page ?? defaults.page);
     const size = Number(request.query.size ?? defaults.size);
     const query = request.query;
