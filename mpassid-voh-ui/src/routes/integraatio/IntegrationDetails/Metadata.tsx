@@ -1,6 +1,6 @@
 import type { Components } from "@/api";
 import type { roles } from "@/config";
-import { Grid, TextField } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 
@@ -23,8 +23,10 @@ export default function Metadata({
         <Grid item xs={4}>
           <FormattedMessage defaultMessage="Metatiedot" />
         </Grid>
-        <Grid item xs={8}>
-          <TextField multiline rows={4} disabled value={value} fullWidth />
+        <Grid item xs={8} sx={{}}>
+          <Typography sx={{ whiteSpace: "pre-wrap" }} variant="caption">
+            <code>{value}</code>
+          </Typography>
         </Grid>
       </Grid>
     );
