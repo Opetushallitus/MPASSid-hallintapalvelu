@@ -10,11 +10,8 @@ export default function APIRedirectResponseHandler() {
       axios.interceptors.response.use(
         (response) => response,
         (error) => {
-          if (
-            error.response.status === 302 &&
-            error.response.headers.location
-          ) {
-            window.location.replace(error.response.headers.location);
+          if (error.response.status === 401) {
+            window.location.reload();
           }
           return Promise.reject(error);
         }
