@@ -3,32 +3,7 @@ import { get, last, toPath } from "lodash";
 import type { PropsWithChildren } from "react";
 import { cloneElement } from "react";
 import type { MessageDescriptor } from "react-intl";
-import { defineMessages, FormattedMessage, useIntl } from "react-intl";
-
-export const tooltips = defineMessages({
-  customDisplayName: {
-    defaultMessage:
-      "OKJ:n nimi koulunvalintasivun listauksessa. Esim. ”Lahti (perusaste)”",
-    description: "työkaluvihje",
-  },
-  showSchools: {
-    defaultMessage:
-      "Näytetäänkö valintalistauksessa koulujen tiedot. Jos OKJ:llä vain yksi koulu, koulujen tietoja ei yleensä näytetä.",
-    description: "työkaluvihje",
-  },
-  schools: {
-    defaultMessage: "Listaukseen tulevat koulukoodit",
-    description: "työkaluvihje",
-  },
-  excludedSchools: {
-    defaultMessage: "Mitkä koulut jätetään pois listauksesta",
-    description: "työkaluvihje",
-  },
-  customTitle: {
-    defaultMessage: "Koulun nimen yhteydessä suluissa oleva OKJ:n nimi",
-    description: "työkaluvihje",
-  },
-});
+import { FormattedMessage, useIntl } from "react-intl";
 
 export function DataRowContainer({
   children,
@@ -40,9 +15,9 @@ export function DataRowContainer({
   const name = last(toPath(path));
   const intl = useIntl();
   const id = `attribuutti.${name}`;
+  const tooltipId = `työkaluvihje.${name}`;
   const label = id in intl.messages ? { id } : undefined;
-
-  const tooltip = tooltips[name as keyof typeof tooltips];
+  const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
 
   const TypeComponent =
     typeof type === "function" ? type : typeComponents[type];

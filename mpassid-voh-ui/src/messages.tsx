@@ -165,6 +165,35 @@ defineMessage({
   description: "attribuutti",
 });
 
+// Attribuuttien työkaluvihjeet
+defineMessage({
+  defaultMessage:
+    "OKJ:n nimi koulunvalintasivun listauksessa. Esim. ”Lahti (perusaste)”",
+  id: "työkaluvihje.customDisplayName",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage:
+    "Näytetäänkö valintalistauksessa koulujen tiedot. Jos OKJ:llä vain yksi koulu, koulujen tietoja ei yleensä näytetä.",
+  id: "työkaluvihje.showSchools",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Listaukseen tulevat koulukoodit",
+  id: "työkaluvihje.schools",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Mitkä koulut jätetään pois listauksesta",
+  id: "työkaluvihje.excludedSchools",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Koulun nimen yhteydessä suluissa oleva OKJ:n nimi",
+  id: "työkaluvihje.customTitle",
+  description: "attribuutin työkaluvihje",
+});
+
 // Tyypit
 defineMessage({
   defaultMessage: "Azure",
