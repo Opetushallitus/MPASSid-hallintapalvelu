@@ -22,6 +22,12 @@ export default function IntegrationDetails({ id }: Props) {
   const integration = useIntegration({ id });
   const role = getRole(integration);
 
+  const hasAttributes =
+    role === "idp" &&
+    !["opinsys", "wilma"].includes(
+      integration.configurationEntity?.[role]?.type!
+    );
+
   return (
     <>
       <Typography variant="h2" gutterBottom>
@@ -107,7 +113,7 @@ export default function IntegrationDetails({ id }: Props) {
         role={role}
       />
 
-      <Grid mb={role === "idp" ? 3 : undefined}>
+      <Grid mb={hasAttributes ? 3 : undefined}>
         <ErrorBoundary>
           <Attributes
             attributes={integration.configurationEntity?.attributes ?? []}
@@ -116,7 +122,7 @@ export default function IntegrationDetails({ id }: Props) {
         </ErrorBoundary>
       </Grid>
 
-      {role === "idp" && (
+      {hasAttributes && (
         <>
           <Typography variant="h2" gutterBottom>
             <FormattedMessage defaultMessage="Attribuutit" />
