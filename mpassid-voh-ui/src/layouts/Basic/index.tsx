@@ -4,7 +4,13 @@ import StyleIcon from "@mui/icons-material/Style";
 import { Box, Container, Fab, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { Link, Outlet } from "react-router-dom";
+import definition from "../../../../schema.json";
 import AppBar from "./AppBar";
+import Version from "../../utils/components/Version";
+
+declare global {
+  var CHANGELOG: string;
+}
 
 export default function Basic() {
   useSetDocumentTitle();
@@ -22,6 +28,9 @@ export default function Basic() {
             <Outlet />
           </ErrorBoundary>
         </Box>
+      </Container>
+      <Container maxWidth={false} sx={{ marginBottom: 1 }}>
+        <Version changelog={CHANGELOG} version={definition.info.version} />
       </Container>
       {!ENV.PROD && (
         <Fab

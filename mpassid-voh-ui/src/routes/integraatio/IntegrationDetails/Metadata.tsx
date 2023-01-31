@@ -24,7 +24,13 @@ export default function Metadata({
           <FormattedMessage defaultMessage="Metatiedot" />
         </Grid>
         <Grid item xs={8} sx={{}}>
-          <Typography sx={{ whiteSpace: "pre-wrap" }} variant="caption">
+          <Typography
+            sx={{
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-all",
+            }}
+            variant="caption"
+          >
             <code>{value}</code>
           </Typography>
         </Grid>

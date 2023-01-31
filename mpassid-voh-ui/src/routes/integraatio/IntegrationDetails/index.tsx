@@ -1,12 +1,19 @@
-import { useIntegration } from "@/api";
+import { useIntegrationSafe } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import {
   getRole,
   typeAbbreviations,
   typeTooltips,
 } from "@/routes/home/IntegrationsTable";
-import { Grid, Typography } from "@mui/material";
+import {
+  Alert,
+  AlertTitle,
+  Grid,
+  Link as MuiLink,
+  Typography,
+} from "@mui/material";
 import { FormattedMessage } from "react-intl";
+import { Link } from "react-router-dom";
 import Attributes from "./Attributes";
 import type { DataRowProps } from "./DataRow";
 import { DataRow } from "./DataRow";
@@ -19,8 +26,34 @@ interface Props {
 }
 
 export default function IntegrationDetails({ id }: Props) {
-  const integration = useIntegration({ id });
+  const [error, integration] = useIntegrationSafe({ id });
+
+  if (error?.response?.status === 404) {
+    return (
+      <Alert severity="error">
+        <FormattedMessage
+          defaultMessage="<title>Integraatiota {id} ei löydy</title>Siirry <link>etusivulle</link>."
+          values={{
+            id,
+            title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
+            link: (chunks) => (
+              <MuiLink color="error" component={Link} to="/">
+                {chunks}
+              </MuiLink>
+            ),
+          }}
+        />
+      </Alert>
+    );
+  }
+
   const role = getRole(integration);
+
+  const hasAttributes =
+    role === "idp" &&
+    !["opinsys", "wilma"].includes(
+      integration.configurationEntity?.[role]?.type!
+    );
 
   return (
     <>
@@ -107,7 +140,7 @@ export default function IntegrationDetails({ id }: Props) {
         role={role}
       />
 
-      <Grid mb={role === "idp" ? 3 : undefined}>
+      <Grid mb={hasAttributes ? 3 : undefined}>
         <ErrorBoundary>
           <Attributes
             attributes={integration.configurationEntity?.attributes ?? []}
@@ -116,7 +149,7 @@ export default function IntegrationDetails({ id }: Props) {
         </ErrorBoundary>
       </Grid>
 
-      {role === "idp" && (
+      {hasAttributes && (
         <>
           <Typography variant="h2" gutterBottom>
             <FormattedMessage defaultMessage="Attribuutit" />

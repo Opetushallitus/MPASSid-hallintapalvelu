@@ -1,8 +1,8 @@
 import type { Components } from "@/api";
 import type { PropsWithChildren } from "react";
 import { cloneElement } from "react";
-import { DataRowBase, tooltips, typeComponents } from "./DataRow";
 import { useIntl } from "react-intl";
+import { DataRowBase, typeComponents } from "./DataRow";
 
 export function AttributeRowContainer({
   children,
@@ -16,9 +16,9 @@ export function AttributeRowContainer({
 
   const intl = useIntl();
   const id = `attribuutti.${name}`;
+  const tooltipId = `työkaluvihje.${name}`;
   const label = id in intl.messages ? { id } : undefined;
-
-  const tooltip = tooltips[name as keyof typeof tooltips];
+  const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
 
   const TypeComponent =
     typeof type === "function" ? type : typeComponents[type];

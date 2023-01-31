@@ -1,5 +1,6 @@
 import superTemplate from "@visma/vite-plugin-super-template";
 import dynamicBase from "@visma/vite-plugin-super-template/lib/dynamicBase.js";
+import { readFile } from "node:fs/promises";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -14,6 +15,9 @@ export default defineConfig({
             "./useLocale.js": "./useLocale.ts",
           }
         : undefined,
+  },
+  define: {
+    CHANGELOG: "`" + (await readFile("../CHANGELOG.md", "utf8")) + "`",
   },
   plugins: [
     superTemplate({
