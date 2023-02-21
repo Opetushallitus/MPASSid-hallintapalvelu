@@ -493,6 +493,27 @@
           }
         }
       }
+    },
+    "/api/v1/attributes": {
+      "get": {
+        "summary": "Get a list of available attribute names",
+        "operationId": "getAttributes",
+        "responses": {
+          "200": {
+            "description": "Provides a list of available attribute names",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "string" } },
+                "examples": {
+                  "types": {
+                    "value": ["clientId", "foo", "bar"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

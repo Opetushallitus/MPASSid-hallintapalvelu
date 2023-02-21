@@ -63,7 +63,7 @@ export default function Localisations({ category, defaultMessages }: Props) {
     ([language]) =>
       [
         language,
-        // List of languages is fixed length. Here it is safe to call a hook inside a callback.
+        // List of languages has fixed length. Here it is safe to call a hook inside a callback.
         // eslint-disable-next-line react-hooks/rules-of-hooks
         useLocalisations({
           category,
@@ -174,11 +174,7 @@ export default function Localisations({ category, defaultMessages }: Props) {
                       color="text.secondary"
                       component="em"
                     >
-                      {key?.includes(".") ? (
-                        <FormattedMessage defaultMessage="Arvo puuttuu. Teksti on lisätty myöhemmin." />
-                      ) : (
-                        <FormattedMessage defaultMessage="Arvo puuttuu. Teksti on poistunut käytöstä." />
-                      )}
+                      <FormattedMessage defaultMessage="Tuntematon avain. Teksti on mahdollisesti poistunut käytöstä." />
                     </Typography>
                   )}
                 </TableCell>
