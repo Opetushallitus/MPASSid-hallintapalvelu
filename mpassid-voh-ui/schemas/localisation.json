@@ -59,6 +59,13 @@
                         "id": 789,
                         "locale": "fi",
                         "value": "Foo"
+                      },
+                      {
+                        "category": "mpassid",
+                        "key": "attribuutti.baz",
+                        "id": 789,
+                        "locale": "fi",
+                        "value": "Baz"
                       }
                     ]
                   }
