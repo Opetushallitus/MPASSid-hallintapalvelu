@@ -1,4 +1,4 @@
-import { useAttributes } from "@/api";
+import { useAttributeNames } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
 import NotFound from "@/components/NotFound";
 import { category, tallentajaOphGroup } from "@/config";
@@ -50,7 +50,7 @@ export default function Routes() {
 }
 
 function useDefaultMessagesWithAvailableAttributeKeys() {
-  const attributes = useAttributes();
+  const attributes = useAttributeNames();
 
   return useMemo(() => {
     const defaultMessagesMemo: { [key: string]: MessageDescriptor } = {
