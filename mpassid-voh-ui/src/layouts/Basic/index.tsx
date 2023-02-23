@@ -4,7 +4,7 @@ import StyleIcon from "@mui/icons-material/Style";
 import { Box, Container, Fab, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { Link, Outlet } from "react-router-dom";
-import definition from "../../../../schema.json";
+import definition from "../../../schemas/schema.json";
 import AppBar from "./AppBar";
 import Version from "../../utils/components/Version";
 

@@ -2,7 +2,7 @@ import type { Components } from "@/api";
 import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
-import definition from "../../../schema.json";
+import definition from "../../schemas/schema.json";
 
 export { definition };
 
