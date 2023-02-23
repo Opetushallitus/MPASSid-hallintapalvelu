@@ -14,10 +14,16 @@ import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl;
 
 import java.util.List;
 
-@Profile("!dev")
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Profile("prod")
 @Configuration
-@PropertySource("classpath:kayttooikeus.properties")
+@PropertySource("classpath:kayttooikeus-prod.properties")
 public class OPHUserDetailsServiceConfig {
+
+    private final static Logger logger = LoggerFactory.getLogger(OPHUserDetailsServiceConfig.class);
+
     private static final SimpleGrantedAuthority[] RESTRICTED_AUTHORITIES = new SimpleGrantedAuthority[] {
             new SimpleGrantedAuthority("ROLE_APP_MPASSID")
     };
@@ -39,7 +45,7 @@ public class OPHUserDetailsServiceConfig {
         try {
             userDetails = new OphUserDetailsServiceImpl(kayttooikeusServerPrefix, kayttooikeusClientCallerId);
         } catch (Exception e) {
-            System.out.println("Exception through OphUserDetailsServiceImpl: " + e);
+            logger.error("Exception through OphUserDetailsServiceImpl: " + e);
             userDetails = new OPHUserDetailsService(passwordEncoder());
         }
         return userDetails;
