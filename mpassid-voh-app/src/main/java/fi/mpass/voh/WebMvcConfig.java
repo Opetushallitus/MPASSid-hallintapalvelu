@@ -1,6 +1,5 @@
 package fi.mpass.voh;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -8,8 +7,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Profile("!dev")
 @Configuration
-@RequiredArgsConstructor
 class WebMvcConfig implements WebMvcConfigurer {  
+
+    public WebMvcConfig() {}
+
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         // single element level, no need to exclude i.e. "api"
