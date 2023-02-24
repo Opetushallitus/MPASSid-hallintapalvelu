@@ -14,10 +14,10 @@
 		<node.version>v16.17.0</node.version>
 		<npm.version>8.15.0</npm.version>
 		<frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
-		<build.outDir>dist</build.outDir>
+		<build.outDir>target/classes/public</build.outDir>
 	</properties>
 
-	<build>
+	<build>		
 
 		<filters>
 			<filter>profiles/${build.profile.id}/config.properties</filter>
@@ -26,8 +26,8 @@
 		<resources>
 			<resource>
 				<filtering>true</filtering>
-				<directory>src/main/frontend/resources</directory>
-				<targetPath>${basedir}/src/main/frontend</targetPath>
+				<directory>${basedir}/schemas/resources</directory>
+				<targetPath>${basedir}/schemas</targetPath>
 			</resource>
 		</resources>
 
@@ -61,6 +61,7 @@
 					</execution>
 					<execution>
 						<id>npm build</id>
+						<phase>compile</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
