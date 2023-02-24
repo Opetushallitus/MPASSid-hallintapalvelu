@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.info.License;
                 license = @License(name = "EUPL Version 1.1", url = "http://www.osor.eu/eupl/")
                 // contact = @Contact(url = "https://", name = "support", email = "")
         ),
-        servers = { @Server(url = "https://virkailija.testiopintopolku.fi/mpassid"), @Server(url = "https://localhost:8081") }
+        servers = { @Server(url = "/mpassid") }
 )
 
 @SpringBootApplication
