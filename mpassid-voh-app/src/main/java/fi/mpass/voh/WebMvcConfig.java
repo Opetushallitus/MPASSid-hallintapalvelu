@@ -16,7 +16,7 @@ class WebMvcConfig implements WebMvcConfigurer {
         registry.addViewController("/{x:\\w+}")
                 .setViewName("forward:/index.html");
         // multi-level element path, excluding paths starting with "api", "v3", "index.html", or "assets"
-        registry.addViewController("/{x:(?!api|v3|index\\.html|assets).*}/{*path}")
+        registry.addViewController("/{x:(?!api|v3|index\\.html|assets|swagger-ui).*}/{*path}")
                 .setViewName("forward:/index.html");
     }
 }
