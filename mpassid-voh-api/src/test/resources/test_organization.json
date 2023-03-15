@@ -1,0 +1,156 @@
+{
+  "maskingActive": false,
+  "yhteystietoArvos": [],
+  "muutKotipaikatUris": [],
+  "muutOppilaitosTyyppiUris": [],
+  "metadata": {
+    "hakutoimistoEctsEmail": {},
+    "hakutoimistoEctsNimi": {},
+    "hakutoimistoEctsPuhelin": {},
+    "hakutoimistoEctsTehtavanimike": {},
+    "hakutoimistonNimi": {},
+    "nimi": {},
+    "yhteystiedot": [],
+    "luontiPvm": 1435302360224,
+    "muokkausPvm": 1435302360224,
+    "data": {
+      "KANSAINVALISET_KOULUTUSOHJELMAT": {},
+      "YLEISKUVAUS": {},
+      "KIELIOPINNOT": {},
+      "TERVEYDENHUOLTOPALVELUT": {},
+      "TEHTAVANIMIKE": {},
+      "SAHKOPOSTIOSOITE": {},
+      "RAHOITUS": {},
+      "AIEMMIN_HANKITTU_OSAAMINEN": {},
+      "sosiaalinenmedia_7#1": {},
+      "sosiaalinenmedia_5#1": {},
+      "sosiaalinenmedia_6#1": {},
+      "OPISKELIJALIIKKUVUUS": {},
+      "VAKUUTUKSET": {},
+      "OPISKELIJA_JARJESTOT": {},
+      "VALINTAMENETTELY": {},
+      "sosiaalinenmedia_3#1": {},
+      "sosiaalinenmedia_4#1": {},
+      "sosiaalinenmedia_1#1": {},
+      "VASTUUHENKILOT": {},
+      "KUSTANNUKSET": {},
+      "OPPIMISYMPARISTO": {},
+      "sosiaalinenmedia_2#1": {},
+      "PUHELINNUMERO": {},
+      "NIMI": {},
+      "OPISKELIJALIIKUNTA": {},
+      "VUOSIKELLO": {},
+      "OPISKELIJARUOKAILU": {},
+      "VAPAA_AIKA": {},
+      "ESTEETOMYYS": {},
+      "TIETOA_ASUMISESTA": {},
+      "TYOHARJOITTELU": {}
+    }
+  },
+  "piilotettu": false,
+  "oid": "1.2.246.562.10.74484103937",
+  "parentOid": "1.2.246.562.10.00000000001",
+  "nimi": {
+    "fi": "Lempäälän kunta",
+    "sv": "Lempäälän kunta",
+    "en": "Lempäälän kunta"
+  },
+  "alkuPvm": "1978-03-15",
+  "kieletUris": [
+    "oppilaitoksenopetuskieli_1#1"
+  ],
+  "kotipaikkaUri": "kunta_418",
+  "kuvaus2": {},
+  "maaUri": "maatjavaltiot1_fin",
+  "parentOidPath": "|1.2.246.562.10.00000000001|",
+  "toimipistekoodi": "",
+  "tyypit": [
+    "organisaatiotyyppi_01",
+    "organisaatiotyyppi_07",
+    "organisaatiotyyppi_09"
+  ],
+  "lisatiedot": [],
+  "vuosiluokat": [],
+  "ryhmatyypit": [],
+  "kayttoryhmat": [],
+  "yritysmuoto": "Kunta",
+  "ytjkieli": "kieli_fi#1",
+  "ytjpaivitysPvm": "2021-09-16",
+  "ytunnus": "0150783-1",
+  "tarkastusPvm": 1663310432917,
+  "nimet": [
+    {
+      "nimi": {
+        "fi": "Lempäälän kunta",
+        "sv": "Lempäälän kunta",
+        "en": "Lempäälän kunta"
+      },
+      "alkuPvm": "1978-03-15",
+      "version": 0
+    }
+  ],
+  "kayntiosoite": {
+    "postinumeroUri": "posti_37500",
+    "osoiteTyyppi": "kaynti",
+    "yhteystietoOid": "1.2.246.562.5.30003780811",
+    "postitoimipaikka": "LEMPÄÄLÄ",
+    "osoite": "TAMPEREENTIE 6",
+    "ytjPaivitysPvm": "2016-05-17"
+  },
+  "postiosoite": {
+    "postinumeroUri": "posti_37501",
+    "osoiteTyyppi": "posti",
+    "yhteystietoOid": "1.2.246.562.5.46647518458",
+    "postitoimipaikka": "LEMPÄÄLÄ",
+    "osoite": "PL 36",
+    "ytjPaivitysPvm": "2017-04-18"
+  },
+  "yhteystiedot": [
+    {
+      "osoiteTyyppi": "kaynti",
+      "kieli": "kieli_fi#1",
+      "postinumeroUri": "posti_37500",
+      "yhteystietoOid": "1.2.246.562.5.30003780811",
+      "id": "9374046",
+      "postitoimipaikka": "LEMPÄÄLÄ",
+      "osoite": "TAMPEREENTIE 6",
+      "ytjPaivitysPvm": "2016-05-17"
+    },
+    {
+      "osoiteTyyppi": "posti",
+      "kieli": "kieli_fi#1",
+      "postinumeroUri": "posti_37501",
+      "yhteystietoOid": "1.2.246.562.5.46647518458",
+      "id": "9374047",
+      "postitoimipaikka": "LEMPÄÄLÄ",
+      "osoite": "PL 36",
+      "ytjPaivitysPvm": "2017-04-18"
+    },
+    {
+      "kieli": "kieli_fi#1",
+      "numero": "03  374 4400",
+      "tyyppi": "puhelin",
+      "yhteystietoOid": "1.2.246.562.5.75770557611",
+      "id": "9374044"
+    },
+    {
+      "kieli": "kieli_fi#1",
+      "www": "http://www.lempaala.fi",
+      "yhteystietoOid": "1.2.246.562.5.93262565067",
+      "id": "9374045"
+    },
+    {
+      "kieli": "kieli_fi#1",
+      "yhteystietoOid": "14446285145010.6469249855217922",
+      "id": "9374043",
+      "email": "kunta@lempaala.fi"
+    }
+  ],
+  "lyhytNimi": {
+    "fi": "Lempäälän kunta",
+    "sv": "Lempäälän kunta",
+    "en": "Lempäälän kunta"
+  },
+  "status": "AKTIIVINEN",
+  "version": 17
+}
