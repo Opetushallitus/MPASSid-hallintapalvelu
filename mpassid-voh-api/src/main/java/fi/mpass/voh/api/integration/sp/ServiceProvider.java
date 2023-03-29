@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
 public abstract class ServiceProvider {
     private final static Logger logger = LoggerFactory.getLogger(ServiceProvider.class);
 
+    public enum Type { oidc, saml }
+
     @Id
     @Column(name = "configuration_entity_id")
     @JsonIgnore

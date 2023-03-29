@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OidcServiceProvider extends ServiceProvider {
 
-    private String clientSecret;
     @Column(unique=true)
     private String clientId;
 
@@ -19,14 +18,6 @@ public class OidcServiceProvider extends ServiceProvider {
 
     public OidcServiceProvider(String clientId) {
         this.clientId = clientId;
-    }
-
-    public String getClientSecret() {
-        return this.clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
     }
 
     public String getClientId() {

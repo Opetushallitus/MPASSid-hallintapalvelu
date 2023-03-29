@@ -1,5 +1,4 @@
 alter table if exists service_provider add metadata_json text;
-alter table if exists service_provider add client_secret varchar(4096);
 alter table if exists service_provider add client_id varchar(2048);
 alter table if exists service_provider add entity_id varchar(1024);
 
