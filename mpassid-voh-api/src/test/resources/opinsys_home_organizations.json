@@ -1,0 +1,59 @@
+{
+    "identityProviders": [
+        {
+            "flowName": "OpinsysK",
+            "idpId": "opinsys_k",
+            "userAttributes": {},
+            "type": "opinsys",
+            "logoUrl": "https://btn.png",
+            "dataAttributes": {
+                "datasource": "opinsys",
+                "clientId": "clientId",
+                "clientKey": "key",
+                "tenantId": "k"
+            },
+            "institutionTypes": [
+                "oppilaitostyyppi_11",
+                "oppilaitostyyppi_15"
+            ],
+            "discoveryInformation": {
+                "customDisplayName": null,
+                "showSchools": true,
+                "schools": [
+                    "03176",
+                    "00270",
+                    "03174"
+                ],
+                "excludedSchools": [],
+                "title": "K"
+            },
+            "oid": "1.2.246.562.10.00000000001",
+            "vatNumber": ""
+        },
+        {
+            "flowName": "OpinsysJ",
+            "idpId": "opinsys_j",
+            "userAttributes": {},
+            "type": "opinsys",
+            "logoUrl": "https://btn.png",
+            "dataAttributes": {
+                "datasource": "opinsys",
+                "clientId": "clientId",
+                "clientKey": "key",
+                "tenantId": "j"
+            },
+            "institutionTypes": [
+                "oppilaitostyyppi_11"
+            ],
+            "discoveryInformation": {
+                "customDisplayName": "J",
+                "showSchools": true,
+                "schools": [],
+                "excludedSchools": [],
+                "title": "J"
+            },
+            "oid": "1.2.246.562.10.00000000001",
+            "vatNumber": ""
+        }
+    ]
+}

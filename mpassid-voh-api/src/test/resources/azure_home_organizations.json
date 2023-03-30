@@ -1,0 +1,131 @@
+{
+    "identityProviders": [
+        {
+            "flowName": "ShibH",
+            "idpId": "shib_h",
+            "userAttributes": {
+              "firstName": "givenName",
+              "groups": "officeLocation",
+              "legacyId": "onPremisesExtensionAttributes.extensionAttribute5",
+              "roles": "onPremisesExtensionAttributes.extensionAttribute12",
+              "schoolIds": "onPremisesExtensionAttributes.extensionAttribute7",
+              "surname": "surname",
+              "learnerId": "onPremisesExtensionAttributes.extensionAttribute9",
+              "groupLevels": "onPremisesExtensionAttributes.extensionAttribute14",
+              "learningMaterialsCharges": "onPremisesExtensionAttributes.extensionAttribute11"
+            },
+            "type": "azure",
+            "entityId": "https://sts.windows.net/6ab309b7/",
+            "metadataUrl": "https://login.microsoftonline.com/FederationMetadata.xml",
+            "logoUrl": "https://btn.png",
+            "dataAttributes": {
+              "datasource": "azurev4",
+              "baseUrlGraph": "https://graph.windows.net/",
+              "clientId": "clientId",
+              "clientKey": "key",
+              "tenantId": "6ab309b7"
+            },
+            "institutionTypes": [
+              "oppilaitostyyppi_15",
+              "oppilaitostyyppi_11"
+            ],
+            "discoveryInformation": {
+              "customDisplayName": null,
+              "showSchools": true,
+              "schools": [],
+              "excludedSchools": [],
+              "title": "H"
+            },
+            "oid": "1.2.246.562.10.00000000001",
+            "vatNumber": ""
+          },
+          {
+            "flowName": "ShibH2",
+            "idpId": "azure_h2",
+            "userAttributes": {
+              "firstName": "givenName",
+              "groups": "extension_af0e57de18dbbba7_iamStudyGroup",
+              "legacyId": "extension_af0e57de18dbbba7_extensionAttribute6",
+              "roles": "extension_af0e57de18dbbba7_iamMpassRole",
+              "schoolIds": "extension_af0e57de18dbbba7_iamMpassSchoolCode",
+              "surname": "surname",
+              "groupLevels": "extension_af0e57de18dbbba7_iamSchoolGrade",
+              "learnerId": "extension_af0e57de18dbbba7_iamOphOID"
+            },
+            "type": "azure",
+            "entityId": "https://sts.windows.net/35d439eb/",
+            "metadataUrl": "https://login.microsoftonline.com/FederationMetadata.xml",
+            "logoUrl": "https://btn.png",
+            "dataAttributes": {
+              "azureApplicationIdUri": "api://f8074c10",
+              "datasource": "azurev4",
+              "baseUrlGraph": "https://graph.windows.net/",
+              "clientId": "clientId",
+              "clientKey": "key",
+              "tenantId": "35d439eb"
+            },
+            "institutionTypes": [
+              "oppilaitostyyppi_11",
+              "oppilaitostyyppi_12",
+              "oppilaitostyyppi_15",
+              "oppilaitostyyppi_21"
+            ],
+            "discoveryInformation": {
+              "customDisplayName": null,
+              "showSchools": true,
+              "schools": [],
+              "excludedSchools": [],
+              "title": "H2"
+            },
+            "allowedServices": [
+              "https://www/",
+              "https://ruu",
+              "https://ap",
+              "afac5bc98b4c186ea76b",
+              "42ced387cdcee0e4e305",
+              "bc307d8f242d88c31cda"
+            ],
+            "oid": "1.2.246.562.10.00000000001",
+            "vatNumber": ""
+          },
+          {
+            "flowName": "ShibI",
+            "idpId": "azure_i",
+            "userAttributes": {
+              "legacyId": "extension_b38ac41b3b59824579c6_rv01",
+              "schoolIds": "extension_b38ac41b3b59824579c6_rv11",
+              "roles": "extension_b38ac41b3b59824579c6_rv11",
+              "learnerId": "extension_b38ac41b3b59824579c6_rv05",
+              "groupLevels": "extension_b38ac41b3b59824579c6_rv12",
+              "groups": "extension_b38ac41b3b59824579c6_rv12",
+              "firstName": "givenName",
+              "surname": "surname"
+            },
+            "type": "azure",
+            "entityId": "https://sts.windows.net/f5d80e8f",
+            "metadataUrl": "https://login.microsoftonline.com/FederationMetadata.xml",
+            "logoUrl": "https://btn.png",
+            "dataAttributes": {
+              "datasource": "azure_amc",
+              "baseUrlGraph": "https://graph.windows.net/",
+              "clientId": "clientId",
+              "clientKey": "key",
+              "tenantId": "f5d80e8f"
+            },
+            "institutionTypes": [
+              "oppilaitostyyppi_11",
+              "oppilaitostyyppi_15"
+            ],
+            "discoveryInformation": {
+              "customDisplayName": null,
+              "showSchools": true,
+              "schools": [],
+              "excludedSchools": [],
+              "title": "I"
+            },
+            "oid": "1.2.246.562.10.00000000001",
+            "vatNumber": ""
+          }
+    ]
+
+}
