@@ -13,7 +13,7 @@ export default function HelpLinkButton() {
       target="_blank"
       rel="noreferrer"
       href={intl.formatMessage({
-        defaultMessage: "https://example.com",
+        defaultMessage: "https://wiki.eduuni.fi/display/OPHPALV/MPASSid-ohjeet",
         description: "ohjelinkki",
       })}
     >
