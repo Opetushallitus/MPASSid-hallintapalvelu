@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
@@ -29,10 +28,7 @@ public class ConfigurationEntity {
     @JsonIgnore
     private long id;
 
-    // Instruct Jackson not to deserialize input attributes json,
-    // instead handle the conversion through the IntegrationConfig class
     @JsonManagedReference
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @OneToMany(mappedBy="configurationEntity", cascade = CascadeType.ALL)
     private Set<Attribute> attributes;
     

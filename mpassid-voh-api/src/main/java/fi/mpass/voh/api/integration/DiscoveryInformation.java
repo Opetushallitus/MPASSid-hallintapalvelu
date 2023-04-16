@@ -16,7 +16,6 @@ import javax.persistence.JoinColumn;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -47,16 +46,12 @@ public class DiscoveryInformation {
     @CollectionTable(name = "discovery_information_schools", joinColumns = @JoinColumn(name = "discovery_information_id"))
     @Column(name = "schools")
     @Schema(description="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitosnumero/latest")
-    // Instruct Jackson not to deserialize input schools json, instead handle conversion in IntegrationConfig
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<String> schools = new HashSet<>();
 
     @ElementCollection
     @CollectionTable(name = "discovery_information_excludedSchools", joinColumns = @JoinColumn(name = "discovery_information_id"))
     @Column(name = "schools")
     @Schema(description="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitosnumero/latest")
-    // Instruct Jackson not to deserialize input excluded schools json, instead handle conversion in IntegrationConfig
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<String> excludedSchools = new HashSet<>();
 
     public DiscoveryInformation() { }

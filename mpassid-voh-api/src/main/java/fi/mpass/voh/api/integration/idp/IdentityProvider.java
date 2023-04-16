@@ -1,11 +1,8 @@
 package fi.mpass.voh.api.integration.idp;
 
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
+import java.util.HashSet;
+import java.util.Set;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -16,25 +13,28 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 
-import fi.mpass.voh.api.integration.ConfigurationEntity;
-import fi.mpass.voh.api.integration.sp.ServiceProvider;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.ElementCollection;
-
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
+
+import fi.mpass.voh.api.integration.ConfigurationEntity;
+import fi.mpass.voh.api.integration.sp.ServiceProvider;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -52,6 +52,8 @@ import javax.persistence.Inheritance;
 @JsonInclude(Include.NON_NULL)
 public abstract class IdentityProvider {
 
+    public enum Type { adfs , azure, gsuite, opinsys, wilma }
+
     @Id
     @Column(name = "configuration_entity_id")
     @JsonIgnore
@@ -63,9 +65,6 @@ public abstract class IdentityProvider {
     @JsonIgnore
     private ConfigurationEntity configurationEntity;
 
-    // Instruct Jackson not to deserialize input institution types json,
-    // instead handle the conversion through the IntegrationConfig class
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ElementCollection
     @CollectionTable(name = "identity_provider_institution_types", joinColumns = @JoinColumn(name = "configuration_entity_id"))
     @Column(name = "institution_type")

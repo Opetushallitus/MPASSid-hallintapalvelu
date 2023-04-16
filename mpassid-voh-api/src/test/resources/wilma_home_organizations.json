@@ -1,79 +1,97 @@
 {
     "identityProviders": [
-        {
-            "flowName": "WilmaA",
-            "idpId": "wilma_a",
-            "userAttributes": {},
-            "type": "wilma",
-            "instanceUrl": "https://",
-            "logoUrl": "https://btn.png",
-            "dataAttributes": {
-              "datasource": "wilma",
-              "hostname": "a"
+      {
+        "configurationEntity": {
+            "idp": {
+                "institutionTypes": [
+                    15,
+                    11
+                ],
+                "idpId": "wilma_en",
+                "logoUrl": "https://btn-en.png",
+                "flowName": "WilmaEn",
+                "type": "wilma",
+                "hostname": "en.inschool.fi"
             },
-            "institutionTypes": [
-              "oppilaitostyyppi_11",
-              "oppilaitostyyppi_19"
+            "attributes": [
+                { "name": "datasource", "content": "wilma", "type": "data"},
+                { "name": "hostname", "content": "en.inschool.fi", "type": "data"}
+            ]
+        },
+        "discoveryInformation": {
+            "showSchools": "true",
+            "schools": [
             ],
-            "discoveryInformation": {
-              "customDisplayName": null,
-              "showSchools": true,
-              "schools": [],
-              "excludedSchools": [],
-              "title": "A"
+            "excludedSchools": [
+            ],                
+            "title": "En"
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.00000000001"
+        },
+        "deploymentPhase": 1
+    },
+    {
+        "configurationEntity": {
+            "idp": {
+                "institutionTypes": [
+                    12,
+                    15,
+                    11
+                ],
+                "idpId": "wilma_eu",
+                "logoUrl": "https://btn-eu.png",
+                "flowName": "WilmaEu",
+                "type": "wilma",
+                "hostname": "eu.inschool.fi"
             },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
-          },
-          {
-            "flowName": "WilmaH5",
-            "idpId": "wilma_h5",
-            "userAttributes": {},
-            "type": "wilma",
-            "instanceUrl": "https://",
-            "logoUrl": "https://btn.png",
-            "dataAttributes": {
-              "datasource": "wilma",
-              "hostname": "h"
-            },
-            "institutionTypes": [
-              "oppilaitostyyppi_11",
-              "oppilaitostyyppi_15",
-              "oppilaitostyyppi_12"
+            "attributes": [
+                { "name": "datasource", "content": "wilma", "type": "data"},
+                { "name": "hostname", "content": "eu.inschool.fi", "type": "data"}
+            ]
+        },
+        "discoveryInformation": {
+            "showSchools": "true",
+            "schools": [
             ],
-            "discoveryInformation": {
-              "customDisplayName": null,
-              "showSchools": true,
-              "schools": [],
-              "excludedSchools": [],
-              "title": "H5"
+            "excludedSchools": [
+            ],                
+            "title": "Eu"
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.00000000001"
+        },
+        "deploymentPhase": 1
+    },
+    {
+        "configurationEntity": {
+            "idp": {
+                "institutionTypes": [
+                    15
+                ],
+                "idpId": "wilma_el",
+                "logoUrl": "https://btn-el.png",
+                "flowName": "WilmaEl",
+                "type": "wilma",
+                "hostname": "el.inschool.fi"
             },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
-          },
-          {
-            "flowName": "WilmaI2",
-            "idpId": "wilma_i2",
-            "userAttributes": {},
-            "type": "wilma",
-            "instanceUrl": "https://",
-            "logoUrl": "https://btn.png",
-            "dataAttributes": {
-              "datasource": "wilma",
-              "hostname": "i2"
-            },
-            "institutionTypes": [
-              "oppilaitostyyppi_64"
+            "attributes": [
+                { "name": "datasource", "content": "wilma", "type": "data"},
+                { "name": "hostname", "content": "el.inschool.fi", "type": "data"}
+            ]
+        },
+        "discoveryInformation": {
+            "showSchools": "true",
+            "schools": [
             ],
-            "discoveryInformation": {
-              "customDisplayName": "I2",
-              "showSchools": false,
-              "schools": [],
-              "excludedSchools": [],
-              "title": null
-            },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
-          }
+            "excludedSchools": [
+            ],                
+            "title": "El"
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.00000000001"
+        },
+        "deploymentPhase": 1
+    }
     ]
 }

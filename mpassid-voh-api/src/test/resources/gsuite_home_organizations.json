@@ -1,157 +1,192 @@
 {
-    "identityProviders": [
-        {
-            "flowName": "ShibL",
-            "idpId": "shib_l",
-            "userAttributes": {
-                "schoolIds": "schoolCode",
-                "firstName": "firstName",
-                "username": "gsuiteid",
-                "groups": "class",
-                "legacyId": "legacyId",
-                "roles": "userRole",
-                "surname": "surname",
-                "learnerId": "learnerId",
-                "groupLevels": "classLevel",
-                "learningMaterialsCharges": "learningMaterialsCharge"
+  "identityProviders": [
+    {
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            15,
+            21
+          ],
+          "idpId": "shib_v",
+          "logoUrl": "https://fi/v.png",
+          "flowName": "ShibV",
+          "allowedServiceProviders": [
+            {
+              "entityId": "https://mpass",
+              "type": "saml"
             },
-            "type": "gsuite",
-            "entityId": "https://accounts.google.com/",
-            "metadataUrl": "http://127.0.0.1/metadata.xml",
-            "logoUrl": "https://btn.png",
-            "institutionTypes": [
-                "oppilaitostyyppi_11",
-                "oppilaitostyyppi_15"
-            ],
-            "discoveryInformation": {
-                "customDisplayName": null,
-                "showSchools": true,
-                "schools": [],
-                "excludedSchools": [],
-                "title": "L"
+            {
+              "entityId": "https://www.fi/",
+              "type": "saml"
             },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
+            {
+              "clientId": "e4e305",
+              "type": "oidc"
+            },
+            {
+              "clientId": "o4ce8c3c795cbf30",
+              "type": "oidc"
+            },
+            {
+              "entityId": "mparo",
+              "type": "saml"
+            },
+            {
+              "entityId": "ngom",
+              "type": "saml"
+            },
+            {
+              "entityId": "https://apd",
+              "type": "saml"
+            }
+          ],
+          "type": "gsuite",
+          "entityId": "https://acwdh4",
+          "metadataUrl": "https://metadata.xml"
         },
-        {
-            "flowName": "ShibH3",
-            "idpId": "shib_h3",
-            "userAttributes": {
-              "schoolIds": "schoolCode",
-              "firstName": "firstName",
-              "username": "gsuiteid",
-              "groups": "class",
-              "legacyId": "legacyId",
-              "roles": "userRole",
-              "surname": "surname",
-              "learnerId": "learnerId",
-              "groupLevels": "classLevel",
-              "learningMaterialsCharges": "learningMaterialsCharge"
-            },
-            "type": "gsuite",
-            "entityId": "https://accounts.google.com/o/",
-            "metadataUrl": "http://127.0.0.1/metadata.xml",
-            "logoUrl": "https://btn.png",
-            "institutionTypes": [
-              "oppilaitostyyppi_11",
-              "oppilaitostyyppi_15"
-            ],
-            "discoveryInformation": {
-              "customDisplayName": null,
-              "showSchools": true,
-              "schools": [],
-              "excludedSchools": [],
-              "title": "H3"
-            },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
+        "attributes": [
+          {
+            "name": "username",
+            "content": "gsuiteid",
+            "type": "user"
           },
           {
-            "flowName": "ShibH4",
-            "idpId": "shib_h4",
-            "userAttributes": {
-              "schoolIds": "schoolCode",
-              "firstName": "firstName",
-              "username": "gsuiteid",
-              "groups": "class",
-              "legacyId": "legacyId",
-              "roles": "userRole",
-              "surname": "surname",
-              "learnerId": "learnerId",
-              "groupLevels": "classLevel",
-              "learningMaterialsCharges": "learningMaterialsCharge"
-            },
-            "type": "gsuite",
-            "entityId": "https://accounts.google.com/o/",
-            "metadataUrl": "http://127.0.0.1/metadata.xml",
-            "logoUrl": "https://btn.png",
-            "institutionTypes": [
-              "oppilaitostyyppi_11",
-              "oppilaitostyyppi_15"
-            ],
-            "discoveryInformation": {
-              "customDisplayName": null,
-              "showSchools": true,
-              "schools": [],
-              "excludedSchools": [],
-              "title": "H4"
-            },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
+            "name": "legacyId",
+            "content": "legacyId",
+            "type": "user"
           },
           {
-            "flowName": "ShibV",
-            "idpId": "shib_v",
-            "userAttributes": {
-              "schoolIds": "schoolCode",
-              "firstName": "firstName",
-              "username": "gsuiteid",
-              "groups": "class",
-              "legacyId": "legacyId",
-              "roles": "userRole",
-              "surname": "surname",
-              "learnerId": "learnerId",
-              "groupLevels": "classLevel",
-              "learningMaterialsCharges": "learningMaterialsCharge"
-            },
-            "type": "gsuite",
-            "entityId": "https://accounts.google.com/o/",
-            "metadataUrl": "http://127.0.0.1/metadata.xml",
-            "logoUrl": "https:///btn.png",
-            "institutionTypes": [
-              "oppilaitostyyppi_11",
-              "oppilaitostyyppi_15",
-              "oppilaitostyyppi_21"
-            ],
-            "discoveryInformation": {
-              "customDisplayName": null,
-              "showSchools": true,
-              "schools": [],
-              "excludedSchools": [],
-              "title": "V"
-            },
-            "allowedServices": [
-              "https://r",
-              "https://e/",
-              "clientId1",
-              "https://k",
-              "clientId2",
-              "pro",
-              "master",
-              "https://o",
-              "https://g/",
-              "clientId3",
-              "https://o",
-              "https://s",
-              "clientId4",
-              "clientId5",
-              "clientId6",
-              "clientId7",
-              "clientId8",
-              "clientId9"
-            ],
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
+            "name": "firstName",
+            "content": "firstName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "userRole",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "learnerId",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "classLevel",
+            "type": "user"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "learningMaterialsCharge",
+            "type": "user"
+          },
+          {
+            "name": "schoolIds",
+            "content": "schoolCode",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "class",
+            "type": "user"
           }
-    ]
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "true",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "V"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    },
+    {
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            15,
+            12
+          ],
+          "idpId": "shib_m",
+          "logoUrl": "https://m.png",
+          "flowName": "ShibM",
+          "type": "gsuite",
+          "entityId": "https://ac56y56y56h",
+          "metadataUrl": "https://metadata.xml"
+        },
+        "attributes": [
+          {
+            "name": "username",
+            "content": "gsuiteid",
+            "type": "user"
+          },
+          {
+            "name": "legacyId",
+            "content": "legacyId",
+            "type": "user"
+          },
+          {
+            "name": "firstName",
+            "content": "firstName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "userRole",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "learnerId",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "classLevel",
+            "type": "user"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "learningMaterialsCharge",
+            "type": "user"
+          },
+          {
+            "name": "schoolIds",
+            "content": "schoolCode",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "class",
+            "type": "user"
+          }
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "true",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "M"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    }
+  ]
 }

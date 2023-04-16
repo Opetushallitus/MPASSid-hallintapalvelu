@@ -1,59 +1,112 @@
 {
     "identityProviders": [
         {
-            "flowName": "OpinsysK",
-            "idpId": "opinsys_k",
-            "userAttributes": {},
-            "type": "opinsys",
-            "logoUrl": "https://btn.png",
-            "dataAttributes": {
-                "datasource": "opinsys",
-                "clientId": "clientId",
-                "clientKey": "key",
-                "tenantId": "k"
+            "configurationEntity": {
+                "idp": {
+                    "institutionTypes": [
+                        11,
+                        15
+                    ],
+                    "idpId": "opinsys_kauniainen",
+                    "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                    "flowName": "OpinsysKauniainen",
+                    "type": "opinsys",
+                    "tenantId": "kauniainen.opinsys.fi",
+                    "allowedServiceProviders": [
+                        { "entityId": "https://www.examina.fi/", "type": "saml" },
+                        { "entityId": "https://app.studeo.fi", "type": "saml" },
+                        { "entityId": "digma_854a3866f51bd29b4654afac5bc98b4c186ea76b", "type": "saml" },
+                        { "clientId": "iltoppiminen_514e03433ed3dc42419a42ced387cdcee0e4e305", "type": "oidc" },
+                        { "clientId": "hs_d3f6812215336d53ce52e1307d8f242d88c31cda", "type": "oidc" }
+                    ]
+                },
+                "attributes": [
+                    { "name": "datasource", "content": "opinsys", "type": "data" },
+                    { "name": "tenantId", "content": "kauniainen.opinsys.fi", "type": "data" },
+                    { "name": "clientId", "content": "***", "type": "data" },
+                    { "name": "clientKey", "content": "***", "type": "data" }
+                ]
             },
-            "institutionTypes": [
-                "oppilaitostyyppi_11",
-                "oppilaitostyyppi_15"
-            ],
             "discoveryInformation": {
-                "customDisplayName": null,
-                "showSchools": true,
+                "showSchools": "true",
                 "schools": [
                     "03176",
                     "00270",
-                    "03174"
+                    "03174"                
                 ],
-                "excludedSchools": [],
-                "title": "K"
+                "excludedSchools": [
+                ],                
+                "title": "Kauniainen"
             },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
+            "organization": {
+                "oid": "1.2.246.562.10.98343673038"
+            },
+            "deploymentPhase": 1
         },
         {
-            "flowName": "OpinsysJ",
-            "idpId": "opinsys_j",
-            "userAttributes": {},
-            "type": "opinsys",
-            "logoUrl": "https://btn.png",
-            "dataAttributes": {
-                "datasource": "opinsys",
-                "clientId": "clientId",
-                "clientKey": "key",
-                "tenantId": "j"
+            "configurationEntity": {
+                "idp": {
+                    "institutionTypes": [
+                        "11"
+                    ],
+                    "idpId": "opinsys_espoonsteinerkoulu",
+                    "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-espoonsteinerkoulu.png",
+                    "flowName": "OpinsysEspoonSteinerkoulu",
+                    "type": "opinsys",
+                    "tenantId": "espoonsteinerkoulu.opinsys.fi"
+                },
+                "attributes": [
+                    { "name": "datasource", "content": "opinsys" },
+                    { "name": "tenantId", "content": "espoonsteinerkoulu.opinsys.fi" },
+                    { "name": "clientId", "content": "***" },
+                    { "name": "clientKey", "content": "***" }
+                ]
             },
-            "institutionTypes": [
-                "oppilaitostyyppi_11"
-            ],
             "discoveryInformation": {
-                "customDisplayName": "J",
-                "showSchools": true,
-                "schools": [],
-                "excludedSchools": [],
-                "title": "J"
+                "customDisplayName": "Espoon Steinerkoulu",
+                "schools": [
+                ],
+                "excludedSchools": [
+                ],                
+                "title": ""
             },
-            "oid": "1.2.246.562.10.00000000001",
-            "vatNumber": ""
+            "organization": {
+                "oid": "1.2.246.562.10.33651716236"
+            },
+            "deploymentPhase": 1
+        },
+        {
+            "configurationEntity": {
+                "idp": {
+                    "institutionTypes": [
+                        "11",
+                        "15"
+                    ],
+                    "idpId": "opinsys_joroinen",
+                    "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-joroinen.png",
+                    "flowName": "OpinsysJoroinen",
+                    "type": "opinsys",
+                    "tenantId": "joroinen.opinsys.fi"
+                },
+                "attributes": [
+                    { "datasource": "opinsys" },
+                    { "tenantId": "joroinen.opinsys.fi" },
+                    { "clientId": "***" },
+                    { "clientKey": "***" }
+                ]
+            },
+            "discoveryInformation": {
+                "showSchools": "true",
+                "schools": [
+                ],
+                "excludedSchools": [
+                ],                
+                "title": "Joroinen"
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.54874899088"
+            },
+            "deploymentPhase": 1
         }
     ]
 }
