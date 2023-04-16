@@ -100,7 +100,7 @@ export default function IntegrationDetails({ id }: Props) {
             />
             <DataRow
               object={integration}
-              path="discoveryInformation.customTitle"
+              path="discoveryInformation.title"
             />
           </Grid>
         </>
@@ -128,9 +128,6 @@ export default function IntegrationDetails({ id }: Props) {
             ValueComponent={UniqueIdValue}
           />
         </Grid>
-        <DataRow object={integration} path="deploymentDate" type="date" />
-        <DataRow object={integration} path="acceptanceDate" type="date" />
-        <DataRow object={integration} path="serviceContactAddress" />
       </Grid>
 
       <Role integration={integration} />
