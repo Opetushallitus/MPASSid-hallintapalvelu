@@ -1,0 +1,192 @@
+{
+  "identityProviders": [
+    {
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            15,
+            21
+          ],
+          "idpId": "shib_v",
+          "logoUrl": "https://fi/v.png",
+          "flowName": "ShibV",
+          "allowedServiceProviders": [
+            {
+              "entityId": "https://mpass",
+              "type": "saml"
+            },
+            {
+              "entityId": "https://www.fi/",
+              "type": "saml"
+            },
+            {
+              "clientId": "e4e305",
+              "type": "oidc"
+            },
+            {
+              "clientId": "o4ce8c3c795cbf30",
+              "type": "oidc"
+            },
+            {
+              "entityId": "mparo",
+              "type": "saml"
+            },
+            {
+              "entityId": "ngom",
+              "type": "saml"
+            },
+            {
+              "entityId": "https://apd",
+              "type": "saml"
+            }
+          ],
+          "type": "gsuite",
+          "entityId": "https://acwdh4",
+          "metadataUrl": "https://metadata.xml"
+        },
+        "attributes": [
+          {
+            "name": "username",
+            "content": "gsuiteid",
+            "type": "user"
+          },
+          {
+            "name": "legacyId",
+            "content": "legacyId",
+            "type": "user"
+          },
+          {
+            "name": "firstName",
+            "content": "firstName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "userRole",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "learnerId",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "classLevel",
+            "type": "user"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "learningMaterialsCharge",
+            "type": "user"
+          },
+          {
+            "name": "schoolIds",
+            "content": "schoolCode",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "class",
+            "type": "user"
+          }
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "true",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "V"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    },
+    {
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            15,
+            12
+          ],
+          "idpId": "shib_m",
+          "logoUrl": "https://m.png",
+          "flowName": "ShibM",
+          "type": "gsuite",
+          "entityId": "https://ac56y56y56h",
+          "metadataUrl": "https://metadata.xml"
+        },
+        "attributes": [
+          {
+            "name": "username",
+            "content": "gsuiteid",
+            "type": "user"
+          },
+          {
+            "name": "legacyId",
+            "content": "legacyId",
+            "type": "user"
+          },
+          {
+            "name": "firstName",
+            "content": "firstName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "userRole",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "learnerId",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "classLevel",
+            "type": "user"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "learningMaterialsCharge",
+            "type": "user"
+          },
+          {
+            "name": "schoolIds",
+            "content": "schoolCode",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "class",
+            "type": "user"
+          }
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "true",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "M"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    }
+  ]
+}

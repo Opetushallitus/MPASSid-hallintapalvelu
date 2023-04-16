@@ -9,9 +9,7 @@
     "version": "0.1.0"
   },
   "servers": [
-    { "url": "https://virkailija.testiopintopolku.fi/mpassid" },
-    { "url": "https://mpassid-rr-test.csc.fi" },
-    { "url": "https://localhost:8081" }
+    { "url": "@api.baseurl@" }
   ],
   "paths": {
     "/api/v1/integration/{id}": {
@@ -494,10 +492,10 @@
         }
       }
     },
-    "/api/v1/attributes": {
+    "/api/v1/attribute/names": {
       "get": {
         "summary": "Get a list of available attribute names",
-        "operationId": "getAttributes",
+        "operationId": "getAttributeNames",
         "responses": {
           "200": {
             "description": "Provides a list of available attribute names",

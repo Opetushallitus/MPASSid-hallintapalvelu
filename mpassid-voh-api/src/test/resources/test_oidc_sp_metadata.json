@@ -1,0 +1,14 @@
+{
+    "scope": "openid profile",
+    "redirect_uris": [
+        "https://domain/auth/mpass"
+    ],
+    "client_id": "{{ domain_clientId }}",
+    "client_secret": "{{ domain_clientSecret }}",
+    "response_types": [
+        "code"
+    ],
+    "grant_types": [
+        "authorization_code"
+    ]
+}

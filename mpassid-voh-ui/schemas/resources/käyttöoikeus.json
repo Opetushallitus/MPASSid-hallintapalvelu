@@ -1,0 +1,63 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "description": "Järjestelmä käyttöoikeuksien hallinnointiin",
+    "title": "Käyttöoikeuspalvelu",
+    "version": "0"
+  },
+  "servers": [
+    { "url": "@kayttooikeus.url@" }
+  ],
+  "paths": {
+    "/cas/me": {
+      "get": {
+        "tags": ["CAS:a varten olevat rajapinnat."],
+        "summary": "Deprekoitu CAS palvelusta siirretty rajapinta",
+        "description": "Deprekoitu. Käytä /henkilo/current/omattiedot ja oppijanumerorekisterin /henkilo/current/omattiedotrajapintoja.",
+        "operationId": "getMe",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MeDto" },
+                "examples": {
+                  "localisation": {
+                    "value": {
+                      "firstName": "Foo",
+                      "groups": [
+                        "APP_MPASSID",
+                        "APP_MPASSID_TALLENTAJA",
+                        "APP_MPASSID_TALLENTAJA_1.2.246.562.10.00000000001",
+                        "VIRKAILIJA"
+                      ],
+                      "lastName": "Bar",
+                      "lang": "fi"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MeDto": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string" },
+          "groups": { "type": "array", "items": { "type": "string" } },
+          "lang": { "type": "string" },
+          "lastName": { "type": "string" },
+          "oid": { "type": "string" },
+          "roles": { "type": "string" },
+          "uid": { "type": "string" }
+        },
+        "title": "MeDto"
+      }
+    }
+  }
+}
