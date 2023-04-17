@@ -1,5 +1,7 @@
 # MPASSid-hallinta
 
-## 0.1.0
+## 1.0.0
 
-- Kehitysversio
+- Opetuksen- ja koulutuksenjärjestäjien tietojen tarkastelu
+- Palveluntarjoajien tietojen tarkastelu
+- Tietojen haku, järjestäminen ja valinta
