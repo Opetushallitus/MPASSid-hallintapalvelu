@@ -6,7 +6,7 @@
       "name": "EUPL Version 1.1",
       "url": "http://www.osor.eu/eupl/"
     },
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "servers": [
     { "url": "@api.baseurl@" }
@@ -595,7 +595,7 @@
         "properties": {
           "integration": { "$ref": "#/components/schemas/Integration" },
           "customDisplayName": { "type": "string" },
-          "customTitle": { "type": "string" },
+          "title": { "type": "string" },
           "showSchools": { "type": "boolean" },
           "schools": {
             "uniqueItems": true,
