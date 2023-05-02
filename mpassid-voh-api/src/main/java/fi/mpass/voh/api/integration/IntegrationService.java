@@ -89,8 +89,8 @@ public class IntegrationService {
 
   /**
    * The method creates a specification from the given search criteria, filtering
-   * types and roles. The methods queries a repository through the specification and
-   * returns paged integrations.
+   * types and roles. The methods queries a repository through the specification
+   * and returns paged integrations.
    * 
    * @param search          search string from the user; case-sentitive;
    *                        identifiers are matched with equality, names with
@@ -134,8 +134,7 @@ public class IntegrationService {
     if (auth != null) {
       List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
       if (!includesAdminOrganization(userOrganizationOids)) {
-        // TODO the case of multiple admin organizations
-        builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids.get(0));
+        builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
       }
       Specification<Integration> spec = builder.build();
 

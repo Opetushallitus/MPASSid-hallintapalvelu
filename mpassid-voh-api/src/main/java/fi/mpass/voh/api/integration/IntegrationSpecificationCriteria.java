@@ -1,5 +1,7 @@
 package fi.mpass.voh.api.integration;
 
+import java.util.List;
+
 public class IntegrationSpecificationCriteria {
 
     public enum Operation {
@@ -16,9 +18,11 @@ public class IntegrationSpecificationCriteria {
     private Object value;
     private boolean or;
 
-    public IntegrationSpecificationCriteria() { }
+    public IntegrationSpecificationCriteria() {
+    }
 
-    public IntegrationSpecificationCriteria(final boolean or, final Category category, final String key, final Operation operation,
+    public IntegrationSpecificationCriteria(final boolean or, final Category category, final String key,
+            final Operation operation,
             final Object value) {
         this.or = or;
         this.category = category;
@@ -61,6 +65,10 @@ public class IntegrationSpecificationCriteria {
             if (v.contains(",") && v.split(",").length > 1) {
                 return true;
             }
+        }
+        if (this.value instanceof List) {
+            if (((List)this.value).get(0) instanceof String)
+            return true;
         }
         return false;
     }
