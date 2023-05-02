@@ -4,7 +4,6 @@ import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,7 +11,6 @@ import org.hibernate.annotations.Immutable;
 
 @Entity
 @Immutable
-@Table
 public class Organization {
 
     @Id

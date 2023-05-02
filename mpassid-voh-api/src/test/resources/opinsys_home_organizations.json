@@ -1,0 +1,112 @@
+{
+    "identityProviders": [
+        {
+            "configurationEntity": {
+                "idp": {
+                    "institutionTypes": [
+                        11,
+                        15
+                    ],
+                    "idpId": "opinsys_ka",
+                    "logoUrl": "https://btn-ka.png",
+                    "flowName": "OpinsysKa",
+                    "type": "opinsys",
+                    "tenantId": "ka.opinsys.fi",
+                    "allowedServiceProviders": [
+                        { "entityId": "https://www.e.fi/", "type": "saml" },
+                        { "entityId": "https://t.fi", "type": "saml" },
+                        { "entityId": "d654afac5bea76b", "type": "saml" },
+                        { "clientId": "i3dc42419a42ced387cd305", "type": "oidc" },
+                        { "clientId": "hd53ce52e1307d831cda", "type": "oidc" }
+                    ]
+                },
+                "attributes": [
+                    { "name": "datasource", "content": "opinsys", "type": "data" },
+                    { "name": "tenantId", "content": "ka.opinsys.fi", "type": "data" },
+                    { "name": "clientId", "content": "***", "type": "data" },
+                    { "name": "clientKey", "content": "***", "type": "data" }
+                ]
+            },
+            "discoveryInformation": {
+                "showSchools": "true",
+                "schools": [
+                    "03176",
+                    "00270",
+                    "03174"                
+                ],
+                "excludedSchools": [
+                ],                
+                "title": "Ka"
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.00000000001"
+            },
+            "deploymentPhase": 1
+        },
+        {
+            "configurationEntity": {
+                "idp": {
+                    "institutionTypes": [
+                        "11"
+                    ],
+                    "idpId": "opinsys_es",
+                    "logoUrl": "https://btn-es.png",
+                    "flowName": "OpinsysEs",
+                    "type": "opinsys",
+                    "tenantId": "es.opinsys.fi"
+                },
+                "attributes": [
+                    { "name": "datasource", "content": "opinsys" },
+                    { "name": "tenantId", "content": "es.opinsys.fi" },
+                    { "name": "clientId", "content": "***" },
+                    { "name": "clientKey", "content": "***" }
+                ]
+            },
+            "discoveryInformation": {
+                "customDisplayName": "Es",
+                "schools": [
+                ],
+                "excludedSchools": [
+                ],                
+                "title": ""
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.00000000001"
+            },
+            "deploymentPhase": 1
+        },
+        {
+            "configurationEntity": {
+                "idp": {
+                    "institutionTypes": [
+                        "11",
+                        "15"
+                    ],
+                    "idpId": "opinsys_jo",
+                    "logoUrl": "https://btn-jo.png",
+                    "flowName": "OpinsysJo",
+                    "type": "opinsys",
+                    "tenantId": "jo.opinsys.fi"
+                },
+                "attributes": [
+                    { "datasource": "opinsys" },
+                    { "tenantId": "jo.opinsys.fi" },
+                    { "clientId": "***" },
+                    { "clientKey": "***" }
+                ]
+            },
+            "discoveryInformation": {
+                "showSchools": "true",
+                "schools": [
+                ],
+                "excludedSchools": [
+                ],                
+                "title": "Jo"
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.00000000001"
+            },
+            "deploymentPhase": 1
+        }
+    ]
+}
