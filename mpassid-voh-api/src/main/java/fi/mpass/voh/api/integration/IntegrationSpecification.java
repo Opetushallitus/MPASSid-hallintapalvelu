@@ -21,7 +21,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * IntegrationSpecification implements Specification interface.
- * See https://docs.spring.io/spring-data/jpa/docs/2.7.10/reference/html/#specifications
+ * See
+ * https://docs.spring.io/spring-data/jpa/docs/2.7.10/reference/html/#specifications
  */
 public class IntegrationSpecification implements Specification<Integration> {
 	private final static Logger logger = LoggerFactory.getLogger(IntegrationSpecification.class);
@@ -76,8 +77,8 @@ public class IntegrationSpecification implements Specification<Integration> {
 						Join<Integration, ConfigurationEntity> integrationCE = root.join("configurationEntity");
 						if (criteria.getValue() != null) {
 							// TODO consider refactoring/moving to Criteria
-							List<Predicate> predicateList = new ArrayList<>();
 							if (criteria.isStringList()) {
+								List<Predicate> predicateList = new ArrayList<>();
 								for (String byRole : ((String) criteria.getValue()).split(",")) {
 									Predicate typePredicate = builder.equal(integrationCE.get(criteria.getKey()),
 											byRole);
@@ -99,8 +100,8 @@ public class IntegrationSpecification implements Specification<Integration> {
 									JoinType.LEFT);
 
 							// TODO consider refactoring/moving to Criteria
-							List<Predicate> predicateList = new ArrayList<>();
 							if (criteria.isStringList()) {
+								List<Predicate> predicateList = new ArrayList<>();
 								for (String byType : ((String) criteria.getValue()).split(",")) {
 									if (isIdpType(byType)) {
 										Predicate typePredicate = builder.equal(integrationIdp.get(criteria.getKey()),
@@ -125,8 +126,20 @@ public class IntegrationSpecification implements Specification<Integration> {
 						}
 					}
 					case ORGANIZATION: {
-						Join<Integration, Organization> integrationOrganization = root.join("organization");
-						return builder.equal(integrationOrganization.get(criteria.getKey()), criteria.getValue());
+						if (criteria.getValue() != null) {
+							Join<Integration, Organization> integrationOrganization = root.join("organization");
+							
+							if (criteria.isStringList()) {
+								List<Predicate> predicateList = new ArrayList<>();
+								for (String organizationOid : (List<String>)criteria.getValue()) {
+									Predicate typePredicate = builder.equal(integrationOrganization.get(criteria.getKey()),
+											organizationOid);
+									predicateList.add(typePredicate);
+								}
+								return builder.or(predicateList.toArray(Predicate[]::new));
+							}
+							return builder.equal(integrationOrganization.get(criteria.getKey()), criteria.getValue());
+						}
 					}
 					// Integration, e.g. id and deploymentPhase
 					default:

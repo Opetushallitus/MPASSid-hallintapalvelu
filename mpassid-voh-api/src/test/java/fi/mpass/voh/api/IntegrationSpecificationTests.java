@@ -3,6 +3,7 @@ package fi.mpass.voh.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class IntegrationSpecificationTests {
     private OrganizationRepository organizationRepository;
 
     private Integration integration;
+    private Integration spIntegration;
 
     @BeforeEach
     public void setup() {
@@ -53,10 +55,9 @@ public class IntegrationSpecificationTests {
 
         // Allowed services, ConfigurationEntity (OIDC Service Provider) wo/ Integration
         ConfigurationEntity ce = new ConfigurationEntity();
-        OidcServiceProvider serviceProvider = new OidcServiceProvider();
+        OidcServiceProvider serviceProvider = new OidcServiceProvider("clientId");
         serviceProvider.setConfigurationEntity(ce);
         ce.setSp(serviceProvider);
-        serviceProvider.setClientId("clientId");
         serviceProvider.addAllowingIdentityProvider(wilma);
         Set<ServiceProvider> allowedServices = new HashSet<>();
         allowedServices.add(serviceProvider);
@@ -71,7 +72,21 @@ public class IntegrationSpecificationTests {
 
         integrationRepository.save(integration);
 
-        // TODO SP
+        // ServiceProvider
+        
+        Organization spOrganization = new Organization("Organization xyz", "123456-9", "1.2.3.4.5.6.7.9");
+        organizationRepository.save(spOrganization);
+
+        ConfigurationEntity configurationEntitySp = new ConfigurationEntity();
+        ServiceProvider oidcSp = new OidcServiceProvider("clientId2");
+        oidcSp.setConfigurationEntity(configurationEntitySp);
+        configurationEntitySp.setSp(oidcSp);
+
+        spIntegration = new Integration(999L, LocalDate.now(), configurationEntitySp, LocalDate.of(2023, 6, 30),
+                1, null, spOrganization,
+                "serviceProviderContactAddress@example.net");
+
+        integrationRepository.save(spIntegration);
     }
 
     @Test
@@ -82,7 +97,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(1, integrationList.size());
+        assertEquals(2, integrationList.size());
     }
 
     @Test
@@ -103,7 +118,7 @@ public class IntegrationSpecificationTests {
     public void testIntegrationWithFalseOrganizationOid() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
-        builder.withEqualOr(Category.ORGANIZATION, "oid", "1.2.3.4.5.6.7.9");
+        builder.withEqualOr(Category.ORGANIZATION, "oid", "1.2.3.4.5.6.7.10");
 
         Specification<Integration> spec = builder.build();
 
@@ -154,7 +169,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(1, integrationList.size());
+        assertEquals(2, integrationList.size());
     }
 
     @Test
@@ -169,7 +184,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(0, integrationList.size());
+        assertEquals(1, integrationList.size());
     }
 
     @Test
@@ -177,6 +192,36 @@ public class IntegrationSpecificationTests {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         builder.withContainOr(Category.ORGANIZATION, "name", "zyx");
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        assertEquals(1, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationWithEqualOrganizations() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.8", "1.2.3.4.5.6.7.9");
+
+        builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        assertEquals(2, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationWithEqualOrganization() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.9");
+
+        builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
 
         Specification<Integration> spec = builder.build();
 
