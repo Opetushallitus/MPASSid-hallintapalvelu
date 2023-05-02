@@ -166,11 +166,8 @@ public class IntegrationService {
     if (auth != null) {
       List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
       if (!includesAdminOrganization(userOrganizationOids)) {
-        // TODO the case of multiple organizations
-        /* equality AND */
-        builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids.get(0));
+        builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
       }
-
       Specification<Integration> spec = builder.build();
 
       Optional<Integration> integration = integrationRepository.findOne(spec);
