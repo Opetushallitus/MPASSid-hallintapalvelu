@@ -15,11 +15,18 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
@@ -49,18 +56,20 @@ public class IntegrationControllerTest {
         Organization organization = new Organization("Organization zyx", "123456-7", "1.2.3.4.5.6.7.8");
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Wilma wilma = new Wilma("wilmaHostname");
-        
-        // Allowed services
-        ConfigurationEntity ce = new ConfigurationEntity();
-        OidcServiceProvider serviceProvider = new OidcServiceProvider();
-        serviceProvider.setConfigurationEntity(ce);
-        ce.setSp(serviceProvider);
-        serviceProvider.setClientId("clientId");
-        serviceProvider.addAllowingIdentityProvider(wilma);
-        Set<ServiceProvider> allowedServices = new HashSet<>();
-        allowedServices.add(serviceProvider);
 
-        wilma.setAllowedServiceProviders(allowedServices);
+        // Allowed services
+        /*
+         * ConfigurationEntity ce = new ConfigurationEntity();
+         * OidcServiceProvider serviceProvider = new OidcServiceProvider();
+         * serviceProvider.setConfigurationEntity(ce);
+         * ce.setSp(serviceProvider);
+         * serviceProvider.setClientId("clientId");
+         * serviceProvider.addAllowingIdentityProvider(wilma);
+         * Set<ServiceProvider> allowedServices = new HashSet<>();
+         * allowedServices.add(serviceProvider);
+         * 
+         * wilma.setAllowedServiceProviders(allowedServices);
+         */
         wilma.setFlowName("wilmaFlowname");
         configurationEntity.setIdp(wilma);
 
@@ -123,5 +132,23 @@ public class IntegrationControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$").isArray());
+    }
+
+    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_TALLENTAJA" })
+    @Test
+    public void testAuthorizedUpdateIntegration() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+        mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
+                // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
+                .content(objectMapper.writeValueAsString(integration)).with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(99L))
+                .andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
     }
 }

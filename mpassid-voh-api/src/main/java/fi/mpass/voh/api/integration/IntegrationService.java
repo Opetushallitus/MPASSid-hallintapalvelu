@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -178,5 +180,15 @@ public class IntegrationService {
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
+  }
+
+  public Integration updateIntegration(Long id, Integration integration) {
+    try {
+      integration = integrationRepository.saveAndFlush(integration);
+    } catch (OptimisticLockException ole) {
+      // TODO throw new
+      logger.error(ole.toString());
+    }
+    return integration;
   }
 }

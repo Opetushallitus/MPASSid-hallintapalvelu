@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -21,6 +22,9 @@ public class Integration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Version
+    private java.sql.Timestamp version;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "configuration_entity_id", referencedColumnName = "id")
@@ -82,6 +86,10 @@ public class Integration {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public java.sql.Timestamp getVersion() {
+        return this.version;
     }
 
     public ConfigurationEntity getConfigurationEntity() {
