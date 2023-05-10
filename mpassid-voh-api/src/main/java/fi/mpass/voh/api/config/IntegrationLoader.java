@@ -99,6 +99,7 @@ public class IntegrationLoader implements CommandLineRunner {
                     try {
                         organization = organizationService.getById(integration.getOrganization().getOid());
                     } catch (Exception ex) {
+                        // TODO allow fallback to organization service?
                         logger.error("Organization exception: " + ex + " continuing to next integration.");
                         continue;
                     }

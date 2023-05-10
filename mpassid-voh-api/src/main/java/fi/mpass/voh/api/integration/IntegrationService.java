@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import fi.mpass.voh.api.exception.EntityNotFoundException;
+import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 
 import org.slf4j.Logger;
@@ -183,12 +184,16 @@ public class IntegrationService {
   }
 
   public Integration updateIntegration(Long id, Integration integration) {
-    try {
-      integration = integrationRepository.saveAndFlush(integration);
-    } catch (OptimisticLockException ole) {
-      // TODO throw new
-      logger.error(ole.toString());
+
+    Integration existingIntegration = getSpecIntegrationById(id).get();
+    if (existingIntegration != null) {
+      try {
+        integration = integrationRepository.saveAndFlush(integration);
+      } catch (OptimisticLockException ole) {
+        throw new EntityUpdateException("Integration update not successful. Please re-update.");
+      }
+      return integration;
     }
-    return integration;
+    return existingIntegration;
   }
 }

@@ -75,7 +75,13 @@ public class IntegrationController {
         return integrationService.getSpecIntegrationById(id);
     }
 
+    @Operation(summary = "Update the specific integration")
     @PreAuthorize("hasPermission('Integration', 'TALLENTAJA')")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")), 
+        @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+        @ApiResponse(responseCode = "409", description = "Integration update conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")) 
+    })
     @PutMapping("{id}")
     Integration updateIntegration(@RequestBody Integration integration, @PathVariable Long id) {
         return integrationService.updateIntegration(id, integration);
