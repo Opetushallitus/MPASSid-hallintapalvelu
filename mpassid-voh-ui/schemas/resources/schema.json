@@ -6,7 +6,7 @@
       "name": "EUPL Version 1.1",
       "url": "http://www.osor.eu/eupl/"
     },
-    "version": "1.0.1"
+    "version": "1.0.2"
   },
   "servers": [
     {
@@ -559,7 +559,7 @@
                                 "clientId": "n_abae576a70855a",
                                 "type": "oidc"
                               },
-                              
+                              {
                                 "clientId": "ed_5c35ad0752eb0",
                                 "type": "oidc"
                               },

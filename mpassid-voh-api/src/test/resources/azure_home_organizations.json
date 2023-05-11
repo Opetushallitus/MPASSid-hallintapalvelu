@@ -13,7 +13,7 @@
           "flowName": "ShibT",
           "type": "azure",
           "entityId": "https://df-44d9-bffa-1a/",
-          "metadataUrl": "https://FederationMetadata.xml"
+          "metadataUrl": "https://www.example.org"
         },
         "attributes": [
           {
@@ -101,7 +101,7 @@
           "flowName": "ShibU",
           "type": "azure",
           "entityId": "https://7-b624-d34c2a24/",
-          "metadataUrl": "https://FederationMetadata.xml"
+          "metadataUrl": "https://www.example.org"
         },
         "attributes": [
           {
@@ -190,7 +190,7 @@
           "flowName": "ShibVa",
           "type": "azure",
           "entityId": "https://st6c-c84667ac/",
-          "metadataUrl": "https://FederationMetadata.xml"
+          "metadataUrl": "https://www.example.org"
         },
         "attributes": [
           {
@@ -278,7 +278,7 @@
           "flowName": "ShibVal",
           "type": "azure",
           "entityId": "https://-b624-d34c2a24/",
-          "metadataUrl": "https://FederationMetadata.xml"
+          "metadataUrl": "https://www.example.org"
         },
         "attributes": [
           {
