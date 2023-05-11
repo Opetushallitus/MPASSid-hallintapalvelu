@@ -43,7 +43,7 @@
           ],
           "type": "gsuite",
           "entityId": "https://acwdh4",
-          "metadataUrl": "https://metadata.xml"
+          "metadataUrl": "https://www.example.org"
         },
         "attributes": [
           {
@@ -122,7 +122,7 @@
           "flowName": "ShibM",
           "type": "gsuite",
           "entityId": "https://ac56y56y56h",
-          "metadataUrl": "https://metadata.xml"
+          "metadataUrl": "https://www.example.org"
         },
         "attributes": [
           {

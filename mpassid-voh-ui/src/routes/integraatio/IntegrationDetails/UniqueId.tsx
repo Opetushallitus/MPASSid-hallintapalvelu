@@ -47,6 +47,11 @@ export default function UniqueId({
           <ValueComponent />
         </DataRowContainer>
       ),
+      wilma: () => (
+        <DataRowContainer object={configurationEntity} path="idp.hostname">
+          <ValueComponent />
+        </DataRowContainer>
+      ),
     },
     sp: {
       saml,

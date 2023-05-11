@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.info.License;
 @OpenAPIDefinition(
         info = @Info(
                 title = "MPASSid virkailijan opintopolun hallintapalvelu",
-                version = "1.0.0",
+                version = "1.0.2",
                 description = "",
                 license = @License(name = "EUPL Version 1.1", url = "http://www.osor.eu/eupl/")
                 // contact = @Contact(url = "https://", name = "support", email = "")
