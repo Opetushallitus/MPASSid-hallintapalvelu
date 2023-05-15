@@ -9,6 +9,7 @@ import { FormattedMessage } from "react-intl";
 import { useParams } from "react-router-dom";
 import { useSessionStorage } from "usehooks-ts";
 import IntegrationDetails from "./IntegrationDetails";
+import ServiceProviderButton from "@/utils/components/ServiceProviderButton";
 
 export default function Integraatio() {
   const { integrationId } = useParams();
@@ -34,6 +35,7 @@ export default function Integraatio() {
           >
             <FormattedMessage defaultMessage="Jäsenen integraatiotiedot" />
           </PageHeader>
+          <ServiceProviderButton id={Number(integrationId)} />
           <HelpLinkButton />
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
