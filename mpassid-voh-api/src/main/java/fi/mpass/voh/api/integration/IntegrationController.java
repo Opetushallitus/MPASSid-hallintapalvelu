@@ -15,13 +15,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Content;
-
+import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.exception.IntegrationError;
 
 @RestController
@@ -39,6 +41,7 @@ public class IntegrationController {
     @ApiResponse(responseCode = "200", description = "Provides a list of integrations", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
             @ExampleObject(name = "integrations", externalValue = "https://mpassid-rr-test.csc.fi/integrations.json") }))
     @GetMapping("/list")
+    @JsonView(value = IntegrationView.Default.class)
     public List<Integration> getIntegrations() {
         return integrationService.getIntegrations();
     }
@@ -46,6 +49,7 @@ public class IntegrationController {
     @Operation(summary = "Search paged integrations")
     @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
     @GetMapping("/search")
+    @JsonView(value = IntegrationView.Default.class)
     public Page<Integration> getIntegrationsSpecSearchPageable(
             @RequestParam(required = false, value = "search") String search,
             @RequestParam(required = false, value = "type") String filterByType,
@@ -69,6 +73,7 @@ public class IntegrationController {
             @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
     @GetMapping("{id}")
+    @JsonView(value = IntegrationView.Default.class)
     public Optional<Integration> getIntegration(@PathVariable Long id) {
         return integrationService.getSpecIntegrationById(id);
     }
