@@ -25,5 +25,5 @@ export function useIntegrationsSpecSearchPageable() {
       ? JSON.parse(searchParams.get(defaults.searchParamName)!)
       : defaults.default,
     sort: searchParams.getAll("sort") ?? undefined,
-  });
+  } as any);
 }
