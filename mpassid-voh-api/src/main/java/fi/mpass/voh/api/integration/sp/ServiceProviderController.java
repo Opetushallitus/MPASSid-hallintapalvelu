@@ -28,10 +28,10 @@ public class ServiceProviderController {
     @Operation(summary = "Get a list of distinct ServiceProvider types")
     @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Provides a list of distinct ServiceProvider types",
+        @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = String.class)), 
-                            examples = { @ExampleObject(name = "ServiceProvider types", value = "[ \"oidc\", \"saml\" ]") } )),
+                            examples = { @ExampleObject(name = "types", value = "[ \"oidc\", \"saml\" ]") } )),
         @ApiResponse(responseCode = "403", description = "Forbidden operation")
     })
     @GetMapping("/types")
