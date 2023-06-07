@@ -8,7 +8,7 @@ import { useLayoutEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { useParams } from "react-router-dom";
 import { useSessionStorage } from "usehooks-ts";
-import IntegrationDetails from "./IntegrationDetails";
+import IntegrationTab from "./IntegrationTab";
 
 export default function Integraatio() {
   const { integrationId } = useParams();
@@ -32,14 +32,14 @@ export default function Integraatio() {
             icon={<IntegrationInstructionsIcon />}
             sx={{ flexGrow: 1 }}
           >
-            <FormattedMessage defaultMessage="Jäsenen integraatiotiedot" />
+            <FormattedMessage defaultMessage="Jäsen {id}" values={{id: integrationId}} />
           </PageHeader>
           <HelpLinkButton />
         </Box>
-        <Divider sx={{ marginBottom: 2 }} />
+        
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(integrationId)} />
+            <IntegrationTab id={Number(integrationId)} />
           </ErrorBoundary>
         </Suspense>
       </TableContainer>
