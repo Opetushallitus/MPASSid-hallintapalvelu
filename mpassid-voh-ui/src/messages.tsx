@@ -164,6 +164,11 @@ defineMessage({
   id: "attribuutti.encryptionCertificateValidUntil",
   description: "attribuutti",
 });
+defineMessage({
+  defaultMessage: "Sallitut palvelut",
+  id: "attribuutti.allowedIntegrations",
+  description: "attribuutti",
+});
 
 // Attribuuttien työkaluvihjeet
 defineMessage({
@@ -191,6 +196,11 @@ defineMessage({
 defineMessage({
   defaultMessage: "Koulun nimen yhteydessä suluissa oleva OKJ:n nimi",
   id: "työkaluvihje.customTitle",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Listauksessa näytetään palvelun nimi ja suluissa palvelun tarjoajan organisaatio.",
+  id: "työkaluvihje.allowedIntegrations",
   description: "attribuutin työkaluvihje",
 });
 

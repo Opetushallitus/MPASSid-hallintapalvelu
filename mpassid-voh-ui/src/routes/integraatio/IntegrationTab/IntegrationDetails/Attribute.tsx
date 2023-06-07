@@ -2,7 +2,7 @@ import type { Components } from "@/api";
 import type { PropsWithChildren } from "react";
 import { cloneElement } from "react";
 import { useIntl } from "react-intl";
-import { DataRowBase, typeComponents } from "./DataRow";
+import { DataRowBase, typeComponents } from "../DataRow";
 
 export function AttributeRowContainer({
   children,

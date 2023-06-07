@@ -2,7 +2,7 @@ import type { Components } from "@/api";
 import { attributePreferredOrder } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from "react-intl";
-import { DataRow } from "./DataRow";
+import { DataRow } from "../DataRow";
 
 interface Props {
   attributes: Components.Schemas.Attribute[];
