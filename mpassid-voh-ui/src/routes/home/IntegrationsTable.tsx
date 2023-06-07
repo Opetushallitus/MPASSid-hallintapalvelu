@@ -23,9 +23,9 @@ import {
 } from "@mui/material";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Link } from "react-router-dom";
-import type { DataRowProps } from "../integraatio/IntegrationDetails/DataRow";
-import { DataRowContainer } from "../integraatio/IntegrationDetails/DataRow";
-import UniqueId from "../integraatio/IntegrationDetails/UniqueId";
+import type { DataRowProps } from "../integraatio/IntegrationTab/DataRow";
+import { DataRowContainer } from "../integraatio/IntegrationTab/DataRow";
+import UniqueId from "../integraatio/IntegrationTab/IntegrationDetails/UniqueId";
 
 export const typeAbbreviations = defineMessages({
   idp: {

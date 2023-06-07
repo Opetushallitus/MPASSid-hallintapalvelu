@@ -15,8 +15,8 @@ import {
 import { FormattedMessage } from "react-intl";
 import { Link } from "react-router-dom";
 import Attributes from "./Attributes";
-import type { DataRowProps } from "./DataRow";
-import { DataRow } from "./DataRow";
+import type { DataRowProps } from "../DataRow";
+import { DataRow } from "../DataRow";
 import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";

@@ -129,22 +129,22 @@ export function TextList({ value = [] }: { value?: string[] }) {
     </>
   );
 }
-/*
-export function SPList({ value = [] }: { value?: string[] }) {
+
+export function SPList({ value = [] }: { value?: { configurationEntity?: { sp?: { name?: String } }; organization?: { name?: String };  }[] } ) {
   return (
     <>
       {value.length
-        ? value.map((value, index) => <div key={value}>{value.clientId||value.entityId}</div>)
+        ? value.map((value, index) => <div>{value?.configurationEntity?.sp?.name||"-"} ({value?.organization?.name||"-"})</div>)
         : "–"}
     </>
   );
 }
-*/
+
 export const typeComponents = {
   boolean: Boolean,
   image: Image,
   date: Date,
   text: Text,
   "text-list": TextList,
-  //"sp-list": SPList,
+  "sp-list": SPList,
 };

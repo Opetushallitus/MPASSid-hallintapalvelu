@@ -1,10 +1,4 @@
 import { useIntegrationSafe } from "@/api";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import {
-  getRole,
-  typeAbbreviations,
-  typeTooltips,
-} from "@/routes/home/IntegrationsTable";
 import {
   Alert,
   AlertTitle,
@@ -14,12 +8,7 @@ import {
 } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { Link } from "react-router-dom";
-import Attributes from "../IntegrationDetails/Attributes";
-import type { DataRowProps } from "../IntegrationDetails/DataRow";
-import { DataRow } from "../IntegrationDetails/DataRow";
-import Metadata from "../IntegrationDetails/Metadata";
-import Role from "../IntegrationDetails/Role"
-import UniqueId from "../IntegrationDetails/UniqueId";
+import { DataRow } from "../DataRow";
 
 interface Props {
   id: number;
@@ -52,14 +41,15 @@ export default function IntegrationSelection({ id }: Props) {
   return (
     <>
           <Typography variant="h2" gutterBottom>
-            <FormattedMessage defaultMessage="Sallitut palvelun tarjoajat" />
+            <FormattedMessage defaultMessage="Palvelun tarjoajat" />
           </Typography>
-          <Grid container spacing={2} mb={3}>
+          <Grid container spacing={3} mb={3}>
             <DataRow
               object={integration}
-              path="configurationEntity.idp.allowedServiceProviders"
+              path="allowedIntegrations"
+              type="sp-list"
+              
             />
-            
           </Grid>
     </>
   );
