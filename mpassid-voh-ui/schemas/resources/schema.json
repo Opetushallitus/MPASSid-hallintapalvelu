@@ -648,9 +648,9 @@
                                     }
                                 },
                                 "examples": {
-                                    "Attribute names": {
+                                    "names": {
                                         "description": "Attribute names",
-                                        "value": "[ \"foo\", \"bar\", \"zoo\" ]"
+                                        "value": [ "foo", "bar", "zoo" ]
                                     }
                                 }
                             }
