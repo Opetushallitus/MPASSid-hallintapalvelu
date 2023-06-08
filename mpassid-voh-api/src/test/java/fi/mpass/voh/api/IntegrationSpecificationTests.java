@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -47,22 +45,26 @@ public class IntegrationSpecificationTests {
 
         Organization organization = new Organization("Organization zyx", "123456-7", "1.2.3.4.5.6.7.8");
         organizationRepository.save(organization);
+        Organization spOrg = new Organization("SP Organization 321", "654321-7", "1.2.3.4.5.6.7.1");
+        organizationRepository.save(spOrg);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Wilma wilma = new Wilma("wilmaHostname");
 
-        // Allowed services, ConfigurationEntity (OIDC Service Provider) wo/ Integration
+        // Allowed services, ConfigurationEntity (OIDC Service Provider)
+        DiscoveryInformation spDiscoveryInformation = new DiscoveryInformation("SP Custom Display Name",
+                "SP Custom Title", true);
         ConfigurationEntity ce = new ConfigurationEntity();
         OidcServiceProvider serviceProvider = new OidcServiceProvider("clientId");
         serviceProvider.setConfigurationEntity(ce);
         ce.setSp(serviceProvider);
-        serviceProvider.addAllowingIdentityProvider(wilma);
-        Set<ServiceProvider> allowedServices = new HashSet<>();
-        allowedServices.add(serviceProvider);
+        Integration spInt = new Integration(66L, LocalDate.now(), ce, LocalDate.of(2023, 6, 30),
+                0, spDiscoveryInformation, spOrg,
+                "spContactAddress@example.net");
+        integrationRepository.save(spInt);
 
-        wilma.setAllowedServiceProviders(allowedServices);
         wilma.setFlowName("wilmaFlowname");
         configurationEntity.setIdp(wilma);
 
@@ -70,10 +72,12 @@ public class IntegrationSpecificationTests {
                 0, discoveryInformation, organization,
                 "serviceContactAddress@example.net");
 
+        integration.addAllowed(spInt);
+
         integrationRepository.save(integration);
 
         // ServiceProvider
-        
+
         Organization spOrganization = new Organization("Organization xyz", "123456-9", "1.2.3.4.5.6.7.9");
         organizationRepository.save(spOrganization);
 
@@ -97,7 +101,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(2, integrationList.size());
+        assertEquals(3, integrationList.size());
     }
 
     @Test
@@ -169,7 +173,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(2, integrationList.size());
+        assertEquals(3, integrationList.size());
     }
 
     @Test
@@ -184,7 +188,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(1, integrationList.size());
+        assertEquals(2, integrationList.size());
     }
 
     @Test

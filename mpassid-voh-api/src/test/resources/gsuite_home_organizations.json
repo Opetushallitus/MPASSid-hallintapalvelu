@@ -13,32 +13,24 @@
           "flowName": "ShibV",
           "allowedServiceProviders": [
             {
-              "entityId": "https://mpass",
+              "entityId": "https://mt/mpass",
               "type": "saml"
             },
             {
-              "entityId": "https://www.fi/",
+              "entityId": "https://do/mpass",
               "type": "saml"
             },
             {
-              "clientId": "e4e305",
+              "clientId": "Wuoluc1FARWBe6yocK9J6hiHh5gAjB7pyw4KXRQjVDvWnY21srEDJl50ae4OtBz4NovyCvxrTvaukDUa",
               "type": "oidc"
             },
             {
-              "clientId": "o4ce8c3c795cbf30",
+              "clientId": "clientId4",
               "type": "oidc"
             },
             {
-              "entityId": "mparo",
-              "type": "saml"
-            },
-            {
-              "entityId": "ngom",
-              "type": "saml"
-            },
-            {
-              "entityId": "https://apd",
-              "type": "saml"
+              "clientId": "clientId",
+              "type": "oidc"
             }
           ],
           "type": "gsuite",

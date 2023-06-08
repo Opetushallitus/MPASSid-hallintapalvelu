@@ -46,7 +46,7 @@ public class SamlMetadataProvider {
 
     XMLObjectProviderRegistry registry;
 
-    private final String metadata;
+    private String metadata;
 
     private LocalDate metadataValidUntil;
     private LocalDate signingCertificateValidUntil;
@@ -63,8 +63,12 @@ public class SamlMetadataProvider {
         registry.setParserPool(getParserPool());
 
         WebClient client = WebClient.create();
-        WebClient.ResponseSpec response = client.get().uri(metadataUrl).retrieve();
-        metadata = response.bodyToMono(String.class).block();
+        try {
+            WebClient.ResponseSpec response = client.get().uri(metadataUrl).retrieve();
+            metadata = response.bodyToMono(String.class).block();
+        } catch (Exception ex) {
+            metadata = null;
+        }
 
         if (metadata != null) {
             extractValidUntilDates();

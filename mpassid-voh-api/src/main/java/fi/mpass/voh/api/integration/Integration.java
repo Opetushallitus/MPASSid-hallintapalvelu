@@ -1,6 +1,8 @@
 package fi.mpass.voh.api.integration;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -9,11 +11,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.Version;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 
+import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.organization.Organization;
 
 @Entity
@@ -21,6 +30,9 @@ public class Integration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Version
+    private java.sql.Timestamp version;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "configuration_entity_id", referencedColumnName = "id")
@@ -31,14 +43,34 @@ public class Integration {
     @JoinColumn(name = "organization_oid", referencedColumnName = "oid")
     private Organization organization;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "integration_group_id", referencedColumnName = "id")
+    private IntegrationGroup integrationGroup;
+
     @JsonManagedReference
     // TODO cascade review
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "discovery_information_id", referencedColumnName = "id")
+    @JsonView(value = IntegrationView.Excluded.class)
     private DiscoveryInformation discoveryInformation;
 
+    @JsonView(value = IntegrationView.Default.class)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnoreProperties("allowedIntegrations")
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.REFRESH, CascadeType.MERGE })
+    @JoinTable(name = "allowedIntegrations", joinColumns = @JoinColumn(name = "integration_id1", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_id2", referencedColumnName = "id"))
+    private Set<Integration> allowedIntegrations = new HashSet<>();
+
+    @JsonIgnoreProperties("allowedIntegrations")
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "allowedIntegrations", cascade = { CascadeType.REFRESH,
+            CascadeType.MERGE })
+    private Set<Integration> allowingIntegrations = new HashSet<>();
+
+    @JsonView(value = IntegrationView.Excluded.class)
     private int deploymentPhase;
+    @JsonView(value = IntegrationView.Excluded.class)
     private LocalDate deploymentDate;
+    @JsonView(value = IntegrationView.Excluded.class)
     private LocalDate acceptanceDate;
 
     private String serviceContactAddress;
@@ -82,6 +114,10 @@ public class Integration {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public java.sql.Timestamp getVersion() {
+        return this.version;
     }
 
     public ConfigurationEntity getConfigurationEntity() {
@@ -143,5 +179,14 @@ public class Integration {
 
     public void setServiceContactAddress(String serviceContactAddress) {
         this.serviceContactAddress = serviceContactAddress;
+    }
+
+    public void addAllowed(Integration integration) {
+        allowedIntegrations.add(integration);
+        integration.addAllowing(this);
+    }
+
+    public void addAllowing(Integration integration) {
+            this.allowingIntegrations.add(integration);
     }
 }

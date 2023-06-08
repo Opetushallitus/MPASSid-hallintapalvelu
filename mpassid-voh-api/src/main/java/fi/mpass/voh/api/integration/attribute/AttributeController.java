@@ -28,10 +28,10 @@ public class AttributeController {
     @Operation(summary = "Get a list of available attribute names")
     @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Provides a list of available attribute names",
+            @ApiResponse(responseCode = "200", description = "OK",
                 content = @Content(mediaType = "application/json",
                                 array = @ArraySchema(schema = @Schema(implementation = String.class)), 
-                                examples = { @ExampleObject(name = "Attribute names", value = "[ \"foo\", \"bar\", \"zoo\" ]") } )),
+                                examples = { @ExampleObject(name = "names", value = "[ \"foo\", \"bar\", \"zoo\" ]") } )),
             @ApiResponse(responseCode = "403", description = "Forbidden operation")
     })
     @GetMapping("/names")

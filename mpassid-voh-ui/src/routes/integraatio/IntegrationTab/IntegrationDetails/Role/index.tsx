@@ -1,5 +1,5 @@
 import type { Components } from "@/api";
-import { getRole } from "../../../home/IntegrationsTable";
+import { getRole } from "../../../../home/IntegrationsTable";
 import IdentityProvider from "./IdentityProvider";
 import ServiceProvider from "./ServiceProvider";
 

@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.persistence.OptimisticLockException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import fi.mpass.voh.api.exception.EntityNotFoundException;
+import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 
 import org.slf4j.Logger;
@@ -178,5 +181,19 @@ public class IntegrationService {
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
+  }
+
+  public Integration updateIntegration(Long id, Integration integration) {
+
+    Integration existingIntegration = getSpecIntegrationById(id).get();
+    if (existingIntegration != null) {
+      try {
+        integration = integrationRepository.saveAndFlush(integration);
+      } catch (OptimisticLockException ole) {
+        throw new EntityUpdateException("Integration update not successful. Please re-update.");
+      }
+      return integration;
+    }
+    return existingIntegration;
   }
 }

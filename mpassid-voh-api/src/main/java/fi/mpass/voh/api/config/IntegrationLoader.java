@@ -21,6 +21,7 @@ import org.springframework.util.ResourceUtils;
 import fi.mpass.voh.api.integration.sp.ServiceProviderRepository;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
+import fi.mpass.voh.api.integration.idp.IdentityProvider;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
 
@@ -99,6 +100,7 @@ public class IntegrationLoader implements CommandLineRunner {
                     try {
                         organization = organizationService.getById(integration.getOrganization().getOid());
                     } catch (Exception ex) {
+                        // TODO allow fallback to organization service?
                         logger.error("Organization exception: " + ex + " continuing to next integration.");
                         continue;
                     }
@@ -121,6 +123,33 @@ public class IntegrationLoader implements CommandLineRunner {
                     logger.error("Organization Exception: " + e);
                 }
                 integration.setOrganization(organization);
+
+                IdentityProvider idp = integration.getConfigurationEntity().getIdp();
+                if (idp != null) {
+                    JsonNode allowedNode = arrayNode.get("configurationEntity").get("idp")
+                            .get("allowedServiceProviders");
+                    if (allowedNode != null) {
+                        final Integration i = integration;
+                        allowedNode.forEach(c -> {
+                            if (c.get("entityId") != null) {
+                                Integration samlSp = integrationRepository
+                                        .findByConfigurationEntitySpEntityId(c.get("entityId").asText());
+                                if (samlSp != null) {
+                                    logger.debug("Allowed SAML SP: " + samlSp.toString());
+                                    i.addAllowed(samlSp);
+                                }
+                            }
+                            if (c.get("clientId") != null) {
+                                Integration oidcRp = integrationRepository
+                                        .findByConfigurationEntitySpClientId(c.get("clientId").asText());
+                                if (oidcRp != null) {
+                                    logger.debug("Allowed OIDC RP: " + oidcRp.toString());
+                                    i.addAllowed(oidcRp);
+                                }
+                            }
+                        });
+                    }
+                }
 
                 try {
                     integrationRepository.save(integration);

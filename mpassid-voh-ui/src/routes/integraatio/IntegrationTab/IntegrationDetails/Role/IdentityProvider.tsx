@@ -5,7 +5,7 @@ import getKoodistoValue from "@/utils/getKoodistoValue";
 import toLanguage from "@/utils/toLanguage";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
-import { DataRow, TextList } from "../DataRow";
+import { DataRow, TextList } from "../../DataRow";
 import LinkValue from "../LinkValue";
 import Type from "./Type";
 

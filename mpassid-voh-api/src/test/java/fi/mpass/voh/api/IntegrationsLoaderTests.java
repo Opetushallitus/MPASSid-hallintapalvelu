@@ -12,6 +12,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import fi.mpass.voh.api.config.IntegrationLoader;
+import fi.mpass.voh.api.config.ServiceProvidersLoader;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
@@ -45,11 +46,17 @@ public class IntegrationsLoaderTests {
  
     @Test
     public void testGsuiteLoader() throws Exception {
+        String oidcLocation = "oidc_services.json";
+        String samlLocation = "saml_services.json";
+        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        serviceLoader.run(oidcLocation);
+        serviceLoader.run(samlLocation);
+
         String location = "gsuite_home_organizations.json";
         integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
         integrationLoader.run(location);
 
-        assertEquals(2, repository.findAll().size());
+        assertEquals(7, repository.findAll().size());
     }
 
     @Test

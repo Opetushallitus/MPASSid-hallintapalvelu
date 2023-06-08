@@ -3,10 +3,8 @@ package fi.mpass.voh.api.integration.sp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,23 +25,21 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 import io.swagger.v3.oas.annotations.media.Schema;
-
+import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.integration.ConfigurationEntity;
-import fi.mpass.voh.api.integration.idp.IdentityProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +56,9 @@ import org.slf4j.LoggerFactory;
 public abstract class ServiceProvider {
     private final static Logger logger = LoggerFactory.getLogger(ServiceProvider.class);
 
-    public enum Type { oidc, saml }
+    public enum Type {
+        oidc, saml
+    }
 
     @Id
     @Column(name = "configuration_entity_id")
@@ -73,20 +71,23 @@ public abstract class ServiceProvider {
     @JsonIgnore
     private ConfigurationEntity configurationEntity;
 
-    @JsonBackReference
-    @ManyToMany(mappedBy = "allowedServiceProviders")
-    private Set<IdentityProvider> allowingIdentityProviders = new HashSet<>();
-
     @Convert(converter = HashMapConverter.class)
     @Column(columnDefinition = "text")
+    @JsonView(value = IntegrationView.Excluded.class)
     private Map<String, Object> metadataJson;
 
     @Column(name = "type", insertable = false, updatable = false)
     private String type;
     private String name;
 
-     /* Service Provider type specific identifiers used for the default sorting/search implementation should be also declared here */
-     /* No getter or setter methods declared for these fields, only the corresponding child class contains those methods */
+    /*
+     * Service Provider type specific identifiers used for the default
+     * sorting/search implementation should be also declared here
+     */
+    /*
+     * No getter or setter methods declared for these fields, only the corresponding
+     * child class contains those methods
+     */
     @Schema(example = "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea64")
     private String entityId;
     private String clientId;
@@ -94,7 +95,8 @@ public abstract class ServiceProvider {
     @Transient
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ServiceProvider() { }
+    public ServiceProvider() {
+    }
 
     public Long getId() {
         return this.id;
@@ -127,14 +129,7 @@ public abstract class ServiceProvider {
         this.name = name;
     }
 
-    public Set<IdentityProvider> getAllowingIdentityProviders() {
-        return this.allowingIdentityProviders;
-    }
-
-    public void addAllowingIdentityProvider(IdentityProvider idp) {
-        this.allowingIdentityProviders.add(idp);
-    }
-
+    @JsonView(value = IntegrationView.Excluded.class)
     public Map<String, Object> getMetadata() {
         return this.metadataJson;
     }

@@ -130,10 +130,21 @@ export function TextList({ value = [] }: { value?: string[] }) {
   );
 }
 
+export function SPList({ value = [] }: { value?: { configurationEntity?: { sp?: { name?: String } }; organization?: { name?: String };  }[] } ) {
+  return (
+    <>
+      {value.length
+        ? value.map((value, index) => <div>{value?.configurationEntity?.sp?.name||"-"} ({value?.organization?.name||"-"})</div>)
+        : "–"}
+    </>
+  );
+}
+
 export const typeComponents = {
   boolean: Boolean,
   image: Image,
   date: Date,
   text: Text,
   "text-list": TextList,
+  "sp-list": SPList,
 };

@@ -25,6 +25,19 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
         return buildResponseEntity(integrationError);
     }
 
+    /**
+     * Handles EntityUpdateException.
+     * 
+     * @param ex the EntityUpdateException
+     * @return the IntegrationError object
+     */
+    @ExceptionHandler(EntityUpdateException.class)
+    protected ResponseEntity<Object> handleEntityUpdate(EntityUpdateException ex) {
+        IntegrationError integrationError = new IntegrationError(HttpStatus.CONFLICT);
+        integrationError.setMessage(ex.getMessage());
+        return buildResponseEntity(integrationError);
+    }
+
      /**
      * Handles MethodArgumentTypeMismatchException.
      *

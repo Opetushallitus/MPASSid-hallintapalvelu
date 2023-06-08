@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface ServiceProviderRepository extends JpaRepository<ServiceProvider, Long> {
     @Query("SELECT DISTINCT sp.type FROM ServiceProvider sp")
     List<String> findDistinctType();
+    ServiceProvider findByEntityId(String entityId);
+    ServiceProvider findByClientId(String clientId);
 }
