@@ -63,6 +63,7 @@ public class IntegrationSpecificationTests {
         Integration spInt = new Integration(66L, LocalDate.now(), ce, LocalDate.of(2023, 6, 30),
                 0, spDiscoveryInformation, spOrg,
                 "spContactAddress@example.net");
+        integrationRepository.save(spInt);
 
         wilma.setFlowName("wilmaFlowname");
         configurationEntity.setIdp(wilma);
@@ -76,7 +77,7 @@ public class IntegrationSpecificationTests {
         integrationRepository.save(integration);
 
         // ServiceProvider
-        
+
         Organization spOrganization = new Organization("Organization xyz", "123456-9", "1.2.3.4.5.6.7.9");
         organizationRepository.save(spOrganization);
 
