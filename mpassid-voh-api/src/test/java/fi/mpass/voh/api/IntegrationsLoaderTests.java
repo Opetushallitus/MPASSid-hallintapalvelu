@@ -15,6 +15,7 @@ import fi.mpass.voh.api.config.IntegrationLoader;
 import fi.mpass.voh.api.config.ServiceProvidersLoader;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationGroupRepository;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.sp.ServiceProviderRepository;
@@ -29,6 +30,9 @@ public class IntegrationsLoaderTests {
 
     @Autowired
     IntegrationRepository repository;
+
+    @Autowired
+    IntegrationGroupRepository groupRepository;
 
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
@@ -48,7 +52,7 @@ public class IntegrationsLoaderTests {
     public void testGsuiteLoader() throws Exception {
         String oidcLocation = "oidc_services.json";
         String samlLocation = "saml_services.json";
-        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, groupRepository, service, loader);
         serviceLoader.run(oidcLocation);
         serviceLoader.run(samlLocation);
 

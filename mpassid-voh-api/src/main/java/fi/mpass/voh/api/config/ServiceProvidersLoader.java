@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationGroup;
+import fi.mpass.voh.api.integration.IntegrationGroupRepository;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -31,7 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Profile("!default")
-@Order(value = Ordered.HIGHEST_PRECEDENCE)
+@Order(2)
 @Component
 public class ServiceProvidersLoader implements CommandLineRunner {
     private final static Logger logger = LoggerFactory.getLogger(ServiceProvidersLoader.class);
@@ -43,14 +45,18 @@ public class ServiceProvidersLoader implements CommandLineRunner {
     IntegrationRepository integrationRepository;
 
     @Autowired
+    IntegrationGroupRepository integrationGroupRepository;
+
+    @Autowired
     OrganizationService organizationService;
 
     @Autowired
     ResourceLoader resourceLoader;
 
-    public ServiceProvidersLoader(IntegrationRepository repository, OrganizationService service,
+    public ServiceProvidersLoader(IntegrationRepository repository, IntegrationGroupRepository groupRepository, OrganizationService service,
             ResourceLoader loader) {
         this.integrationRepository = repository;
+        this.integrationGroupRepository = groupRepository;
         this.organizationService = service;
         this.resourceLoader = loader;
         if (this.serviceProvidersInput == null) {
@@ -59,7 +65,8 @@ public class ServiceProvidersLoader implements CommandLineRunner {
     }
 
     /**
-     * Loads ServiceProviders from the given, configurable resource (a list of inputs).
+     * Loads ServiceProviders from the given, configurable resource (a list of
+     * inputs).
      * Assumes to be run before IntegrationLoader ordered by @Order annotation.
      */
     @Override
@@ -127,6 +134,18 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                         organization = organizationService.saveOrganization(organization);
                     } catch (Exception e) {
                         logger.error("Organization Exception: " + e);
+                    }
+
+                    JsonNode groupNode = arrayNode.get("integrationGroup");
+                    if (groupNode != null) {
+                        if (groupNode.get("id") != null) {
+                            Optional<IntegrationGroup> group = integrationGroupRepository
+                                    .findById(groupNode.get("id").asLong());
+                            if (group.isPresent()) {
+                                logger.debug("Integration group: " + groupNode.get("id"));
+                                integration.addGroup(group.get());
+                            }
+                        }
                     }
 
                     integration.setOrganization(organization);

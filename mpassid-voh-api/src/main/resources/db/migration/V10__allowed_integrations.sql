@@ -12,4 +12,4 @@ add
 alter table
     if exists allowed_integrations
 add
-    constraint FKptcetqic78q8oyy3k8dt foreign key (integration_id2) references integration;
+    constraint FKjwtg44w2icm5t6mhqans727nk foreign key (integration_id2) references integration;

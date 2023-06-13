@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 
+import fi.mpass.voh.api.config.IntegrationGroupLoader;
 import fi.mpass.voh.api.config.ServiceProvidersLoader;
+import fi.mpass.voh.api.integration.IntegrationGroupRepository;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.organization.OrganizationService;
 
@@ -20,6 +22,9 @@ public class ServiceProvidersLoaderTests {
 
     @Autowired
     IntegrationRepository repository;
+
+    @Autowired
+    IntegrationGroupRepository groupRepository;
 
     @Autowired
     OrganizationService service;
@@ -35,7 +40,7 @@ public class ServiceProvidersLoaderTests {
     @Test
     public void testOidcLoader() throws Exception {
         String location = "oidc_services.json";
-        serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        serviceLoader = new ServiceProvidersLoader(repository, groupRepository, service, loader);
         serviceLoader.run(location);
 
         assertEquals(3, repository.findAll().size());
@@ -44,9 +49,22 @@ public class ServiceProvidersLoaderTests {
     @Test
     public void testSamlLoader() throws Exception {
         String location = "saml_services.json";
-        serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        serviceLoader = new ServiceProvidersLoader(repository, groupRepository, service, loader);
         serviceLoader.run(location);
 
         assertEquals(2, repository.findAll().size());
+    }
+
+    @Test
+    public void testOidcGroupLoader() throws Exception {
+        String groupsLocation = "integration_groups.json";
+        IntegrationGroupLoader groupLoader = new IntegrationGroupLoader(groupRepository, loader);
+        groupLoader.run(groupsLocation);
+
+        String location = "oidc_services_with_groups.json";
+        serviceLoader = new ServiceProvidersLoader(repository, groupRepository, service, loader);
+        serviceLoader.run(location);
+
+        assertEquals(3, repository.findAll().size());
     }
 }

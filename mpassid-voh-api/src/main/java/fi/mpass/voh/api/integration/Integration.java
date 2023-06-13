@@ -43,9 +43,9 @@ public class Integration {
     @JoinColumn(name = "organization_oid", referencedColumnName = "oid")
     private Organization organization;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "integration_group_id", referencedColumnName = "id")
-    private IntegrationGroup integrationGroup;
+    @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE })
+    @JoinTable(name = "integrationsGroups", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_group_id", referencedColumnName = "id"))
+    private Set<IntegrationGroup> integrationGroups = new HashSet<>();
 
     @JsonManagedReference
     // TODO cascade review
@@ -130,8 +130,9 @@ public class Integration {
 
     /**
      * Gets the deployment phase.
+     * 
      * @return The {@link int} representing the deployment phase.
-     * 0 testing, 1 production.
+     *         0 testing, 1 production.
      */
     public int getDeploymentPhase() {
         return this.deploymentPhase;
@@ -187,6 +188,14 @@ public class Integration {
     }
 
     public void addAllowing(Integration integration) {
-            this.allowingIntegrations.add(integration);
+        this.allowingIntegrations.add(integration);
+    }
+
+    public void addGroup(IntegrationGroup integrationGroup) {
+        this.integrationGroups.add(integrationGroup);
+    }
+
+    public Set<IntegrationGroup> getIntegrationGroups() {
+        return this.integrationGroups;
     }
 }

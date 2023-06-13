@@ -4,6 +4,7 @@ create table if not exists integration (
     configuration_entity_id int8,
     discovery_information_id int8,
     organization_oid varchar(255),
+    version timestamp,
     primary key (id)
 );
 
