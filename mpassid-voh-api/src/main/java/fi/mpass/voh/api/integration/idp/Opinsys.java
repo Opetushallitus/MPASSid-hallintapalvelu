@@ -3,8 +3,11 @@ package fi.mpass.voh.api.integration.idp;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.hibernate.envers.Audited;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@Audited
 @Entity
 @DiscriminatorValue("opinsys")
 @JsonIgnoreProperties(ignoreUnknown = true)

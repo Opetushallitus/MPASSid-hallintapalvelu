@@ -5,6 +5,10 @@ import java.util.Set;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
+
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
 import fi.mpass.voh.api.integration.sp.ServiceProvider;
-
+@Audited
 @Entity
 @JsonInclude(Include.NON_NULL)
 public class ConfigurationEntity {
@@ -30,6 +34,7 @@ public class ConfigurationEntity {
 
     @JsonManagedReference
     @OneToMany(mappedBy="configurationEntity", cascade = CascadeType.ALL)
+    @NotAudited
     private Set<Attribute> attributes;
     
     @OneToOne(mappedBy = "configurationEntity", cascade = CascadeType.ALL)

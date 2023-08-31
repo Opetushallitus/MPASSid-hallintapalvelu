@@ -4,8 +4,11 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.hibernate.envers.Audited;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@Audited
 @Entity
 @DiscriminatorValue("wilma")
 @JsonIgnoreProperties(ignoreUnknown = true)

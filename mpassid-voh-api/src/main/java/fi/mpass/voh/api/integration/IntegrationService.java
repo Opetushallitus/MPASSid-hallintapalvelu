@@ -1,16 +1,24 @@
 package fi.mpass.voh.api.integration;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.persistence.OptimisticLockException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revision;
+import org.springframework.data.history.Revisions;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -183,17 +191,92 @@ public class IntegrationService {
     }
   }
 
+  /**
+   * The method queries service providers by id.
+   * Requires authentication yet not organizational authorization.
+   * 
+   * @param id the id of the Integration
+   * @return Integration
+   * @throws EntityNotFoundException
+   */
+  public Optional<Integration> getSPIntegrationById(Long id) {
+
+    IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+    if (id != null) {
+      builder.withEqualAnd(Category.INTEGRATION, "id", id);
+    } else {
+      return Optional.empty();
+    }
+
+    builder.withEqualAnd(Category.ROLE, "role", "sp");
+
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null) {
+
+      Specification<Integration> spec = builder.build();
+
+      Optional<Integration> integration = integrationRepository.findOne(spec);
+      if (!integration.isPresent()) {
+        throw new EntityNotFoundException("Not found Integration " + id);
+      }
+      return integration;
+    } else {
+      throw new EntityNotFoundException("Authentication not successful");
+    }
+  }
+
   public Integration updateIntegration(Long id, Integration integration) {
 
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
       try {
-        integration = integrationRepository.saveAndFlush(integration);
+        logger.debug("Saving changes for integration #" + existingIntegration.getId());
+        if (integration.getServiceContactAddress() != null) {
+          existingIntegration.setServiceContactAddress(integration.getServiceContactAddress());
+        }
+        // updates institution types
+        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null
+            && integration.getConfigurationEntity().getIdp().getInstitutionTypes() != null) {
+          existingIntegration.getConfigurationEntity().getIdp()
+              .setInstitutionTypes(integration.getConfigurationEntity().getIdp().getInstitutionTypes());
+        }
+        // updates allowed integrations
+        if (integration.getAllowedIntegrations() != null) {
+          existingIntegration.setAllowedIntegrations(new HashSet<Integration>());
+          for (Integration allowedIntegration : integration.getAllowedIntegrations()) {
+            Integration existingAllowedIntegration = getSPIntegrationById(allowedIntegration.getId()).get();
+            existingIntegration.addAllowed(existingAllowedIntegration);
+            logger.debug("Updated #" + existingIntegration.getId() + ": Allowed integration #" + allowedIntegration.getId());
+          }
+        }
+        integration = integrationRepository.saveAndFlush(existingIntegration);
       } catch (OptimisticLockException ole) {
-        throw new EntityUpdateException("Integration update not successful. Please re-update.");
+        throw new EntityUpdateException("Integration #" + existingIntegration.getId() + " update not successful. Please re-update.");
       }
       return integration;
     }
     return existingIntegration;
+  }
+
+  public List<Integration> getIntegrationsSince(LocalDateTime timestamp) {
+    Date since = Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
+    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfter(since);
+    for (Integration integration : integrations) {
+      List<Revision<Integer, Integration>> revisions = findRevisionsSince(integration.getId(), timestamp);
+      logger.debug(
+          "Integration: " + integration.getId() + " Number of revisions: " + revisions.size() + " since " + timestamp);
+    }
+    return integrations;
+  }
+
+  private List<Revision<Integer, Integration>> findRevisionsSince(Long id, LocalDateTime since) {
+    Revisions<Integer, Integration> integrationRevisions = integrationRepository.findRevisions(id);
+    if (integrationRevisions != null) {
+      return integrationRevisions.getContent().stream().filter(
+          revision -> revision.getEntity().getLastUpdatedOn().getTime() > Timestamp.valueOf(since).getTime())
+          .collect(Collectors.toList());
+    }
+    return new ArrayList<Revision<Integer, Integration>>();
   }
 }
