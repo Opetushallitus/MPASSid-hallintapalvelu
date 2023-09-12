@@ -66,10 +66,16 @@ public class IntegrationController {
             @RequestParam(required = false, value = "type") String filterByType,
             @RequestParam(required = false, value = "role") String role,
             @RequestParam(required = false, value = "deploymentPhase") String deploymentPhase,
+            @RequestParam(required = false, value = "referenceIntegration") Long referenceIntegration,
             Pageable pageable) {
         try {
-            return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase,
-                    pageable);
+            if (!(referenceIntegration == null)) {
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, referenceIntegration,
+                        pageable);
+            } else {
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase,
+                        pageable);
+            }
         } catch (PropertyReferenceException exc) {
             throw new ResponseStatusException(
                     HttpStatus.SC_NOT_FOUND, "Integration Not Found", exc);
@@ -92,10 +98,10 @@ public class IntegrationController {
     @Operation(summary = "Update the specific integration")
     @PreAuthorize("hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")), 
-        @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
-        @ApiResponse(responseCode = "405", description = "Integration update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
-        @ApiResponse(responseCode = "409", description = "Integration update conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")) 
+            @ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "405", description = "Integration update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "409", description = "Integration update conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
     @PutMapping("{id}")
     @JsonView(value = IntegrationView.Default.class)
@@ -112,7 +118,8 @@ public class IntegrationController {
     })
     @GetMapping("/since/{timestamp}")
     @JsonView(value = IntegrationView.Default.class)
-    public List<Integration> getIntegrationsSince(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timestamp) {
+    public List<Integration> getIntegrationsSince(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timestamp) {
         return integrationService.getIntegrationsSince(timestamp);
     }
 }
