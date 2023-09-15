@@ -7,9 +7,8 @@ import {
   Alert,
   AlertTitle,
   Box,
-  Grid,
   Link as MuiLink,
-  Typography,
+  Container,
   Tab,
   Tabs
 } from "@mui/material";
@@ -41,9 +40,12 @@ function TabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
+        <Container>
+          <br></br>
+          <Box>
+            {children}
+          </Box>
+        </Container>
       )}
     </div>
   );

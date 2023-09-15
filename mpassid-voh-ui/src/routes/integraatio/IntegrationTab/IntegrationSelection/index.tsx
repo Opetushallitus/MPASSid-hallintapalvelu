@@ -5,14 +5,13 @@ import { roles } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
-import { defineMessages, FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import {
   Alert,
   AlertTitle,
   Box,
   Button,
   FormControlLabel,
-  ListSubheader,
   Snackbar,
   Stack,
   Switch,
@@ -28,8 +27,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link, useSearchParams } from "react-router-dom";
 import type { DataRowProps } from "../DataRow";
-import { ChangeEvent, Component, SetStateAction, useCallback, useEffect, useState } from "react";
-import React from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import RowsPerPage from "@/utils/components/RowsPerPage";
 import SearchForm from "./../../../home/SearchForm";
 import { usePaginationPage } from "@/utils/components/pagination";
@@ -54,7 +52,7 @@ export default function IntegrationSelection({ id }: Props) {
     vertical: 'bottom',
     horizontal: 'center',
   }
-  const [snackbarState, setSnackbarState] = React.useState<boolean>(false);
+  const [snackbarState, setSnackbarState] = useState<boolean>(false);
   
   useEffect(() => {
     setNewIntegration(integration);

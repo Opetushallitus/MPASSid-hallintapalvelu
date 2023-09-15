@@ -38,7 +38,7 @@ export default function BasicPopover({ id }: Props) {
     };
 
     return (
-        <div>
+        <>
             <Button aria-describedby={popoverId} variant="contained" onClick={handleClick}>
                 Sallitut palvelut
             </Button>
@@ -61,6 +61,6 @@ export default function BasicPopover({ id }: Props) {
                             </div>
                         ) : [] }
             </Popover>
-        </div>
+        </>
     );
 }

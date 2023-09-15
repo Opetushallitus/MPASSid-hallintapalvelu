@@ -13,29 +13,19 @@ import {
   Typography,
 } from "@mui/material";
 import { FormattedMessage } from "react-intl";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Attributes from "./Attributes";
 import type { DataRowProps } from "../DataRow";
 import { DataRow } from "../DataRow";
 import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";
-import { useEffect } from "react";
-
 interface Props {
   id: number;
 }
 
 export default function IntegrationDetails({ id }: Props) {
   const [error, integration] = useIntegrationSafe({ id });
-  let [searchParams, setSearchParams] = useSearchParams();
-
-  useEffect(() => {
-    let currentRole=searchParams.get("rooli") ?? "";
-    if(currentRole!=="sp") {
-      setSearchParams("rooli=sp")
-    }
-  }, [id]);
 
   if (error?.response?.status === 404) {
     return (
@@ -66,7 +56,8 @@ export default function IntegrationDetails({ id }: Props) {
 
   return (
     <>
-      <Typography variant="h2" gutterBottom>
+    
+      <Typography component={"div"} variant="h2" gutterBottom >
         <FormattedMessage defaultMessage="Organisaation tiedot" />
       </Typography>
       <Grid container spacing={2} mb={3}>
@@ -115,42 +106,42 @@ export default function IntegrationDetails({ id }: Props) {
         </>
       )}
 
-{(role === "idp" || role === "sp" ) && (
-  <>
-      <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Integraation perustiedot" />
-      </Typography>
+      {(role === "idp" || role === "sp" ) && (
+        <>
+            <Typography variant="h2" gutterBottom>
+              <FormattedMessage defaultMessage="Integraation perustiedot" />
+            </Typography>
 
-      <Grid container spacing={2} mb={3}>
-        <DataRow object={integration} path="id" />
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="Jäsentyyppi" />
-        </Grid>
-        <Grid item xs={8}>
-          <FormattedMessage {...typeAbbreviations[role]} /> (
-          <FormattedMessage {...typeTooltips[role]} />)
-        </Grid>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="Yksilöllinen tunniste" />
-        </Grid>
-        <Grid item xs={8}>
-          <UniqueId
-            configurationEntity={integration.configurationEntity!}
-            role={role}
-            ValueComponent={UniqueIdValue}
-          />
-        </Grid>
-             
-          {role === "sp" && (
-              <DataRow
-              object={integration}
-              path="integrationGroups"
-              type="service-list"
-            />
-          )}
-      </Grid>
-    </>
-)}    
+            <Grid container spacing={2} mb={3}>
+              <DataRow object={integration} path="id" />
+              <Grid item xs={4}>
+                <FormattedMessage defaultMessage="Jäsentyyppi" />
+              </Grid>
+              <Grid item xs={8}>
+                <FormattedMessage {...typeAbbreviations[role]} /> (
+                <FormattedMessage {...typeTooltips[role]} />)
+              </Grid>
+              <Grid item xs={4}>
+                <FormattedMessage defaultMessage="Yksilöllinen tunniste" />
+              </Grid>
+              <Grid item xs={8}>
+                <UniqueId
+                  configurationEntity={integration.configurationEntity!}
+                  role={role}
+                  ValueComponent={UniqueIdValue}
+                />
+              </Grid>
+                  
+                {role === "sp" && (
+                    <DataRow
+                    object={integration}
+                    path="integrationGroups"
+                    type="service-list"
+                  />
+                )}
+            </Grid>
+          </>
+      )}    
       <Role integration={integration} />
 
       <Metadata
