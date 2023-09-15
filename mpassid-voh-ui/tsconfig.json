@@ -1,6 +1,7 @@
 {
   "extends": "@visma/tsconfig/react-app-vite.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],

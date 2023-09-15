@@ -66,6 +66,12 @@ export default function IntegrationTab({ id }: Props) {
     setValue(newValue);
   };
 
+  useEffect(() => {
+    if((role==="sp"||role==="set")&&value===1) {
+      setValue(0);  
+    }
+  }, [id, role, value]);
+
 
   if (error?.response?.status === 404) {
     return (
@@ -93,9 +99,14 @@ export default function IntegrationTab({ id }: Props) {
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          {(role === "idp" || role === "sp") && (
             <Tab label={<FormattedMessage defaultMessage="Integraatiotiedot" />} {...a11yProps(0)} />
+          )}
             {role === "idp" && (
             <Tab label={<FormattedMessage defaultMessage="Integraatiovalinnat" />} {...a11yProps(1)} />
+            )}
+            {role === "set" && (
+            <Tab label={<FormattedMessage defaultMessage="Palvelutiedot" />} {...a11yProps(0)} />
             )}
           </Tabs>
         </Box>

@@ -1,4 +1,4 @@
-export const roles = ["idp", "sp"] as const;
+export const roles = ["idp", "sp", "set"] as const;
 export const openIntegrationsSessionStorageKey =
   "mpassid-open-integration-tabs";
 export const attributePreferredOrder = ["firstName", "surname"]

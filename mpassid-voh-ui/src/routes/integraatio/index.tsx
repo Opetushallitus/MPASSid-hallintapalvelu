@@ -3,7 +3,7 @@ import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
-import { Box, Divider, Paper, TableContainer } from "@mui/material";
+import { Box, Paper, TableContainer } from "@mui/material";
 import { useLayoutEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { useParams } from "react-router-dom";

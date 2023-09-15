@@ -2,6 +2,7 @@ import type { Components } from "@/api";
 import { getRole } from "../../../../home/IntegrationsTable";
 import IdentityProvider from "./IdentityProvider";
 import ServiceProvider from "./ServiceProvider";
+import SetProvider from "./SetProvider";
 
 interface Props {
   integration: Components.Schemas.Integration;
@@ -10,6 +11,7 @@ interface Props {
 const roleComponents = {
   idp: IdentityProvider,
   sp: ServiceProvider,
+  set: SetProvider
 };
 
 export default function Role({ integration }: Props) {

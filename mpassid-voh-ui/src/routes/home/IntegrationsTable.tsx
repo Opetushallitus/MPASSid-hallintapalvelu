@@ -32,6 +32,9 @@ export const typeAbbreviations = defineMessages({
     defaultMessage: "OKJ",
   },
   sp: {
+    defaultMessage: "PI",
+  },
+  set: {
     defaultMessage: "PT",
   },
 });
@@ -41,6 +44,9 @@ export const typeTooltips = defineMessages({
     defaultMessage: "Opetuksen ja koulutuksen järjestäjä",
   },
   sp: {
+    defaultMessage: "Palveluintegraatio",
+  },
+  set: {
     defaultMessage: "Palveluntarjoaja",
   },
 });
@@ -48,6 +54,7 @@ export const typeTooltips = defineMessages({
 const typeColors = {
   idp: "primary",
   sp: "success",
+  set: "success"
 } as const;
 
 export default function IntegrationsTable() {
@@ -244,6 +251,18 @@ const palveluCellContents = {
         <UniqueId
           configurationEntity={props}
           role="sp"
+          ValueComponent={UniqueIdValue}
+        />
+      </Stack>
+    );
+  },
+  set: function Set(props: Components.Schemas.ConfigurationEntity) {
+    return (
+      <Stack>
+        {props.set!.name}
+        <UniqueId
+          configurationEntity={props}
+          role="set"
           ValueComponent={UniqueIdValue}
         />
       </Stack>

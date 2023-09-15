@@ -1,9 +1,12 @@
-import { Box, Grid, Paper, Tooltip } from "@mui/material";
+import { Box, Button, Grid, Paper, Tooltip } from "@mui/material";
 import { get, last, toPath } from "lodash";
 import type { PropsWithChildren } from "react";
 import { cloneElement } from "react";
 import type { MessageDescriptor } from "react-intl";
 import { FormattedMessage, useIntl } from "react-intl";
+import type { Components } from "@/api";
+import { Link } from "react-router-dom";
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 export function DataRowContainer({
   children,
@@ -130,11 +133,63 @@ export function TextList({ value = [] }: { value?: string[] }) {
   );
 }
 
+export function ServiceList({ value = [] }: { value?: { name?: String ; id?: BigInteger;  }[] }) {
+  return (
+    <>
+      {value.length
+        ? value.map((value, index) => <div key={index}>{value.name}</div>)
+        : "–"}
+    </>
+  );
+}
+
+export function SetList({ value = [] }: { value?: Components.Schemas.Integration[] }) {
+
+  return (
+    <>
+      {value.length
+        ? value.map((value, index) => <div key={index}><Link to={`/integraatio/${value.id}`}><Button variant="text" startIcon={<OpenInNewIcon />}>{getName(value.configurationEntity?.sp)}</Button></Link> ({getType(value.configurationEntity?.sp)})</div>)
+        : "–"}
+    </>
+  );
+}
+type ServiceProvider = Components.Schemas.OidcServiceProvider | Components.Schemas.SamlServiceProvider;
+
+const getName = (sp: ServiceProvider|undefined) => {
+  if(sp !== undefined) {
+    if ("clientId" in sp) {
+      return sp.clientId;
+    } else if ("entityId" in sp) {
+        return sp.entityId;
+    } else {
+        return sp.name;
+    }
+  } else {
+    return "";
+  }
+  
+};
+
+const getType = (sp: ServiceProvider|undefined) => {
+  if(sp !== undefined) {
+    if ("clientId" in sp) {
+      return "Client-ID";
+    } else if ("entityId" in sp) {
+        return "Entity-ID";
+    } else {
+        return "Name";
+    }
+  } else {
+    return "";
+  }
+  
+};
+
 export function SPList({ value = [] }: { value?: { configurationEntity?: { sp?: { name?: String } }; organization?: { name?: String };  }[] } ) {
   return (
     <>
       {value.length
-        ? value.map((value, index) => <div>{value?.configurationEntity?.sp?.name||"-"} ({value?.organization?.name||"-"})</div>)
+        ? value.map((value, index) => <div key={index}>{value?.configurationEntity?.sp?.name||"-"} ({value?.organization?.name||"-"})</div>)
         : "–"}
     </>
   );
@@ -147,4 +202,6 @@ export const typeComponents = {
   text: Text,
   "text-list": TextList,
   "sp-list": SPList,
+  "service-list": ServiceList,
+  "set-list": SetList,
 };

@@ -62,6 +62,15 @@ export default function UniqueId({
         </DataRowContainer>
       ),
     },
+    set: {
+      saml,
+      saml2: saml,
+      oidc: () => (
+        <DataRowContainer object={configurationEntity} path="sp.clientId">
+          <ValueComponent />
+        </DataRowContainer>
+      ),
+    },
   }[role];
 
   const path = provider[type as keyof typeof provider];

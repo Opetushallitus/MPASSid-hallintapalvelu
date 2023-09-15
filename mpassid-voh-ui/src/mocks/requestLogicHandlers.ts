@@ -3,16 +3,25 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
+import exampleData from "../../schemas/response_1694761791754.json";
 
 export { definition };
 
+/*
 let allIntegrations = definition.paths["/api/v1/integration/list"].get
   .responses["200"].content["application/json"].examples.integrations
   .value as Components.Schemas.Integration[];
+*/
+let allIntegrations = exampleData as unknown as Components.Schemas.Integration[];
+
 
 const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
   "200"
 ].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
+const updateIntegration = definition.paths["/api/v1/integration/{id}"].put.responses["200"].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
 };
 
@@ -21,7 +30,10 @@ const searchIntegrations: { value?: Components.Schemas.PageIntegration } =
     "application/json"
   ].examples.searchIntegrations;
 
-allIntegrations = Array(21).fill(allIntegrations).flat();
+
+  
+
+allIntegrations = Array(1).fill(allIntegrations).flat();
 
 allIntegrations.push(
   ...allIntegrations.map((row) => ({
@@ -32,7 +44,7 @@ allIntegrations.push(
     },
     deploymentPhase: 1,
     organization: {
-      ...row.organization,
+      ...row?.organization,
       //name: `${row.organization!.name} (julkaistu)`,
     },
   }))
@@ -41,7 +53,7 @@ allIntegrations.push(
 let id = 1000;
 allIntegrations = allIntegrations.map((row) => ({
   ...row,
-  id: id++,
+  
 }));
 
 const defaults = {
@@ -50,6 +62,9 @@ const defaults = {
 };
 
 export default {
+  updateIntegration(request) {
+    updateIntegration.value = request.requestBody
+  },
   getIntegration(request) {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);

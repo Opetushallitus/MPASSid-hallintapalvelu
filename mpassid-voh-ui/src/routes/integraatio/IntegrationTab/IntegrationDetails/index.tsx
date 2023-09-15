@@ -13,13 +13,14 @@ import {
   Typography,
 } from "@mui/material";
 import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Attributes from "./Attributes";
 import type { DataRowProps } from "../DataRow";
 import { DataRow } from "../DataRow";
 import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";
+import { useEffect } from "react";
 
 interface Props {
   id: number;
@@ -27,6 +28,14 @@ interface Props {
 
 export default function IntegrationDetails({ id }: Props) {
   const [error, integration] = useIntegrationSafe({ id });
+  let [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    let currentRole=searchParams.get("rooli") ?? "";
+    if(currentRole!=="sp") {
+      setSearchParams("rooli=sp")
+    }
+  }, [id]);
 
   if (error?.response?.status === 404) {
     return (
@@ -106,9 +115,12 @@ export default function IntegrationDetails({ id }: Props) {
         </>
       )}
 
+{(role === "idp" || role === "sp" ) && (
+  <>
       <Typography variant="h2" gutterBottom>
         <FormattedMessage defaultMessage="Integraation perustiedot" />
       </Typography>
+
       <Grid container spacing={2} mb={3}>
         <DataRow object={integration} path="id" />
         <Grid item xs={4}>
@@ -128,8 +140,17 @@ export default function IntegrationDetails({ id }: Props) {
             ValueComponent={UniqueIdValue}
           />
         </Grid>
+             
+          {role === "sp" && (
+              <DataRow
+              object={integration}
+              path="integrationGroups"
+              type="service-list"
+            />
+          )}
       </Grid>
-
+    </>
+)}    
       <Role integration={integration} />
 
       <Metadata
@@ -145,7 +166,7 @@ export default function IntegrationDetails({ id }: Props) {
           />
         </ErrorBoundary>
       </Grid>
-
+      
       {hasAttributes && (
         <>
           <Typography variant="h2" gutterBottom>
@@ -159,6 +180,7 @@ export default function IntegrationDetails({ id }: Props) {
           </ErrorBoundary>
         </>
       )}
+      
     </>
   );
 }
