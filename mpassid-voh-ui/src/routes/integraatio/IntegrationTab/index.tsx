@@ -1,5 +1,4 @@
 import { useIntegrationSafe } from "@/api";
-import ErrorBoundary from "@/components/ErrorBoundary";
 import {
   getRole,
 } from "@/routes/home/IntegrationsTable";
@@ -10,14 +9,15 @@ import {
   Link as MuiLink,
   Container,
   Tab,
-  Tabs
+  Tabs,
+  CircularProgress
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Link } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import IntegrationSelection from "./IntegrationSelection";
-
+import type { Components } from "@/api";
 interface Props {
   id: number;
 }
@@ -59,21 +59,37 @@ function a11yProps(index: number) {
 }
 
 export default function IntegrationTab({ id }: Props) {
-  const [error, integration] = useIntegrationSafe({ id });
+  const [error, origInteg] = useIntegrationSafe({ id });
   const [value, setValue] = useState(0);
+  const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration | undefined>(undefined);
+  const [integration, setIntegration] = useState<Components.Schemas.Integration| undefined>(undefined);
+  const [activateAllServices, setActivateAllServices] = useState(false);
 
-  const role = getRole(integration);
+  const role = getRole(origInteg);
   
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   useEffect(() => {
+    if(origInteg!==undefined) {
+      setIntegration(origInteg)
+    }
+  }, [origInteg]);
+
+  useEffect(() => {
+    if(integration?.allowedIntegrations === undefined || integration?.allowedIntegrations?.length===0) {
+      setActivateAllServices(true);
+    } else {
+      setActivateAllServices(false);
+    }
+  }, [integration]);
+
+  useEffect(() => {
     if((role==="sp"||role==="set")&&value===1) {
       setValue(0);  
     }
   }, [id, role, value]);
-
 
   if (error?.response?.status === 404) {
     return (
@@ -94,9 +110,11 @@ export default function IntegrationTab({ id }: Props) {
     );
   }
 
-  
-  
-    return (
+  if (integration === undefined) {
+    return (<CircularProgress />)
+  }
+    
+  return (
       <>
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -116,7 +134,15 @@ export default function IntegrationTab({ id }: Props) {
           <IntegrationDetails id={Number(integration.id)} />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          <IntegrationSelection id={Number(integration.id)} />
+          <IntegrationSelection 
+                  integration={integration} 
+                  newIntegration={newIntegration} 
+                  setNewIntegration={setNewIntegration} 
+                  setIntegration={setIntegration}
+                  activateAllServices={activateAllServices} 
+                  setActivateAllServices={setActivateAllServices}
+
+          />
         </TabPanel>
       </Box>
       </>

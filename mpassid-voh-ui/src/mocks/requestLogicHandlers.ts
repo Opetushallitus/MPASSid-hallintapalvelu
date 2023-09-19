@@ -3,7 +3,7 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response_1694761791754.json";
+import exampleData from "../../schemas/response.json";
 
 export { definition };
 
@@ -50,12 +50,6 @@ allIntegrations.push(
   }))
 );
 
-let id = 1000;
-allIntegrations = allIntegrations.map((row) => ({
-  ...row,
-  
-}));
-
 const defaults = {
   page: 1,
   size: 25,
@@ -63,6 +57,11 @@ const defaults = {
 
 export default {
   updateIntegration(request) {
+    const id = Number(request.params.id);
+    const index=allIntegrations.map(i=>i.id).indexOf(id);
+    if (index !== -1) {
+      allIntegrations[index] = request.requestBody;
+    }
     updateIntegration.value = request.requestBody
   },
   getIntegration(request) {

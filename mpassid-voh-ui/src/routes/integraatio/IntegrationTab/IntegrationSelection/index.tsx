@@ -1,4 +1,4 @@
-import { useIntegrationSafe, updateIntegration } from "@/api";
+import { updateIntegration } from "@/api";
 import type { Components } from "@/api";
 import { useIntegrationsSpecSearchPageable } from "@/api";
 import { roles } from "@/config";
@@ -21,30 +21,35 @@ import {
   TableHead,
   TableRow,
   Tooltip,
-  Link as MuiLink,
   Typography,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import type { DataRowProps } from "../DataRow";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState, Dispatch } from "react";
 import RowsPerPage from "@/utils/components/RowsPerPage";
 import SearchForm from "./../../../home/SearchForm";
 import { usePaginationPage } from "@/utils/components/pagination";
-
-
 interface Props {
-  id: number;
+  integration: Components.Schemas.Integration;
+  newIntegration: Components.Schemas.Integration;
+  setNewIntegration: Dispatch<Components.Schemas.Integration>
+  setIntegration: Dispatch<Components.Schemas.Integration>
+  activateAllServices: boolean
+  setActivateAllServices: Dispatch<boolean>
 }
 
-export default function IntegrationSelection({ id }: Props) {
+const eqCheck = (integ1: Components.Schemas.Integration,integ2: Components.Schemas.Integration) =>  {
+    const list1 = integ1.allowedIntegrations?.map(i=>i.id) || [];
+    const list2 = integ2.allowedIntegrations?.map(i=>i.id) || [];
+    return list1.length === list2.length&&[...list1].filter(id => list2.indexOf(id)>-1).length === list1.length;
+}
+export default function IntegrationSelection({ integration, newIntegration, setNewIntegration, setIntegration, activateAllServices, setActivateAllServices }: Props) {
   
-  const [error, integration] = useIntegrationSafe({ id });
   const { content, totalPages } = useIntegrationsSpecSearchPageable();
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration | undefined>(undefined);
-  const [activateAllServices, setActivateAllServices] = useState(false);
+  
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
     horizontal: 'left' | 'center' | 'right';
@@ -55,25 +60,34 @@ export default function IntegrationSelection({ id }: Props) {
   const [snackbarState, setSnackbarState] = useState<boolean>(false);
   
   useEffect(() => {
-    setNewIntegration(integration);
-    setSnackbarState(false);
-    if(integration?.allowedIntegrations === undefined || integration?.allowedIntegrations?.length===0) {
-      setActivateAllServices(true);
-    } else {
-      setActivateAllServices(false);
+    if((integration !== undefined)&&(newIntegration?.id !== integration?.id)) {
+      setNewIntegration(integration);
     }
-  }, [integration]);
+  }, [integration,newIntegration,setNewIntegration,setActivateAllServices]);
 
-  
+  useEffect(() => {
+    if(integration!==undefined&&newIntegration!==undefined&& eqCheck(integration,newIntegration)) {
+      setSnackbarState(false);
+    } else {
+      setSnackbarState(true);
+    }
+  }, [integration,newIntegration,setSnackbarState,]);
 
   useEffect(() => {
     if((searchParams.get("rooli") ?? "")!=="set") {
       setSearchParams("rooli=set")
     }
-  }, [id,searchParams,setSearchParams]);
+  }, [integration,searchParams,setSearchParams]);
 
   const handleSwitchAllChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSnackbarState(true);
+    const copy = structuredClone(newIntegration)
+
+    if(!activateAllServices) {
+      copy.allowedIntegrations = [];
+    } else {
+      copy.allowedIntegrations = structuredClone(integration.allowedIntegrations);
+    }
+    setNewIntegration(copy);
     setActivateAllServices(!activateAllServices);
   };
 
@@ -95,15 +109,12 @@ export default function IntegrationSelection({ id }: Props) {
     setSearchParams((searchParams) => resetPage(copy(searchParams)));
   }
 
-  const saveIntegrations = () => {
-    //Hae uusi integration
-    //Varmista ettei ActivateAllServices=false ja allowedIntegrations length = 0, jos on niin notice ettei tuo ole mahdollista
+  const saveIntegrations = async () => {
     if(newIntegration!==undefined) {
-      const updateResponse = updateIntegration({ id },newIntegration);
-      setSnackbarState(false);
+      const id = newIntegration.id!;
+      const updateResponse = await updateIntegration({ id },newIntegration);
+      setIntegration(updateResponse);
     }
-    
-  
   };
 
   const clearIntegrations = () => {
@@ -127,48 +138,27 @@ export default function IntegrationSelection({ id }: Props) {
   };
 
   const handleSwitchChange = (row: Components.Schemas.Integration) => {
+      
     const copy = structuredClone(newIntegration)
 
-      if(copy.allowedIntegrations === undefined) {
-        copy.allowedIntegrations = [];
-      }
-    
-      const index:number|undefined = copy.allowedIntegrations?.map((i:Components.Schemas.Integration)=>i.id).indexOf(row.id);
-      if(index!=undefined) {
-        if (index > -1) {
-          copy?.allowedIntegrations?.splice(index, 1);
-        } else {
-          const newServiceIntgeration:Components.Schemas.Integration={};
-          newServiceIntgeration.id=row.id;
-          copy?.allowedIntegrations?.push(newServiceIntgeration);
-        }  
-        setNewIntegration(copy);
-        setSnackbarState(true);
-    
+    if(copy.allowedIntegrations === undefined) {
+      copy.allowedIntegrations = [];
+    }
+  
+    const index:number|undefined = copy.allowedIntegrations?.map((i:Components.Schemas.Integration)=>i.id).indexOf(row.id);
+    if(index!=undefined) {
+      if (index > -1) {
+        copy?.allowedIntegrations?.splice(index, 1);
+      } else {
+        const newServiceIntgeration:Components.Schemas.Integration={};
+        newServiceIntgeration.id=row.id;
+        copy?.allowedIntegrations?.push(newServiceIntgeration);
+      }  
+      setNewIntegration(copy);    
     }
       
   };
-  
-  if (error?.response?.status === 404) {
-    return (
-      <Alert severity="error">
-        <FormattedMessage
-          defaultMessage="<title>Integraatiota {id} ei löydy</title>Siirry <link>etusivulle</link>."
-          values={{
-            id,
-            title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
-            link: (chunks) => (
-              <MuiLink color="error" component={Link} to="/">
-                {chunks}
-              </MuiLink>
-            ),
-          }}
-        />
-      </Alert>
-    );
-  }
-  
-  
+
     return (
       <>
             <Typography variant="h2" gutterBottom>
@@ -196,13 +186,12 @@ export default function IntegrationSelection({ id }: Props) {
                   <TableHead component="div">
                     <TableRow component="div">
                         <TableHeaderCell sort="id" component="div">
-                          <FormattedMessage defaultMessage="Tunniste" />
+                            <FormattedMessage defaultMessage="Tunniste" />
                         </TableHeaderCell>
                         <TableHeaderCell
                         sort={["configurationEntity.idp", "configurationEntity.sp"]}
-                        component="div"
-                        >
-                          <FormattedMessage defaultMessage="Sallittu palvelu" />
+                        component="div">
+                            <FormattedMessage defaultMessage="Sallittu palvelu" />
                         </TableHeaderCell>
                         <TableHeaderCell
                         sort={[
@@ -210,15 +199,14 @@ export default function IntegrationSelection({ id }: Props) {
                             "configurationEntity.idp.entityId",
                             "configurationEntity.sp.name",
                         ]}
-                        component="div"
-                        >
-                          <FormattedMessage defaultMessage="Palvelu" />
+                        component="div">
+                            <FormattedMessage defaultMessage="Palvelu" />
                         </TableHeaderCell>
                         <TableHeaderCell sort="organization.name" component="div">
-                          <FormattedMessage defaultMessage="Organisaatio" />
+                            <FormattedMessage defaultMessage="Organisaatio" />
                         </TableHeaderCell>
                         <TableHeaderCell sort="organization.edited" component="div">
-                          <FormattedMessage defaultMessage="Muokattu" />
+                            <FormattedMessage defaultMessage="Muokattu" />
                         </TableHeaderCell>
                     </TableRow>
                   </TableHead>
@@ -288,9 +276,8 @@ function Row(props:RowListProps) {
 
   return (
     <TableRow
-      
       hover
-      
+      component="div"
       sx={{ textDecorationLine: "inherit" }}
     >
       <TableCell component="div">{props.row.id}</TableCell>
@@ -339,42 +326,3 @@ function SallittuPalvelu(props:RowListProps) {
   );
   
 };
-
-
-
-
-
-
-function UniqueIdValue({ name, label, children }: DataRowProps) {
-  return (
-    <>
-      {(children as JSX.Element)?.props?.value ? (
-        <Box
-          component="div"
-          sx={{
-            lineHeight: "initial",
-            maxWidth: 200,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            "&:hover": {
-              position: "relative",
-              overflow: "visible",
-            },
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              backgroundColor: "var(--background-color)",
-              boxShadow: "0px 0px 5px 4px var(--background-color)",
-            }}
-          >
-            <Tooltip title={label ? <FormattedMessage {...label} /> : name}>
-              <span>{children}</span>
-            </Tooltip>
-          </Box>
-        </Box>
-      ) : null}
-    </>
-  );
-}
