@@ -11,6 +11,11 @@ import {
   AlertTitle,
   Box,
   Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
   FormControlLabel,
   Snackbar,
   Stack,
@@ -20,19 +25,18 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useSearchParams } from "react-router-dom";
-import type { DataRowProps } from "../DataRow";
 import { ChangeEvent, useEffect, useState, Dispatch } from "react";
 import RowsPerPage from "@/utils/components/RowsPerPage";
 import SearchForm from "./../../../home/SearchForm";
 import { usePaginationPage } from "@/utils/components/pagination";
+import DialogTitle from "@mui/material/DialogTitle";
 interface Props {
   integration: Components.Schemas.Integration;
-  newIntegration: Components.Schemas.Integration;
+  newIntegration?: Components.Schemas.Integration;
   setNewIntegration: Dispatch<Components.Schemas.Integration>
   setIntegration: Dispatch<Components.Schemas.Integration>
   activateAllServices: boolean
@@ -49,13 +53,14 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const { content, totalPages } = useIntegrationsSpecSearchPageable();
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [open, setOpen] = useState(false);
   
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
     horizontal: 'left' | 'center' | 'right';
   } = {
     vertical: 'bottom',
-    horizontal: 'center',
+    horizontal: 'right',
   }
   const [snackbarState, setSnackbarState] = useState<boolean>(false);
   
@@ -74,6 +79,17 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   }, [integration,newIntegration,setSnackbarState,]);
 
   useEffect(() => {
+    if(newIntegration) {
+      if(!activateAllServices&&(newIntegration.allowedIntegrations === undefined||newIntegration.allowedIntegrations.length===0)) {
+        setSnackbarState(true);
+      }
+    }
+    
+  }, [activateAllServices,newIntegration,setSnackbarState,]);
+
+
+  
+  useEffect(() => {
     if((searchParams.get("rooli") ?? "")!=="set") {
       setSearchParams("rooli=set")
     }
@@ -87,8 +103,10 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     } else {
       copy.allowedIntegrations = structuredClone(integration.allowedIntegrations);
     }
+
     setNewIntegration(copy);
     setActivateAllServices(!activateAllServices);
+    
   };
 
   const copyFormDataToURLSearchParams =
@@ -114,6 +132,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
       const id = newIntegration.id!;
       const updateResponse = await updateIntegration({ id },newIntegration);
       setIntegration(updateResponse);
+      setOpen(true)
     }
   };
 
@@ -167,15 +186,24 @@ export default function IntegrationSelection({ integration, newIntegration, setN
             </Typography>
             
             <Box display="flex" justifyContent="center" mt={3}> 
+            
             <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label="Salli kaikki palvelut" />
                   <Button aria-label="delete" 
                           sx={{ marginLeft: "auto" }}
-                                               variant="text"
-                                               startIcon={<DeleteIcon />} 
-                                               onClick={()=>removeIntegrations()} >Poista valinnat</Button>
+                          variant="text"
+                          startIcon={<DeleteIcon />} 
+                          onClick={()=>removeIntegrations()} >
+                    Poista valinnat
+                  </Button>
                   
-              </Box>
-             <br></br>
+            </Box>
+            {(activateAllServices)&&<>
+                                    <Alert severity="warning" sx={{ width: '60%' }}>
+                                              <FormattedMessage defaultMessage="Yksittäisten palvelujen tilaa ei voi muuttaa, kun kaikki palvelut ovat sallittuja" />
+                                    </Alert>
+                                    <br></br>
+                                    </>}
+             
               <Stack direction="row" alignItems="center">
                 <Box flex={1} sx={{ mr: 2 }}>
                   <SearchForm formData={searchParams} onSearch={handleSearch} />
@@ -231,20 +259,45 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                   </Secondary>
                   </Box>
               )}
-              {snackbarState&&<br></br>}
-              {snackbarState&&<br></br>}
-              
+
+              <Dialog
+                open={open}
+                onClose={()=>setOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">
+                    <FormattedMessage defaultMessage="Muutokset tallennettu onnistuneesti" />
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                  <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={()=>setOpen(false)} autoFocus>
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
               <Snackbar
                   open={snackbarState}
                   anchorOrigin={snackbarLocation}>
-                    <Alert severity="info" sx={{ width: '100%' }}>
-                    <AlertTitle>Info</AlertTitle>
-                              <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
-                              <Box display="flex" justifyContent="center" mt={2}> 
-                                  <Button  variant="text" onClick={clearIntegrations} sx={{ marginRight: "auto" }}>Peruuta</Button> 
-                                  <Button  variant="text" onClick={saveIntegrations} sx={{ marginLeft: "auto" }}>Tallenna muutokset</Button> 
-                              </Box>
-                    </Alert>
+                  
+                    <Box boxShadow={5} sx={{ width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
+                    <Container maxWidth="sm">
+                    
+                        <Typography variant="h6" component="h2" sx={{ my: 2, marginLeft: 'auto', marginRight: 'auto', marginTop: '6%' }}>
+                            <FormattedMessage defaultMessage="Tallenna muutokset" />
+                        </Typography>
+        
+                        <Box display="flex" justifyContent="center" mt={2}> 
+                            <Button onClick={clearIntegrations} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button> 
+                            <Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button> 
+                        </Box>
+                        <br></br>
+                      </Container>
+                    </Box>
                    
               </Snackbar>
 
@@ -318,7 +371,7 @@ function SallittuPalvelu(props:RowListProps) {
   }
   if(props.activateAllServices) {
     checked=props.activateAllServices;
-    switchOpacity=0.2
+    switchOpacity=0.4
   }
   
   return(

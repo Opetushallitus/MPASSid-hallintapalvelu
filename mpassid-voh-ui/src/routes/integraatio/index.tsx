@@ -3,8 +3,8 @@ import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
-import { Box, Paper, TableContainer } from "@mui/material";
-import { useLayoutEffect } from "react";
+import { Alert, Box, Button, Paper, TableContainer } from "@mui/material";
+import { useLayoutEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { useParams } from "react-router-dom";
 import { useSessionStorage } from "usehooks-ts";
@@ -17,6 +17,7 @@ export default function Integraatio() {
     "mpassid-open-integration-tabs",
     []
   );
+  
 
   useLayoutEffect(() => {
     if (!tabs.includes(integrationId!)) {
@@ -41,8 +42,10 @@ export default function Integraatio() {
           <ErrorBoundary>
             <IntegrationTab id={Number(integrationId)} />
           </ErrorBoundary>
+          
         </Suspense>
       </TableContainer>
+      
     </>
   );
 }
