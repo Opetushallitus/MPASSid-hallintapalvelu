@@ -25,8 +25,9 @@ export default function SetProvider({ integration }: Props) {
         <Grid item xs={8}>
           <FormattedMessage
             defaultMessage={`{deploymentPhase, select,
-              0 {Testiympäristö}
-              1 {Tuotantoympäristö}
+              0 {Testi}
+              1 {Tuotanto}
+              2 {Tuotanto-Testi}
               other {Tuntematon}
             }`}
             values={{ deploymentPhase: integration.deploymentPhase }}

@@ -5,6 +5,7 @@ import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
 import exampleData from "../../schemas/response.json";
 
+
 export { definition };
 
 /*
@@ -29,8 +30,6 @@ const searchIntegrations: { value?: Components.Schemas.PageIntegration } =
   definition.paths["/api/v1/integration/search"].get.responses["200"].content[
     "application/json"
   ].examples.searchIntegrations;
-
-
   
 
 allIntegrations = Array(1).fill(allIntegrations).flat();
@@ -49,6 +48,19 @@ allIntegrations.push(
     },
   }))
 );
+
+allIntegrations = allIntegrations.map((row)=>{
+  if(row?.configurationEntity?.set !== undefined) {
+    row.configurationEntity.set.type="palvelu";
+    row.organization={}
+    row.organization.name= "CSC-Tieteen tietotekniikan keskus Oy"
+    row.organization.oid= "1.2.246.562.10.201311201229111111"
+    row.organization.ytunnus="123245-0"
+  }
+  return row;
+})
+  
+
 
 const defaults = {
   page: 1,

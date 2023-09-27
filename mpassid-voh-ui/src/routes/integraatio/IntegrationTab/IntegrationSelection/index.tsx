@@ -76,7 +76,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     } else {
       setSnackbarState(true);
     }
-  }, [integration,newIntegration,setSnackbarState,]);
+  }, [integration,newIntegration,setSnackbarState]);
 
   useEffect(() => {
     if(newIntegration) {
@@ -98,14 +98,16 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const handleSwitchAllChange = (e: ChangeEvent<HTMLInputElement>) => {
     const copy = structuredClone(newIntegration)
 
-    if(!activateAllServices) {
-      copy.allowedIntegrations = [];
-    } else {
-      copy.allowedIntegrations = structuredClone(integration.allowedIntegrations);
+    if(copy!==undefined) {
+      if(!activateAllServices) {
+        copy.allowedIntegrations = [];
+      } else {
+        copy.allowedIntegrations = structuredClone(integration.allowedIntegrations);
+      }
+  
+      setNewIntegration(copy);
+      setActivateAllServices(!activateAllServices);
     }
-
-    setNewIntegration(copy);
-    setActivateAllServices(!activateAllServices);
     
   };
 
@@ -217,15 +219,13 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                             <FormattedMessage defaultMessage="Tunniste" />
                         </TableHeaderCell>
                         <TableHeaderCell
-                        sort={["configurationEntity.idp", "configurationEntity.sp"]}
+                        sort={[ "referenceIntegration"]}
                         component="div">
                             <FormattedMessage defaultMessage="Sallittu palvelu" />
                         </TableHeaderCell>
                         <TableHeaderCell
                         sort={[
-                            "configurationEntity.idp.flowName",
-                            "configurationEntity.idp.entityId",
-                            "configurationEntity.sp.name",
+                            "configurationEntity.set.name"
                         ]}
                         component="div">
                             <FormattedMessage defaultMessage="Palvelu" />

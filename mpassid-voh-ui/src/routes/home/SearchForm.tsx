@@ -1,4 +1,5 @@
-import { Clear, Search } from "@mui/icons-material";
+import Clear from "@mui/icons-material/Clear";
+import Search from "@mui/icons-material/Search";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";

@@ -50,8 +50,7 @@ export const typeTooltips = defineMessages({
     defaultMessage: "Palveluntarjoaja",
   },
 });
-
-export const envAbbreviations = defineMessages({
+export const envAbbreviationValues = defineMessages({
   0: {
     defaultMessage: "Testi",
   },
@@ -62,6 +61,21 @@ export const envAbbreviations = defineMessages({
     defaultMessage: "Tuotanto-Testi",
   }
 });
+export const envAbbreviations = (index:string) =>  {
+  if("0"==index) {
+    return envAbbreviationValues[index]
+  }
+  if("1"==index) {
+    return envAbbreviationValues[index]
+  }
+  if("2"==index) {
+    return envAbbreviationValues[index]
+  }
+  return {
+    defaultMessage: "Ei tiedossa",
+  };
+}
+
 
 const typeColors = {
   idp: "primary",
@@ -99,7 +113,7 @@ export default function IntegrationsTable() {
   const envFilter = useFilterMenuItems({
     options: environments,
     optionsLabels: Object.fromEntries(
-      environments.map((env) => [env, intl.formatMessage(envAbbreviations[env])])
+      environments.map((env) => [env, intl.formatMessage(envAbbreviations(env))])
     ),
     searchParamName: "ympäristö",
   });
@@ -248,7 +262,7 @@ function Row(row: Components.Schemas.Integration) {
       </TableCell>
       <TableCell component="div">
         <span>
-        <FormattedMessage {...envAbbreviations[row.deploymentPhase as unknown as string]} />
+        <FormattedMessage {...envAbbreviations(row?.deploymentPhase as unknown as string)} />
         </span>
       </TableCell>
       <TableCell component="div">
