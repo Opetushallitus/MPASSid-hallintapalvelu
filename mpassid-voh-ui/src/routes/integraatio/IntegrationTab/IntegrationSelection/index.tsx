@@ -8,7 +8,6 @@ import TableHeaderCell from "@/utils/components/TableHeaderCell";
 import { FormattedMessage } from "react-intl";
 import {
   Alert,
-  AlertTitle,
   Box,
   Button,
   Container,

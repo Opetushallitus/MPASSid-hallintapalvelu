@@ -61,6 +61,7 @@
     "workerDirectory": "public"
   },
   "overrides": {
-    "react": "$react"
+    "react": "$react",
+    "graphql": "16.6.0"
   }
 }
