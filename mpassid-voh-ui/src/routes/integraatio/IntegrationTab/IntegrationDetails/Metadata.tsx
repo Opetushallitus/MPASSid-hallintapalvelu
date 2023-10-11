@@ -13,8 +13,8 @@ export default function Metadata({
 }) {
   const providerData = configurationEntity[role]!;
 
-  if (providerData.metadata) {
-    const value = providerData.metadata.encoding
+  if (providerData.metadata && providerData.metadata !== undefined) {  
+    const value = providerData.metadata.encoding && providerData.metadata.content !== undefined
       ? atob(providerData.metadata.content as unknown as string)
       : JSON.stringify(providerData.metadata, null, 2);
 

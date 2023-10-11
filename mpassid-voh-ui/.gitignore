@@ -13,9 +13,12 @@ dist-ssr
 /lang/fi-FI.json
 /.compiled-lang
 
+/schemas/response_*
+
 # generated
 /public/default-messages-*
 /src/api/client.ts
 /src/api/käyttöoikeus.ts
 /src/api/koodisto.ts
 /src/api/localisation.ts
+/target/*

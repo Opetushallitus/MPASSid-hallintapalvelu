@@ -8,16 +8,17 @@ interface Props {
   integration: Components.Schemas.Integration;
 }
 
-export default function ServiceProvider({ integration }: Props) {
-  const serviceProvider = integration.configurationEntity!.sp!;
-
+export default function SetProvider({ integration }: Props) {
+  const setProvider = integration.configurationEntity!.set!;
+    
   return (
     <>
       <Typography variant="h2" gutterBottom>
-        <FormattedMessage defaultMessage="Palveluiden yhteiset tiedot" />
+        <FormattedMessage defaultMessage="Palvelun tiedot" />
       </Typography>
-
+      
       <Grid container spacing={2} mb={2}>
+        <DataRow object={integration} path="id" />
         <Grid item xs={4}>
           <FormattedMessage defaultMessage="Palveluympäristö" />
         </Grid>
@@ -32,9 +33,19 @@ export default function ServiceProvider({ integration }: Props) {
             values={{ deploymentPhase: integration.deploymentPhase }}
           />
         </Grid>
-        <DataRow object={serviceProvider} path="name" />
-        <DataRow object={serviceProvider} path="type" type={Type} />
+        <DataRow object={setProvider} path="name" />
       </Grid>
+      <Typography variant="h2" gutterBottom>
+            <FormattedMessage defaultMessage="Palvelun integraatiot" />
+          </Typography>
+          <Grid container spacing={3} mb={3}>
+            <DataRow
+              object={integration}
+              path="integrationSets"
+              type="set-list"
+              
+            />
+          </Grid>
     </>
   );
 }

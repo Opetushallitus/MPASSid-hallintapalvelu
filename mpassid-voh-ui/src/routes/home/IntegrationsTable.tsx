@@ -4,7 +4,7 @@ import {
   useIdentityProviderTypes,
   useServiceProviderTypes,
 } from "@/api";
-import { roles } from "@/config";
+import { environments, roles } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
@@ -32,6 +32,9 @@ export const typeAbbreviations = defineMessages({
     defaultMessage: "OKJ",
   },
   sp: {
+    defaultMessage: "PI",
+  },
+  set: {
     defaultMessage: "PT",
   },
 });
@@ -41,13 +44,43 @@ export const typeTooltips = defineMessages({
     defaultMessage: "Opetuksen ja koulutuksen järjestäjä",
   },
   sp: {
+    defaultMessage: "Palveluintegraatio",
+  },
+  set: {
     defaultMessage: "Palveluntarjoaja",
   },
 });
+export const envAbbreviationValues = defineMessages({
+  0: {
+    defaultMessage: "Testi",
+  },
+  1: {
+    defaultMessage: "Tuotanto",
+  },
+  2: {
+    defaultMessage: "Tuotanto-Testi",
+  }
+});
+export const envAbbreviations = (index:string) =>  {
+  if("0"==index) {
+    return envAbbreviationValues[index]
+  }
+  if("1"==index) {
+    return envAbbreviationValues[index]
+  }
+  if("2"==index) {
+    return envAbbreviationValues[index]
+  }
+  return {
+    defaultMessage: "Ei tiedossa",
+  };
+}
+
 
 const typeColors = {
   idp: "primary",
   sp: "success",
+  set: "success"
 } as const;
 
 export default function IntegrationsTable() {
@@ -75,6 +108,14 @@ export default function IntegrationsTable() {
       roles.map((role) => [role, intl.formatMessage(typeAbbreviations[role])])
     ),
     searchParamName: "rooli",
+  });
+
+  const envFilter = useFilterMenuItems({
+    options: environments,
+    optionsLabels: Object.fromEntries(
+      environments.map((env) => [env, intl.formatMessage(envAbbreviations(env))])
+    ),
+    searchParamName: "ympäristö",
   });
 
   return (
@@ -131,6 +172,20 @@ export default function IntegrationsTable() {
               component="div"
             >
               <FormattedMessage defaultMessage="Rooli" />
+            </TableHeaderCell>
+            <TableHeaderCell 
+              menuProps={{
+                MenuListProps: {
+                  subheader: (
+                    <ListSubheader>
+                      <FormattedMessage defaultMessage="Suodata ympäristön mukaan" />
+                    </ListSubheader>
+                  ),
+                },
+                active: envFilter.modified,
+                children: envFilter.children,
+              }} component="div">
+              <FormattedMessage defaultMessage="Ympäristö" />
             </TableHeaderCell>
             <TableHeaderCell sort="organization.name" component="div">
               <FormattedMessage defaultMessage="Organisaatio" />
@@ -206,6 +261,11 @@ function Row(row: Components.Schemas.Integration) {
         </Tooltip>
       </TableCell>
       <TableCell component="div">
+        <span>
+        <FormattedMessage {...envAbbreviations(row?.deploymentPhase as unknown as string)} />
+        </span>
+      </TableCell>
+      <TableCell component="div">
         <Stack>
           {row.organization?.name}
           <Secondary sx={{ lineHeight: "initial" }}>
@@ -244,6 +304,18 @@ const palveluCellContents = {
         <UniqueId
           configurationEntity={props}
           role="sp"
+          ValueComponent={UniqueIdValue}
+        />
+      </Stack>
+    );
+  },
+  set: function Set(props: Components.Schemas.ConfigurationEntity) {
+    return (
+      <Stack>
+        {props.set!.name}
+        <UniqueId
+          configurationEntity={props}
+          role="set"
           ValueComponent={UniqueIdValue}
         />
       </Stack>

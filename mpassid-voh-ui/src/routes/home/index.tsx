@@ -10,10 +10,8 @@ import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstruct
 import {
   Box,
   Divider,
-  FormControlLabel,
   Paper,
   Stack,
-  Switch,
   TableContainer,
   Typography,
 } from "@mui/material";
@@ -24,9 +22,9 @@ import SearchForm from "./SearchForm";
 
 const copyFormDataToURLSearchParams =
   (formData: FormData) => (searchParams: URLSearchParams) => {
-    (formData as URLSearchParams).forEach((value, key) => {
+    (formData as unknown as URLSearchParams).forEach((value, key) => {
       if (value) {
-        searchParams.set(key, value);
+        searchParams.set(key, value); 
       } else {
         searchParams.delete(key);
       }
@@ -63,32 +61,13 @@ export default function Home() {
               </Suspense>
             </Secondary>
           </PageHeader>
-          <FormControlLabel
-            control={
-              <Switch
-                color="warning"
-                checked={JSON.parse(searchParams.get("testi") ?? "false")}
-                onChange={(event) => {
-                  setSearchParams((searchParams) => {
-                    if (event.target.checked) {
-                      searchParams.set("testi", JSON.stringify(true));
-                    } else {
-                      searchParams.delete("testi");
-                    }
-
-                    return resetPage(searchParams);
-                  });
-                }}
-              />
-            }
-            label={intl.formatMessage({ defaultMessage: "Testi-integraatiot" })}
-          />
+          
           <HelpLinkButton />
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
         <Stack direction="row" alignItems="center">
           <Box flex={1} sx={{ mr: 2 }}>
-            <SearchForm formData={searchParams} onSearch={handleSearch} />
+            <SearchForm formData={searchParams as unknown as FormData} onSearch={handleSearch} />
           </Box>
           <RowsPerPage />
         </Stack>

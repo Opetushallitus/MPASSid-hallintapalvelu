@@ -1,5 +1,8 @@
 # MPASSid-hallinta
 
+## 1.03
+- Lisätään palvelu 
+- Lisätään sallittujen palveluiden muokkaus
 ## 1.0.2
 - Näytetään wilma hostname integraation perustiedoissa tietokentän yksilöllinen tunniste arvona
 
