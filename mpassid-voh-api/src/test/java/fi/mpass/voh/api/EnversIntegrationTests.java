@@ -122,6 +122,8 @@ class EnversIntegrationTests {
 				0, null, organization,
 				"spContactAddress@example.net");
 
+		repository.save(integration);
+
 		return integration;
 	}
 }

@@ -177,7 +177,7 @@ public class IntegrationService {
     return integrations;
   }
 
-  public static <T> Predicate<T> distinctByKey(
+  private static <T> Predicate<T> distinctByKey(
       Function<? super T, ?> keyExtractor) {
 
     Map<Object, Boolean> seen = new ConcurrentHashMap<>();

@@ -10,11 +10,9 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-// import org.springframework.boot.test.context.SpringBootTest;
 
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
-// import fi.mpass.voh.api.integration.IdentityProvider;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.idp.Azure;
@@ -40,6 +38,7 @@ public class IntegrationRepositoryTests {
         // TODO: ce.setAttributes();
         Integration integration = new Integration(ce);
         integration.setDiscoveryInformation(discoveryInformation);
+        integration.setId(4000001L);
 
         // when
         Integration savedIntegration = underTest.save(integration);

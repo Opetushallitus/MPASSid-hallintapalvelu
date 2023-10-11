@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,8 +25,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import fi.mpass.voh.api.integration.Integration;
-import fi.mpass.voh.api.integration.IntegrationGroup;
-import fi.mpass.voh.api.integration.IntegrationGroupRepository;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -45,18 +45,14 @@ public class ServiceProvidersLoader implements CommandLineRunner {
     IntegrationRepository integrationRepository;
 
     @Autowired
-    IntegrationGroupRepository integrationGroupRepository;
-
-    @Autowired
     OrganizationService organizationService;
 
     @Autowired
     ResourceLoader resourceLoader;
 
-    public ServiceProvidersLoader(IntegrationRepository repository, IntegrationGroupRepository groupRepository, OrganizationService service,
+    public ServiceProvidersLoader(IntegrationRepository repository, OrganizationService service,
             ResourceLoader loader) {
         this.integrationRepository = repository;
-        this.integrationGroupRepository = groupRepository;
         this.organizationService = service;
         this.resourceLoader = loader;
         if (this.serviceProvidersInput == null) {
@@ -69,6 +65,7 @@ public class ServiceProvidersLoader implements CommandLineRunner {
      * inputs).
      * Assumes to be run before IntegrationLoader ordered by @Order annotation.
      */
+    @Transactional
     @Override
     public void run(String... args) throws Exception {
 
@@ -139,11 +136,13 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                     JsonNode groupNode = arrayNode.get("integrationGroup");
                     if (groupNode != null) {
                         if (groupNode.get("id") != null) {
-                            Optional<IntegrationGroup> group = integrationGroupRepository
-                                    .findById(groupNode.get("id").asLong());
-                            if (group.isPresent()) {
-                                logger.debug("Integration group: " + groupNode.get("id"));
-                                integration.addGroup(group.get());
+                            Optional<Integration> integrationSet = integrationRepository
+                                    .findByIdAll(groupNode.get("id").asLong());
+                            if (integrationSet.isPresent()) {
+                                integrationSet.get().getConfigurationEntity().getSet().setType("sp");
+                                logger.debug("Integration set #" + groupNode.get("id"));
+                                logger.debug("Integration set size: " + integrationSet.get().getIntegrationSets().size());
+                                integration.addToSet(integrationSet.get());   
                             }
                         }
                     }

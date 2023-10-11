@@ -22,7 +22,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.ServiceProvider;
+
 @Audited
 @Entity
 @JsonInclude(Include.NON_NULL)
@@ -33,10 +35,10 @@ public class ConfigurationEntity {
     private long id;
 
     @JsonManagedReference
-    @OneToMany(mappedBy="configurationEntity", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "configurationEntity", cascade = CascadeType.ALL)
     @NotAudited
     private Set<Attribute> attributes;
-    
+
     @OneToOne(mappedBy = "configurationEntity", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private IdentityProvider idp;
@@ -45,10 +47,15 @@ public class ConfigurationEntity {
     @PrimaryKeyJoinColumn
     private ServiceProvider sp;
 
+    @OneToOne(mappedBy = "configurationEntity", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private IntegrationSet set;
+
     @JsonIgnore
     private String role;
 
-    public ConfigurationEntity() { }
+    public ConfigurationEntity() {
+    }
 
     public ConfigurationEntity(long id) {
         this.id = id;
@@ -88,5 +95,15 @@ public class ConfigurationEntity {
         this.sp = sp;
         this.sp.setConfigurationEntity(this);
         this.role = "sp";
+    }
+
+    public IntegrationSet getSet() {
+        return this.set;
+    }
+
+    public void setSet(IntegrationSet set) {
+        this.set = set;
+        this.set.setConfigurationEntity(this);
+        this.role = "set";
     }
 }

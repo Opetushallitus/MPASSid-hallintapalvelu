@@ -1,6 +1,7 @@
 {
     "services": [
         {
+            "id": 5000001,
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",
@@ -22,12 +23,16 @@
                 },
                 "attributes": []
             },
+            "integrationGroup": {
+                "id": 6000001
+            },
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"
             },
             "deploymentPhase": 1
         },
         {
+            "id": 5000002,
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",
@@ -52,12 +57,16 @@
                 },
                 "attributes": []
             },
+            "integrationGroup": {
+                "id": 6000001
+              },
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"
             },
             "deploymentPhase": 1
         },
         {
+            "id": 5000003,
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",

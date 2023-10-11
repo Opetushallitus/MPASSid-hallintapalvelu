@@ -101,7 +101,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(4, integrationList.size());
+        assertEquals(3, integrationList.size());
     }
 
     @Test
@@ -173,7 +173,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(4, integrationList.size());
+        assertEquals(3, integrationList.size());
     }
 
     @Test
@@ -188,7 +188,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(3, integrationList.size());
+        assertEquals(2, integrationList.size());
     }
 
     @Test

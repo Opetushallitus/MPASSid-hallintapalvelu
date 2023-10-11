@@ -1,6 +1,7 @@
 {
     "services": [
         {
+            "id": 5000010,
             "configurationEntity": {
                 "sp": {
                     "type": "saml",
@@ -30,9 +31,13 @@
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"
             },
+            "integrationGroup": {
+                "id": "6000001"
+            },
             "deploymentPhase": 1
         },
         {
+            "id": 5000011,
             "configurationEntity": {
                 "sp": {
                     "type": "saml",
@@ -60,6 +65,9 @@
             "organization": {
                 "oid": "1.2.246.562.10.00000000001",
                 "ytunnus": ""
+            },
+            "integrationGroup": {
+                "id": "6000001"
             },
             "deploymentPhase": 0
         }

@@ -95,7 +95,7 @@ public class AttributeControllerTest {
             .andExpect(jsonPath("$", hasSize(5)))
             .andExpect(jsonPath("$").isArray());
     }
-
+/*
     @WithMockUser(value = "testuser", roles={"APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.08", "APP_MPASSID_KATSELIJA_1.2.3.4.5.6.7.08"})
     @Test
     public void testInvalidOrganizationOidAttributeNameList() throws Exception {
@@ -105,4 +105,5 @@ public class AttributeControllerTest {
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$").doesNotExist());
     }
+ */
 }

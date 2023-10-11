@@ -33,8 +33,7 @@ public class ServiceProviderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "OK",
             content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = String.class)), 
-                            examples = { @ExampleObject(name = "types", value = "[ \"oidc\", \"saml\" ]") } )),
+                            array = @ArraySchema(schema = @Schema(implementation = String.class)))),
         @ApiResponse(responseCode = "403", description = "Forbidden operation")
     })
     @GetMapping("/types")

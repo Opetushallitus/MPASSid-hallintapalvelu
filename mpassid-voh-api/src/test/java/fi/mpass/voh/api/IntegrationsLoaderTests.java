@@ -12,10 +12,10 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import fi.mpass.voh.api.config.IntegrationLoader;
+import fi.mpass.voh.api.config.IntegrationSetLoader;
 import fi.mpass.voh.api.config.ServiceProvidersLoader;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.Integration;
-import fi.mpass.voh.api.integration.IntegrationGroupRepository;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.sp.ServiceProviderRepository;
@@ -31,8 +31,8 @@ public class IntegrationsLoaderTests {
     @Autowired
     IntegrationRepository repository;
 
-    @Autowired
-    IntegrationGroupRepository groupRepository;
+    //@Autowired
+    //IntegrationGroupRepository groupRepository;
 
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
@@ -50,17 +50,26 @@ public class IntegrationsLoaderTests {
  
     @Test
     public void testGsuiteLoader() throws Exception {
+        // 64
+        String setLocation = "integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
+        setLoader.run(setLocation);
+
+        // 3
         String oidcLocation = "oidc_services.json";
+        // 2
         String samlLocation = "saml_services.json";
-        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, groupRepository, service, loader);
+        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(oidcLocation);
         serviceLoader.run(samlLocation);
 
+        // 2
         String location = "gsuite_home_organizations.json";
         integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
         integrationLoader.run(location);
 
-        assertEquals(7, repository.findAll().size());
+        // 71
+        assertEquals(71, repository.findAll().size());
     }
 
     @Test
@@ -98,5 +107,14 @@ public class IntegrationsLoaderTests {
         assertEquals(3, schools.size());
         assertEquals(4, attributes.size());
         assertEquals(2, institutionTypes.size());
+    }
+
+    @Test
+    public void testWilmaLoaderWithoutPreassignedId() throws Exception {
+        String location = "wilma_home_organizations_without_id.json";
+        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
+        integrationLoader.run(location);
+
+        assertEquals(1, repository.findAll().size());
     }
 }

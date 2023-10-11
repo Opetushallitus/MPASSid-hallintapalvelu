@@ -23,7 +23,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Answers.valueOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;

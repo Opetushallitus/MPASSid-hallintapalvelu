@@ -55,7 +55,7 @@ public class IntegrationController {
     @Operation(summary = "Search paged integrations", ignoreJsonView = true)
     @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PageIntegration.class), mediaType = "application/json", examples = {
                     @ExampleObject(name = "searchIntegrations", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
             @ApiResponse(responseCode = "404", description = "No integrations found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
@@ -108,7 +108,7 @@ public class IntegrationController {
     Integration updateIntegration(@Valid @RequestBody Integration integration, @PathVariable Long id) {
         return integrationService.updateIntegration(id, integration);
     }
-
+ 
     @Operation(summary = "Get integrations since a point in time", ignoreJsonView = true)
     @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
