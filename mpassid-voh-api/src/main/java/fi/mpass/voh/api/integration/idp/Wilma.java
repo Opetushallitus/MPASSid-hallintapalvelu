@@ -8,12 +8,15 @@ import org.hibernate.envers.Audited;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @Audited
 @Entity
 @DiscriminatorValue("wilma")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Wilma extends IdentityProvider {
 
+    @Schema(description = "Kirjautumisosoite")
     @Column(name="wilma_hostname")
     String hostname;
 
