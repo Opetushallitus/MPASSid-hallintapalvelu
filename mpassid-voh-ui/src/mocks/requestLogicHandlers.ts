@@ -22,7 +22,7 @@ const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
   value?: Components.Schemas.Integration;
 };
 
-const updateIntegration = definition.paths["/api/v1/integration/{id}"].put.responses["200"].content["application/json"].examples.integration as {
+const updateIntegration = {} as {
   value?: Components.Schemas.Integration;
 };
 
