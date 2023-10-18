@@ -298,14 +298,14 @@ public class IntegrationService {
   }
 
   /**
-   * The method queries service providers by id.
+   * The method queries integration sets by id.
    * Requires authentication yet not organizational authorization.
    * 
    * @param id the id of the Integration
    * @return Integration
    * @throws EntityNotFoundException
    */
-  public Optional<Integration> getSPIntegrationById(Long id) {
+  public Optional<Integration> getIntegrationSetById(Long id) {
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
@@ -315,7 +315,7 @@ public class IntegrationService {
       return Optional.empty();
     }
 
-    builder.withEqualAnd(Category.ROLE, "role", "sp");
+    builder.withEqualAnd(Category.ROLE, "role", "set");
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -347,11 +347,11 @@ public class IntegrationService {
           existingIntegration.getConfigurationEntity().getIdp()
               .setInstitutionTypes(integration.getConfigurationEntity().getIdp().getInstitutionTypes());
         }
-        // updates allowed integrations
+        // updates allowed integration sets
         if (integration.getAllowedIntegrations() != null) {
           existingIntegration.setAllowedIntegrations(new HashSet<Integration>());
           for (Integration allowedIntegration : integration.getAllowedIntegrations()) {
-            Integration existingAllowedIntegration = getSPIntegrationById(allowedIntegration.getId()).get();
+            Integration existingAllowedIntegration = getIntegrationSetById(allowedIntegration.getId()).get();
             existingIntegration.addAllowed(existingAllowedIntegration);
             logger.debug(
                 "Updated #" + existingIntegration.getId() + ": Allowed integration #" + allowedIntegration.getId());
