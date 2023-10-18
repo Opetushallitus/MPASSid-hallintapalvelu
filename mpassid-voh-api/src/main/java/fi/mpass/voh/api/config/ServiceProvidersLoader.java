@@ -133,16 +133,19 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                         logger.error("Organization Exception: " + e);
                     }
 
-                    JsonNode groupNode = arrayNode.get("integrationGroup");
-                    if (groupNode != null) {
-                        if (groupNode.get("id") != null) {
-                            Optional<Integration> integrationSet = integrationRepository
-                                    .findByIdAll(groupNode.get("id").asLong());
-                            if (integrationSet.isPresent()) {
-                                integrationSet.get().getConfigurationEntity().getSet().setType("sp");
-                                logger.debug("Integration set #" + groupNode.get("id"));
-                                logger.debug("Integration set size: " + integrationSet.get().getIntegrationSets().size());
-                                integration.addToSet(integrationSet.get());   
+                    JsonNode groupArrayNode = arrayNode.get("integrationGroups");
+                    if (groupArrayNode != null && groupArrayNode.isArray()) {
+                        for (JsonNode groupNode : groupArrayNode) {
+                            if (groupNode.get("id") != null) {
+                                Optional<Integration> integrationSet = integrationRepository
+                                        .findByIdAll(groupNode.get("id").asLong());
+                                if (integrationSet.isPresent()) {
+                                    integrationSet.get().getConfigurationEntity().getSet().setType("sp");
+                                    logger.debug("Integration set #" + groupNode.get("id"));
+                                    logger.debug("Integration set size: "
+                                            + integrationSet.get().getIntegrationSets().size());
+                                    integration.addToSet(integrationSet.get());
+                                }
                             }
                         }
                     }
