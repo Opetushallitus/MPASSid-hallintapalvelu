@@ -31,9 +31,6 @@ public class IntegrationsLoaderTests {
     @Autowired
     IntegrationRepository repository;
 
-    //@Autowired
-    //IntegrationGroupRepository groupRepository;
-
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
 
