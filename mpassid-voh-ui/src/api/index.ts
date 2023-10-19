@@ -14,13 +14,9 @@ export function useIntegrationsSpecSearchPageable() {
   return client.useIntegrationsSpecSearchPageable({
     search: searchParams.get("hae") ?? "",
     role: searchParams.get("rooli") ?? undefined,
+    deploymentPhase: searchParams.get("ympäristö") ?? undefined,
     type: searchParams.get("tyyppi") ?? undefined,
-    environment: searchParams.get("ympäristö") ?? undefined,
-    deploymentPhase: searchParams.has("testi")
-      ? JSON.parse(searchParams.get("testi")!)
-        ? "0"
-        : "1"
-      : undefined,
+    
     page: page - 1,
     size: searchParams.has(defaults.searchParamName)
       ? JSON.parse(searchParams.get(defaults.searchParamName)!)

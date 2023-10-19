@@ -97,13 +97,14 @@ export default {
         ].some((path) => get(element, path)?.toLowerCase().includes(search))
       );
     }
-    const deploymentPhase = JSON.parse(
-      (query.deploymentPhase as string) ?? "1"
-    );
 
-    filteredElements = filteredElements.filter(
-      (row) => row.deploymentPhase === deploymentPhase
-    );
+    if ("deploymentPhase" in query) {
+      const deploymentPhases = (query.deploymentPhase as string).split(",").filter(Boolean);
+
+      filteredElements = filteredElements.filter(
+        (row) => deploymentPhases.includes(String(row.deploymentPhase!))
+      );
+    }
 
     if ("type" in query) {
       const types = (query.type as string).split(",").filter(Boolean);
