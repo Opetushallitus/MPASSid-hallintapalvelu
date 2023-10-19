@@ -1,16 +1,30 @@
 package fi.mpass.voh.api.integration;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.persistence.OptimisticLockException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.history.Revision;
+import org.springframework.data.history.Revisions;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -92,7 +106,7 @@ public class IntegrationService {
 
   /**
    * The method creates a specification from the given search criteria, filtering
-   * types and roles. The methods queries a repository through the specification
+   * types and roles. The method queries a repository through the specification
    * and returns paged integrations.
    * 
    * @param search          search string from the user; case-sentitive;
@@ -148,6 +162,106 @@ public class IntegrationService {
   }
 
   /**
+   * The method pages a list of integrations.
+   * 
+   * @param results  the list of integrations to be paged
+   * @param pageable the paging parameters
+   * @return
+   */
+  private Page<Integration> pageIntegrations(List<Integration> results, Pageable pageable) {
+    final int toIndex = Math.min((pageable.getPageNumber() + 1) * pageable.getPageSize(), results.size());
+    final int fromIndex = Math.max(toIndex - pageable.getPageSize(), 0);
+    Page<Integration> integrations = new PageImpl<Integration>(results.subList(fromIndex, toIndex), pageable,
+        results.size());
+
+    return integrations;
+  }
+
+  private static <T> Predicate<T> distinctByKey(
+      Function<? super T, ?> keyExtractor) {
+
+    Map<Object, Boolean> seen = new ConcurrentHashMap<>();
+    return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+  }
+
+  /**
+   * The method creates a specification from the given search criteria, filtering
+   * types and roles. The method uses the reference integration to add
+   * information or to extend the specified query to the repository and returns
+   * paged integrations.
+   * 
+   * @param search                 search string from the user; case-sentitive;
+   *                               identifiers are matched with equality, names
+   *                               with
+   *                               containing match
+   * @param filterByType           type filtering string, can be a comma-separated
+   *                               list
+   * @param role                   role selection string, can be a comma-separated
+   *                               list
+   * @param deploymentPhase        deployment phase {@link int}
+   * @param referenceIntegrationId the id of an Integration used to provide more
+   *                               information for searching, filtering, or
+   *                               sorting
+   * @return a paged list of Integrations
+   * @throws EntityNotFoundException
+   */
+  public Page<Integration> getIntegrationsSpecSearchPageable(String search, String filterByType, String role,
+      String deploymentPhase, Long referenceIntegrationId, Pageable pageable) {
+
+    List<Integration> integrations = new ArrayList<Integration>();
+
+    IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+    // try to query the reference integration
+    Optional<Integration> referenceIntegration = getSpecIntegrationById(referenceIntegrationId);
+    if (referenceIntegration.isPresent()) {
+      // allowed integrations
+      Set<Integration> allowedIntegrations = referenceIntegration.get().getAllowedIntegrations();
+      integrations.addAll(allowedIntegrations);
+    }
+
+    if (search != null && search.length() > 0) {
+      builder.withEqualOr(Category.IDP, "flowName", search);
+      builder.withEqualOr(Category.IDP, "entityId", search);
+      builder.withEqualOr(Category.IDP, "tenantId", search);
+      builder.withEqualOr(Category.IDP, "hostname", search);
+      builder.withEqualOr(Category.SP, "entityId", search);
+      builder.withEqualOr(Category.SP, "clientId", search);
+      builder.withEqualOr(Category.ORGANIZATION, "oid", search);
+      builder.withEqualOr(Category.ORGANIZATION, "businessId", search);
+      builder.withContainOr(Category.SP, "name", search);
+      builder.withContainOr(Category.ORGANIZATION, "name", search);
+    }
+
+    // filterByType can be a list of types, thus (equality OR equality OR ...) AND
+    if (filterByType != null && filterByType.length() > 0)
+      builder.withEqualAnd(Category.TYPE, "type", filterByType);
+
+    // role can be a list of roles, thus (equality OR equality OR ...) AND
+    if (role != null && role.length() > 0)
+      builder.withEqualAnd(Category.ROLE, "role", role);
+
+    if (deploymentPhase != null)
+      builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
+
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null) {
+      List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+      if (!includesAdminOrganization(userOrganizationOids)) {
+        builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
+      }
+      Specification<Integration> spec = builder.build();
+
+      integrations.addAll(integrationRepository.findAll(spec));
+      List<Integration> distinctIntegrations = integrations.stream().filter(distinctByKey(i -> i.getId()))
+          .collect(Collectors.toList());
+      return pageIntegrations(distinctIntegrations, pageable);
+    } else {
+      throw new EntityNotFoundException("Authentication not successful");
+    }
+  }
+
+  /**
    * The method creates a specification based on the given id and queries a
    * repository through the specification.
    * 
@@ -183,17 +297,94 @@ public class IntegrationService {
     }
   }
 
+  /**
+   * The method queries integration sets by id.
+   * Requires authentication yet not organizational authorization.
+   * 
+   * @param id the id of the Integration
+   * @return Integration
+   * @throws EntityNotFoundException
+   */
+  public Optional<Integration> getIntegrationSetById(Long id) {
+
+    IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+    if (id != null) {
+      builder.withEqualAnd(Category.INTEGRATION, "id", id);
+    } else {
+      return Optional.empty();
+    }
+
+    builder.withEqualAnd(Category.ROLE, "role", "set");
+
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null) {
+
+      Specification<Integration> spec = builder.build();
+
+      Optional<Integration> integration = integrationRepository.findOne(spec);
+      if (!integration.isPresent()) {
+        throw new EntityNotFoundException("Not found Integration " + id);
+      }
+      return integration;
+    } else {
+      throw new EntityNotFoundException("Authentication not successful");
+    }
+  }
+
   public Integration updateIntegration(Long id, Integration integration) {
 
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
       try {
-        integration = integrationRepository.saveAndFlush(integration);
+        logger.debug("Saving changes for integration #" + existingIntegration.getId());
+        if (integration.getServiceContactAddress() != null) {
+          existingIntegration.setServiceContactAddress(integration.getServiceContactAddress());
+        }
+        // updates institution types
+        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null
+            && integration.getConfigurationEntity().getIdp().getInstitutionTypes() != null) {
+          existingIntegration.getConfigurationEntity().getIdp()
+              .setInstitutionTypes(integration.getConfigurationEntity().getIdp().getInstitutionTypes());
+        }
+        // updates allowed integration sets
+        if (integration.getAllowedIntegrations() != null) {
+          existingIntegration.setAllowedIntegrations(new HashSet<Integration>());
+          for (Integration allowedIntegration : integration.getAllowedIntegrations()) {
+            Integration existingAllowedIntegration = getIntegrationSetById(allowedIntegration.getId()).get();
+            existingIntegration.addAllowed(existingAllowedIntegration);
+            logger.debug(
+                "Updated #" + existingIntegration.getId() + ": Allowed integration #" + allowedIntegration.getId());
+          }
+        }
+        integration = integrationRepository.saveAndFlush(existingIntegration);
       } catch (OptimisticLockException ole) {
-        throw new EntityUpdateException("Integration update not successful. Please re-update.");
+        throw new EntityUpdateException(
+            "Integration #" + existingIntegration.getId() + " update not successful. Please re-update.");
       }
       return integration;
     }
     return existingIntegration;
+  }
+
+  public List<Integration> getIntegrationsSince(LocalDateTime timestamp) {
+    Date since = Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
+    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfter(since);
+    for (Integration integration : integrations) {
+      List<Revision<Integer, Integration>> revisions = findRevisionsSince(integration.getId(), timestamp);
+      logger.debug(
+          "Integration: " + integration.getId() + " Number of revisions: " + revisions.size() + " since " + timestamp);
+    }
+    return integrations;
+  }
+
+  private List<Revision<Integer, Integration>> findRevisionsSince(Long id, LocalDateTime since) {
+    Revisions<Integer, Integration> integrationRevisions = integrationRepository.findRevisions(id);
+    if (integrationRevisions != null) {
+      return integrationRevisions.getContent().stream().filter(
+          revision -> revision.getEntity().getLastUpdatedOn().getTime() > Timestamp.valueOf(since).getTime())
+          .collect(Collectors.toList());
+    }
+    return new ArrayList<Revision<Integer, Integration>>();
   }
 }

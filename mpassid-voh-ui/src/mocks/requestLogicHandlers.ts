@@ -3,12 +3,18 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
+import exampleData from "../../schemas/response.json";
+
 
 export { definition };
 
+/*
 let allIntegrations = definition.paths["/api/v1/integration/list"].get
   .responses["200"].content["application/json"].examples.integrations
   .value as Components.Schemas.Integration[];
+*/
+let allIntegrations = exampleData as unknown as Components.Schemas.Integration[];
+
 
 const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
   "200"
@@ -16,12 +22,17 @@ const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
   value?: Components.Schemas.Integration;
 };
 
+const updateIntegration = {} as {
+  value?: Components.Schemas.Integration;
+};
+
 const searchIntegrations: { value?: Components.Schemas.PageIntegration } =
   definition.paths["/api/v1/integration/search"].get.responses["200"].content[
     "application/json"
   ].examples.searchIntegrations;
+  
 
-allIntegrations = Array(21).fill(allIntegrations).flat();
+allIntegrations = Array(1).fill(allIntegrations).flat();
 
 allIntegrations.push(
   ...allIntegrations.map((row) => ({
@@ -32,17 +43,24 @@ allIntegrations.push(
     },
     deploymentPhase: 1,
     organization: {
-      ...row.organization,
+      ...row?.organization,
       //name: `${row.organization!.name} (julkaistu)`,
     },
   }))
 );
 
-let id = 1000;
-allIntegrations = allIntegrations.map((row) => ({
-  ...row,
-  id: id++,
-}));
+allIntegrations = allIntegrations.map((row)=>{
+  if(row?.configurationEntity?.set !== undefined) {
+    row.configurationEntity.set.type="palvelu";
+    row.organization={}
+    row.organization.name= "CSC-Tieteen tietotekniikan keskus Oy"
+    row.organization.oid= "1.2.246.562.10.201311201229111111"
+    row.organization.ytunnus="123245-0"
+  }
+  return row;
+})
+  
+
 
 const defaults = {
   page: 1,
@@ -50,6 +68,14 @@ const defaults = {
 };
 
 export default {
+  updateIntegration(request) {
+    const id = Number(request.params.id);
+    const index=allIntegrations.map(i=>i.id).indexOf(id);
+    if (index !== -1) {
+      allIntegrations[index] = request.requestBody;
+    }
+    updateIntegration.value = request.requestBody
+  },
   getIntegration(request) {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);

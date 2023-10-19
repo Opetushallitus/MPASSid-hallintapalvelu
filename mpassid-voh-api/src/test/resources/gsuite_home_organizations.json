@@ -1,6 +1,7 @@
 {
   "identityProviders": [
     {
+      "id": 4000010,
       "configurationEntity": {
         "idp": {
           "institutionTypes": [
@@ -102,6 +103,7 @@
       "deploymentPhase": 1
     },
     {
+      "id": 4000011,
       "configurationEntity": {
         "idp": {
           "institutionTypes": [

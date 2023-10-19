@@ -18,6 +18,9 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
+
+import org.hibernate.envers.Audited;
+
 import javax.persistence.DiscriminatorType;
 import javax.persistence.ElementCollection;
 import javax.persistence.CollectionTable;
@@ -29,6 +32,7 @@ import javax.persistence.Inheritance;
 
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 
+@Audited
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)

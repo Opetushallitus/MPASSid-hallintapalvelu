@@ -5,11 +5,14 @@ import java.time.LocalDate;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.hibernate.envers.Audited;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import fi.mpass.voh.api.integration.mp.SamlMetadataProvider;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@Audited
 @Entity
 @DiscriminatorValue("gsuite")
 @JsonIgnoreProperties(ignoreUnknown = true)

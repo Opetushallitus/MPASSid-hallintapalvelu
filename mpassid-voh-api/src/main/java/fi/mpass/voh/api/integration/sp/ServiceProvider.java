@@ -41,9 +41,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 
+import org.hibernate.envers.Audited;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Audited
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)

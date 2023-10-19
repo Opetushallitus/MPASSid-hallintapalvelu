@@ -11,45 +11,47 @@ export default function Metadata({
   configurationEntity: Components.Schemas.ConfigurationEntity;
   role: typeof roles[number];
 }) {
-  const providerData = configurationEntity[role]!;
+  if(role!="set") {
+    const providerData:Components.Schemas.ServiceProvider|Components.Schemas.IdentityProvider = configurationEntity[role]!;
+    if (providerData.metadata && providerData.metadata !== undefined) {  
+      const value = providerData.metadata.encoding && providerData.metadata.content !== undefined
+        ? atob(providerData.metadata.content as unknown as string)
+        : JSON.stringify(providerData.metadata, null, 2);
 
-  if (providerData.metadata) {
-    const value = providerData.metadata.encoding
-      ? atob(providerData.metadata.content as unknown as string)
-      : JSON.stringify(providerData.metadata, null, 2);
+      return (
+        <Grid container spacing={2} mb={3}>
+          <Grid item xs={4}>
+            <FormattedMessage defaultMessage="Metatiedot" />
+          </Grid>
+          <Grid item xs={8} sx={{}}>
+            <Typography
+              sx={{
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
+              }}
+              variant="caption"
+            >
+              <code>{value}</code>
+            </Typography>
+          </Grid>
+        </Grid>
+      );
+    }
 
-    return (
-      <Grid container spacing={2} mb={3}>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="Metatiedot" />
+    if (providerData.metadataUrl) {
+      return (
+        <Grid container spacing={2} mb={3}>
+          <Grid item xs={4}>
+            <FormattedMessage defaultMessage="Metatiedot" />
+          </Grid>
+          <Grid item xs={8}>
+            <LinkValue href={providerData.metadataUrl} />
+          </Grid>
         </Grid>
-        <Grid item xs={8} sx={{}}>
-          <Typography
-            sx={{
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-all",
-            }}
-            variant="caption"
-          >
-            <code>{value}</code>
-          </Typography>
-        </Grid>
-      </Grid>
-    );
+      );
+    }
   }
-
-  if (providerData.metadataUrl) {
-    return (
-      <Grid container spacing={2} mb={3}>
-        <Grid item xs={4}>
-          <FormattedMessage defaultMessage="Metatiedot" />
-        </Grid>
-        <Grid item xs={8}>
-          <LinkValue href={providerData.metadataUrl} />
-        </Grid>
-      </Grid>
-    );
-  }
+  
 
   return null;
 }

@@ -1,12 +1,16 @@
 package fi.mpass.voh.api.integration;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.apache.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,7 +55,7 @@ public class IntegrationController {
     @Operation(summary = "Search paged integrations", ignoreJsonView = true)
     @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PageIntegration.class), mediaType = "application/json", examples = {
                     @ExampleObject(name = "searchIntegrations", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
             @ApiResponse(responseCode = "404", description = "No integrations found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
@@ -62,10 +66,16 @@ public class IntegrationController {
             @RequestParam(required = false, value = "type") String filterByType,
             @RequestParam(required = false, value = "role") String role,
             @RequestParam(required = false, value = "deploymentPhase") String deploymentPhase,
+            @RequestParam(required = false, value = "referenceIntegration") Long referenceIntegration,
             Pageable pageable) {
         try {
-            return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase,
-                    pageable);
+            if (!(referenceIntegration == null)) {
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, referenceIntegration,
+                        pageable);
+            } else {
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase,
+                        pageable);
+            }
         } catch (PropertyReferenceException exc) {
             throw new ResponseStatusException(
                     HttpStatus.SC_NOT_FOUND, "Integration Not Found", exc);
@@ -88,12 +98,28 @@ public class IntegrationController {
     @Operation(summary = "Update the specific integration")
     @PreAuthorize("hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")), 
-        @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
-        @ApiResponse(responseCode = "409", description = "Integration update conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")) 
+            @ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "405", description = "Integration update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "409", description = "Integration update conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
     @PutMapping("{id}")
-    Integration updateIntegration(@RequestBody Integration integration, @PathVariable Long id) {
+    @JsonView(value = IntegrationView.Default.class)
+    Integration updateIntegration(@Valid @RequestBody Integration integration, @PathVariable Long id) {
         return integrationService.updateIntegration(id, integration);
+    }
+ 
+    @Operation(summary = "Get integrations since a point in time", ignoreJsonView = true)
+    @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
+                    @ExampleObject(name = "integration", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
+            @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
+    })
+    @GetMapping("/since/{timestamp}")
+    @JsonView(value = IntegrationView.Default.class)
+    public List<Integration> getIntegrationsSince(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timestamp) {
+        return integrationService.getIntegrationsSince(timestamp);
     }
 }

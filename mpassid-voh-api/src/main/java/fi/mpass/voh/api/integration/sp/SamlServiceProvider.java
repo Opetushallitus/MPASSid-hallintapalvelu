@@ -4,8 +4,10 @@ import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.envers.Audited;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+@Audited
 @Entity
 @DiscriminatorValue("saml")
 @JsonIgnoreProperties(ignoreUnknown = true)

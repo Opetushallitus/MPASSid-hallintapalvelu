@@ -19,10 +19,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import org.hibernate.envers.Audited;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Audited
 @Entity
 public class DiscoveryInformation {
     private final static Logger logger = LoggerFactory.getLogger(DiscoveryInformation.class);

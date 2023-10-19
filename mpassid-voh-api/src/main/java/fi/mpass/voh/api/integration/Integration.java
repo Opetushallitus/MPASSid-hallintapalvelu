@@ -7,8 +7,6 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -17,22 +15,36 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.springframework.data.domain.Persistable;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.organization.Organization;
 
+@Audited
 @Entity
-public class Integration {
+public class Integration implements Persistable<Long> {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Version
-    private java.sql.Timestamp version;
+    private int version;
+
+    @CreationTimestamp
+    private java.sql.Timestamp createdOn;
+
+    @UpdateTimestamp
+    private java.sql.Timestamp lastUpdatedOn;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "configuration_entity_id", referencedColumnName = "id")
@@ -40,12 +52,16 @@ public class Integration {
 
     // Defaults to no operations being cascaded
     @ManyToOne(fetch = FetchType.EAGER)
+    @NotAudited
     @JoinColumn(name = "organization_oid", referencedColumnName = "oid")
     private Organization organization;
 
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIgnoreProperties("integrationSets")
     @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE })
-    @JoinTable(name = "integrationsGroups", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_group_id", referencedColumnName = "id"))
-    private Set<IntegrationGroup> integrationGroups = new HashSet<>();
+    @Audited
+    @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
+    private Set<Integration> integrationSets = new HashSet<Integration>();
 
     @JsonManagedReference
     // TODO cascade review
@@ -55,18 +71,16 @@ public class Integration {
     private DiscoveryInformation discoveryInformation;
 
     @JsonView(value = IntegrationView.Default.class)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JsonIgnoreProperties("allowedIntegrations")
-    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.REFRESH, CascadeType.MERGE })
+    @ManyToMany(cascade = { CascadeType.REFRESH })
     @JoinTable(name = "allowedIntegrations", joinColumns = @JoinColumn(name = "integration_id1", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_id2", referencedColumnName = "id"))
-    private Set<Integration> allowedIntegrations = new HashSet<>();
+    private Set<Integration> allowedIntegrations = new HashSet<Integration>();
 
-    @JsonIgnoreProperties("allowedIntegrations")
+    @JsonIgnoreProperties("allowingIntegrations")
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "allowedIntegrations", cascade = { CascadeType.REFRESH,
             CascadeType.MERGE })
-    private Set<Integration> allowingIntegrations = new HashSet<>();
+    private Set<Integration> allowingIntegrations = new HashSet<Integration>();
 
-    @JsonView(value = IntegrationView.Excluded.class)
+    @JsonView(value = IntegrationView.Default.class)
     private int deploymentPhase;
     @JsonView(value = IntegrationView.Excluded.class)
     private LocalDate deploymentDate;
@@ -108,16 +122,27 @@ public class Integration {
         this.serviceContactAddress = serviceContactAddress;
     }
 
-    public long getId() {
+    @Override
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public java.sql.Timestamp getVersion() {
+    @JsonIgnore
+    @Override
+    public boolean isNew() {
+        return this.id == null;
+    }
+
+    public int getVersion() {
         return this.version;
+    }
+
+    public java.sql.Timestamp getLastUpdatedOn() {
+        return this.lastUpdatedOn;
     }
 
     public ConfigurationEntity getConfigurationEntity() {
@@ -132,7 +157,7 @@ public class Integration {
      * Gets the deployment phase.
      * 
      * @return The {@link int} representing the deployment phase.
-     *         0 testing, 1 production.
+     *         0 testing, 1 production, 2 preproduction
      */
     public int getDeploymentPhase() {
         return this.deploymentPhase;
@@ -182,6 +207,7 @@ public class Integration {
         this.serviceContactAddress = serviceContactAddress;
     }
 
+    // no cascadetype.merge 
     public void addAllowed(Integration integration) {
         allowedIntegrations.add(integration);
         integration.addAllowing(this);
@@ -191,11 +217,23 @@ public class Integration {
         this.allowingIntegrations.add(integration);
     }
 
-    public void addGroup(IntegrationGroup integrationGroup) {
-        this.integrationGroups.add(integrationGroup);
+    public Set<Integration> getAllowedIntegrations() {
+        return this.allowedIntegrations;
     }
 
-    public Set<IntegrationGroup> getIntegrationGroups() {
-        return this.integrationGroups;
+    public void setAllowedIntegrations(Set<Integration> allowed) {
+        this.allowedIntegrations = allowed;
+    }
+
+    /**
+     * associates this Integration to the given IntegrationSet
+     */
+    public void addToSet(Integration integrationSet) {
+        integrationSet.getIntegrationSets().add(this);
+        this.integrationSets.add(integrationSet);
+    }
+
+    public Set<Integration> getIntegrationSets() {
+        return this.integrationSets;
     }
 }

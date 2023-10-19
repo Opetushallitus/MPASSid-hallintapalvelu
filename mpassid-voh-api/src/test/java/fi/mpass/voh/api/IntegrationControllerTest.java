@@ -5,10 +5,14 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,9 +22,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -131,6 +137,33 @@ public class IntegrationControllerTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$").isArray());
+    }
+
+    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA" })
+    @Test
+    public void testOrganizationalAuthorizedSearchIntegrationsPaged() throws Exception {
+        mockMvc.perform(get("/api/v1/integration/search")
+                .param("role", "idp")
+                .param("search", "test")
+                .param("type", "oidc")
+                .param("deploymentPhase", "1")
+                .param("referenceIntegration", "12345")
+                .param("page", "5")
+                .param("size", "10")
+                .param("sort", "id,desc") // <-- no space after comma!
+                .param("sort", "name,asc")) // <-- no space after comma!
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(integrationService).getIntegrationsSpecSearchPageable(any(String.class), any(String.class),
+                any(String.class), any(String.class), any(Long.class), pageableCaptor.capture());
+        PageRequest pageable = (PageRequest) pageableCaptor.getValue();
+
+        assertEquals(5, pageable.getPageNumber());
+        assertEquals(10, pageable.getPageSize());
+        Sort sort = pageable.getSort();
+        assertEquals("name", sort.getOrderFor("name").getProperty());
+        assertEquals(Sort.Direction.ASC, sort.getOrderFor("name").getDirection());
     }
 
     @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_TALLENTAJA" })

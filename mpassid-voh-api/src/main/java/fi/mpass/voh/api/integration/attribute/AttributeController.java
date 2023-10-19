@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 
 @RestController
 @RequestMapping(path = "api/v1/attribute")
@@ -30,8 +29,7 @@ public class AttributeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                 content = @Content(mediaType = "application/json",
-                                array = @ArraySchema(schema = @Schema(implementation = String.class)), 
-                                examples = { @ExampleObject(name = "names", value = "[ \"foo\", \"bar\", \"zoo\" ]") } )),
+                                array = @ArraySchema(schema = @Schema(implementation = String.class)))),
             @ApiResponse(responseCode = "403", description = "Forbidden operation")
     })
     @GetMapping("/names")

@@ -3,6 +3,7 @@ package fi.mpass.voh.api.config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -132,19 +133,35 @@ public class IntegrationLoader implements CommandLineRunner {
                         final Integration i = integration;
                         allowedNode.forEach(c -> {
                             if (c.get("entityId") != null) {
+                                // find the corresponding integration set and make that set the allowed integration
                                 Integration samlSp = integrationRepository
                                         .findByConfigurationEntitySpEntityId(c.get("entityId").asText());
                                 if (samlSp != null) {
                                     logger.debug("Allowed SAML SP: " + samlSp.toString());
-                                    i.addAllowed(samlSp);
+                                    Set<Integration> integrationSet = samlSp.getIntegrationSets();
+                                    // assuming that an SP can belong to only one set
+                                    if (!integrationSet.isEmpty()) {
+                                        Integration setIntegration = integrationSet.iterator().next();
+                                        logger.debug("Set: " + setIntegration.getId());
+                                        i.addAllowed(setIntegration);
+                                    }
                                 }
                             }
                             if (c.get("clientId") != null) {
+                                // TODO find the corresponding integration set and make that the allowed
+                                // integration
                                 Integration oidcRp = integrationRepository
                                         .findByConfigurationEntitySpClientId(c.get("clientId").asText());
                                 if (oidcRp != null) {
                                     logger.debug("Allowed OIDC RP: " + oidcRp.toString());
-                                    i.addAllowed(oidcRp);
+                                    // i.addAllowed(oidcRp);
+                                    Set<Integration> integrationSet = oidcRp.getIntegrationSets();
+                                    // assuming that an RP can belong to only one set
+                                    if (!integrationSet.isEmpty()) {
+                                        Integration setIntegration = integrationSet.iterator().next();
+                                        logger.debug("Set: " + setIntegration.getId());
+                                        i.addAllowed(setIntegration);
+                                    }
                                 }
                             }
                         });
