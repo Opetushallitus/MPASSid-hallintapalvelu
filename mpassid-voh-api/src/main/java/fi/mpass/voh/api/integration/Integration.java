@@ -80,7 +80,8 @@ public class Integration implements Persistable<Long> {
             CascadeType.MERGE })
     private Set<Integration> allowingIntegrations = new HashSet<Integration>();
 
-    @JsonView(value = IntegrationView.Excluded.class)
+    // @JsonView(value = IntegrationView.Excluded.class)
+    @JsonView(value = IntegrationView.Default.class)
     private int deploymentPhase;
     @JsonView(value = IntegrationView.Excluded.class)
     private LocalDate deploymentDate;
