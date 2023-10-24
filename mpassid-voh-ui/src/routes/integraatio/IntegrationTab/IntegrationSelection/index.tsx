@@ -53,6 +53,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
+  const [openConfirmation, setOpenConfirmation] = useState(false);
   
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
@@ -70,21 +71,29 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   }, [integration,newIntegration,setNewIntegration,setActivateAllServices]);
 
   useEffect(() => {
-    if(integration!==undefined&&newIntegration!==undefined&& eqCheck(integration,newIntegration)) {
+    if(integration!==undefined&&newIntegration!==undefined&&eqCheck(integration,newIntegration)) {
       setSnackbarState(false);
     } else {
-      setSnackbarState(true);
+      if(!openConfirmation) {
+        setSnackbarState(true);
+      } else {
+        setSnackbarState(false);
+      }
     }
-  }, [integration,newIntegration,setSnackbarState]);
+  }, [openConfirmation,integration,newIntegration,setSnackbarState]);
 
   useEffect(() => {
     if(newIntegration) {
       if(!activateAllServices&&(newIntegration.allowedIntegrations === undefined||newIntegration.allowedIntegrations.length===0)) {
-        setSnackbarState(true);
+        if(!openConfirmation) {
+          setSnackbarState(true);
+        } else {
+          setSnackbarState(false);
+        }
       }
     }
     
-  }, [activateAllServices,newIntegration,setSnackbarState,]);
+  }, [activateAllServices,newIntegration,setSnackbarState,openConfirmation]);
 
 
   
@@ -130,10 +139,16 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const saveIntegrations = async () => {
     if(newIntegration!==undefined) {
-      const id = newIntegration.id!;
-      const updateResponse = await updateIntegration({ id },newIntegration);
-      setIntegration(updateResponse);
-      setOpen(true)
+      if(newIntegration.allowedIntegrations?.length == 0&&openConfirmation == false) {
+        setOpenConfirmation(true)
+      } else {
+        const id = newIntegration.id!;
+        const updateResponse = await updateIntegration({ id },newIntegration);
+        setIntegration(updateResponse);
+        setOpenConfirmation(false)
+        setOpen(true)
+      }
+      
     }
   };
 
@@ -218,7 +233,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                             <FormattedMessage defaultMessage="Tunniste" />
                         </TableHeaderCell>
                         <TableHeaderCell
-                        sort={[ "referenceIntegration"]}
+                        sort={[ "allowedIntegrations"]}
                         component="div">
                             <FormattedMessage defaultMessage="Sallittu palvelu" />
                         </TableHeaderCell>
@@ -258,7 +273,29 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                   </Secondary>
                   </Box>
               )}
-
+              <Dialog
+                open={openConfirmation}
+                onClose={()=>setOpen(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">
+                    <FormattedMessage defaultMessage="Olet sallimassa kaikki palvelut" />
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                  <FormattedMessage defaultMessage="Haluatko varmasti tallentaa? Tieto yksittäisistä valinnoista poistuu tallennuksen yhteydessä." />
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={()=>{setOpenConfirmation(false);setSnackbarState(true)}} autoFocus>
+                    PERUUTA
+                  </Button>
+                  <Button onClick={saveIntegrations} autoFocus>
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
               <Dialog
                 open={open}
                 onClose={()=>setOpen(false)}

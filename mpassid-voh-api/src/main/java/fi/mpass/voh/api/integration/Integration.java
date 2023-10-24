@@ -80,7 +80,6 @@ public class Integration implements Persistable<Long> {
             CascadeType.MERGE })
     private Set<Integration> allowingIntegrations = new HashSet<Integration>();
 
-    // @JsonView(value = IntegrationView.Excluded.class)
     @JsonView(value = IntegrationView.Default.class)
     private int deploymentPhase;
     @JsonView(value = IntegrationView.Excluded.class)
@@ -158,7 +157,7 @@ public class Integration implements Persistable<Long> {
      * Gets the deployment phase.
      * 
      * @return The {@link int} representing the deployment phase.
-     *         0 testing, 1 production.
+     *         0 testing, 1 production, 2 preproduction
      */
     public int getDeploymentPhase() {
         return this.deploymentPhase;

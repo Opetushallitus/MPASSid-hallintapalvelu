@@ -72,7 +72,7 @@ export const envAbbreviations = (index:string) =>  {
     return envAbbreviationValues[index]
   }
   return {
-    defaultMessage: "Ei tiedossa",
+    defaultMessage: "Ei tiedossa"
   };
 }
 
@@ -104,18 +104,20 @@ export default function IntegrationsTable() {
 
   const roleFilter = useFilterMenuItems({
     options: roles,
+    searchParamName: "rooli",
     optionsLabels: Object.fromEntries(
       roles.map((role) => [role, intl.formatMessage(typeAbbreviations[role])])
     ),
-    searchParamName: "rooli",
+    
   });
 
   const envFilter = useFilterMenuItems({
     options: environments,
-    optionsLabels: Object.fromEntries(
-      environments.map((env) => [env, intl.formatMessage(envAbbreviations(env))])
-    ),
     searchParamName: "ympäristö",
+    optionsLabels: Object.fromEntries(
+      environments.map((env) => [env, intl.formatMessage(envAbbreviationValues[env])])
+    ),
+    
   });
 
   return (
@@ -124,71 +126,73 @@ export default function IntegrationsTable() {
         <TableHead component="div">
           <TableRow component="div">
             <TableHeaderCell sort="id" component="div">
-              <FormattedMessage defaultMessage="Tunniste" />
+                <FormattedMessage defaultMessage="Tunniste" />
             </TableHeaderCell>
             <TableHeaderCell
-              sort={[
-                "configurationEntity.idp.flowName",
-                "configurationEntity.idp.entityId",
-                "configurationEntity.sp.name",
-              ]}
-              component="div"
-            >
-              <FormattedMessage defaultMessage="Palvelu" />
+                sort={[
+                  "configurationEntity.idp.flowName",
+                  "configurationEntity.idp.entityId",
+                  "configurationEntity.sp.name",
+                ]}
+                component="div">
+                <FormattedMessage defaultMessage="Palvelu" />
             </TableHeaderCell>
             <TableHeaderCell
-              sort={[
-                "configurationEntity.idp.type",
-                "configurationEntity.sp.type",
-              ]}
-              menuProps={{
-                MenuListProps: {
-                  subheader: (
-                    <ListSubheader>
-                      <FormattedMessage defaultMessage="Suodata tyypin mukaan" />
-                    </ListSubheader>
-                  ),
-                },
-                active: typeFilter.modified,
-                children: typeFilter.children,
-              }}
-              component="div"
-            >
-              <FormattedMessage defaultMessage="Tyyppi" />
+                sort={[
+                  "configurationEntity.idp.type",
+                  "configurationEntity.set.type",
+                  "configurationEntity.sp.type",
+                ]}
+                menuProps={{
+                  MenuListProps: {
+                    subheader: (
+                      <ListSubheader>
+                        <FormattedMessage defaultMessage="Suodata tyypin mukaan" />
+                      </ListSubheader>
+                    ),
+                  },
+                  active: typeFilter.modified,
+                  children: typeFilter.children,
+                }}
+                component="div">
+                <FormattedMessage defaultMessage="Tyyppi" />
             </TableHeaderCell>
             <TableHeaderCell
-              sort={["configurationEntity.idp", "configurationEntity.sp"]}
-              menuProps={{
-                MenuListProps: {
-                  subheader: (
-                    <ListSubheader>
-                      <FormattedMessage defaultMessage="Suodata roolin mukaan" />
-                    </ListSubheader>
-                  ),
-                },
-                active: roleFilter.modified,
-                children: roleFilter.children,
-              }}
-              component="div"
-            >
-              <FormattedMessage defaultMessage="Rooli" />
+                sort={["configurationEntity.idp", 
+                       "configurationEntity.set",
+                       "configurationEntity.sp"]}
+                menuProps={{
+                  MenuListProps: {
+                    subheader: (
+                      <ListSubheader>
+                        <FormattedMessage defaultMessage="Suodata roolin mukaan" />
+                      </ListSubheader>
+                    ),
+                  },
+                  active: roleFilter.modified,
+                  children: roleFilter.children,
+                }}
+                component="div">
+                <FormattedMessage defaultMessage="Rooli" />
             </TableHeaderCell>
             <TableHeaderCell 
-              menuProps={{
-                MenuListProps: {
-                  subheader: (
-                    <ListSubheader>
-                      <FormattedMessage defaultMessage="Suodata ympäristön mukaan" />
-                    </ListSubheader>
-                  ),
-                },
-                active: envFilter.modified,
-                children: envFilter.children,
-              }} component="div">
-              <FormattedMessage defaultMessage="Ympäristö" />
+                sort={["deploymentPhase"]}
+                menuProps={{
+                  MenuListProps: {
+                    subheader: (
+                      <ListSubheader>
+                        <FormattedMessage defaultMessage="Suodata ympäristön mukaan" />
+                      </ListSubheader>
+                    ),
+                  },
+                  active: envFilter.modified,
+                  children: envFilter.children,
+                }} 
+                component="div">
+                <FormattedMessage defaultMessage="Ympäristö" />
             </TableHeaderCell>
             <TableHeaderCell sort="organization.name" component="div">
-              <FormattedMessage defaultMessage="Organisaatio" />
+                <FormattedMessage defaultMessage="Organisaatio" />
             </TableHeaderCell>
           </TableRow>
         </TableHead>
