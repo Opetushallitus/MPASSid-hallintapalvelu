@@ -140,6 +140,7 @@ export default function IntegrationsTable() {
             <TableHeaderCell
                 sort={[
                   "configurationEntity.idp.type",
+                  "configurationEntity.set.type",
                   "configurationEntity.sp.type",
                 ]}
                 menuProps={{
@@ -157,7 +158,9 @@ export default function IntegrationsTable() {
                 <FormattedMessage defaultMessage="Tyyppi" />
             </TableHeaderCell>
             <TableHeaderCell
-                sort={["configurationEntity.idp", "configurationEntity.sp"]}
+                sort={["configurationEntity.idp", 
+                       "configurationEntity.set",
+                       "configurationEntity.sp"]}
                 menuProps={{
                   MenuListProps: {
                     subheader: (
