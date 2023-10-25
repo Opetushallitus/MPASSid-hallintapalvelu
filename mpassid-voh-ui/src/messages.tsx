@@ -170,7 +170,7 @@ defineMessage({
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Palvelu ryhmä",
+  defaultMessage: "Palveluryhmä",
   id: "attribuutti.integrationGroups",
   description: "attribuutti",
 });
