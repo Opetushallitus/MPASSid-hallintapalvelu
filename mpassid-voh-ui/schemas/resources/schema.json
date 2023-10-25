@@ -141,6 +141,12 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Integration"
+                                },
+                                "examples": {
+                                  "integration": {
+                                    "description": "integration"
+
+                                  }
                                 }
                             }
                         }
