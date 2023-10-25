@@ -22,7 +22,9 @@ const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
   value?: Components.Schemas.Integration;
 };
 
-const updateIntegration = {} as {
+const updateIntegration = definition.paths["/api/v1/integration/{id}"].put.responses[
+  "200"
+].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
 };
 
@@ -48,19 +50,6 @@ allIntegrations.push(
     },
   }))
 );
-
-allIntegrations = allIntegrations.map((row)=>{
-  if(row?.configurationEntity?.set !== undefined) {
-    row.configurationEntity.set.type="palvelu";
-    row.organization={}
-    row.organization.name= "CSC-Tieteen tietotekniikan keskus Oy"
-    row.organization.oid= "1.2.246.562.10.201311201229111111"
-    row.organization.ytunnus="123245-0"
-  }
-  return row;
-})
-  
-
 
 const defaults = {
   page: 1,

@@ -279,6 +279,6 @@ defineMessage({
 });
 defineMessage({
   defaultMessage: "Palvelu",
-  id: "tyyppi.palvelu",
+  id: "tyyppi.sp",
   description: "tyyppi",
 });

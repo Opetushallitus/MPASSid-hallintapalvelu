@@ -52,9 +52,10 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const { content, totalPages } = useIntegrationsSpecSearchPageable();
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [open, setOpen] = useState(false);
+  const [openNotice, setOpenNotice] = useState(false);
   const [openConfirmation, setOpenConfirmation] = useState(false);
-  
+  const [saveDialogState, setSaveDialogState] = useState(false);
+
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
     horizontal: 'left' | 'center' | 'right';
@@ -62,41 +63,39 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     vertical: 'bottom',
     horizontal: 'right',
   }
-  const [snackbarState, setSnackbarState] = useState<boolean>(false);
   
   useEffect(() => {
     if((integration !== undefined)&&(newIntegration?.id !== integration?.id)) {
       setNewIntegration(integration);
+      setSaveDialogState(false);
     }
-  }, [integration,newIntegration,setNewIntegration,setActivateAllServices]);
+  }, [integration,newIntegration,setNewIntegration,setSaveDialogState]);
 
   useEffect(() => {
     if(integration!==undefined&&newIntegration!==undefined&&eqCheck(integration,newIntegration)) {
-      setSnackbarState(false);
+      setSaveDialogState(false);
     } else {
-      if(!openConfirmation) {
-        setSnackbarState(true);
+      if(!openConfirmation&&!openNotice) {
+        setSaveDialogState(true);
       } else {
-        setSnackbarState(false);
+        setSaveDialogState(false);
       }
     }
-  }, [openConfirmation,integration,newIntegration,setSnackbarState]);
+  }, [openConfirmation,openNotice,integration,newIntegration,setSaveDialogState]);
 
   useEffect(() => {
     if(newIntegration) {
       if(!activateAllServices&&(newIntegration.allowedIntegrations === undefined||newIntegration.allowedIntegrations.length===0)) {
-        if(!openConfirmation) {
-          setSnackbarState(true);
+        if(!openConfirmation&&!openNotice) {
+          setSaveDialogState(true);
         } else {
-          setSnackbarState(false);
+          setSaveDialogState(false);
         }
       }
     }
     
-  }, [activateAllServices,newIntegration,setSnackbarState,openConfirmation]);
+  }, [activateAllServices,newIntegration,setSaveDialogState,openConfirmation,openNotice]);
 
-
-  
   useEffect(() => {
     if((searchParams.get("rooli") ?? "")!=="set") {
       setSearchParams("rooli=set")
@@ -140,13 +139,13 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const saveIntegrations = async () => {
     if(newIntegration!==undefined) {
       if(newIntegration.allowedIntegrations?.length == 0&&openConfirmation == false) {
-        setOpenConfirmation(true)
+        setOpenConfirmation(true);
       } else {
         const id = newIntegration.id!;
         const updateResponse = await updateIntegration({ id },newIntegration);
-        setIntegration(updateResponse);
-        setOpenConfirmation(false)
-        setOpen(true)
+        setIntegration(updateResponse);     
+        setOpenNotice(true);
+        setOpenConfirmation(false);
       }
       
     }
@@ -154,7 +153,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const clearIntegrations = () => {
     setNewIntegration(integration);
-    setSnackbarState(false);
+    setSaveDialogState(false);
     if(integration?.allowedIntegrations === undefined || integration?.allowedIntegrations?.length===0) {
       setActivateAllServices(true);
     } else {
@@ -168,7 +167,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     if(copy!==undefined) {
       copy.allowedIntegrations=[];
       setNewIntegration(copy);
-      setSnackbarState(true);
+      setSaveDialogState(true);
     }
   };
 
@@ -275,7 +274,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
               )}
               <Dialog
                 open={openConfirmation}
-                onClose={()=>setOpen(false)}
+                onClose={()=>setOpenNotice(false)}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
               >
@@ -288,7 +287,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={()=>{setOpenConfirmation(false);setSnackbarState(true)}} autoFocus>
+                  <Button onClick={()=>setOpenConfirmation(false)} autoFocus>
                     PERUUTA
                   </Button>
                   <Button onClick={saveIntegrations} autoFocus>
@@ -297,8 +296,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                 </DialogActions>
               </Dialog>
               <Dialog
-                open={open}
-                onClose={()=>setOpen(false)}
+                open={openNotice}
+                onClose={()=>setOpenNotice(false)}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
               >
@@ -311,13 +310,13 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={()=>setOpen(false)} autoFocus>
+                  <Button onClick={()=>setOpenNotice(false)} autoFocus>
                     OK
                   </Button>
                 </DialogActions>
               </Dialog>
               <Snackbar
-                  open={snackbarState}
+                  open={saveDialogState}
                   anchorOrigin={snackbarLocation}>
                   
                     <Box boxShadow={5} sx={{ width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
