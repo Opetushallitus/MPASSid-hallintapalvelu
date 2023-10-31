@@ -183,4 +183,6 @@ public class IntegrationControllerTest {
                 .andExpect(jsonPath("$.id").value(99L))
                 .andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
     }
+
+    // TODO negative test for invalid search deploymentPhase parameter, e.g. "0,2"
 }
