@@ -35,7 +35,6 @@ import fi.mpass.voh.api.organization.Organization;
 
 @Audited
 @Entity
-// @JsonIgnoreProperties(allowSetters = true)
 public class Integration implements Persistable<Long> {
     @Id
     private Long id;

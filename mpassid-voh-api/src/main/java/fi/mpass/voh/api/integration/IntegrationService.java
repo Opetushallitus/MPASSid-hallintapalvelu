@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -23,6 +22,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.Revisions;
 import org.springframework.data.jpa.domain.Specification;
@@ -177,13 +179,6 @@ public class IntegrationService {
     return integrations;
   }
 
-  private static <T> Predicate<T> distinctByKey(
-      Function<? super T, ?> keyExtractor) {
-
-    Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-    return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
-  }
-
   /**
    * The method creates a specification from the given search criteria, filtering
    * types and roles. The method uses the reference integration to add
@@ -211,14 +206,6 @@ public class IntegrationService {
     List<Integration> integrations = new ArrayList<Integration>();
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
-
-    // try to query the reference integration
-    Optional<Integration> referenceIntegration = getSpecIntegrationById(referenceIntegrationId);
-    if (referenceIntegration.isPresent()) {
-      // allowed integrations
-      Set<Integration> allowedIntegrations = referenceIntegration.get().getAllowedIntegrations();
-      integrations.addAll(allowedIntegrations);
-    }
 
     if (search != null && search.length() > 0) {
       builder.withEqualOr(Category.IDP, "flowName", search);
@@ -252,10 +239,45 @@ public class IntegrationService {
       }
       Specification<Integration> spec = builder.build();
 
-      integrations.addAll(integrationRepository.findAll(spec));
-      List<Integration> distinctIntegrations = integrations.stream().filter(distinctByKey(i -> i.getId()))
-          .collect(Collectors.toList());
-      return pageIntegrations(distinctIntegrations, pageable);
+      List<Integration> existingIntegrations = integrationRepository.findAll(spec);
+
+      // try to query the reference integration
+      Optional<Integration> referenceIntegration = getSpecIntegrationById(referenceIntegrationId);
+      if (referenceIntegration.isPresent()) {
+        // allowed integrations
+        List<Integration> allowedIntegrations = List.copyOf(referenceIntegration.get().getAllowedIntegrations());
+        if (!allowedIntegrations.isEmpty()) {
+          Sort sort = pageable.getSort();
+          if (!sort.isEmpty()) {
+            // if allowedIntegrations sort parameter exists, add the referenced
+            // integration's allowed integrations to the start or the end
+            // of the list based on the sort order
+            Order order = sort.getOrderFor("allowedIntegrations");
+            if (order != null) {
+              existingIntegrations.removeAll(allowedIntegrations);
+
+              if (order.getDirection().equals(Direction.DESC)) {
+                integrations.addAll(existingIntegrations);
+                integrations.addAll(allowedIntegrations);
+                logger.debug("After removing and adding allowed integrations to the end of the response. Size: "
+                    + existingIntegrations.size());
+              } else {
+                integrations.addAll(allowedIntegrations);
+                integrations.addAll(existingIntegrations);
+                logger.debug("After removing and adding allowed integrations to the beginning of the response. Size: "
+                    + allowedIntegrations.size());
+              }
+            }
+          }
+        }
+      }
+
+      if (integrations.isEmpty()) {
+        integrations = List.copyOf(existingIntegrations);
+      }
+
+      // logger.debug("Distinct integrations size: " + distinctIntegrations.size());
+      return pageIntegrations(integrations, pageable);
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
