@@ -24,15 +24,18 @@ import org.springframework.data.domain.Persistable;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.organization.Organization;
 
 @Audited
 @Entity
+// @JsonIgnoreProperties(allowSetters = true)
 public class Integration implements Persistable<Long> {
     @Id
     private Long id;
@@ -71,6 +74,7 @@ public class Integration implements Persistable<Long> {
     private DiscoveryInformation discoveryInformation;
 
     @JsonView(value = IntegrationView.Default.class)
+    @JsonInclude(Include.NON_EMPTY)
     @ManyToMany(cascade = { CascadeType.REFRESH })
     @JoinTable(name = "allowedIntegrations", joinColumns = @JoinColumn(name = "integration_id1", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_id2", referencedColumnName = "id"))
     private Set<Integration> allowedIntegrations = new HashSet<Integration>();
