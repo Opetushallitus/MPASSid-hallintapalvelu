@@ -131,7 +131,7 @@ public abstract class ServiceProvider {
         this.name = name;
     }
 
-    @JsonView(value = IntegrationView.Excluded.class)
+    //@JsonView(value = IntegrationView.Excluded.class)
     public Map<String, Object> getMetadata() {
         return this.metadataJson;
     }
