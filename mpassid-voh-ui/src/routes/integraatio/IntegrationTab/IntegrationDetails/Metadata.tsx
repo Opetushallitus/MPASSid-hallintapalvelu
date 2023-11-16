@@ -40,7 +40,7 @@ export default function Metadata({
   }
   if(role=="idp") {
     const providerData:Components.Schemas.Azure|Components.Schemas.Gsuite|Components.Schemas.Adfs = configurationEntity[role]!;
-    if (providerData.metadataUrl) {
+    if ((providerData.type==="azure"||providerData.type==="gsuite"||providerData.type==="adfs")&&providerData.metadataUrl) {
       return (
         <Grid container spacing={2} mb={3}>
           <Grid item xs={4}>

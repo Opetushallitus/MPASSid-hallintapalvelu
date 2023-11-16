@@ -57,18 +57,21 @@ function useDefaultMessagesWithAvailableAttributeKeys() {
       ...defaultMessages,
     };
 
-    attributes.forEach((attribute) => {
-      [
-        { description: "attribuutti", prefix: "attribuutti" },
-        { description: "attribuutin työkaluvihje", prefix: "työkaluvihje" },
-      ].forEach(({ description, prefix }) => {
-        const key = [prefix, attribute].join(".");
-
-        if (!(key in defaultMessagesMemo)) {
-          defaultMessagesMemo[key] = { description, defaultMessage: "" };
-        }
+    if(attributes) {
+      attributes.forEach((attribute) => {
+        [
+          { description: "attribuutti", prefix: "attribuutti" },
+          { description: "attribuutin työkaluvihje", prefix: "työkaluvihje" },
+        ].forEach(({ description, prefix }) => {
+          const key = [prefix, attribute].join(".");
+  
+          if (!(key in defaultMessagesMemo)) {
+            defaultMessagesMemo[key] = { description, defaultMessage: "" };
+          }
+        });
       });
-    });
+    }
+    
 
     return defaultMessagesMemo;
   }, [attributes]);
