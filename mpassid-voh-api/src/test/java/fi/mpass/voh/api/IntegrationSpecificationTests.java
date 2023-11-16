@@ -3,6 +3,7 @@ package fi.mpass.voh.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationSpecificationsBuilder;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.idp.Wilma;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.ServiceProvider;
 import fi.mpass.voh.api.organization.Organization;
@@ -91,6 +93,19 @@ public class IntegrationSpecificationTests {
                 "serviceProviderContactAddress@example.net");
 
         integrationRepository.save(spIntegration);
+
+        // Integration sets
+        for (int i = 1; i < 10; i++) {
+            ConfigurationEntity setCe = new ConfigurationEntity();
+            IntegrationSet set = new IntegrationSet();
+            set.setConfigurationEntity(setCe);
+            setCe.setSet(set);
+            set.setName("Integration set " + i);
+            Integration integrationSet = new Integration(3000L + i, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
+                    0, null, organization, "serviceContactAddress" + i + "@example.net");
+            integrationSet.setConfigurationEntity(setCe);
+            integrationRepository.save(integrationSet);
+        }
     }
 
     @Test
@@ -226,6 +241,21 @@ public class IntegrationSpecificationTests {
         List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.9");
 
         builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        assertEquals(1, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationSetWithEqualName() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        String setName = "Integration set 5";
+
+        builder.withEqualAnd(Category.SET, "name", setName);
 
         Specification<Integration> spec = builder.build();
 
