@@ -57,7 +57,7 @@ function useDefaultMessagesWithAvailableAttributeKeys() {
       ...defaultMessages,
     };
 
-    if(attributes) {
+    if(attributes !== undefined) {
       attributes.forEach((attribute) => {
         [
           { description: "attribuutti", prefix: "attribuutti" },

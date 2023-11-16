@@ -10,7 +10,7 @@
     },
     "servers": [
       {
-        "url": "/mpassid"
+        "url": "@api.baseurl@"
       }
     ],
     "paths": {
