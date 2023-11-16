@@ -9,7 +9,7 @@ public class IntegrationSpecificationCriteria {
     }
 
     public enum Category {
-        INTEGRATION, IDP, SP, ROLE, TYPE, ORGANIZATION, DEPLOYMENT_PHASE
+        INTEGRATION, IDP, SP, SET, ROLE, TYPE, ORGANIZATION, DEPLOYMENT_PHASE
     }
 
     private Category category;

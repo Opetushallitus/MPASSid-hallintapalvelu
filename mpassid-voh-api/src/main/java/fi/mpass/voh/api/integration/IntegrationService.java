@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -130,6 +129,7 @@ public class IntegrationService {
       builder.withEqualOr(Category.IDP, "hostname", search);
       builder.withEqualOr(Category.SP, "entityId", search);
       builder.withEqualOr(Category.SP, "clientId", search);
+      builder.withEqualOr(Category.SET, "name", search);
       builder.withEqualOr(Category.ORGANIZATION, "oid", search);
       builder.withEqualOr(Category.ORGANIZATION, "businessId", search);
       builder.withContainOr(Category.SP, "name", search);
@@ -212,6 +212,7 @@ public class IntegrationService {
       builder.withEqualOr(Category.IDP, "hostname", search);
       builder.withEqualOr(Category.SP, "entityId", search);
       builder.withEqualOr(Category.SP, "clientId", search);
+      builder.withEqualOr(Category.SET, "name", search);
       builder.withEqualOr(Category.ORGANIZATION, "oid", search);
       builder.withEqualOr(Category.ORGANIZATION, "businessId", search);
       builder.withContainOr(Category.SP, "name", search);
