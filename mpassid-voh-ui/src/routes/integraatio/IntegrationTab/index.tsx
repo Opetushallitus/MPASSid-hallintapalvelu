@@ -78,7 +78,7 @@ export default function IntegrationTab({ id }: Props) {
   }, [origInteg]);
 
   useEffect(() => {
-    if(integration?.allowedIntegrations === undefined || integration?.allowedIntegrations?.length===0) {
+    if(integration?.permissions === undefined || integration?.permissions?.length===0) {
       setActivateAllServices(true);
     } else {
       setActivateAllServices(false);
