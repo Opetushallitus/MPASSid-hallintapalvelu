@@ -5,7 +5,7 @@ import { roles } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   Alert,
   Box,
@@ -43,8 +43,8 @@ interface Props {
 }
 
 const eqCheck = (integ1: Components.Schemas.Integration,integ2: Components.Schemas.Integration) =>  {
-    const list1 = integ1.allowedIntegrations?.map(i=>i.id) || [];
-    const list2 = integ2.allowedIntegrations?.map(i=>i.id) || [];
+    const list1 = integ1.permissions?.map(i=>i.to?.id) || [];
+    const list2 = integ2.permissions?.map(i=>i.to?.id) || [];
     return list1.length === list2.length&&[...list1].filter(id => list2.indexOf(id)>-1).length === list1.length;
 }
 export default function IntegrationSelection({ integration, newIntegration, setNewIntegration, setIntegration, activateAllServices, setActivateAllServices }: Props) {
@@ -85,7 +85,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   useEffect(() => {
     if(newIntegration) {
-      if(!activateAllServices&&(newIntegration.allowedIntegrations === undefined||newIntegration.allowedIntegrations.length===0)) {
+      if(!activateAllServices&&(newIntegration.permissions === undefined||newIntegration.permissions.length===0)) {
         if(!openConfirmation&&!openNotice) {
           setSaveDialogState(true);
         } else {
@@ -107,9 +107,9 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
     if(copy!==undefined) {
       if(!activateAllServices) {
-        copy.allowedIntegrations = [];
+        copy.permissions = [];
       } else {
-        copy.allowedIntegrations = structuredClone(integration.allowedIntegrations);
+        copy.permissions = structuredClone(integration.permissions);
       }
   
       setNewIntegration(copy);
@@ -138,7 +138,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const saveIntegrations = async () => {
     if(newIntegration!==undefined) {
-      if(newIntegration.allowedIntegrations?.length == 0&&openConfirmation == false) {
+      if(newIntegration.permissions?.length == 0&&openConfirmation == false) {
         setOpenConfirmation(true);
       } else {
         const id = newIntegration.id!;
@@ -154,7 +154,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const clearIntegrations = () => {
     setNewIntegration(integration);
     setSaveDialogState(false);
-    if(integration?.allowedIntegrations === undefined || integration?.allowedIntegrations?.length===0) {
+    if(integration?.permissions === undefined || integration?.permissions?.length===0) {
       setActivateAllServices(true);
     } else {
       setActivateAllServices(false);
@@ -165,7 +165,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const removeIntegrations = () => {
     const copy = structuredClone(newIntegration)
     if(copy!==undefined) {
-      copy.allowedIntegrations=[];
+      copy.permissions=[];
       setNewIntegration(copy);
       setSaveDialogState(true);
     }
@@ -175,18 +175,20 @@ export default function IntegrationSelection({ integration, newIntegration, setN
       
     const copy = structuredClone(newIntegration)
 
-    if(copy.allowedIntegrations === undefined) {
-      copy.allowedIntegrations = [];
+    if(copy.permissions === undefined) {
+      copy.permissions = [];
     }
-  
-    const index:number|undefined = copy.allowedIntegrations?.map((i:Components.Schemas.Integration)=>i.id).indexOf(row.id);
+ 
+    const index:number|undefined = copy.permissions?.map((i:Components.Schemas.IntegrationPermission)=>i.to?.id).indexOf(row.id);
     if(index!=undefined) {
       if (index > -1) {
-        copy?.allowedIntegrations?.splice(index, 1);
+        copy?.permissions?.splice(index, 1);
       } else {
-        const newServiceIntgeration:Components.Schemas.Integration={};
-        newServiceIntgeration.id=row.id;
-        copy?.allowedIntegrations?.push(newServiceIntgeration);
+        const newServiceIntgeration:Components.Schemas.IntegrationPermission={};
+        newServiceIntgeration.to={}; 
+        newServiceIntgeration.to.id=row.id;
+        newServiceIntgeration.lastUpdatedOn="edited";
+        copy?.permissions?.push(newServiceIntgeration);
       }  
       setNewIntegration(copy);    
     }
@@ -246,8 +248,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                         <TableHeaderCell sort="organization.name" component="div">
                             <FormattedMessage defaultMessage="Organisaatio" />
                         </TableHeaderCell>
-                        <TableHeaderCell sort="organization.edited" component="div">
-                            <FormattedMessage defaultMessage="Muokattu" />
+                        <TableHeaderCell sort="lastUpdatedOn" component="div">
+                            <FormattedMessage defaultMessage="Aktivoitu" />
                         </TableHeaderCell>
                     </TableRow>
                   </TableHead>
@@ -354,12 +356,17 @@ interface RowListProps {
   handleSwitch: (sp: Components.Schemas.Integration) => void,
 } 
 
+interface RowListProps2 {
+  row:Components.Schemas.Integration, 
+  newIntegration:Components.Schemas.Integration|undefined,
+} 
+
 function Row(props:RowListProps) {
     
   if(props.newIntegration==undefined) {
     return (<></>);
   }
-  
+
   const configurationEntity = props.row.configurationEntity;
 
   return (
@@ -380,10 +387,8 @@ function Row(props:RowListProps) {
           {props.row.organization?.name}
         </Stack>
       </TableCell>
-      <TableCell component="div">
-        <Stack>
-          TBD!
-        </Stack>
+      <TableCell align="center" component="div">
+        <ViimeksiMuokattu row={props.row} newIntegration={props.newIntegration} />
       </TableCell>
     </TableRow>
   );
@@ -398,7 +403,7 @@ function PalveluRyhmaContent(props: Components.Schemas.ConfigurationEntity) {
 
 function SallittuPalvelu(props:RowListProps) {
     
-  const allowed=props.newIntegration?.allowedIntegrations?.find(i => i.id === props.row.id);
+  const allowed=props.newIntegration?.permissions?.find(i => i.to?.id === props.row.id );
   let checked=false;
   let switchOpacity=1;
   if(allowed) {
@@ -412,5 +417,29 @@ function SallittuPalvelu(props:RowListProps) {
   return(
       <Switch sx={{ opacity: switchOpacity}} disabled={props.activateAllServices} checked={checked} onChange={()=>props.handleSwitch(props.row)}/>
   );
+  
+};
+
+function ViimeksiMuokattu(props:RowListProps2) {
+    
+  const intl = useIntl();
+  const item:Components.Schemas.IntegrationPermission|undefined=props.newIntegration?.permissions?.find(i => i.to?.id === props.row.id );
+  let checked;
+
+  if(item) {
+    checked=item.lastUpdatedOn
+  }
+  
+  if(checked) {
+    if(checked==="edited") {
+      return (<><FormattedMessage defaultMessage="Editoitu" /></>)
+    } else {
+      return(<>{new Intl.DateTimeFormat(intl.locale).format(new window.Date(checked))}</> );
+    }
+    
+  } else {
+    return(<>-</>)
+  }
+  
   
 };
