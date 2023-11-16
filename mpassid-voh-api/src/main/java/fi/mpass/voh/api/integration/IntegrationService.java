@@ -5,11 +5,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -244,28 +242,33 @@ public class IntegrationService {
       // try to query the reference integration
       Optional<Integration> referenceIntegration = getSpecIntegrationById(referenceIntegrationId);
       if (referenceIntegration.isPresent()) {
-        // allowed integrations
-        List<Integration> allowedIntegrations = List.copyOf(referenceIntegration.get().getAllowedIntegrations());
-        if (!allowedIntegrations.isEmpty()) {
+        // permitted integrations
+        List<IntegrationPermission> permissions = referenceIntegration.get().getPermissions();
+        List<Integration> permittedIntegrations = new ArrayList<Integration>();
+        for (IntegrationPermission p : permissions) {
+          permittedIntegrations.add(p.getTo());
+        }
+
+        if (!permittedIntegrations.isEmpty()) {
           Sort sort = pageable.getSort();
           if (!sort.isEmpty()) {
-            // if allowedIntegrations sort parameter exists, add the referenced
-            // integration's allowed integrations to the start or the end
+            // if permissions sort parameter exists, add the referenced
+            // integration's permitted integrations to the start or the end
             // of the list based on the sort order
-            Order order = sort.getOrderFor("allowedIntegrations");
+            Order order = sort.getOrderFor("permissions");
             if (order != null) {
-              existingIntegrations.removeAll(allowedIntegrations);
+              existingIntegrations.removeAll(permittedIntegrations);
 
               if (order.getDirection().equals(Direction.DESC)) {
                 integrations.addAll(existingIntegrations);
-                integrations.addAll(allowedIntegrations);
-                logger.debug("After removing and adding allowed integrations to the end of the response. Size: "
+                integrations.addAll(permittedIntegrations);
+                logger.debug("After removing and adding permitted integrations to the end of the response. Size: "
                     + existingIntegrations.size());
               } else {
-                integrations.addAll(allowedIntegrations);
+                integrations.addAll(permittedIntegrations);
                 integrations.addAll(existingIntegrations);
-                logger.debug("After removing and adding allowed integrations to the beginning of the response. Size: "
-                    + allowedIntegrations.size());
+                logger.debug("After removing and adding permitted integrations to the beginning of the response. Size: "
+                    + permissions.size());
               }
             }
           }
@@ -327,7 +330,7 @@ public class IntegrationService {
    * @return Integration
    * @throws EntityNotFoundException
    */
-  public Optional<Integration> getIntegrationSetById(Long id) {
+  private Optional<Integration> getIntegrationSetById(Long id) {
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
@@ -369,14 +372,17 @@ public class IntegrationService {
           existingIntegration.getConfigurationEntity().getIdp()
               .setInstitutionTypes(integration.getConfigurationEntity().getIdp().getInstitutionTypes());
         }
-        // updates allowed integration sets
-        if (integration.getAllowedIntegrations() != null) {
-          existingIntegration.setAllowedIntegrations(new HashSet<Integration>());
-          for (Integration allowedIntegration : integration.getAllowedIntegrations()) {
-            Integration existingAllowedIntegration = getIntegrationSetById(allowedIntegration.getId()).get();
-            existingIntegration.addAllowed(existingAllowedIntegration);
+        // updates integration permissions
+        if (integration.getPermissions() != null) {
+          logger.debug(
+                "Permitted integrations count : " + integration.getPermissions().size());
+          existingIntegration.removePermissions();
+          for (IntegrationPermission permission : integration.getPermissions()) {
+            // permission to integration set
+            Integration integrationSet = getIntegrationSetById(permission.getTo().getId()).get();
+            existingIntegration.addPermissionTo(integrationSet);
             logger.debug(
-                "Updated #" + existingIntegration.getId() + ": Allowed integration #" + allowedIntegration.getId());
+                "Updated #" + existingIntegration.getId() + ": Permitted integration #" + permission.getTo().getId());
           }
         }
         integration = integrationRepository.saveAndFlush(existingIntegration);

@@ -1,7 +1,10 @@
 package fi.mpass.voh.api.integration;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -12,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Version;
 
@@ -35,6 +39,7 @@ import fi.mpass.voh.api.organization.Organization;
 
 @Audited
 @Entity
+@JsonInclude(Include.NON_NULL)
 public class Integration implements Persistable<Long> {
     @Id
     private Long id;
@@ -69,25 +74,19 @@ public class Integration implements Persistable<Long> {
     // TODO cascade review
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "discovery_information_id", referencedColumnName = "id")
-    @JsonView(value = IntegrationView.Excluded.class)
+    // @JsonView(value = IntegrationView.Excluded.class)
     private DiscoveryInformation discoveryInformation;
 
-    @JsonView(value = IntegrationView.Default.class)
-    @JsonInclude(Include.NON_EMPTY)
-    @ManyToMany(cascade = { CascadeType.REFRESH })
-    @JoinTable(name = "allowedIntegrations", joinColumns = @JoinColumn(name = "integration_id1", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_id2", referencedColumnName = "id"))
-    private Set<Integration> allowedIntegrations = new HashSet<Integration>();
+    @JsonManagedReference
+    // @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToMany(mappedBy = "from", cascade = { CascadeType.ALL }, orphanRemoval = true)
+    private List<IntegrationPermission> permissions = new ArrayList<IntegrationPermission>();
 
-    @JsonIgnoreProperties("allowingIntegrations")
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "allowedIntegrations", cascade = { CascadeType.REFRESH,
-            CascadeType.MERGE })
-    private Set<Integration> allowingIntegrations = new HashSet<Integration>();
-
-    @JsonView(value = IntegrationView.Default.class)
+    // @JsonView(value = IntegrationView.Default.class)
     private int deploymentPhase;
-    @JsonView(value = IntegrationView.Excluded.class)
+    // @JsonView(value = IntegrationView.Excluded.class)
     private LocalDate deploymentDate;
-    @JsonView(value = IntegrationView.Excluded.class)
+    // @JsonView(value = IntegrationView.Excluded.class)
     private LocalDate acceptanceDate;
 
     private String serviceContactAddress;
@@ -160,7 +159,7 @@ public class Integration implements Persistable<Long> {
      * Gets the deployment phase.
      * 
      * @return The {@link int} representing the deployment phase.
-     *         0 testing, 1 production, 2 preproduction
+     *         0 testing, 1 production, 2 preproduction, 3 reserved
      */
     public int getDeploymentPhase() {
         return this.deploymentPhase;
@@ -210,22 +209,43 @@ public class Integration implements Persistable<Long> {
         this.serviceContactAddress = serviceContactAddress;
     }
 
-    // no cascadetype.merge 
-    public void addAllowed(Integration integration) {
-        allowedIntegrations.add(integration);
-        integration.addAllowing(this);
+    public void addPermissionTo(Integration integration) {
+        IntegrationPermission permission = new IntegrationPermission(this, integration);
+        if (!permissions.contains(permission)) {
+            permissions.add(permission);
+        }
     }
 
-    public void addAllowing(Integration integration) {
-        this.allowingIntegrations.add(integration);
+    public List<IntegrationPermission> getPermissions() {
+        return this.permissions;
     }
 
-    public Set<Integration> getAllowedIntegrations() {
-        return this.allowedIntegrations;
+    public void setPermissions(List<IntegrationPermission> permissions) {
+        this.permissions = permissions;
     }
 
-    public void setAllowedIntegrations(Set<Integration> allowed) {
-        this.allowedIntegrations = allowed;
+    public void removePermissionTo(Integration integration) {
+        for (Iterator<IntegrationPermission> iterator = permissions.iterator(); iterator.hasNext();) {
+            IntegrationPermission permission = iterator.next();
+
+            if (permission.getFrom().equals(this) && permission.getTo().equals(integration)) {
+                iterator.remove();
+                permission.setFrom(null);
+                permission.setTo(null);
+            }
+        }
+    }
+
+    public void removePermissions() {
+        for (Iterator<IntegrationPermission> iterator = permissions.iterator(); iterator.hasNext();) {
+            IntegrationPermission permission = iterator.next();
+
+            if (permission.getFrom().equals(this)) {
+                iterator.remove();
+                permission.setFrom(null);
+                permission.setTo(null);
+            }
+        }
     }
 
     /**

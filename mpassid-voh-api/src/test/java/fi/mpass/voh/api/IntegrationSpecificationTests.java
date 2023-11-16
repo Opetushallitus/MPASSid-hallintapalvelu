@@ -72,7 +72,7 @@ public class IntegrationSpecificationTests {
                 0, discoveryInformation, organization,
                 "serviceContactAddress@example.net");
 
-        integration.addAllowed(spInt);
+        integration.addPermissionTo(spInt);
 
         integrationRepository.save(integration);
 

@@ -105,7 +105,7 @@ class EnversIntegrationTests {
 				0, discoveryInformation, organization,
 				"serviceContactAddress@example.net");
 
-		integration.addAllowed(createSpIntegration());
+		integration.addPermissionTo(createSpIntegration());
 
 		return integration;
 	}

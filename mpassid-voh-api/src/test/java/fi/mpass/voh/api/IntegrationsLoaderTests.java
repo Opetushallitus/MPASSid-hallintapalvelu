@@ -60,7 +60,7 @@ public class IntegrationsLoaderTests {
         serviceLoader.run(oidcLocation);
         serviceLoader.run(samlLocation);
 
-        // 2
+        // 2, one with integration permissions
         String location = "gsuite_home_organizations.json";
         integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
         integrationLoader.run(location);

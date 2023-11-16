@@ -8,8 +8,10 @@ import java.util.Optional;
 
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.test.context.support.WithMockUser;
 
@@ -20,6 +22,7 @@ import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.organization.Organization;
 
 import org.mockito.Mock;
@@ -44,7 +47,9 @@ public class IntegrationServiceTests {
     private Integration integration;
     private Integration updatedIntegration;
     private Integration updatedAllowingIntegration;
+    private Integration referenceIntegration;
     private List<Integration> updatedIntegrations;
+    private List<Integration> integrationSets;
 
     @BeforeEach
     void setUp() {
@@ -55,21 +60,21 @@ public class IntegrationServiceTests {
         Organization organization = new Organization("Organization zyx", "123456-7", "1.2.3.4.5.6.7.8");
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Opinsys opinsys = new Opinsys("tenantId");
-
-        // Allowed services
-        /*
-         * ConfigurationEntity ce = new ConfigurationEntity();
-         * OidcServiceProvider serviceProvider = new OidcServiceProvider();
-         * serviceProvider.setConfigurationEntity(ce);
-         * ce.setSp(serviceProvider);
-         * serviceProvider.setClientId("clientId");
-         * serviceProvider.addAllowingIdentityProvider(wilma);
-         * Set<ServiceProvider> allowedServices = new HashSet<>();
-         * allowedServices.add(serviceProvider);
-         * 
-         * wilma.setAllowedServiceProviders(allowedServices);
-         */
         configurationEntity.setIdp(opinsys);
+
+        // Integration sets
+        integrationSets = new ArrayList<Integration>();
+        for (int i = 1; i < 10; i++) {
+            ConfigurationEntity ce = new ConfigurationEntity();
+            IntegrationSet set = new IntegrationSet();
+            set.setConfigurationEntity(ce);
+            ce.setSet(set);
+            set.setName("Integration set " + i);
+            Integration integrationSet = new Integration(1000L + i, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
+                    0, null, organization, "serviceContactAddress" + i + "@example.net");
+            integrationSet.setConfigurationEntity(ce);
+            integrationSets.add(integrationSet);
+        }
 
         integration = new Integration(999L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
                 0, discoveryInformation, organization,
@@ -84,8 +89,22 @@ public class IntegrationServiceTests {
                 0, discoveryInformation, organization,
                 "zoo@bar");
 
-        // TODO create Integration bakery
-        updatedAllowingIntegration.addAllowed(integration);
+        referenceIntegration = new Integration(1111L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 8, 30),
+                0, discoveryInformation, organization,
+                "zap@bar");
+
+        updatedIntegrations = new ArrayList<Integration>();
+        updatedIntegration.setServiceContactAddress("zyx@domain");
+        updatedIntegrations.add(updatedIntegration);
+        updatedAllowingIntegration.setServiceContactAddress("xyz@domain");
+        updatedIntegrations.add(updatedAllowingIntegration);
+
+        for (Integration set : integrationSets) {
+            updatedAllowingIntegration.addPermissionTo(set);
+            referenceIntegration.addPermissionTo(set);
+        }
+        referenceIntegration.removePermissionTo(integrationSets.get(5));
+        referenceIntegration.removePermissionTo(integrationSets.get(2));
     }
 
     @Test
@@ -111,6 +130,27 @@ public class IntegrationServiceTests {
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
+    void testGetIntegrationsSpecSearchPageableWithReferenceId() {
+        List<Integration> integrations = new ArrayList<Integration>();
+        integrations.add(updatedIntegration);
+        integrations.add(updatedAllowingIntegration);
+        Pageable pageable = PageRequest.of(0, 20, Sort.by("permissions"));
+        given(integrationRepository.findAll(any(Specification.class))).willReturn(integrationSets);
+        given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(referenceIntegration));
+
+        // when
+        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L,
+                pageable);
+
+        // then
+        assertTrue(pageIntegration.getContent().size() == 9);
+        assertTrue(pageIntegration.getContent().get(8).getId() == 1006);
+        assertTrue(pageIntegration.getContent().get(7).getId() == 1003);
+
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
     void testGetSpecIntegrationByNotExistingId() {
 
         EntityNotFoundException thrown = assertThrows(EntityNotFoundException.class, () -> {
@@ -132,24 +172,24 @@ public class IntegrationServiceTests {
 
         // then - verify the output
         assertTrue(resultIntegration.getId() == 999);
-        assertTrue(resultIntegration.getServiceContactAddress().equals("foo@bar"));
+        assertTrue(resultIntegration.getServiceContactAddress().equals("zyx@domain"));
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
-    public void testUpdateAllowedIntegrations() {
+    public void testUpdateIntegrationPermissions() {
         // given
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
 
         // when - action or the behaviour that we are going test
-        Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedIntegration);
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
 
         // then - verify the output
         assertTrue(resultIntegration.getId() == 999);
-        assertTrue(resultIntegration.getAllowedIntegrations().size() == 1);
+        assertTrue(resultIntegration.getPermissions().size() == 9);
     }
- 
+
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     public void testUpdateIntegrationWhenNoExistingIntegration() {
@@ -168,13 +208,8 @@ public class IntegrationServiceTests {
 
     @Test
     void testGetUpdatedIntegrationsSince() {
-        updatedIntegrations = new ArrayList<Integration>();
         LocalDateTime sinceTime = LocalDateTime.now();
-        updatedIntegration.setServiceContactAddress("zyx@domain");
-        updatedIntegrations.add(updatedIntegration);
-        updatedAllowingIntegration.setServiceContactAddress("xyz@domain");
-        updatedIntegrations.add(updatedAllowingIntegration);
-
+        
         // given
         given(integrationRepository.findAllByLastUpdatedOnAfter(any())).willReturn(updatedIntegrations);
 

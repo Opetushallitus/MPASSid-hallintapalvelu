@@ -143,13 +143,12 @@ public class IntegrationLoader implements CommandLineRunner {
                                     if (!integrationSet.isEmpty()) {
                                         Integration setIntegration = integrationSet.iterator().next();
                                         logger.debug("Set: " + setIntegration.getId());
-                                        i.addAllowed(setIntegration);
+                                        i.addPermissionTo(setIntegration);
                                     }
                                 }
                             }
                             if (c.get("clientId") != null) {
-                                // TODO find the corresponding integration set and make that the allowed
-                                // integration
+                                // find the corresponding integration set and make that set the allowed integration
                                 Integration oidcRp = integrationRepository
                                         .findByConfigurationEntitySpClientId(c.get("clientId").asText());
                                 if (oidcRp != null) {
@@ -160,7 +159,7 @@ public class IntegrationLoader implements CommandLineRunner {
                                     if (!integrationSet.isEmpty()) {
                                         Integration setIntegration = integrationSet.iterator().next();
                                         logger.debug("Set: " + setIntegration.getId());
-                                        i.addAllowed(setIntegration);
+                                        i.addPermissionTo(setIntegration);
                                     }
                                 }
                             }
