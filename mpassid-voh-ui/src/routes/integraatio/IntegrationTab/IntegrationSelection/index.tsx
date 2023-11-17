@@ -234,7 +234,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                             <FormattedMessage defaultMessage="Tunniste" />
                         </TableHeaderCell>
                         <TableHeaderCell
-                        sort={[ "allowedIntegrations"]}
+                        sort={[ "permissions"]}
                         component="div">
                             <FormattedMessage defaultMessage="Sallittu palvelu" />
                         </TableHeaderCell>
