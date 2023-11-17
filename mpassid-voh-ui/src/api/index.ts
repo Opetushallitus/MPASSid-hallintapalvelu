@@ -12,7 +12,7 @@ export function useIntegrationsSpecSearchPageable() {
   const [searchParams] = useSearchParams();
   const location = useLocation()
 
-  if(searchParams.getAll("sort").includes("allowedIntegrations,asc")||searchParams.getAll("sort").includes("allowedIntegrations,desc")) {
+  if(searchParams.getAll("sort").includes("permissions,asc")||searchParams.getAll("sort").includes("permissions,desc")) {
     searchParams.set("referenceIntegration",String(location.pathname.split("/").pop()))
   }
 
