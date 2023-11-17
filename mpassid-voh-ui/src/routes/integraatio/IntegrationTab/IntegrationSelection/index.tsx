@@ -142,6 +142,9 @@ export default function IntegrationSelection({ integration, newIntegration, setN
         setOpenConfirmation(true);
       } else {
         const id = newIntegration.id!;
+        newIntegration.permissions.forEach((permission)=>{
+          delete permission.lastUpdatedOn;
+        })
         const updateResponse = await updateIntegration({ id },newIntegration);
         setIntegration(updateResponse);     
         setOpenNotice(true);
