@@ -109,8 +109,9 @@ public class IntegrationSpecificationTests {
             set.setConfigurationEntity(setCe);
             setCe.setSet(set);
             set.setName("Integration set " + i);
+            // set deployment phase modulo 3
             Integration integrationSet = new Integration(3000L + i, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
-                    0, null, organization, "serviceContactAddress" + i + "@example.net");
+                    i%3, null, organization, "serviceContactAddress" + i + "@example.net");
             integrationSet.setConfigurationEntity(setCe);
             integrationSet.setOrganization(setOrganization);
             integrationRepository.save(integrationSet);
@@ -198,6 +199,21 @@ public class IntegrationSpecificationTests {
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
         assertEquals(3, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationWithDeploymentPhases() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        String deploymentPhase = "2,1";
+
+        builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        assertEquals(7, integrationList.size());
     }
 
     @Test
