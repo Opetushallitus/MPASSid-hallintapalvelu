@@ -77,8 +77,9 @@ public class Integration implements Persistable<Long> {
     // @JsonView(value = IntegrationView.Excluded.class)
     private DiscoveryInformation discoveryInformation;
 
+    /* empty permissions list indicates all permissions */
     @JsonManagedReference
-    // @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToMany(mappedBy = "from", cascade = { CascadeType.ALL }, orphanRemoval = true)
     private List<IntegrationPermission> permissions = new ArrayList<IntegrationPermission>();
 

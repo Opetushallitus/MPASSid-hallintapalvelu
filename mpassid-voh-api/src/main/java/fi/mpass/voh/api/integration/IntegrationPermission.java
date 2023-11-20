@@ -11,6 +11,9 @@ import org.hibernate.envers.Audited;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Audited
 @Entity
@@ -26,8 +29,10 @@ public class IntegrationPermission {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("toId")
+    @JsonSerialize(using = IntegrationPermissionSerializer.class)
     private Integration to;
 
+    @JsonInclude(Include.NON_NULL)
     @UpdateTimestamp
     private java.sql.Timestamp lastUpdatedOn;
 
