@@ -3,7 +3,6 @@ package fi.mpass.voh.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -96,6 +95,15 @@ public class IntegrationSpecificationTests {
 
         // Integration sets
         for (int i = 1; i < 10; i++) {
+            Organization setOrganization;
+            if (i<5) {
+                setOrganization = new Organization("Organization set 1234", "123444-1", "1.2.3.4.5.6.7.2");
+                organizationRepository.save(setOrganization);
+            } else {
+                setOrganization = new Organization("Organization set 56789", "567899-1", "1.2.3.4.5.6.7.3");
+                organizationRepository.save(setOrganization);
+            }
+
             ConfigurationEntity setCe = new ConfigurationEntity();
             IntegrationSet set = new IntegrationSet();
             set.setConfigurationEntity(setCe);
@@ -104,6 +112,7 @@ public class IntegrationSpecificationTests {
             Integration integrationSet = new Integration(3000L + i, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
                     0, null, organization, "serviceContactAddress" + i + "@example.net");
             integrationSet.setConfigurationEntity(setCe);
+            integrationSet.setOrganization(setOrganization);
             integrationRepository.save(integrationSet);
         }
     }
@@ -116,7 +125,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(3, integrationList.size());
+        assertEquals(12, integrationList.size());
     }
 
     @Test
@@ -223,7 +232,7 @@ public class IntegrationSpecificationTests {
     public void testIntegrationWithEqualOrganizations() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
-        List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.8", "1.2.3.4.5.6.7.9");
+        List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.8", "1.2.3.4.5.6.7.9", "1.2.3.4.5.6.7.2");
 
         builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
 
@@ -231,7 +240,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(2, integrationList.size());
+        assertEquals(6, integrationList.size());
     }
 
     @Test
