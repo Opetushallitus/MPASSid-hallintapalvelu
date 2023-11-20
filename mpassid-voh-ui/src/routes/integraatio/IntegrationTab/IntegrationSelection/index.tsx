@@ -142,6 +142,9 @@ export default function IntegrationSelection({ integration, newIntegration, setN
         setOpenConfirmation(true);
       } else {
         const id = newIntegration.id!;
+        newIntegration.permissions?.forEach((permission)=>{
+          delete permission.lastUpdatedOn;
+        })
         const updateResponse = await updateIntegration({ id },newIntegration);
         setIntegration(updateResponse);     
         setOpenNotice(true);
@@ -234,7 +237,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                             <FormattedMessage defaultMessage="Tunniste" />
                         </TableHeaderCell>
                         <TableHeaderCell
-                        sort={[ "allowedIntegrations"]}
+                        sort={[ "permissions"]}
                         component="div">
                             <FormattedMessage defaultMessage="Sallittu palvelu" />
                         </TableHeaderCell>
