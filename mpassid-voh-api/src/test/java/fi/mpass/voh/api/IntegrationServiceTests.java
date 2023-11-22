@@ -23,6 +23,7 @@ import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
+import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.organization.Organization;
 
 import org.mockito.Mock;
@@ -50,6 +51,7 @@ public class IntegrationServiceTests {
     private Integration referenceIntegration;
     private List<Integration> updatedIntegrations;
     private List<Integration> integrationSets;
+    private List<Integration> serviceProviders;
 
     @BeforeEach
     void setUp() {
@@ -64,7 +66,9 @@ public class IntegrationServiceTests {
 
         // Integration sets
         integrationSets = new ArrayList<Integration>();
+        serviceProviders = new ArrayList<Integration>();
         for (int i = 1; i < 10; i++) {
+            
             ConfigurationEntity ce = new ConfigurationEntity();
             IntegrationSet set = new IntegrationSet();
             set.setConfigurationEntity(ce);
@@ -73,6 +77,9 @@ public class IntegrationServiceTests {
             Integration integrationSet = new Integration(1000L + i, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
                     0, null, organization, "serviceContactAddress" + i + "@example.net");
             integrationSet.setConfigurationEntity(ce);
+            Integration sp = createServiceProvider(Long.valueOf(i), organization);
+            sp.addToSet(integrationSet);
+            serviceProviders.add(sp);
             integrationSets.add(integrationSet);
         }
 
@@ -105,6 +112,18 @@ public class IntegrationServiceTests {
         }
         referenceIntegration.removePermissionTo(integrationSets.get(5));
         referenceIntegration.removePermissionTo(integrationSets.get(2));
+    }
+
+    private Integration createServiceProvider(Long id, Organization organization) {
+        ConfigurationEntity ce = new ConfigurationEntity();
+        OidcServiceProvider sp = new OidcServiceProvider();
+        sp.setConfigurationEntity(ce);
+        ce.setSp(sp);
+        sp.setName("SP " +id);
+        sp.setClientId("clientId-"+id);
+        Integration integration = new Integration(id, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
+                0, null, organization, "serviceContactAddress" + id +"@example.net");
+        return integration;
     }
 
     @Test
@@ -209,12 +228,24 @@ public class IntegrationServiceTests {
     @Test
     void testGetUpdatedIntegrationsSince() {
         LocalDateTime sinceTime = LocalDateTime.now();
-        
+
         // given
         given(integrationRepository.findAllByLastUpdatedOnAfter(any())).willReturn(updatedIntegrations);
 
         // when
         List<Integration> integrations = underTest.getIntegrationsSince(sinceTime);
+
+        // then
+        assertTrue(integrations.size() == 2);
+    }
+
+    @Test
+    void testGetIdentityProviders() {
+        // given
+        given(integrationRepository.findAll(any(Specification.class))).willReturn(updatedIntegrations);
+
+        // when
+        List<Integration> integrations = underTest.getIdentityProviders();
 
         // then
         assertTrue(integrations.size() == 2);
