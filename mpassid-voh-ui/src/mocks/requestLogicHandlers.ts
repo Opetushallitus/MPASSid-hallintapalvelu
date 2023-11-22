@@ -28,7 +28,7 @@ const updateIntegration = definition.paths["/api/v1/integration/{id}"].put.respo
   value?: Components.Schemas.Integration;
 };
 
-const searchIntegrations: { value?: Components.Schemas.PageIntegration } =
+const searchIntegrations: { value?: Components.Schemas.PageIntegration } = 
   definition.paths["/api/v1/integration/search"].get.responses["200"].content[
     "application/json"
   ].examples.searchIntegrations;

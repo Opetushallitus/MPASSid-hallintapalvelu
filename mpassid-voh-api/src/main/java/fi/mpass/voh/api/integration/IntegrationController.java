@@ -47,7 +47,7 @@ public class IntegrationController {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
             @ExampleObject(name = "integrations", externalValue = "https://mpassid-rr-test.csc.fi/integrations.json") }))
     @GetMapping("/list")
-    @JsonView(value = IntegrationView.Default.class)
+    // @JsonView(value = IntegrationView.Default.class)
     public List<Integration> getIntegrations() {
         return integrationService.getIntegrations();
     }
@@ -60,7 +60,7 @@ public class IntegrationController {
             @ApiResponse(responseCode = "404", description = "No integrations found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
     @GetMapping("/search")
-    @JsonView(value = IntegrationView.Default.class)
+    // @JsonView(value = IntegrationView.Default.class)
     public Page<Integration> getIntegrationsSpecSearchPageable(
             @RequestParam(required = false, value = "search") String search,
             @RequestParam(required = false, value = "type") String filterByType,
@@ -90,7 +90,7 @@ public class IntegrationController {
             @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
     @GetMapping("{id}")
-    @JsonView(value = IntegrationView.Default.class)
+    // @JsonView(value = IntegrationView.Default.class)
     public Optional<Integration> getIntegration(@PathVariable Long id) {
         return integrationService.getSpecIntegrationById(id);
     }
@@ -104,7 +104,7 @@ public class IntegrationController {
             @ApiResponse(responseCode = "409", description = "Integration update conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
     @PutMapping("{id}")
-    @JsonView(value = IntegrationView.Default.class)
+    // @JsonView(value = IntegrationView.Default.class)
     Integration updateIntegration(@Valid @RequestBody Integration integration, @PathVariable Long id) {
         return integrationService.updateIntegration(id, integration);
     }
@@ -117,7 +117,7 @@ public class IntegrationController {
             @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
     })
     @GetMapping("/since/{timestamp}")
-    @JsonView(value = IntegrationView.Default.class)
+    // @JsonView(value = IntegrationView.Default.class)
     public List<Integration> getIntegrationsSince(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timestamp) {
         return integrationService.getIntegrationsSince(timestamp);

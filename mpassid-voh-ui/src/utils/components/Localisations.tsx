@@ -93,16 +93,19 @@ export default function Localisations({ category, defaultMessages }: Props) {
   );
 
   // Add any unknown messages to list
-  messages.forEach(([, messages]) => {
-    messages.forEach(({ key, description }) => {
-      if (key?.includes(".")) {
-        description ??= key?.slice(0, key.indexOf("."));
-      }
-      if (!messageList.some((message) => message.key === key)) {
-        messageList.push({ key, description });
-      }
+  if(messages !== undefined) {
+    messages.forEach(([, messages]) => {
+      messages.forEach(({ key, description }) => {
+        if (key?.includes(".")) {
+          description ??= key?.slice(0, key.indexOf("."));
+        }
+        if (!messageList.some((message) => message.key === key)) {
+          messageList.push({ key, description });
+        }
+      });
     });
-  });
+  }
+  
 
   // If description is available in default language, override the original description
   messages

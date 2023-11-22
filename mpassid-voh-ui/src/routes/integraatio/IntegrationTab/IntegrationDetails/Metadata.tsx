@@ -11,8 +11,8 @@ export default function Metadata({
   configurationEntity: Components.Schemas.ConfigurationEntity;
   role: typeof roles[number];
 }) {
-  if(role!="set") {
-    const providerData:Components.Schemas.ServiceProvider|Components.Schemas.IdentityProvider = configurationEntity[role]!;
+  if(role=="sp") {
+    const providerData:Components.Schemas.ServiceProvider = configurationEntity[role]!;
     if (providerData.metadata && providerData.metadata !== undefined) {  
       const value = providerData.metadata.encoding && providerData.metadata.content !== undefined
         ? atob(providerData.metadata.content as unknown as string)
@@ -37,8 +37,10 @@ export default function Metadata({
         </Grid>
       );
     }
-
-    if (providerData.metadataUrl) {
+  }
+  if(role=="idp") {
+    const providerData:Components.Schemas.Azure|Components.Schemas.Gsuite|Components.Schemas.Adfs = configurationEntity[role]!;
+    if ((providerData.type==="azure"||providerData.type==="gsuite"||providerData.type==="adfs")&&providerData.metadataUrl) {
       return (
         <Grid container spacing={2} mb={3}>
           <Grid item xs={4}>

@@ -1,12 +1,13 @@
 create sequence hibernate_sequence;
 
-create table allowed_integrations_history (
-    rev integer not null,
-    integration_id1 bigint not null,
-    integration_id2 bigint not null,
-    revtype smallint,
-    primary key (rev, integration_id1, integration_id2)
-);
+create table integration_permission_history (
+       from_id bigint not null,
+        to_id bigint not null,
+        rev integer not null,
+        revtype smallint,
+        last_updated_on timestamp,
+        primary key (from_id, to_id, rev)
+    );
 
 create table configuration_entity_history (
     id bigint not null,
@@ -137,9 +138,9 @@ add
     constraint FKnd3cfeul43swtk2g8h9ir8h4x foreign key (rev) references extended_revinfo;
 
 alter table
-    allowed_integrations_history
+    integration_permission_history
 add
-    constraint FK4eebjkc6cbma3wueeex0037id foreign key (rev) references extended_revinfo;
+    constraint FK2wl7mfxmlvl56b8ug77lxyqm3 foreign key (rev) references extended_revinfo;
 
 alter table
     configuration_entity_history

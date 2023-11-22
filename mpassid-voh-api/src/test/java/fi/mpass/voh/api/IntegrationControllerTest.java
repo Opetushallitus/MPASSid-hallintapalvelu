@@ -1,7 +1,9 @@
 package fi.mpass.voh.api;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +39,7 @@ import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Wilma;
-import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.organization.Organization;
 
 @SpringBootTest
@@ -51,6 +53,7 @@ public class IntegrationControllerTest {
     private IntegrationService integrationService;
 
     private Integration integration;
+    private List<Integration> integrationSets;
 
     @BeforeEach
     public void setup() {
@@ -59,28 +62,31 @@ public class IntegrationControllerTest {
         Organization organization = new Organization("Organization zyx", "123456-7", "1.2.3.4.5.6.7.8");
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Wilma wilma = new Wilma("wilmaHostname");
-
-        // Allowed services
-        DiscoveryInformation spDiscoveryInformation = new DiscoveryInformation("SP Custom Display Name",
-                "SP Custom Title", true);
-        Organization spOrganization = new Organization("SP Organization 321", "654321-7", "1.2.3.4.5.6.7.1");
-        ConfigurationEntity ce = new ConfigurationEntity();
-        OidcServiceProvider serviceProvider = new OidcServiceProvider();
-        serviceProvider.setConfigurationEntity(ce);
-        ce.setSp(serviceProvider);
-        serviceProvider.setClientId("clientId");
-        Integration spIntegration = new Integration(66L, LocalDate.now(), ce, LocalDate.of(2023, 6, 30),
-                0, spDiscoveryInformation, spOrganization,
-                "spContactAddress@example.net");
-
         wilma.setFlowName("wilmaFlowname");
         configurationEntity.setIdp(wilma);
+
+        // Integration sets
+        integrationSets = new ArrayList<Integration>();
+        for (int i = 1; i < 10; i++) {
+            ConfigurationEntity ce = new ConfigurationEntity();
+            IntegrationSet set = new IntegrationSet();
+            set.setConfigurationEntity(ce);
+            ce.setSet(set);
+            set.setName("Integration set " + i);
+            Integration integrationSet = new Integration(1000L + i, LocalDate.now(), ce,
+                    LocalDate.of(2023, 7, 30),
+                    0, null, organization, "serviceContactAddress" + i + "@example.net");
+            integrationSet.setConfigurationEntity(ce);
+            integrationSets.add(integrationSet);
+        }
 
         integration = new Integration(99L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
                 0, discoveryInformation, organization,
                 "serviceContactAddress@example.net");
 
-        integration.addAllowed(spIntegration);
+        for (Integration set : integrationSets) {
+            integration.addPermissionTo(set);
+        }
     }
 
     @WithMockUser(value = "testuser", roles={"APP_MPASSID_KATSELIJA"})
@@ -166,7 +172,8 @@ public class IntegrationControllerTest {
         assertEquals(Sort.Direction.ASC, sort.getOrderFor("name").getDirection());
     }
 
-    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_TALLENTAJA" })
+    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+            "APP_MPASSID_TALLENTAJA" })
     @Test
     public void testAuthorizedUpdateIntegration() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -177,6 +184,47 @@ public class IntegrationControllerTest {
         mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
                 // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
                 .content(objectMapper.writeValueAsString(integration)).with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(99L))
+                .andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
+    }
+
+    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+            "APP_MPASSID_TALLENTAJA" })
+    @Test
+    public void testAuthorizedUpdateIntegrationWithJson() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        String json = "{" +
+                "\"id\": 99," +
+                "\"permissions\": [" +
+                "{" +
+                "\"to\": {" +
+                "\"id\": 3000046" +
+                "}" +
+                "}," +
+                "{ " +
+                "\"to\": {" +
+                "\"id\": 3000012" +
+                "}" +
+                "}," +
+                "{ " +
+                "\"to\": {" +
+                "\"id\": 3000022" +
+                "}" +
+                "}" +
+                "]," +
+                "\"serviceContactAddress\": \"zoo@bar\"" +
+                "}";
+
+        when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+        mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
+                // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
+                .content(json).with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
