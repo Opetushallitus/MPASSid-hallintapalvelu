@@ -409,4 +409,24 @@ public class IntegrationService {
     }
     return new ArrayList<Revision<Integer, Integration>>();
   }
+
+  private List<Integration> getProvidersBy(String role) {
+
+    IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+    if (role != null && role.length() > 0) {
+      builder.withEqualAnd(Category.ROLE, "role", role);
+      Specification<Integration> spec = builder.build();
+      return integrationRepository.findAll(spec);
+    } else {
+      throw new EntityNotFoundException("No role specified");
+    }
+  }
+
+  public List<Integration> getIdentityProviders() {
+    return getProvidersBy("idp");
+  }
+
+  public List<Integration> getServiceProviders() {
+    return getProvidersBy("sp");
+  }
 }
