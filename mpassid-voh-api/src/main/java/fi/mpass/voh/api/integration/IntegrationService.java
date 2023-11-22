@@ -113,7 +113,8 @@ public class IntegrationService {
    *                        containing match
    * @param filterByType    type filtering string, can be a comma-separated list
    * @param role            role selection string, can be a comma-separated list
-   * @param deploymentPhase deployment phase {@link int}
+   * @param deploymentPhase deployment phase string, can be a
+   *                        comma-separated list
    * @return a paged list of Integrations
    * @throws EntityNotFoundException
    */
@@ -144,7 +145,9 @@ public class IntegrationService {
     if (role != null && role.length() > 0)
       builder.withEqualAnd(Category.ROLE, "role", role);
 
-    if (deploymentPhase != null)
+    // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
+    // AND
+    if (deploymentPhase != null && deploymentPhase.length() > 0)
       builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -191,7 +194,8 @@ public class IntegrationService {
    *                               list
    * @param role                   role selection string, can be a comma-separated
    *                               list
-   * @param deploymentPhase        deployment phase {@link int}
+   * @param deploymentPhase        deployment phase string, can be a
+   *                               comma-separated list
    * @param referenceIntegrationId the id of an Integration used to provide more
    *                               information for searching, filtering, or
    *                               sorting
@@ -227,7 +231,9 @@ public class IntegrationService {
     if (role != null && role.length() > 0)
       builder.withEqualAnd(Category.ROLE, "role", role);
 
-    if (deploymentPhase != null)
+    // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
+    // AND
+    if (deploymentPhase != null && deploymentPhase.length() > 0)
       builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -376,7 +382,7 @@ public class IntegrationService {
         // updates integration permissions
         if (integration.getPermissions() != null) {
           logger.debug(
-                "Permitted integrations count : " + integration.getPermissions().size());
+              "Permitted integrations count : " + integration.getPermissions().size());
           existingIntegration.removePermissions();
           for (IntegrationPermission permission : integration.getPermissions()) {
             // permission to integration set

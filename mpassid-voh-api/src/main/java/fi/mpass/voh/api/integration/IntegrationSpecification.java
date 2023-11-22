@@ -95,6 +95,22 @@ public class IntegrationSpecification implements Specification<Integration> {
 							}
 						}
 					}
+					case DEPLOYMENT_PHASE: {
+						if (criteria.getValue() != null) {
+							// TODO consider refactoring/moving to Criteria
+							if (criteria.isStringList()) {
+								List<Predicate> predicateList = new ArrayList<>();
+								for (String byPhase : ((String) criteria.getValue()).split(",")) {
+									Predicate phasePredicate = builder.equal(root.get(criteria.getKey()),
+											byPhase);
+									predicateList.add(phasePredicate);
+								}
+								return builder.or(predicateList.toArray(Predicate[]::new));
+							} else {
+								return builder.equal(root.get(criteria.getKey()), criteria.getValue());
+							}
+						}
+					}
 					case TYPE: {
 						if (criteria.getValue() != null) {
 							Join<Integration, IdentityProvider> integrationIdp = root.join("configurationEntity").join(
@@ -146,7 +162,7 @@ public class IntegrationSpecification implements Specification<Integration> {
 							return builder.equal(integrationOrganization.get(criteria.getKey()), criteria.getValue());
 						}
 					}
-					// Integration, e.g. id and deploymentPhase
+					// Integration, e.g. id
 					default:
 						return builder.equal(root.get(criteria.getKey()), criteria.getValue());
 				}
