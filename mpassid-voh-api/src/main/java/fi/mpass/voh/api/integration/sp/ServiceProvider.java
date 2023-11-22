@@ -75,7 +75,7 @@ public abstract class ServiceProvider {
 
     @Convert(converter = HashMapConverter.class)
     @Column(columnDefinition = "text")
-    @JsonView(value = IntegrationView.Excluded.class)
+    @JsonIgnore
     private Map<String, Object> metadataJson;
 
     @Column(name = "type", insertable = false, updatable = false)

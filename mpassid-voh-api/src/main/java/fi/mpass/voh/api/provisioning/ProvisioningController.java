@@ -13,8 +13,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
+@SecurityRequirement(name = "provisioning")
 @RequestMapping(path = "api/v1/provisioning")
 public class ProvisioningController {
 
@@ -49,5 +51,21 @@ public class ProvisioningController {
     @GetMapping("/list")
     public List<Integration> getIntegrations() {
         return integrationService.getIntegrations();
+    }
+
+    @Operation(summary = "Get all identity providers")
+    @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = IdentityProviders.class), mediaType = "application/json"))
+    @GetMapping("/identityproviders")
+    public IdentityProviders getIdentityProviders() {
+        return new IdentityProviders(integrationService.getIdentityProviders());
+    }
+
+    @Operation(summary = "Get all service providers")
+    @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ServiceProviders.class), mediaType = "application/json"))
+    @GetMapping("/serviceproviders")
+    public ServiceProviders getServiceProviders() {
+        return new ServiceProviders(integrationService.getServiceProviders());
     }
 }
