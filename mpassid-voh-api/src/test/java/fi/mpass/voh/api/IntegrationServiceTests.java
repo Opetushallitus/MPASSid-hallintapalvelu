@@ -77,9 +77,12 @@ public class IntegrationServiceTests {
             Integration integrationSet = new Integration(1000L + i, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
                     0, null, organization, "serviceContactAddress" + i + "@example.net");
             integrationSet.setConfigurationEntity(ce);
-            Integration sp = createServiceProvider(Long.valueOf(i), organization);
-            sp.addToSet(integrationSet);
-            serviceProviders.add(sp);
+            Integration sp1 = createServiceProvider(Long.valueOf(i), organization);
+            Integration sp2 = createServiceProvider(Long.valueOf(i+100), organization);
+            sp1.addToSet(integrationSet);
+            serviceProviders.add(sp1);
+            sp2.addToSet(integrationSet);
+            serviceProviders.add(sp2);
             integrationSets.add(integrationSet);
         }
 

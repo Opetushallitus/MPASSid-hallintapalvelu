@@ -27,8 +27,11 @@ public class IntegrationPermissionSerializer extends StdSerializer<Integration> 
         if (value.getIntegrationSets() != null) {
             // get service provider integrations
             Set<Integration> integrations = value.getIntegrationSets();
+            // "integrations" : [
+            gen.writeArrayFieldStart("integrations");
             for (Integration integration : integrations) {
                 if (integration.getConfigurationEntity().getSp().getType() != null) {
+                    gen.writeStartObject();
                     gen.writeObjectField("type", integration.getConfigurationEntity().getSp().getType());
                     if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
                         OidcServiceProvider oidc = (OidcServiceProvider) integration.getConfigurationEntity().getSp();
@@ -42,8 +45,11 @@ public class IntegrationPermissionSerializer extends StdSerializer<Integration> 
                             gen.writeObjectField("entityId", saml.getEntityId());
                         }
                     }
+                    gen.writeEndObject();
                 }
             }
+            gen.writeEndArray();
+            // ]
         }
         gen.writeEndObject();
     }
