@@ -13,6 +13,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.ServiceProvider;
 import fi.mpass.voh.api.organization.Organization;
 
@@ -48,6 +49,14 @@ public class IntegrationSpecification implements Specification<Integration> {
 
 	private boolean isSpType(String type) {
 		for (ServiceProvider.Type spType : ServiceProvider.Type.values()) {
+			if (spType.name().equals(type))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean isSetType(String type) {
+		for (IntegrationSet.Type spType : IntegrationSet.Type.values()) {
 			if (spType.name().equals(type))
 				return true;
 		}
@@ -119,6 +128,9 @@ public class IntegrationSpecification implements Specification<Integration> {
 							Join<Integration, ServiceProvider> integrationSp = root.join("configurationEntity").join(
 									"sp",
 									JoinType.LEFT);
+							Join<Integration, ServiceProvider> integrationSet = root.join("configurationEntity").join(
+									"set",
+									JoinType.LEFT);
 
 							// TODO consider refactoring/moving to Criteria
 							if (criteria.isStringList()) {
@@ -134,6 +146,11 @@ public class IntegrationSpecification implements Specification<Integration> {
 												byType);
 										predicateList.add(typePredicate);
 									}
+									if (isSetType(byType)) {
+										Predicate typePredicate = builder.equal(integrationSet.get(criteria.getKey()),
+												byType);
+										predicateList.add(typePredicate);
+									}
 								}
 								return builder.or(predicateList.toArray(Predicate[]::new));
 							} else {
@@ -142,6 +159,9 @@ public class IntegrationSpecification implements Specification<Integration> {
 								}
 								if (isSpType((String) criteria.getValue())) {
 									return builder.equal(integrationSp.get(criteria.getKey()), criteria.getValue());
+								}
+								if (isSetType((String) criteria.getValue())) {
+									return builder.equal(integrationSet.get(criteria.getKey()), criteria.getValue());
 								}
 							}
 						}

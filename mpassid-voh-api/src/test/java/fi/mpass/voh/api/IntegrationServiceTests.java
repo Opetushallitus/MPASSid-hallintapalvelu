@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,7 +148,20 @@ public class IntegrationServiceTests {
         underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "idp", "0", pageable);
 
         // then
-        verify(integrationRepository).findAll(any(Specification.class), any(Pageable.class));
+        //verify(integrationRepository).findAll(any(Specification.class), any(Pageable.class));
+        verify(integrationRepository, times(2)).findAll(any(Specification.class));
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetIntegrationsSpecSearchPageableWithNoRole() {
+        Pageable pageable = PageRequest.of(0, 20);
+
+        // when
+        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "", "0", pageable);
+
+        // then
+        verify(integrationRepository, times(1)).findAll(any(Specification.class));
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })

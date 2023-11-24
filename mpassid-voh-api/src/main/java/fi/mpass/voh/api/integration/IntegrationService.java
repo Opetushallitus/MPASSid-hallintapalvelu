@@ -141,10 +141,14 @@ public class IntegrationService {
     if (filterByType != null && filterByType.length() > 0)
       builder.withEqualAnd(Category.TYPE, "type", filterByType);
 
+    List<Integration> spSetIntegrations = new ArrayList<Integration>();
     // role can be a list of roles, thus (equality OR equality OR ...) AND
-    if (role != null && role.length() > 0)
+    if (role != null && role.length() > 0) {
       builder.withEqualAnd(Category.ROLE, "role", role);
 
+      // Integration sp (type) sets (role) are shown to all authenticated
+      spSetIntegrations = getServiceProviderSets();
+    }
     // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
     // AND
     if (deploymentPhase != null && deploymentPhase.length() > 0)
@@ -158,7 +162,13 @@ public class IntegrationService {
       }
       Specification<Integration> spec = builder.build();
 
-      return integrationRepository.findAll(spec, pageable);
+      List<Integration> integrations = integrationRepository.findAll(spec);
+      // Avoid duplicates in (service provider set) responses to admin organizations
+      if (!includesAdminOrganization(userOrganizationOids)) {
+        integrations.addAll(spSetIntegrations);
+      }
+
+      return pageIntegrations(integrations, pageable);
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
@@ -423,7 +433,7 @@ public class IntegrationService {
     return new ArrayList<Revision<Integer, Integration>>();
   }
 
-  private List<Integration> getProvidersBy(String role) {
+  private List<Integration> getIntegrationsBy(String role) {
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
     if (role != null && role.length() > 0) {
@@ -435,11 +445,28 @@ public class IntegrationService {
     }
   }
 
+  private List<Integration> getIntegrationsBy(String role, String type) {
+
+    IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+    if (role != null && role.length() > 0 && type != null && type.length() > 0) {
+      builder.withEqualAnd(Category.ROLE, "role", role);
+      builder.withEqualAnd(Category.TYPE, "type", type);
+      Specification<Integration> spec = builder.build();
+      return integrationRepository.findAll(spec);
+    } else {
+      throw new EntityNotFoundException("No role and type specified");
+    }
+  }
+
   public List<Integration> getIdentityProviders() {
-    return getProvidersBy("idp");
+    return getIntegrationsBy("idp");
   }
 
   public List<Integration> getServiceProviders() {
-    return getProvidersBy("sp");
+    return getIntegrationsBy("sp");
+  }
+
+  public List<Integration> getServiceProviderSets() {
+    return getIntegrationsBy("set", "sp");
   }
 }

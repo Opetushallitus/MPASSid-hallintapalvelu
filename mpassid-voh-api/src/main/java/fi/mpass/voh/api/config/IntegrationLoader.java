@@ -3,6 +3,8 @@ package fi.mpass.voh.api.config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -35,8 +37,8 @@ import org.slf4j.LoggerFactory;
 public class IntegrationLoader implements CommandLineRunner {
     private final static Logger logger = LoggerFactory.getLogger(IntegrationLoader.class);
 
-    @Value("${application.home-organizations.input}")
-    private String homeOrganizationsInput;
+    @Value("#{${application.home-organizations.input}}")
+    private List<String> homeOrganizationsInput;
 
     IntegrationRepository integrationRepository;
 
@@ -53,129 +55,136 @@ public class IntegrationLoader implements CommandLineRunner {
         this.serviceProviderRepository = spRepository;
         this.resourceLoader = loader;
         if (this.homeOrganizationsInput == null) {
-            this.homeOrganizationsInput = "home_organizations.json";
+            // this.homeOrganizationsInput = "home_organizations.json";
+            this.homeOrganizationsInput = Arrays.asList("home_organizations.json");
         }
     }
 
     @Override
     public void run(String... args) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        InputStream inputStream;
-        File file = ResourceUtils.getFile(homeOrganizationsInput);
-        if (file.exists()) {
-            logger.info("Reading home organizations from " + homeOrganizationsInput);
-            inputStream = new FileInputStream(file);
-        } else {
-            // Fallback to classpath resource if the configured input file doesn't exist
-            // Allow input file configuration through run arguments
-            if (args.length > 0) {
-                homeOrganizationsInput = args[0];
-            }
-            logger.info("Reading home organizations from classpath " + homeOrganizationsInput);
-            Resource resource = resourceLoader.getResource("classpath:" + homeOrganizationsInput);
-            inputStream = resource.getInputStream();
-        }
-        JsonNode rootNode = (objectMapper.readTree(inputStream)).path("identityProviders");
+        for (String idpInput : this.homeOrganizationsInput) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        int integrationCount = 0;
-
-        if (rootNode.isArray()) {
-            for (JsonNode arrayNode : rootNode) {
-                Integration integration = null;
-                try {
-                    integration = new ObjectMapper()
-                            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                            .readValue(arrayNode.toString(), Integration.class);
-                } catch (Exception e) {
-                    logger.error(
-                            "Integration exception: " + e + " continuing to next.");
-                    continue;
+            InputStream inputStream;
+            File file = ResourceUtils.getFile(idpInput);
+            if (file.exists()) {
+                logger.info("Reading home organizations from " + idpInput);
+                inputStream = new FileInputStream(file);
+            } else {
+                // Fallback to classpath resource if the configured input file doesn't exist
+                // Allow input file configuration through run arguments
+                if (args.length > 0) {
+                    idpInput = args[0];
                 }
+                logger.info("Reading home organizations from classpath " + idpInput);
+                Resource resource = resourceLoader.getResource("classpath:" + idpInput);
+                inputStream = resource.getInputStream();
+            }
+            JsonNode rootNode = (objectMapper.readTree(inputStream)).path("identityProviders");
 
-                Organization organization = new Organization();
-                if (integration.getOrganization().getOid() != null
-                        && integration.getOrganization().getOid().length() > 0) {
-                    logger.debug("Organization oid:" + integration.getOrganization().getOid());
+            int integrationCount = 0;
+
+            if (rootNode.isArray()) {
+                for (JsonNode arrayNode : rootNode) {
+                    Integration integration = null;
                     try {
-                        organization = organizationService.getById(integration.getOrganization().getOid());
-                    } catch (Exception ex) {
-                        // TODO allow fallback to organization service?
-                        logger.error("Organization exception: " + ex + " continuing to next integration.");
+                        integration = new ObjectMapper()
+                                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                                .readValue(arrayNode.toString(), Integration.class);
+                    } catch (Exception e) {
+                        logger.error(
+                                "Integration exception: " + e + " continuing to next.");
                         continue;
                     }
-                    if (organization == null) {
+
+                    Organization organization = new Organization();
+                    if (integration.getOrganization().getOid() != null
+                            && integration.getOrganization().getOid().length() > 0) {
+                        logger.debug("Organization oid:" + integration.getOrganization().getOid());
                         try {
-                            logger.debug("A new Integration organization: " + integration.getOrganization().getOid());
-                            organization = organizationService
-                                    .retrieveOrganization(integration.getOrganization().getOid());
+                            organization = organizationService.getById(integration.getOrganization().getOid());
                         } catch (Exception ex) {
-                            logger.error("Organization exception: " + ex + ". Continuing to next.");
+                            // TODO allow fallback to organization service?
+                            logger.error("Organization exception: " + ex + " continuing to next integration.");
                             continue;
                         }
+                        if (organization == null) {
+                            try {
+                                logger.debug(
+                                        "A new Integration organization: " + integration.getOrganization().getOid());
+                                organization = organizationService
+                                        .retrieveOrganization(integration.getOrganization().getOid());
+                            } catch (Exception ex) {
+                                logger.error("Organization exception: " + ex + ". Continuing to next.");
+                                continue;
+                            }
+                        }
                     }
-                }
 
-                try {
-                    // No cascading, Integration:Organization
-                    organization = organizationService.saveOrganization(organization);
-                } catch (Exception e) {
-                    logger.error("Organization Exception: " + e);
-                }
-                integration.setOrganization(organization);
+                    try {
+                        // No cascading, Integration:Organization
+                        organization = organizationService.saveOrganization(organization);
+                    } catch (Exception e) {
+                        logger.error("Organization Exception: " + e);
+                    }
+                    integration.setOrganization(organization);
 
-                IdentityProvider idp = integration.getConfigurationEntity().getIdp();
-                if (idp != null) {
-                    JsonNode allowedNode = arrayNode.get("configurationEntity").get("idp")
-                            .get("allowedServiceProviders");
-                    if (allowedNode != null) {
-                        final Integration i = integration;
-                        allowedNode.forEach(c -> {
-                            if (c.get("entityId") != null) {
-                                // find the corresponding integration set and make that set the allowed integration
-                                Integration samlSp = integrationRepository
-                                        .findByConfigurationEntitySpEntityId(c.get("entityId").asText());
-                                if (samlSp != null) {
-                                    logger.debug("Allowed SAML SP: " + samlSp.toString());
-                                    Set<Integration> integrationSet = samlSp.getIntegrationSets();
-                                    // assuming that an SP can belong to only one set
-                                    if (!integrationSet.isEmpty()) {
-                                        Integration setIntegration = integrationSet.iterator().next();
-                                        logger.debug("Set: " + setIntegration.getId());
-                                        i.addPermissionTo(setIntegration);
+                    IdentityProvider idp = integration.getConfigurationEntity().getIdp();
+                    if (idp != null) {
+                        JsonNode allowedNode = arrayNode.get("configurationEntity").get("idp")
+                                .get("allowedServiceProviders");
+                        if (allowedNode != null) {
+                            final Integration i = integration;
+                            allowedNode.forEach(c -> {
+                                if (c.get("entityId") != null) {
+                                    // find the corresponding integration set and make that set the allowed
+                                    // integration
+                                    Integration samlSp = integrationRepository
+                                            .findByConfigurationEntitySpEntityId(c.get("entityId").asText());
+                                    if (samlSp != null) {
+                                        logger.debug("Allowed SAML SP: " + samlSp.toString());
+                                        Set<Integration> integrationSet = samlSp.getIntegrationSets();
+                                        // assuming that an SP can belong to only one set
+                                        if (!integrationSet.isEmpty()) {
+                                            Integration setIntegration = integrationSet.iterator().next();
+                                            logger.debug("Set: " + setIntegration.getId());
+                                            i.addPermissionTo(setIntegration);
+                                        }
                                     }
                                 }
-                            }
-                            if (c.get("clientId") != null) {
-                                // find the corresponding integration set and make that set the allowed integration
-                                Integration oidcRp = integrationRepository
-                                        .findByConfigurationEntitySpClientId(c.get("clientId").asText());
-                                if (oidcRp != null) {
-                                    logger.debug("Allowed OIDC RP: " + oidcRp.toString());
-                                    // i.addAllowed(oidcRp);
-                                    Set<Integration> integrationSet = oidcRp.getIntegrationSets();
-                                    // assuming that an RP can belong to only one set
-                                    if (!integrationSet.isEmpty()) {
-                                        Integration setIntegration = integrationSet.iterator().next();
-                                        logger.debug("Set: " + setIntegration.getId());
-                                        i.addPermissionTo(setIntegration);
+                                if (c.get("clientId") != null) {
+                                    // find the corresponding integration set and make that set the allowed
+                                    // integration
+                                    Integration oidcRp = integrationRepository
+                                            .findByConfigurationEntitySpClientId(c.get("clientId").asText());
+                                    if (oidcRp != null) {
+                                        logger.debug("Allowed OIDC RP: " + oidcRp.toString());
+                                        // i.addAllowed(oidcRp);
+                                        Set<Integration> integrationSet = oidcRp.getIntegrationSets();
+                                        // assuming that an RP can belong to only one set
+                                        if (!integrationSet.isEmpty()) {
+                                            Integration setIntegration = integrationSet.iterator().next();
+                                            logger.debug("Set: " + setIntegration.getId());
+                                            i.addPermissionTo(setIntegration);
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
-                }
 
-                try {
-                    integrationRepository.save(integration);
-                    integrationCount++;
-                } catch (Exception e) {
-                    logger.error("Integration Exception: " + e + ". Continuing to next.");
-                    continue;
+                    try {
+                        integrationRepository.save(integration);
+                        integrationCount++;
+                    } catch (Exception e) {
+                        logger.error("Integration Exception: " + e + ". Continuing to next.");
+                        continue;
+                    }
                 }
             }
+            logger.info("Loaded " + integrationCount + " home organizations.");
         }
-        logger.info("Loaded " + integrationCount + " home organizations.");
     }
 }
