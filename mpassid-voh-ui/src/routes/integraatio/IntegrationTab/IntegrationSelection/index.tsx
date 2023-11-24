@@ -63,6 +63,12 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     vertical: 'bottom',
     horizontal: 'right',
   }
+
+  useEffect(() => {
+    if(integration !== undefined) {
+      setNewIntegration(integration);
+    }
+  }, [integration, setNewIntegration]);
   
   useEffect(() => {
     if((integration !== undefined)&&(newIntegration?.id !== integration?.id)) {

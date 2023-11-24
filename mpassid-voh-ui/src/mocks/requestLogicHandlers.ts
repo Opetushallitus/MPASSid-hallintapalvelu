@@ -63,6 +63,9 @@ export default {
     if (index !== -1) {
       allIntegrations[index] = request.requestBody;
     }
+    request.requestBody?.permissions?.forEach((p: Components.Schemas.IntegrationPermission)=>{
+      p.lastUpdatedOn = new Date().toISOString();
+    })
     updateIntegration.value = request.requestBody
   },
   getIntegration(request) {
