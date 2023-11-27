@@ -148,8 +148,7 @@ public class IntegrationServiceTests {
         underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "idp", "0", pageable);
 
         // then
-        //verify(integrationRepository).findAll(any(Specification.class), any(Pageable.class));
-        verify(integrationRepository, times(2)).findAll(any(Specification.class));
+        verify(integrationRepository).findAll(any(Specification.class), any(Pageable.class));
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
@@ -161,7 +160,7 @@ public class IntegrationServiceTests {
         underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "", "0", pageable);
 
         // then
-        verify(integrationRepository, times(1)).findAll(any(Specification.class));
+        verify(integrationRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })

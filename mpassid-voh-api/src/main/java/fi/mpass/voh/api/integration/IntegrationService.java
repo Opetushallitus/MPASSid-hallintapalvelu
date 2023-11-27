@@ -141,14 +141,10 @@ public class IntegrationService {
     if (filterByType != null && filterByType.length() > 0)
       builder.withEqualAnd(Category.TYPE, "type", filterByType);
 
-    List<Integration> spSetIntegrations = new ArrayList<Integration>();
     // role can be a list of roles, thus (equality OR equality OR ...) AND
-    if (role != null && role.length() > 0) {
+    if (role != null && role.length() > 0)
       builder.withEqualAnd(Category.ROLE, "role", role);
 
-      // Integration sp (type) sets (role) are shown to all authenticated
-      spSetIntegrations = getServiceProviderSets();
-    }
     // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
     // AND
     if (deploymentPhase != null && deploymentPhase.length() > 0)
@@ -157,18 +153,12 @@ public class IntegrationService {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
       List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
-      if (!includesAdminOrganization(userOrganizationOids)) {
+      if (!includesAdminOrganization(userOrganizationOids) && !(role != null && role.contains("set"))) {
         builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
       }
       Specification<Integration> spec = builder.build();
 
-      List<Integration> integrations = integrationRepository.findAll(spec);
-      // Avoid duplicates in (service provider set) responses to admin organizations
-      if (!includesAdminOrganization(userOrganizationOids)) {
-        integrations.addAll(spSetIntegrations);
-      }
-
-      return pageIntegrations(integrations, pageable);
+      return integrationRepository.findAll(spec, pageable);
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
