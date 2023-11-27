@@ -160,7 +160,7 @@ public class Integration implements Persistable<Long> {
      * Gets the deployment phase.
      * 
      * @return The {@link int} representing the deployment phase.
-     *         0 testing, 1 production, 2 preproduction, 3 reserved
+     *         -1 inactive, 0 testing, 1 production, 2 preproduction, 3 reserved
      */
     public int getDeploymentPhase() {
         return this.deploymentPhase;

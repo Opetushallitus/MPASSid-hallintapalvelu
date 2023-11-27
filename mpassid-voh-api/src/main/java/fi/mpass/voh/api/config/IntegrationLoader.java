@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -23,6 +24,7 @@ import org.springframework.util.ResourceUtils;
 
 import fi.mpass.voh.api.integration.sp.ServiceProviderRepository;
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationPermission;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
 import fi.mpass.voh.api.organization.Organization;
@@ -55,13 +57,14 @@ public class IntegrationLoader implements CommandLineRunner {
         this.serviceProviderRepository = spRepository;
         this.resourceLoader = loader;
         if (this.homeOrganizationsInput == null) {
-            // this.homeOrganizationsInput = "home_organizations.json";
             this.homeOrganizationsInput = Arrays.asList("home_organizations.json");
         }
     }
 
     @Override
     public void run(String... args) throws Exception {
+
+        List<Long> idpIds = this.integrationRepository.getAllIdpIds();
 
         for (String idpInput : this.homeOrganizationsInput) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -99,6 +102,34 @@ public class IntegrationLoader implements CommandLineRunner {
                         continue;
                     }
 
+                    // CASE an existing integration
+                    // TODO if integration (id) is found from the repository,
+                    // check if it has permissions, if so, copy the permissions to the loaded
+                    // integration
+                    // remove the existing integration id from the id list (***)
+                    // continue as usual
+                    if (idpIds.contains(integration.getId())) {
+                        List<IntegrationPermission> permissions = integration.getPermissions();
+                        if (permissions.size() > 0) {
+                            logger.debug("Loaded integration " + integration.getId()
+                                    + " with permissions! Permissions might be not effective.");
+                        }
+                        Optional<Integration> existingIntegration = this.integrationRepository
+                                .findById(integration.getId());
+                        if (existingIntegration.isPresent()) {
+                            List<IntegrationPermission> existingPermissions = existingIntegration.get()
+                                    .getPermissions();
+                            if (existingPermissions.size() > 0) {
+                                integration.setPermissions(existingPermissions);
+                            }
+                        }
+                        idpIds.remove(integration.getId());
+                    }
+
+                    // CASE a new integration
+                    // if the integration (id) is NOT found from the repository,
+                    // continue as usual
+
                     Organization organization = new Organization();
                     if (integration.getOrganization().getOid() != null
                             && integration.getOrganization().getOid().length() > 0) {
@@ -131,47 +162,50 @@ public class IntegrationLoader implements CommandLineRunner {
                     }
                     integration.setOrganization(organization);
 
-                    IdentityProvider idp = integration.getConfigurationEntity().getIdp();
-                    if (idp != null) {
-                        JsonNode allowedNode = arrayNode.get("configurationEntity").get("idp")
-                                .get("allowedServiceProviders");
-                        if (allowedNode != null) {
-                            final Integration i = integration;
-                            allowedNode.forEach(c -> {
-                                if (c.get("entityId") != null) {
-                                    // find the corresponding integration set and make that set the allowed
-                                    // integration
-                                    Integration samlSp = integrationRepository
-                                            .findByConfigurationEntitySpEntityId(c.get("entityId").asText());
-                                    if (samlSp != null) {
-                                        logger.debug("Allowed SAML SP: " + samlSp.toString());
-                                        Set<Integration> integrationSet = samlSp.getIntegrationSets();
-                                        // assuming that an SP can belong to only one set
-                                        if (!integrationSet.isEmpty()) {
-                                            Integration setIntegration = integrationSet.iterator().next();
-                                            logger.debug("Set: " + setIntegration.getId());
-                                            i.addPermissionTo(setIntegration);
+                    // check if existing permissions were found
+                    if (integration.getPermissions().size() == 0) {
+                        IdentityProvider idp = integration.getConfigurationEntity().getIdp();
+                        if (idp != null) {
+                            JsonNode allowedNode = arrayNode.get("configurationEntity").get("idp")
+                                    .get("allowedServiceProviders");
+                            if (allowedNode != null) {
+                                final Integration i = integration;
+                                allowedNode.forEach(c -> {
+                                    if (c.get("entityId") != null) {
+                                        // find the corresponding integration set and make that set the allowed
+                                        // integration
+                                        Integration samlSp = integrationRepository
+                                                .findByConfigurationEntitySpEntityId(c.get("entityId").asText());
+                                        if (samlSp != null) {
+                                            logger.debug("Allowed SAML SP: " + samlSp.toString());
+                                            Set<Integration> integrationSet = samlSp.getIntegrationSets();
+                                            // assuming that an SP can belong to only one set
+                                            if (!integrationSet.isEmpty()) {
+                                                Integration setIntegration = integrationSet.iterator().next();
+                                                logger.debug("Set: " + setIntegration.getId());
+                                                i.addPermissionTo(setIntegration);
+                                            }
                                         }
                                     }
-                                }
-                                if (c.get("clientId") != null) {
-                                    // find the corresponding integration set and make that set the allowed
-                                    // integration
-                                    Integration oidcRp = integrationRepository
-                                            .findByConfigurationEntitySpClientId(c.get("clientId").asText());
-                                    if (oidcRp != null) {
-                                        logger.debug("Allowed OIDC RP: " + oidcRp.toString());
-                                        // i.addAllowed(oidcRp);
-                                        Set<Integration> integrationSet = oidcRp.getIntegrationSets();
-                                        // assuming that an RP can belong to only one set
-                                        if (!integrationSet.isEmpty()) {
-                                            Integration setIntegration = integrationSet.iterator().next();
-                                            logger.debug("Set: " + setIntegration.getId());
-                                            i.addPermissionTo(setIntegration);
+                                    if (c.get("clientId") != null) {
+                                        // find the corresponding integration set and make that set the allowed
+                                        // integration
+                                        Integration oidcRp = integrationRepository
+                                                .findByConfigurationEntitySpClientId(c.get("clientId").asText());
+                                        if (oidcRp != null) {
+                                            logger.debug("Allowed OIDC RP: " + oidcRp.toString());
+                                            // i.addAllowed(oidcRp);
+                                            Set<Integration> integrationSet = oidcRp.getIntegrationSets();
+                                            // assuming that an RP can belong to only one set
+                                            if (!integrationSet.isEmpty()) {
+                                                Integration setIntegration = integrationSet.iterator().next();
+                                                logger.debug("Set: " + setIntegration.getId());
+                                                i.addPermissionTo(setIntegration);
+                                            }
                                         }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
                     }
 
@@ -185,6 +219,17 @@ public class IntegrationLoader implements CommandLineRunner {
                 }
             }
             logger.info("Loaded " + integrationCount + " home organizations.");
+
+            // TODO iterate all the remaining integration ids
+            // set the deploymentPhase of the remaining integrations to -1 (inactive)
+            for (Long i : idpIds) {
+                logger.debug("Integration " + i + " not found in loaded integrations. It will be set inactive.");
+                Optional<Integration> inactive = this.integrationRepository.findById(i);
+                if (inactive.isPresent()) {
+                    inactive.get().setDeploymentPhase(-1);
+                    this.integrationRepository.save(inactive.get());
+                }
+            }
         }
     }
 }

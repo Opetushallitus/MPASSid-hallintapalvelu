@@ -22,4 +22,7 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
     Optional<Integration> findByIdAll(Long id);
 
     List<Integration> findAllByLastUpdatedOnAfter(Date updateDateTime);
+
+    @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='idp'")
+    List<Long> getAllIdpIds();
 }
