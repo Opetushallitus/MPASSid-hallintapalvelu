@@ -239,7 +239,8 @@ public class IntegrationService {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
       List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
-      if (!includesAdminOrganization(userOrganizationOids)) {
+      // (service provider) sets can be retrieved by all authenticated users
+      if (!includesAdminOrganization(userOrganizationOids) && !(role != null && role.contains("set"))) {
         builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
       }
       Specification<Integration> spec = builder.build();
