@@ -365,6 +365,15 @@ public class IntegrationService {
     }
   }
 
+  /**
+   * The method updates integration given an id and integration.
+   * Requires authentication and organizational authorization.
+   * 
+   * @param id          the id of the Integration
+   * @param integration the input integration
+   * @return Integration
+   * @throws EntityNotFoundException
+   */
   public Integration updateIntegration(Long id, Integration integration) {
 
     Integration existingIntegration = getSpecIntegrationById(id).get();
