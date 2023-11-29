@@ -65,7 +65,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     vertical: 'bottom',
     horizontal: 'right',
   }
-
+    
   useEffect(() => {
     if(integration !== undefined) {
       setNewIntegration(integration);
@@ -191,11 +191,15 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   };
 
   const removeIntegrations = () => {
-    const copy = structuredClone(newIntegration)
-    if(copy!==undefined) {
-      copy.permissions=[];
-      setNewIntegration(copy);
-      setSaveDialogState(true);
+    if(writeAccess()) {
+      const copy = structuredClone(newIntegration)
+      if(copy!==undefined) {
+        copy.permissions=[];
+        setNewIntegration(copy);
+        setSaveDialogState(true);
+      }
+    } else {
+      setNewIntegration(integration);
     }
   };
 
