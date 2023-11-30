@@ -82,7 +82,7 @@ export default function Home() {
 }
 
 function TotalElements() {
-  const integrations = useIntegrationsSpecSearchPageable();
+  const integrations = useIntegrationsSpecSearchPageable(undefined);
 
   return <>{integrations.totalElements}</>;
 }
