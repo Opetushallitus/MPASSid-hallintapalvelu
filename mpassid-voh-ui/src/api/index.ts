@@ -7,12 +7,10 @@ export * from "./client";
 
 // https://www.npmjs.com/package/@visma/react-openapi-client-generator#mutations-and-updates
 
-export function useIntegrationsSpecSearchPageable() {
+export function useIntegrationsSpecSearchPageable(environment:Number|undefined) {
   const [page] = usePaginationPage();
   const [searchParams] = useSearchParams();
   const location = useLocation()
-
- //https://virkailija.testiopintopolku.fi/mpassid/integraatio/1000089
 
   const locationPath = location.pathname.split("/");
   const IntegrationId = locationPath.pop();
@@ -20,6 +18,10 @@ export function useIntegrationsSpecSearchPageable() {
 
   if(integrationName==="integraatio"){
     searchParams.set("referenceIntegration",String(IntegrationId))
+    searchParams.set("rooli","set")
+    if(environment !== undefined) {
+      searchParams.set("ympäristö",String(environment))
+    }
   }
 
   return client.useIntegrationsSpecSearchPageable({

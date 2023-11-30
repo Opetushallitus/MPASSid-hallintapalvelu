@@ -50,7 +50,7 @@ const eqCheck = (integ1: Components.Schemas.Integration,integ2: Components.Schem
 }
 export default function IntegrationSelection({ integration, newIntegration, setNewIntegration, setIntegration, activateAllServices, setActivateAllServices }: Props) {
   
-  const { content, totalPages } = useIntegrationsSpecSearchPageable();
+  const { content, totalPages } = useIntegrationsSpecSearchPageable(integration?.deploymentPhase);
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [openNotice, setOpenNotice] = useState(false);
@@ -104,12 +104,6 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     
   }, [activateAllServices,newIntegration,setSaveDialogState,openConfirmation,openNotice]);
 
-  useEffect(() => {
-    if((searchParams.get("rooli") ?? "")!=="set") {
-      setSearchParams("rooli=set")
-    }
-  }, [integration,searchParams,setSearchParams]);
-
   const handleSwitchAllChange = (e: ChangeEvent<HTMLInputElement>) => {
     if(writeAccess()) {
       const copy = structuredClone(newIntegration)
@@ -149,7 +143,9 @@ export default function IntegrationSelection({ integration, newIntegration, setN
         searchParams.delete(key);
       }
     });
-
+    if(integration?.deploymentPhase) {
+      searchParams.set("ympäristö",String(integration.deploymentPhase));
+    }
     return searchParams;
   };
 
