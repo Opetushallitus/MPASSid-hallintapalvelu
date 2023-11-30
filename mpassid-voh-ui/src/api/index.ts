@@ -12,8 +12,14 @@ export function useIntegrationsSpecSearchPageable() {
   const [searchParams] = useSearchParams();
   const location = useLocation()
 
-  if(searchParams.getAll("sort").includes("permissions,asc")||searchParams.getAll("sort").includes("permissions,desc")) {
-    searchParams.set("referenceIntegration",String(location.pathname.split("/").pop()))
+ //https://virkailija.testiopintopolku.fi/mpassid/integraatio/1000089
+
+  const locationPath = location.pathname.split("/");
+  const IntegrationId = locationPath.pop();
+  const integrationName = locationPath.pop();
+
+  if(integrationName==="integraatio"){
+    searchParams.set("referenceIntegration",String(IntegrationId))
   }
 
   return client.useIntegrationsSpecSearchPageable({
