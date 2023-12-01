@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -38,6 +39,7 @@ import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationService;
+import fi.mpass.voh.api.integration.OPHPermissionEvaluator;
 import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.organization.Organization;
@@ -51,6 +53,9 @@ public class IntegrationControllerTest {
 
     @MockBean
     private IntegrationService integrationService;
+
+    @MockBean
+    private OPHPermissionEvaluator permissionEvaluator;
 
     private Integration integration;
     private List<Integration> integrationSets;
@@ -92,6 +97,7 @@ public class IntegrationControllerTest {
     @WithMockUser(value = "testuser", roles={"APP_MPASSID_KATSELIJA"})
     @Test
     public void testLeastAuthorizedGetIntegrationList() throws Exception {
+        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
         mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -104,6 +110,7 @@ public class IntegrationControllerTest {
     @WithMockUser(value = "testuser", roles={"APP_MPASSID_TALLENTAJA", "APP_MPASSID_KATSELIJA"})
     @Test
     public void testAuthorizedGetIntegrationList() throws Exception {
+        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
         mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -116,6 +123,7 @@ public class IntegrationControllerTest {
     @WithMockUser(value = "testuser")
     @Test
     public void testUnauthorizedGetIntegrationList() throws Exception {
+        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(false);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
         mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -126,6 +134,7 @@ public class IntegrationControllerTest {
     @WithMockUser(value = "testuser", roles={"APP_MPASSID"})
     @Test
     public void testPartiallyUnauthorizedGetIntegrationList() throws Exception {
+        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("TALLENTAJA"))).thenReturn(false);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
         mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -136,6 +145,7 @@ public class IntegrationControllerTest {
     @WithMockUser(value = "testuser", roles={"APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA"})
     @Test
     public void testOrganizationalAuthorizedGetIntegrationList() throws Exception {
+        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
         mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -145,11 +155,14 @@ public class IntegrationControllerTest {
             .andExpect(jsonPath("$").isArray());
     }
 
-    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA" })
+    @WithMockUser(value = "testuser", roles = {"APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA"})
     @Test
     public void testOrganizationalAuthorizedSearchIntegrationsPaged() throws Exception {
+
+        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("TALLENTAJA"))).thenReturn(true);
+
         mockMvc.perform(get("/api/v1/integration/search")
-                .param("role", "idp")
+                .param("role", "set")
                 .param("search", "test")
                 .param("type", "oidc")
                 .param("deploymentPhase", "1")
@@ -163,6 +176,7 @@ public class IntegrationControllerTest {
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(integrationService).getIntegrationsSpecSearchPageable(any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Long.class), pageableCaptor.capture());
+
         PageRequest pageable = (PageRequest) pageableCaptor.getValue();
 
         assertEquals(5, pageable.getPageNumber());
@@ -180,6 +194,8 @@ public class IntegrationControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(99L), eq("TALLENTAJA")))
+                .thenReturn(true);
         when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
         mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
                 // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
@@ -189,6 +205,25 @@ public class IntegrationControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(99L))
                 .andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
+    }
+
+    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.9",
+            "APP_MPASSID_TALLENTAJA" })
+    @Test
+    public void testUnauthorizedUpdateIntegration() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(99L), eq("TALLENTAJA")))
+                .thenReturn(false);
+        when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+        mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
+                // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
+                .content(objectMapper.writeValueAsString(integration)).with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$").doesNotExist());
     }
 
     @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
@@ -221,6 +256,8 @@ public class IntegrationControllerTest {
                 "\"serviceContactAddress\": \"zoo@bar\"" +
                 "}";
 
+        when(permissionEvaluator.hasPermission(any(Authentication.class), eq(99L), eq("TALLENTAJA")))
+                .thenReturn(true);
         when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
         mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
                 // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html

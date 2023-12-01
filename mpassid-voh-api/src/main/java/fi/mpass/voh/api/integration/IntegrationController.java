@@ -98,7 +98,7 @@ public class IntegrationController {
     }
 
     @Operation(summary = "Update the specific integration")
-    @PreAuthorize("hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("hasPermission(#id, 'TALLENTAJA')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),

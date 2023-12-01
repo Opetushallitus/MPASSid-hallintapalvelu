@@ -9,10 +9,14 @@ import org.springframework.core.io.ResourceLoader;
 
 import fi.mpass.voh.api.config.IntegrationSetLoader;
 import fi.mpass.voh.api.config.ServiceProvidersLoader;
+import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.organization.OrganizationService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
 
 @SpringBootTest
 public class IntegrationSetLoaderTests {
@@ -35,11 +39,15 @@ public class IntegrationSetLoaderTests {
 
     @Test
     public void testIntegrationSetLoader() throws Exception {
-        // 64
+        // 64, one with organization
         String setLocation = "integration_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
+        Optional<Integration> integration_with_organization = repository.findById(6000001L);
+
+        assertTrue(integration_with_organization.isPresent());
+        assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
         assertEquals(64, repository.findAll().size());
     }
 

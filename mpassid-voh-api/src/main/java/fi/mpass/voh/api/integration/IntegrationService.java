@@ -4,7 +4,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -141,14 +143,10 @@ public class IntegrationService {
     if (filterByType != null && filterByType.length() > 0)
       builder.withEqualAnd(Category.TYPE, "type", filterByType);
 
-    List<Integration> spSetIntegrations = new ArrayList<Integration>();
     // role can be a list of roles, thus (equality OR equality OR ...) AND
-    if (role != null && role.length() > 0) {
+    if (role != null && role.length() > 0)
       builder.withEqualAnd(Category.ROLE, "role", role);
 
-      // Integration sp (type) sets (role) are shown to all authenticated
-      spSetIntegrations = getServiceProviderSets();
-    }
     // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
     // AND
     if (deploymentPhase != null && deploymentPhase.length() > 0)
@@ -162,13 +160,7 @@ public class IntegrationService {
       }
       Specification<Integration> spec = builder.build();
 
-      List<Integration> integrations = integrationRepository.findAll(spec);
-      // Avoid duplicates in (service provider set) responses to admin organizations
-      if (!includesAdminOrganization(userOrganizationOids)) {
-        integrations.addAll(spSetIntegrations);
-      }
-
-      return pageIntegrations(integrations, pageable);
+      return integrationRepository.findAll(spec, pageable);
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
@@ -188,6 +180,48 @@ public class IntegrationService {
         results.size());
 
     return integrations;
+  }
+
+  private List<Integration> sortIntegrations(List<Integration> integrations, Optional<Integration> referenceIntegration,
+      Pageable pageable) {
+
+    Sort sort = pageable.getSort();
+    Iterator<Sort.Order> iter = sort.iterator();
+    while (iter.hasNext()) {
+      Sort.Order order = iter.next();
+      logger.debug("Sorting result list by " + order.getProperty() + " in " + order.getDirection() + " order");
+      if (order.getProperty().equals("id")) {
+        integrations.sort((i1, i2) -> i1.getId().compareTo(i2.getId()));
+      }
+      if (order.getProperty().equals("configurationEntity.set.name")) {
+        integrations.sort((i1, i2) -> i1.getConfigurationEntity().getSet().getName()
+            .compareTo(i2.getConfigurationEntity().getSet().getName()));
+      }
+      if (order.getProperty().equals("organization.name")) {
+        integrations.sort((i1, i2) -> i1.getOrganization().getName()
+            .compareTo(i2.getOrganization().getName()));
+      }
+      if (order.getProperty().equals("lastUpdatedOn")) {
+        if (referenceIntegration.isPresent()) {
+          for (IntegrationPermission permission : referenceIntegration.get().getPermissions()) {
+            Long to = permission.getTo().getId();
+            for (Integration i : integrations) {
+              if (i.getId().equals(to)) {
+                // not persistent
+                i.setLastUpdatedOn(permission.getLastUpdatedOn());
+              }
+            }
+          }
+        }
+        integrations.sort((i1, i2) -> i1.getLastUpdatedOn().compareTo(i2.getLastUpdatedOn()));
+      }
+      if (order.getDirection().equals(Direction.DESC)) {
+        Collections.reverse(integrations);
+      }
+    }
+
+    return integrations;
+
   }
 
   /**
@@ -249,7 +283,8 @@ public class IntegrationService {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
       List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
-      if (!includesAdminOrganization(userOrganizationOids)) {
+      // (service provider) sets can be retrieved by all authenticated users
+      if (!includesAdminOrganization(userOrganizationOids) && !(role != null && role.contains("set"))) {
         builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
       }
       Specification<Integration> spec = builder.build();
@@ -275,26 +310,20 @@ public class IntegrationService {
             Order order = sort.getOrderFor("permissions");
             if (order != null) {
               existingIntegrations.removeAll(permittedIntegrations);
-
-              if (order.getDirection().equals(Direction.DESC)) {
-                integrations.addAll(existingIntegrations);
-                integrations.addAll(permittedIntegrations);
-                logger.debug("After removing and adding permitted integrations to the end of the response. Size: "
-                    + existingIntegrations.size());
-              } else {
-                integrations.addAll(permittedIntegrations);
-                integrations.addAll(existingIntegrations);
-                logger.debug("After removing and adding permitted integrations to the beginning of the response. Size: "
-                    + permissions.size());
-              }
+              integrations.addAll(permittedIntegrations);
+              integrations.addAll(existingIntegrations);
+              logger.debug("After removing and adding permitted integrations to the beginning of the response. Size: "
+                  + permissions.size());
             }
           }
         }
       }
 
       if (integrations.isEmpty()) {
-        integrations = List.copyOf(existingIntegrations);
+        integrations = new ArrayList<Integration>(existingIntegrations);
       }
+
+      integrations = sortIntegrations(integrations, referenceIntegration, pageable);
 
       // logger.debug("Distinct integrations size: " + distinctIntegrations.size());
       return pageIntegrations(integrations, pageable);
@@ -374,6 +403,15 @@ public class IntegrationService {
     }
   }
 
+  /**
+   * The method updates integration given an id and integration.
+   * Requires authentication and organizational authorization.
+   * 
+   * @param id          the id of the Integration
+   * @param integration the input integration
+   * @return Integration
+   * @throws EntityNotFoundException
+   */
   public Integration updateIntegration(Long id, Integration integration) {
 
     Integration existingIntegration = getSpecIntegrationById(id).get();

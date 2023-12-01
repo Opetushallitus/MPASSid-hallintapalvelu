@@ -1,7 +1,8 @@
 import { updateIntegration } from "@/api";
 import type { Components } from "@/api";
 import { useIntegrationsSpecSearchPageable } from "@/api";
-import { roles } from "@/config";
+import { useMe } from "@/api/käyttöoikeus";
+import { roles, tallentajaOphGroup } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
@@ -49,12 +50,13 @@ const eqCheck = (integ1: Components.Schemas.Integration,integ2: Components.Schem
 }
 export default function IntegrationSelection({ integration, newIntegration, setNewIntegration, setIntegration, activateAllServices, setActivateAllServices }: Props) {
   
-  const { content, totalPages } = useIntegrationsSpecSearchPageable();
+  const { content, totalPages } = useIntegrationsSpecSearchPageable(integration?.deploymentPhase);
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [openNotice, setOpenNotice] = useState(false);
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [saveDialogState, setSaveDialogState] = useState(false);
+  const { groups } = useMe();
 
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
@@ -63,7 +65,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     vertical: 'bottom',
     horizontal: 'right',
   }
-
+    
   useEffect(() => {
     if(integration !== undefined) {
       setNewIntegration(integration);
@@ -102,27 +104,35 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     
   }, [activateAllServices,newIntegration,setSaveDialogState,openConfirmation,openNotice]);
 
-  useEffect(() => {
-    if((searchParams.get("rooli") ?? "")!=="set") {
-      setSearchParams("rooli=set")
-    }
-  }, [integration,searchParams,setSearchParams]);
-
   const handleSwitchAllChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const copy = structuredClone(newIntegration)
+    if(writeAccess()) {
+      const copy = structuredClone(newIntegration)
 
-    if(copy!==undefined) {
-      if(!activateAllServices) {
-        copy.permissions = [];
-      } else {
-        copy.permissions = structuredClone(integration.permissions);
+      if(copy!==undefined) {
+        if(!activateAllServices) {
+          copy.permissions = [];
+        } else {
+          copy.permissions = structuredClone(integration.permissions);
+        }
+    
+        setNewIntegration(copy);
+        setActivateAllServices(!activateAllServices);
       }
-  
-      setNewIntegration(copy);
-      setActivateAllServices(!activateAllServices);
+    } else {
+      setNewIntegration(integration);
     }
     
+    
   };
+
+  
+  const writeAccess = () => {
+    
+    if(integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+      return true;
+    }
+    return false;
+  }
 
   const copyFormDataToURLSearchParams =
   (formData: FormData) => (searchParams: URLSearchParams) => {
@@ -133,7 +143,9 @@ export default function IntegrationSelection({ integration, newIntegration, setN
         searchParams.delete(key);
       }
     });
-
+    if(integration?.deploymentPhase) {
+      searchParams.set("ympäristö",String(integration.deploymentPhase));
+    }
     return searchParams;
   };
 
@@ -143,20 +155,23 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   }
 
   const saveIntegrations = async () => {
-    if(newIntegration!==undefined) {
-      if(newIntegration.permissions?.length == 0&&openConfirmation == false) {
-        setOpenConfirmation(true);
-      } else {
-        const id = newIntegration.id!;
-        newIntegration.permissions?.forEach((permission)=>{
-          delete permission.lastUpdatedOn;
-        })
-        const updateResponse = await updateIntegration({ id },newIntegration);
-        setIntegration(updateResponse);     
-        setOpenNotice(true);
-        setOpenConfirmation(false);
-      }
-      
+    if(writeAccess()) {
+      if(newIntegration!==undefined) {
+        if(newIntegration.permissions?.length == 0&&openConfirmation == false) {
+          setOpenConfirmation(true);
+        } else {
+          const id = newIntegration.id!;
+          newIntegration.permissions?.forEach((permission)=>{
+            delete permission.lastUpdatedOn;
+          })
+          const updateResponse = await updateIntegration({ id },newIntegration);
+          setIntegration(updateResponse);     
+          setOpenNotice(true);
+          setOpenConfirmation(false);
+        }
+      } 
+    } else {
+      setNewIntegration(integration)
     }
   };
 
@@ -172,35 +187,44 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   };
 
   const removeIntegrations = () => {
-    const copy = structuredClone(newIntegration)
-    if(copy!==undefined) {
-      copy.permissions=[];
-      setNewIntegration(copy);
-      setSaveDialogState(true);
+    if(writeAccess()) {
+      const copy = structuredClone(newIntegration)
+      if(copy!==undefined) {
+        copy.permissions=[];
+        setNewIntegration(copy);
+        setSaveDialogState(true);
+      }
+    } else {
+      setNewIntegration(integration);
     }
   };
 
   const handleSwitchChange = (row: Components.Schemas.Integration) => {
       
-    const copy = structuredClone(newIntegration)
+    if(writeAccess()) {
+      const copy = structuredClone(newIntegration)
 
-    if(copy.permissions === undefined) {
-      copy.permissions = [];
+      if(copy.permissions === undefined) {
+        copy.permissions = [];
+      }
+  
+      const index:number|undefined = copy.permissions?.map((i:Components.Schemas.IntegrationPermission)=>i.to?.id).indexOf(row.id);
+      if(index!=undefined) {
+        if (index > -1) {
+          copy?.permissions?.splice(index, 1);
+        } else {
+          const newServiceIntgeration:Components.Schemas.IntegrationPermission={};
+          newServiceIntgeration.to={}; 
+          newServiceIntgeration.to.id=row.id;
+          newServiceIntgeration.lastUpdatedOn="edited";
+          copy?.permissions?.push(newServiceIntgeration);
+        }  
+        setNewIntegration(copy);    
+      }
+    } else {
+        setNewIntegration(integration);
     }
- 
-    const index:number|undefined = copy.permissions?.map((i:Components.Schemas.IntegrationPermission)=>i.to?.id).indexOf(row.id);
-    if(index!=undefined) {
-      if (index > -1) {
-        copy?.permissions?.splice(index, 1);
-      } else {
-        const newServiceIntgeration:Components.Schemas.IntegrationPermission={};
-        newServiceIntgeration.to={}; 
-        newServiceIntgeration.to.id=row.id;
-        newServiceIntgeration.lastUpdatedOn="edited";
-        copy?.permissions?.push(newServiceIntgeration);
-      }  
-      setNewIntegration(copy);    
-    }
+    
       
   };
 
@@ -223,12 +247,18 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                   </Button>
                   
             </Box>
-            {(activateAllServices)&&<>
+            {writeAccess()&&(activateAllServices)&&<>
                                     <Alert severity="warning" sx={{ width: '60%' }}>
                                               <FormattedMessage defaultMessage="Yksittäisten palvelujen tilaa ei voi muuttaa, kun kaikki palvelut ovat sallittuja" />
                                     </Alert>
                                     <br></br>
                                     </>}
+                                    {(!writeAccess())&&<>
+                                    <Alert severity="warning" sx={{ width: '60%' }}>
+                                              <FormattedMessage defaultMessage="Ei oikeuksia muuttaa sallittuja palveluja" />
+                                    </Alert>
+                                    <br></br>
+                                    </>}                      
              
               <Stack direction="row" alignItems="center">
                 <Box flex={1} sx={{ mr: 2 }}>

@@ -2,16 +2,38 @@ package fi.mpass.voh.api;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import static org.mockito.BDDMockito.given;
+
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import fi.mpass.voh.api.integration.ConfigurationEntity;
+import fi.mpass.voh.api.integration.DiscoveryInformation;
+import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.OPHPermissionEvaluator;
+import fi.mpass.voh.api.organization.Organization;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 public class OPHPermissionEvaluatorTests {
+
+    @Mock
+    private IntegrationRepository integrationRepository;
+
+    private Integration integration1;
+    private Integration integration2;
 
     private static final SimpleGrantedAuthority[] AUTHORITIES = new SimpleGrantedAuthority[] {
             new SimpleGrantedAuthority("ROLE_APP_krcpt"),
@@ -87,28 +109,73 @@ public class OPHPermissionEvaluatorTests {
             new SimpleGrantedAuthority("ROLE_APP_MPASSID")
     };
 
-    private static final SimpleGrantedAuthority[] NON_AUTHORITIES = new SimpleGrantedAuthority[] {
-        new SimpleGrantedAuthority("ROLE_APP_Aeftsj"),
-        new SimpleGrantedAuthority("ROLE_APP_Aeftsj_TALLENTAJA"),
-        new SimpleGrantedAuthority("ROLE_APP_Aeftsj_TALLENTAJA_1.2.246.562.10.00000000001"),
-        new SimpleGrantedAuthority("ROLE_APP_Almcgm"),
-        new SimpleGrantedAuthority("ROLE_APP_Almcgm_TALLENTAJA"),
-        new SimpleGrantedAuthority("ROLE_APP_Almcgm_TALLENTAJA_1.2.246.562.10.00000000001"),
-        new SimpleGrantedAuthority("ROLE_APP_Ahjysy"),
-        new SimpleGrantedAuthority("ROLE_APP_AhAjysy_TALLENTAJA"),
-        new SimpleGrantedAuthority("ROLE_APP_Ahjysy_TALLENTAJA_1.2.246.562.10.00000000001"),
-        new SimpleGrantedAuthority("ROLE_APP_Apmfcc"),
-        new SimpleGrantedAuthority("ROLE_APP_Apmfcc_TALLENTAJA"),
-        new SimpleGrantedAuthority("ROLE_APP_Apmfcc_TALLENTAJA_1.2.246.562.10.00000000001"),
-        new SimpleGrantedAuthority("ROLE_APP_Aejczj"),
-        new SimpleGrantedAuthority("ROLE_APP_Aejczj_TALLENTAJA"),
-        new SimpleGrantedAuthority("ROLE_APP_Aejczj_TALLENTAJA_1.2.246.562.10.00000000001")
+    private static final SimpleGrantedAuthority[] COMMON_AUTHORITIES = new SimpleGrantedAuthority[] {
+            new SimpleGrantedAuthority("ROLE_APP_MPASSID"),
+            new SimpleGrantedAuthority("ROLE_APP_MPASSID_TALLENTAJA_1.2.246.562.10.00000000005"),
+            new SimpleGrantedAuthority("ROLE_APP_MPASSID_KATSELIJA_1.2.246.562.10.00000000006")
     };
 
+    private static final SimpleGrantedAuthority[] NON_AUTHORITIES = new SimpleGrantedAuthority[] {
+            new SimpleGrantedAuthority("ROLE_APP_Aeftsj"),
+            new SimpleGrantedAuthority("ROLE_APP_Aeftsj_TALLENTAJA"),
+            new SimpleGrantedAuthority("ROLE_APP_Aeftsj_TALLENTAJA_1.2.246.562.10.00000000001"),
+            new SimpleGrantedAuthority("ROLE_APP_Almcgm"),
+            new SimpleGrantedAuthority("ROLE_APP_Almcgm_TALLENTAJA"),
+            new SimpleGrantedAuthority("ROLE_APP_Almcgm_TALLENTAJA_1.2.246.562.10.00000000001"),
+            new SimpleGrantedAuthority("ROLE_APP_Ahjysy"),
+            new SimpleGrantedAuthority("ROLE_APP_AhAjysy_TALLENTAJA"),
+            new SimpleGrantedAuthority("ROLE_APP_Ahjysy_TALLENTAJA_1.2.246.562.10.00000000001"),
+            new SimpleGrantedAuthority("ROLE_APP_Apmfcc"),
+            new SimpleGrantedAuthority("ROLE_APP_Apmfcc_TALLENTAJA"),
+            new SimpleGrantedAuthority("ROLE_APP_Apmfcc_TALLENTAJA_1.2.246.562.10.00000000001"),
+            new SimpleGrantedAuthority("ROLE_APP_Aejczj"),
+            new SimpleGrantedAuthority("ROLE_APP_Aejczj_TALLENTAJA"),
+            new SimpleGrantedAuthority("ROLE_APP_Aejczj_TALLENTAJA_1.2.246.562.10.00000000001")
+    };
+
+    @BeforeEach
+    void setUp() {
+        Organization organization1 = new Organization("Organization 123", "123456-8", "1.2.246.562.10.00000000005");
+        integration1 = new Integration(99L, LocalDate.now(), new ConfigurationEntity(), LocalDate.of(2023, 7, 30),
+                0, new DiscoveryInformation(), organization1, "serviceContactAddress@example.net");
+
+        Organization organization2 = new Organization("Organization 321", "123456-7", "1.2.246.562.10.00000000006");
+        integration2 = new Integration(9L, LocalDate.now(), new ConfigurationEntity(), LocalDate.of(2023, 7, 30),
+                0, new DiscoveryInformation(), organization2, "serviceContactAddress@example.net");
+    }
+
+    @Test
+    void testSpecificIntegrationTallentajaAuthorized() {
+        // given
+        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+        given(integrationRepository.findById(any(Long.class))).willReturn(Optional.of(integration1));
+
+        // when
+        
+        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd", Arrays.asList(COMMON_AUTHORITIES));
+
+        // then
+        assertTrue(permissionEvaluator.hasPermission(token, 99L, "TALLENTAJA"));
+    }
+
+    @Test
+    void testSpecificIntegrationTallentajaUnauthorized() {
+        // given
+        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+        given(integrationRepository.findById(any(Long.class))).willReturn(Optional.of(integration2));
+
+        // when
+        
+        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd", Arrays.asList(COMMON_AUTHORITIES));
+
+        // then
+        assertFalse(permissionEvaluator.hasPermission(token, 9L, "TALLENTAJA"));
+    }
+    
     @Test
     void testAuthorized() {
         // given
-        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator();
+        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
 
         // when
         TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd", Arrays.asList(AUTHORITIES));
@@ -120,10 +187,11 @@ public class OPHPermissionEvaluatorTests {
     @Test
     void testUnauthorized() {
         // given
-        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator();
+        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
 
         // when
-        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd", Arrays.asList(NON_AUTHORITIES));
+        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd",
+                Arrays.asList(NON_AUTHORITIES));
 
         // then
         assertFalse(permissionEvaluator.hasPermission(token, "", "TALLENTAJA"));
@@ -132,10 +200,11 @@ public class OPHPermissionEvaluatorTests {
     @Test
     void testUnauthorizedWhenAuthorityWithoutPermission() {
         // given
-        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator();
+        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
 
         // when
-        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd", Arrays.asList(RESTRICTED_AUTHORITIES));
+        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd",
+                Arrays.asList(RESTRICTED_AUTHORITIES));
 
         // then
         assertFalse(permissionEvaluator.hasPermission(token, "", "TALLENTAJA"));
@@ -144,10 +213,11 @@ public class OPHPermissionEvaluatorTests {
     @Test
     void testAuthorizedWhenEmptyRequiredPermissionWithRestrictedAuthorities() {
         // given
-        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator();
+        OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
 
         // when
-        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd", Arrays.asList(RESTRICTED_AUTHORITIES));
+        TestingAuthenticationToken token = new TestingAuthenticationToken("user", "pwd",
+                Arrays.asList(RESTRICTED_AUTHORITIES));
 
         // then
         assertTrue(permissionEvaluator.hasPermission(token, "", ""));
