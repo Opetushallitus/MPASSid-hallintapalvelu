@@ -148,6 +148,12 @@ public class Integration implements Persistable<Long> {
         return this.lastUpdatedOn;
     }
 
+    public void setLastUpdatedOn(java.sql.Timestamp ts) {
+        if (ts != null) {
+            this.lastUpdatedOn = ts;
+        }
+    }
+
     public ConfigurationEntity getConfigurationEntity() {
         return this.configurationEntity;
     }
