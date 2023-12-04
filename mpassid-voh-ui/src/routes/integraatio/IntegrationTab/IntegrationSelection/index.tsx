@@ -36,6 +36,7 @@ import SearchForm from "./../../../home/SearchForm";
 import { usePaginationPage } from "@/utils/components/pagination";
 import DialogTitle from "@mui/material/DialogTitle";
 import ServiceLinkButton from "@/utils/components/ServiceLinkButton";
+import Suspense from "@/utils/components/Suspense";
 interface Props {
   integration: Components.Schemas.Integration;
   newIntegration?: Components.Schemas.Integration;
@@ -234,6 +235,11 @@ export default function IntegrationSelection({ integration, newIntegration, setN
       <>
             <Typography variant="h2" gutterBottom>
               <FormattedMessage defaultMessage="Palvelun tarjoajat" />
+              <Secondary>
+              <Suspense inline>
+              &nbsp;( <SelectedElements {...newIntegration}/>/<TotalElements /> )
+              </Suspense>
+            </Secondary>
             </Typography>
             <FormattedMessage defaultMessage="Sivulla MPASSid-pääkäyttäjä voi hallinnoida palveluita, joissa on sallittu kirjautuminen MPASSid-tunnistuksenvälityspalveluun." />
             <Box display="flex" justifyContent="left" mt={3}> 
@@ -487,3 +493,20 @@ function ViimeksiMuokattu(props:RowListProps2) {
   
   
 };
+
+function TotalElements() {
+  const integrations = useIntegrationsSpecSearchPageable();
+
+  return <>{integrations.totalElements}</>;
+}
+
+function SelectedElements(integration: Components.Schemas.Integration) {
+  const allIntegrations = useIntegrationsSpecSearchPageable();
+  
+  if(integration.permissions?.length>0) {
+    return <>{integration.permissions.length}</>;
+  } else {
+    return <>{allIntegrations.totalElements}</>;
+  }
+  
+}
