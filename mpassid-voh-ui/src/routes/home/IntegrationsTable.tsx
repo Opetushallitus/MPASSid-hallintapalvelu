@@ -84,7 +84,7 @@ const typeColors = {
 } as const;
 
 export default function IntegrationsTable() {
-  const { content, totalPages } = useIntegrationsSpecSearchPageable(undefined);
+  const { content, totalPages } = useIntegrationsSpecSearchPageable();
   const intl = useIntl();
   const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
 

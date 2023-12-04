@@ -50,7 +50,7 @@ const eqCheck = (integ1: Components.Schemas.Integration,integ2: Components.Schem
 }
 export default function IntegrationSelection({ integration, newIntegration, setNewIntegration, setIntegration, activateAllServices, setActivateAllServices }: Props) {
   
-  const { content, totalPages } = useIntegrationsSpecSearchPageable(integration?.deploymentPhase);
+  const { content, totalPages } = useIntegrationsSpecSearchPageable();
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [openNotice, setOpenNotice] = useState(false);
