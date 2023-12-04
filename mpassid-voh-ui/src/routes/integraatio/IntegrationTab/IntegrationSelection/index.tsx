@@ -503,7 +503,7 @@ function TotalElements() {
 function SelectedElements(integration: Components.Schemas.Integration) {
   const allIntegrations = useIntegrationsSpecSearchPageable();
   
-  if(integration.permissions?.length>0) {
+  if(integration.permissions!=undefined&&integration.permissions?.length>0) {
     return <>{integration.permissions.length}</>;
   } else {
     return <>{allIntegrations.totalElements}</>;
