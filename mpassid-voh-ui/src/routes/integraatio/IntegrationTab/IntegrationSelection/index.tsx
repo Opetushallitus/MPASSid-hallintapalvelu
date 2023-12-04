@@ -16,6 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
+  Divider,
   FormControlLabel,
   Snackbar,
   Stack,
@@ -34,6 +35,7 @@ import RowsPerPage from "@/utils/components/RowsPerPage";
 import SearchForm from "./../../../home/SearchForm";
 import { usePaginationPage } from "@/utils/components/pagination";
 import DialogTitle from "@mui/material/DialogTitle";
+import ServiceLinkButton from "@/utils/components/ServiceLinkButton";
 interface Props {
   integration: Components.Schemas.Integration;
   newIntegration?: Components.Schemas.Integration;
@@ -231,10 +233,13 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     return (
       <>
             <Typography variant="h2" gutterBottom>
-            <FormattedMessage defaultMessage="Palvelun tarjoajat" />
-              
+              <FormattedMessage defaultMessage="Palvelun tarjoajat" />
             </Typography>
-            
+            <FormattedMessage defaultMessage="Sivulla MPASSid-pääkäyttäjä voi hallinnoida palveluita, joissa on sallittu kirjautuminen MPASSid-tunnistuksenvälityspalveluun." />
+            <Box display="flex" justifyContent="left" mt={3}> 
+              <ServiceLinkButton></ServiceLinkButton>
+            </Box>
+            <Divider variant="middle" ></Divider>
             <Box display="flex" justifyContent="center" mt={3}> 
             
             <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label="Salli kaikki palvelut" />
