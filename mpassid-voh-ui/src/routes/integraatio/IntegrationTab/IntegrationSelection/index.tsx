@@ -128,6 +128,13 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     
   };
 
+  const cannotSave = () => {
+    
+    if(newIntegration&&newIntegration.permissions&&(newIntegration?.permissions?.length>0||activateAllServices)) {
+      return true;
+    }
+    return false;
+  }
   
   const writeAccess = () => {
     
@@ -269,6 +276,12 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                                               <FormattedMessage defaultMessage="Ei oikeuksia muuttaa sallittuja palveluja" />
                                     </Alert>
                                     <br></br>
+                                    </>}   
+                                    {!cannotSave()&&<>
+                                    <Alert severity="warning" sx={{ width: '40%' }}>
+                                              <FormattedMessage defaultMessage="Tallentaaksesi valinnat sinun pitää sallia vähintään yksi tai useampi palvelu" />
+                                    </Alert>
+                                    <br></br>
                                     </>}                      
              
               <Stack direction="row" alignItems="center">
@@ -380,7 +393,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
         
                         <Box display="flex" justifyContent="center" mt={2}> 
                             <Button onClick={clearIntegrations} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button> 
-                            <Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button> 
+                            {!cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                            {cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
                         </Box>
                         <br></br>
                       </Container>
