@@ -2,13 +2,13 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
-import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import { Box, Paper, TableContainer } from "@mui/material";
 import { useLayoutEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { useParams } from "react-router-dom";
 import { useSessionStorage } from "usehooks-ts";
 import IntegrationTab from "./IntegrationTab";
+import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 
 export default function Integraatio() {
   const { integrationId } = useParams();
@@ -30,7 +30,7 @@ export default function Integraatio() {
       <TableContainer component={Paper} sx={{ padding: 3 }}>
         <Box display="flex" alignItems="baseline">
           <PageHeader
-            icon={<IntegrationInstructionsIcon />}
+            icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}
           >
             <FormattedMessage defaultMessage="Jäsen {id}" values={{id: integrationId}} />

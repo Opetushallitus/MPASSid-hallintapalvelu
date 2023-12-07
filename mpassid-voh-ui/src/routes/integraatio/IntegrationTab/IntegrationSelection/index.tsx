@@ -16,6 +16,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
+  Divider,
   FormControlLabel,
   Snackbar,
   Stack,
@@ -34,6 +35,8 @@ import RowsPerPage from "@/utils/components/RowsPerPage";
 import SearchForm from "./../../../home/SearchForm";
 import { usePaginationPage } from "@/utils/components/pagination";
 import DialogTitle from "@mui/material/DialogTitle";
+import ServiceLinkButton from "@/utils/components/ServiceLinkButton";
+import Suspense from "@/utils/components/Suspense";
 interface Props {
   integration: Components.Schemas.Integration;
   newIntegration?: Components.Schemas.Integration;
@@ -50,7 +53,7 @@ const eqCheck = (integ1: Components.Schemas.Integration,integ2: Components.Schem
 }
 export default function IntegrationSelection({ integration, newIntegration, setNewIntegration, setIntegration, activateAllServices, setActivateAllServices }: Props) {
   
-  const { content, totalPages } = useIntegrationsSpecSearchPageable(integration?.deploymentPhase);
+  const { content, totalPages } = useIntegrationsSpecSearchPageable();
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [openNotice, setOpenNotice] = useState(false);
@@ -125,6 +128,13 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     
   };
 
+  const cannotSave = () => {
+    
+    if(newIntegration&&newIntegration.permissions&&(newIntegration?.permissions?.length>0||activateAllServices)) {
+      return true;
+    }
+    return false;
+  }
   
   const writeAccess = () => {
     
@@ -231,10 +241,18 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     return (
       <>
             <Typography variant="h2" gutterBottom>
-            <FormattedMessage defaultMessage="Palvelun tarjoajat" />
-              
+              <FormattedMessage defaultMessage="Palvelun tarjoajat" />
+              <Secondary>
+              <Suspense inline>
+              &nbsp;( <SelectedElements {...newIntegration}/>/<TotalElements /> )
+              </Suspense>
+            </Secondary>
             </Typography>
-            
+            <FormattedMessage defaultMessage="Sivulla MPASSid-pääkäyttäjä voi hallinnoida palveluita, joissa on sallittu kirjautuminen MPASSid-tunnistuksenvälityspalveluun." />
+            <Box display="flex" justifyContent="left" mt={3}> 
+              <ServiceLinkButton></ServiceLinkButton>
+            </Box>
+            <Divider variant="middle" ></Divider>
             <Box display="flex" justifyContent="center" mt={3}> 
             
             <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label="Salli kaikki palvelut" />
@@ -256,6 +274,12 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                                     {(!writeAccess())&&<>
                                     <Alert severity="warning" sx={{ width: '60%' }}>
                                               <FormattedMessage defaultMessage="Ei oikeuksia muuttaa sallittuja palveluja" />
+                                    </Alert>
+                                    <br></br>
+                                    </>}   
+                                    {!cannotSave()&&<>
+                                    <Alert severity="warning" sx={{ width: '40%' }}>
+                                              <FormattedMessage defaultMessage="Tallentaaksesi valinnat sinun pitää sallia vähintään yksi tai useampi palvelu" />
                                     </Alert>
                                     <br></br>
                                     </>}                      
@@ -369,7 +393,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
         
                         <Box display="flex" justifyContent="center" mt={2}> 
                             <Button onClick={clearIntegrations} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button> 
-                            <Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button> 
+                            {!cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                            {cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
                         </Box>
                         <br></br>
                       </Container>
@@ -482,3 +507,20 @@ function ViimeksiMuokattu(props:RowListProps2) {
   
   
 };
+
+function TotalElements() {
+  const integrations = useIntegrationsSpecSearchPageable();
+
+  return <>{integrations.totalElements}</>;
+}
+
+function SelectedElements(integration: Components.Schemas.Integration) {
+  const allIntegrations = useIntegrationsSpecSearchPageable();
+  
+  if(integration.permissions!=undefined&&integration.permissions?.length>0) {
+    return <>{integration.permissions.length}</>;
+  } else {
+    return <>{allIntegrations.totalElements}</>;
+  }
+  
+}
