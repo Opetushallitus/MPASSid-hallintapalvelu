@@ -11,6 +11,7 @@ import org.hibernate.envers.NotAudited;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -35,7 +36,7 @@ public class ConfigurationEntity {
     private long id;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "configurationEntity", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "configurationEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @NotAudited
     private Set<Attribute> attributes;
 

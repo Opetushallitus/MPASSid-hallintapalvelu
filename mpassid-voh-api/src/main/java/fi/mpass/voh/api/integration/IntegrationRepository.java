@@ -25,4 +25,10 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
 
     @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='idp'")
     List<Long> getAllIdpIds();
+
+    @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='set'")
+    List<Long> getAllSetIds();
+
+    @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='sp'")
+    List<Long> getAllSpIds();
 }

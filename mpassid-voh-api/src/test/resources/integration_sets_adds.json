@@ -1,6 +1,18 @@
 
 {
     "integrationGroups": [
+        {
+            "id": 6000002,
+            "configurationEntity": {
+                "set": {
+                    "name": "dev-ops.sanomapro.fi"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" },
+                    { "name": "allowtestlearnerid2", "content": "false", "type": "data" }
+                ]
+            }
+         },
          {
             "id": 6000003,
             "configurationEntity": {
@@ -8,7 +20,8 @@
                     "name": "digivisiodev"
                 },
                 "attributes": [
-                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" },
+                    { "name": "allowtestlearnerid2", "content": "false", "type": "data" }
                 ]
             },
             "organization": {

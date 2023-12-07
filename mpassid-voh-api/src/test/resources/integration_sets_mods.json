@@ -8,7 +8,7 @@
                     "name": "digivisiodev"
                 },
                 "attributes": [
-                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                    { "name": "allowtestlearnerid", "content": "true", "type": "data" }
                 ]
             },
             "organization": {

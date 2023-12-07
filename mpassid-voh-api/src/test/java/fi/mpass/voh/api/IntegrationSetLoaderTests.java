@@ -44,11 +44,11 @@ public class IntegrationSetLoaderTests {
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
-        Optional<Integration> integration_with_organization = repository.findById(6000001L);
+        Optional<Integration> integration_with_organization = repository.findById(6000003L);
 
         assertTrue(integration_with_organization.isPresent());
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
-        assertEquals(64, repository.findAll().size());
+        assertEquals(63, repository.findAll().size());
     }
 
     @Test
@@ -60,4 +60,65 @@ public class IntegrationSetLoaderTests {
 
         assertEquals(64, repository.findAll().size());
     }
+
+    @Test
+    public void testIntegrationSetLoaderReloadModifications() throws Exception {
+        // 64, one with organization
+        String setLocation = "integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
+        setLoader.run(setLocation);
+
+        Optional<Integration> integration_with_organization = repository.findById(6000003L);
+
+        assertTrue(integration_with_organization.isPresent());
+        assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
+        assertEquals(63, repository.findAll().size());
+
+        setLocation = "integration_sets_mods.json";
+        IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
+        setReloader.run(setLocation);
+
+        assertEquals(63, repository.findAll().size());
+    }
+
+    @Test
+    public void testIntegrationSetLoaderReloadAdditions() throws Exception {
+        // 64, one with organization
+        String setLocation = "integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
+        setLoader.run(setLocation);
+
+        Optional<Integration> integration_with_organization = repository.findById(6000003L);
+
+        assertTrue(integration_with_organization.isPresent());
+        assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
+        assertEquals(63, repository.findAll().size());
+
+        setLocation = "integration_sets_adds.json";
+        IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
+        setReloader.run(setLocation);
+
+        assertEquals(64, repository.findAll().size());
+    }
+/*
+    @Test
+    public void testIntegrationSetLoaderReloadDeletions() throws Exception {
+        // 64, one with organization
+        String setLocation = "integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
+        setLoader.run(setLocation);
+
+        Optional<Integration> integration_with_organization = repository.findById(6000003L);
+
+        assertTrue(integration_with_organization.isPresent());
+        assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
+        assertEquals(63, repository.findAll().size());
+
+        setLocation = "integration_sets_dels.json";
+        IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
+        setReloader.run(setLocation);
+
+        assertEquals(62, repository.findAll().size());
+    }
+*/
 }

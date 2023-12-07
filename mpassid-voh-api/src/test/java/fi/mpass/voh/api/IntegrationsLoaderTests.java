@@ -47,7 +47,7 @@ public class IntegrationsLoaderTests {
  
     @Test
     public void testGsuiteLoader() throws Exception {
-        // 64
+        // 63
         String setLocation = "integration_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
@@ -65,8 +65,8 @@ public class IntegrationsLoaderTests {
         integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
         integrationLoader.run(location);
 
-        // 71
-        assertEquals(71, repository.findAll().size());
+        // 70
+        assertEquals(70, repository.findAll().size());
     }
 
     @Test
