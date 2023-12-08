@@ -77,6 +77,7 @@ create table integration_history (
     last_updated_on timestamp,
     acceptance_date date,
     deployment_date date,
+    status integer,
     deployment_phase integer,
     service_contact_address varchar(255),
     configuration_entity_id bigint,

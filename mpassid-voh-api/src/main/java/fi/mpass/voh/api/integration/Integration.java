@@ -36,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.organization.Organization;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Audited
 @Entity
@@ -84,7 +85,11 @@ public class Integration implements Persistable<Long> {
     private List<IntegrationPermission> permissions = new ArrayList<IntegrationPermission>();
 
     // @JsonView(value = IntegrationView.Default.class)
+    @Schema(description = "0:testing, 1:production, 2:preproduction, 3:reserved")
     private int deploymentPhase;
+    @Schema(description = "0:active, 1:inactive")
+    @JsonIgnore
+    private int status;
     // @JsonView(value = IntegrationView.Excluded.class)
     private LocalDate deploymentDate;
     // @JsonView(value = IntegrationView.Excluded.class)
@@ -166,7 +171,7 @@ public class Integration implements Persistable<Long> {
      * Gets the deployment phase.
      * 
      * @return The {@link int} representing the deployment phase.
-     *         -1 inactive, 0 testing, 1 production, 2 preproduction, 3 reserved
+     *         0 testing, 1 production, 2 preproduction, 3 reserved
      */
     public int getDeploymentPhase() {
         return this.deploymentPhase;
@@ -174,6 +179,23 @@ public class Integration implements Persistable<Long> {
 
     public void setDeploymentPhase(int deploymentPhase) {
         this.deploymentPhase = deploymentPhase;
+    }
+    /**
+     * Gets integration status
+     * 
+     * @return The {@link int} representing the integration status.
+     *          0 active, 1 inactive
+    */
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public boolean isActive() {
+        return status == 0;
     }
 
     public Organization getOrganization() {

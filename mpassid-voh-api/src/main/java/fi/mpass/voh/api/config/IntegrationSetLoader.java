@@ -123,7 +123,7 @@ public class IntegrationSetLoader implements CommandLineRunner {
                             logger.debug("Comparing existing integration " + existingIntegration.get().getId()
                                     + " version " + existingIntegration.get().getVersion() + " to "
                                     + integrationSet.getId() + " version " + integrationSet.getVersion());
-                       
+
                             DiffResult<Integration> diff = IntegrationDiffBuilder.compareSet(existingIntegration.get(),
                                     integrationSet);
 
@@ -159,7 +159,7 @@ public class IntegrationSetLoader implements CommandLineRunner {
                                             for (Attribute a : existingIntegration.get().getConfigurationEntity()
                                                     .getAttributes()) {
                                                 // attribute name
-                                                if (diffElements.length>1 && a.getName().equals(diffElements[2])) {
+                                                if (diffElements.length > 1 && a.getName().equals(diffElements[2])) {
                                                     // TODO verify diff fieldName matches attribute name -> attribute
                                                     // content
                                                     // update existing integration attribute content with input
@@ -239,6 +239,20 @@ public class IntegrationSetLoader implements CommandLineRunner {
                 }
             }
             logger.info("Loaded " + integrationSetCount + " integration sets.");
+        }
+        logger.info(setIds.size() + " inactivated integrations.");
+        for (Long id : setIds) {
+            Optional<Integration> inactivatedIntegration = this.integrationRepository
+                    .findByIdAll(id);
+            if (inactivatedIntegration.isPresent()) {
+                inactivatedIntegration.get().setStatus(1);
+                try {
+                    integrationRepository.save(inactivatedIntegration.get());
+                } catch (Exception e) {
+                    logger.error("Integration Exception: " + e + ". Could not inactivate integration #" + inactivatedIntegration.get().getId());
+                    continue;
+                }
+            }
         }
     }
 }
