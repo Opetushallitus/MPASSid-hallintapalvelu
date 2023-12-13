@@ -7,7 +7,7 @@ export * from "./client";
 
 // https://www.npmjs.com/package/@visma/react-openapi-client-generator#mutations-and-updates
 
-export function useIntegrationsSpecSearchPageable(environment:Number|undefined) {
+export function useIntegrationsSpecSearchPageable() {
   const [page] = usePaginationPage();
   const [searchParams] = useSearchParams();
   const location = useLocation()
@@ -19,9 +19,7 @@ export function useIntegrationsSpecSearchPageable(environment:Number|undefined) 
   if(integrationName==="integraatio"){
     searchParams.set("referenceIntegration",String(IntegrationId))
     searchParams.set("rooli","set")
-    if(environment !== undefined) {
-      searchParams.set("ympäristö",String(environment))
-    }
+    searchParams.set("ympäristö","1")
   }
 
   return client.useIntegrationsSpecSearchPageable({

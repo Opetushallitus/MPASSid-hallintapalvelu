@@ -11,15 +11,24 @@ import Toolbar from "@mui/material/Toolbar";
 import { useIntl } from "react-intl";
 import { useSessionStorage } from "usehooks-ts";
 import InterfaceTab from "./InterfaceTab";
+import { useState } from "react";
 
 export default function AppBar() {
   const intl = useIntl();
+
+  const me=useMe();
+  const [ oid, setOid ] = useState("");
 
   const [tabs] = useSessionStorage<string[]>(
     openIntegrationsSessionStorageKey,
     []
   );
-
+    
+  if(me.oid!=undefined&&oid!=me.oid) {
+    setOid(me.oid)
+    sessionStorage.removeItem(openIntegrationsSessionStorageKey);
+  }
+  
   const mainNavLinkTabs = [
     <TabLink
       key="home"

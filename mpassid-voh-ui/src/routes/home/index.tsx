@@ -6,7 +6,7 @@ import { usePaginationPage } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import RowsPerPage from "@/utils/components/RowsPerPage";
 import Suspense from "@/utils/components/Suspense";
-import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
+import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import {
   Box,
   Divider,
@@ -51,7 +51,7 @@ export default function Home() {
       <TableContainer component={Paper} sx={{ padding: 3 }}>
         <Box display="flex" alignItems="baseline">
           <PageHeader
-            icon={<IntegrationInstructionsIcon />}
+            icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}
           >
             <FormattedMessage defaultMessage="Integraatiot" />{" "}
@@ -82,7 +82,7 @@ export default function Home() {
 }
 
 function TotalElements() {
-  const integrations = useIntegrationsSpecSearchPageable(undefined);
+  const integrations = useIntegrationsSpecSearchPageable();
 
   return <>{integrations.totalElements}</>;
 }
