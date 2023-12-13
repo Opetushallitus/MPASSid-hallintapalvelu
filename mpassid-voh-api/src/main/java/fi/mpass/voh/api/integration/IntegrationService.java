@@ -132,8 +132,8 @@ public class IntegrationService {
       builder.withEqualOr(Category.IDP, "hostname", search);
       builder.withEqualOr(Category.SP, "entityId", search);
       builder.withEqualOr(Category.SP, "clientId", search);
-      builder.withEqualOr(Category.SET, "name", search);
       builder.withEqualOr(Category.ORGANIZATION, "oid", search);
+      builder.withContainOr(Category.SET, "name", search);
       builder.withContainOr(Category.SP, "name", search);
       builder.withContainOr(Category.ORGANIZATION, "name", search);
     }
@@ -259,8 +259,8 @@ public class IntegrationService {
       builder.withEqualOr(Category.IDP, "hostname", search);
       builder.withEqualOr(Category.SP, "entityId", search);
       builder.withEqualOr(Category.SP, "clientId", search);
-      builder.withEqualOr(Category.SET, "name", search);
       builder.withEqualOr(Category.ORGANIZATION, "oid", search);
+      builder.withContainOr(Category.SET, "name", search);
       builder.withContainOr(Category.SP, "name", search);
       builder.withContainOr(Category.ORGANIZATION, "name", search);
     }

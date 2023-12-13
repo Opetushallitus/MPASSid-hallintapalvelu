@@ -83,7 +83,7 @@ public class IntegrationSpecification implements Specification<Integration> {
 						return builder.equal(integrationSp.get(criteria.getKey()), criteria.getValue());
 					}
 					case SET: {
-						Join<Integration, ServiceProvider> integrationSet = root.join("configurationEntity").join("set",
+						Join<Integration, IntegrationSet> integrationSet = root.join("configurationEntity").join("set",
 								JoinType.LEFT);
 						return builder.equal(integrationSet.get(criteria.getKey()), criteria.getValue());
 					}
@@ -197,6 +197,11 @@ public class IntegrationSpecification implements Specification<Integration> {
 						Join<Integration, Organization> integrationOrganization = root.join("organization");
 						return builder.like(integrationOrganization.get(criteria.getKey()),
 								"%" + criteria.getValue() + "%");
+					}
+					case SET: {
+						Join<Integration, IntegrationSet> integrationSet = root.join("configurationEntity").join("set",
+								JoinType.LEFT);
+						return builder.like(integrationSet.get(criteria.getKey()), "%" + criteria.getValue() + "%");
 					}
 					default:
 						return builder.like(root.get(criteria.getKey()), "%" + criteria.getValue() + "%");
