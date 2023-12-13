@@ -62,10 +62,10 @@ public class OrganizationService {
   }
 
   /**
-   * Returns a cached Organization object by id (oid or businessId) from the
+   * Returns a cached Organization object by id (oid) from the
    * repository
    * 
-   * @param id oid or businessId
+   * @param id oid
    * @return the organization identified by the specified id
    */
   public Organization getById(String id) {
