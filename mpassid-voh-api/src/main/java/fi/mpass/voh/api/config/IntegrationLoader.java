@@ -12,6 +12,7 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -79,8 +80,9 @@ public class IntegrationLoader implements CommandLineRunner {
         logger.debug("Number of existing idp integrations: " + idpIds.size());
 
         for (String idpInput : this.homeOrganizationsInput) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
+            ObjectMapper objectMapper = JsonMapper.builder()
+                    .addModule(new JavaTimeModule())
+                    .build();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             InputStream inputStream;
@@ -106,9 +108,7 @@ public class IntegrationLoader implements CommandLineRunner {
                 for (JsonNode arrayNode : rootNode) {
                     Integration integration = null;
                     try {
-                        integration = new ObjectMapper()
-                                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                                .readValue(arrayNode.toString(), Integration.class);
+                        integration = objectMapper.readValue(arrayNode.toString(), Integration.class);
                     } catch (Exception e) {
                         logger.error(
                                 "Integration exception: " + e + " continuing to next.");
