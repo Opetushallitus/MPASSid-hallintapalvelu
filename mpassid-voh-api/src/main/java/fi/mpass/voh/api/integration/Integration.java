@@ -66,21 +66,21 @@ public class Integration implements Persistable<Long> {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIgnoreProperties("integrationSets")
-    @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE })
+    @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST })
     @Audited
     @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
     private Set<Integration> integrationSets = new HashSet<Integration>();
 
     @JsonManagedReference
     // TODO cascade review
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "discovery_information_id", referencedColumnName = "id")
     // @JsonView(value = IntegrationView.Excluded.class)
     private DiscoveryInformation discoveryInformation;
 
     /* empty permissions list indicates all permissions */
     @JsonManagedReference
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @OneToMany(mappedBy = "from", cascade = { CascadeType.ALL }, orphanRemoval = true)
     private List<IntegrationPermission> permissions = new ArrayList<IntegrationPermission>();
 
@@ -180,12 +180,13 @@ public class Integration implements Persistable<Long> {
     public void setDeploymentPhase(int deploymentPhase) {
         this.deploymentPhase = deploymentPhase;
     }
+
     /**
      * Gets integration status
      * 
      * @return The {@link int} representing the integration status.
-     *          0 active, 1 inactive
-    */
+     *         0 active, 1 inactive
+     */
     public int getStatus() {
         return status;
     }
@@ -279,10 +280,49 @@ public class Integration implements Persistable<Long> {
 
     /**
      * associates this Integration to the given IntegrationSet
+     * if it doesn't already exist in the set
      */
     public void addToSet(Integration integrationSet) {
-        integrationSet.getIntegrationSets().add(this);
-        this.integrationSets.add(integrationSet);
+        boolean backwardExists = false;
+        for (Iterator<Integration> integrationBackIterator = integrationSet.getIntegrationSets()
+                .iterator(); integrationBackIterator.hasNext();) {
+            if (integrationBackIterator.next().getId().equals(this.getId())) {
+                backwardExists = true;
+                break;
+            }
+        }
+        if (!backwardExists) {
+            integrationSet.getIntegrationSets().add(this);
+        }
+
+        boolean forwardExists = false;
+        for (Iterator<Integration> integrationIterator = this.getIntegrationSets()
+                .iterator(); integrationIterator.hasNext();) {
+            if (integrationIterator.next().getId().equals(this.getId())) {
+                forwardExists = true;
+                break;
+            }
+        }
+        if (!forwardExists) {
+            this.integrationSets.add(integrationSet);
+        }
+    }
+
+    public void removeFromSets() {
+        // if the integration is currently associated with the
+        // integrationSet, remove the association
+        for (Iterator<Integration> integrationIterator = this.getIntegrationSets()
+                .iterator(); integrationIterator.hasNext();) {
+            Integration set = integrationIterator.next();
+            for (Iterator<Integration> integrationSetIterator = set.getIntegrationSets()
+                    .iterator(); integrationSetIterator.hasNext();) {
+                Integration thisIntegration = integrationSetIterator.next();
+                if (thisIntegration.getId().equals(this.getId())) {
+                    integrationSetIterator.remove();
+                }
+                integrationIterator.remove();
+            }
+        }
     }
 
     public Set<Integration> getIntegrationSets() {

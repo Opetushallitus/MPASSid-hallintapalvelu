@@ -27,6 +27,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 
@@ -64,7 +65,7 @@ public abstract class IdentityProvider {
     @JsonIgnore
     private ConfigurationEntity configurationEntity;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "identity_provider_institution_types", joinColumns = @JoinColumn(name = "configuration_entity_id"))
     @Column(name = "institution_type")
     // @Schema(ref="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitostyyppi/latest")
@@ -75,7 +76,7 @@ public abstract class IdentityProvider {
 
     private String idpId;
     private String logoUrl;
-    @Column(unique = true)
+    // @Column(unique = true)
     private String flowName;
 
     /*

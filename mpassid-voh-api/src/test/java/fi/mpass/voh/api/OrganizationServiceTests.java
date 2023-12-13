@@ -63,6 +63,6 @@ public class OrganizationServiceTests {
         
         Organization organization = underTest.retrieveOrganization("1.2.246.562.10.74484103937");
 
-        assertEquals(organization.getBusinessId(), "0150783-1");
+        assertEquals(organization.getName(), "Lempäälän kunta");
     }
 }

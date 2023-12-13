@@ -135,11 +135,11 @@ public class OPHPermissionEvaluatorTests {
 
     @BeforeEach
     void setUp() {
-        Organization organization1 = new Organization("Organization 123", "123456-8", "1.2.246.562.10.00000000005");
+        Organization organization1 = new Organization("Organization 123", "1.2.246.562.10.00000000005");
         integration1 = new Integration(99L, LocalDate.now(), new ConfigurationEntity(), LocalDate.of(2023, 7, 30),
                 0, new DiscoveryInformation(), organization1, "serviceContactAddress@example.net");
 
-        Organization organization2 = new Organization("Organization 321", "123456-7", "1.2.246.562.10.00000000006");
+        Organization organization2 = new Organization("Organization 321", "1.2.246.562.10.00000000006");
         integration2 = new Integration(9L, LocalDate.now(), new ConfigurationEntity(), LocalDate.of(2023, 7, 30),
                 0, new DiscoveryInformation(), organization2, "serviceContactAddress@example.net");
     }

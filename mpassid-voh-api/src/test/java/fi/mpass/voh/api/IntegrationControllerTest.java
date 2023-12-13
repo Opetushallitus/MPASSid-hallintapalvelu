@@ -64,7 +64,7 @@ public class IntegrationControllerTest {
     public void setup() {
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
-        Organization organization = new Organization("Organization zyx", "123456-7", "1.2.3.4.5.6.7.8");
+        Organization organization = new Organization("Organization zyx", "1.2.3.4.5.6.7.8");
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Wilma wilma = new Wilma("wilmaHostname");
         wilma.setFlowName("wilmaFlowname");

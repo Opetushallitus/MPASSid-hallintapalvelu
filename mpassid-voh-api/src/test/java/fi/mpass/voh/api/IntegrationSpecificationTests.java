@@ -44,9 +44,9 @@ public class IntegrationSpecificationTests {
     @BeforeEach
     public void setup() {
 
-        Organization organization = new Organization("Organization zyx", "123456-7", "1.2.3.4.5.6.7.8");
+        Organization organization = new Organization("Organization zyx", "1.2.3.4.5.6.7.8");
         organizationRepository.save(organization);
-        Organization spOrg = new Organization("SP Organization 321", "654321-7", "1.2.3.4.5.6.7.1");
+        Organization spOrg = new Organization("SP Organization 321", "1.2.3.4.5.6.7.1");
         organizationRepository.save(spOrg);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
@@ -79,7 +79,7 @@ public class IntegrationSpecificationTests {
 
         // ServiceProvider
 
-        Organization spOrganization = new Organization("Organization xyz", "123456-9", "1.2.3.4.5.6.7.9");
+        Organization spOrganization = new Organization("Organization xyz", "1.2.3.4.5.6.7.9");
         organizationRepository.save(spOrganization);
 
         ConfigurationEntity configurationEntitySp = new ConfigurationEntity();
@@ -97,10 +97,10 @@ public class IntegrationSpecificationTests {
         for (int i = 1; i < 10; i++) {
             Organization setOrganization;
             if (i<5) {
-                setOrganization = new Organization("Organization set 1234", "123444-1", "1.2.3.4.5.6.7.2");
+                setOrganization = new Organization("Organization set 1234", "1.2.3.4.5.6.7.2");
                 organizationRepository.save(setOrganization);
             } else {
-                setOrganization = new Organization("Organization set 56789", "567899-1", "1.2.3.4.5.6.7.3");
+                setOrganization = new Organization("Organization set 56789", "1.2.3.4.5.6.7.3");
                 organizationRepository.save(setOrganization);
             }
 

@@ -5,13 +5,13 @@
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",
-                    "name": "K H",
+                    "name": "K H 2",
                     "metadata": {
                         "scope": "openid profile",
                         "redirect_uris": [
                             "https://kh/callback/"
                         ],
-                        "client_id": "clientId",
+                        "client_id": "clientId2",
                         "client_secret": "s",
                         "response_types": [
                             "code"
@@ -24,7 +24,7 @@
                 "attributes": [
                     {
                         "name": "allowtestlearnerid",
-                        "content": "true",
+                        "content": "false",
                         "type": "data"
                     }
                 ]
@@ -67,7 +67,7 @@
             },
             "integrationGroups": [
                 {
-                    "id": 6000001
+                    "id": 6000002
                 }
             ],
             "organization": {
@@ -98,7 +98,13 @@
                         "token_endpoint_auth_method": "client_secret_post"
                     }
                 },
-                "attributes": []
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "true",
+                        "type": "data"
+                    }
+                ]
             },
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"

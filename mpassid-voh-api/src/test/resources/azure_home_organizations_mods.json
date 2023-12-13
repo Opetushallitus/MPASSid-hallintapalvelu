@@ -1,0 +1,362 @@
+{
+  "identityProviders": [
+    {
+      "id": 4000001,
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            12,
+            15
+          ],
+          "idpId": "azure_t",
+          "logoUrl": "https://btn-t-changed.png",
+          "flowName": "ShibT",
+          "type": "azure",
+          "entityId": "https://df-44d9-bffa-1a-changed/",
+          "metadataUrl": "https://www.example.org"
+        },
+        "attributes": [
+          {
+            "name": "legacyId",
+            "content": "opentunti",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "opentuntunti.role",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "opentunti.oid",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "opentunti.classLevel",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "opentunti.class",
+            "type": "user"
+          },
+          {
+            "name": "firstName",
+            "content": "givenName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "user"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "opentunti.materialChargeSchool",
+            "type": "user"
+          },
+          {
+            "name": "datasource",
+            "content": "azurev4",
+            "type": "data"
+          },
+          {
+            "name": "clientId",
+            "content": "***,",
+            "type": "data"
+          },
+          {
+            "name": "clientKey",
+            "content": "***",
+            "type": "data"
+          },
+          {
+            "name": "tenantId",
+            "content": "0321ea951a",
+            "type": "data"
+          }
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "true",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "Tu"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    },
+    {
+      "id": 4000002,
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            15
+          ],
+          "idpId": "azure_e",
+          "logoUrl": "https://btn-ur.png",
+          "flowName": "ShibU",
+          "type": "azure",
+          "entityId": "https://7-b624-d34c2a24/",
+          "metadataUrl": "https://www.example.org"
+        },
+        "attributes": [
+          {
+            "name": "legacyId",
+            "content": "opentunti",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "opentunti.role",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "opentunti.oid",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "opentunti.classLevel.change",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "opentunti.class",
+            "type": "user"
+          },
+          {
+            "name": "firstName",
+            "content": "givenName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "data"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "opentunt.materialChargeSchool",
+            "type": "user"
+          },
+          {
+            "name": "datasource",
+            "content": "azurev4",
+            "type": "data"
+          },
+          {
+            "name": "clientId",
+            "content": "***,",
+            "type": "data"
+          },
+          {
+            "name": "clientKey",
+            "content": "***",
+            "type": "data"
+          },
+          {
+            "name": "tenantId",
+            "content": "d6371834c24",
+            "type": "data"
+          }
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "true",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "Ur"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    },
+    {
+      "id": 4000003,
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            15,
+            21
+          ],
+          "idpId": "azure_va",
+          "logoUrl": "https://m.png",
+          "flowName": "ShibVa",
+          "type": "azure",
+          "entityId": "https://st6c-c84667ac/",
+          "metadataUrl": "https://www.example.org"
+        },
+        "attributes": [
+          {
+            "name": "legacyId",
+            "content": "opentunti",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "opentunti.role",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "opentunti.oid",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "opentunti.classLevel",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "opentunti.class",
+            "type": "user"
+          },
+          {
+            "name": "firstName",
+            "content": "givenName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "user"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "opentunti.materialChargeSchool",
+            "type": "user"
+          },
+          {
+            "name": "datasource",
+            "content": "azurev4",
+            "type": "data"
+          },
+          {
+            "name": "clientId",
+            "content": "***,",
+            "type": "data"
+          },
+          {
+            "name": "clientKey",
+            "content": "***",
+            "type": "data"
+          },
+          {
+            "name": "tenantId",
+            "content": "19c6673aec",
+            "type": "data"
+          }
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "false",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "Va changed"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    },
+    {
+      "id": 4000004,
+      "configurationEntity": {
+        "idp": {
+          "institutionTypes": [
+            11,
+            15
+          ],
+          "idpId": "azure_e",
+          "logoUrl": "https://btn.png",
+          "flowName": "ShibVal",
+          "type": "azure",
+          "entityId": "https://-b624-d34c2a24/",
+          "metadataUrl": "https://www.example.org"
+        },
+        "attributes": [
+          {
+            "name": "legacyId",
+            "content": "opentunti",
+            "type": "user"
+          },
+          {
+            "name": "roles",
+            "content": "opentunti.role",
+            "type": "user"
+          },
+          {
+            "name": "learnerId",
+            "content": "opentunti.oid",
+            "type": "user"
+          },
+          {
+            "name": "groupLevels",
+            "content": "opentunti.classLevel",
+            "type": "user"
+          },
+          {
+            "name": "groups",
+            "content": "opentunti.class",
+            "type": "user"
+          },
+          {
+            "name": "firstName",
+            "content": "givenName",
+            "type": "user"
+          },
+          {
+            "name": "surname",
+            "content": "surname",
+            "type": "user"
+          },
+          {
+            "name": "learningMaterialsCharges",
+            "content": "opentunti.materialChargeSchool",
+            "type": "user"
+          },
+          {
+            "name": "datasource",
+            "content": "azurev4",
+            "type": "data"
+          },
+          {
+            "name": "clientId",
+            "content": "***,",
+            "type": "data"
+          },
+          {
+            "name": "clientKey",
+            "content": "***",
+            "type": "data"
+          },
+          {
+            "name": "tenantId",
+            "content": "d64c2a23a",
+            "type": "data"
+          }
+        ]
+      },
+      "discoveryInformation": {
+        "showSchools": "true",
+        "schools": [],
+        "excludedSchools": [],
+        "title": "Val"
+      },
+      "organization": {
+        "oid": "1.2.246.562.10.00000000001"
+      },
+      "deploymentPhase": 1
+    }
+  ]
+}

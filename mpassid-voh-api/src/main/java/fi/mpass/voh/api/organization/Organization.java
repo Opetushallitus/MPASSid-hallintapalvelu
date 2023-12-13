@@ -16,14 +16,11 @@ public class Organization {
     @Id
     private String oid;
     private String name;
-    @JsonProperty("ytunnus")
-    private String businessId;
 
     public Organization() { }
 
-    public Organization(String name, String businessId, String oid) {
+    public Organization(String name, String oid) {
         this.name = name;
-        this.businessId = businessId;
         this.oid = oid;
     }
 
@@ -40,14 +37,6 @@ public class Organization {
         this.name = name;
     }
 
-    public String getBusinessId() {
-        return this.businessId;
-    }
-
-    public void setBusinessId(String businessId) {
-        this.businessId = businessId;
-    }
-
     public String getOid() {
         return this.oid;
     }
@@ -60,7 +49,6 @@ public class Organization {
     public String toString() {
         return "{" +
                 " name='" + getName() + "'" +
-                ", businessId='" + getBusinessId() + "'" +
                 ", oid='" + getOid() + "'" +
                 "}";
     }

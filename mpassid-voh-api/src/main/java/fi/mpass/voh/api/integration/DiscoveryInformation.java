@@ -7,6 +7,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,13 +48,13 @@ public class DiscoveryInformation {
     private String title;
     private boolean showSchools;
  
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "discovery_information_schools", joinColumns = @JoinColumn(name = "discovery_information_id"))
     @Column(name = "schools")
     @Schema(description="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitosnumero/latest")
     private Set<String> schools = new HashSet<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "discovery_information_excludedSchools", joinColumns = @JoinColumn(name = "discovery_information_id"))
     @Column(name = "schools")
     @Schema(description="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitosnumero/latest")
@@ -93,6 +94,10 @@ public class DiscoveryInformation {
 
     public String getTitle() {
         return this.title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void setCustomTitle(String customTitle) {

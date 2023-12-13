@@ -21,6 +21,9 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
     @Query("SELECT i FROM Integration i LEFT JOIN FETCH i.integrationSets WHERE i.id= :id")
     Optional<Integration> findByIdAll(Long id);
 
+    @Query("SELECT i from Integration i left outer join ConfigurationEntity ce on i.configurationEntity=ce.id left outer join IdentityProvider idp on ce.id=idp.configurationEntity LEFT JOIN FETCH i.permissions where i.id= :id")
+    Optional<Integration> findByIdIdpAll(Long id);
+
     List<Integration> findAllByLastUpdatedOnAfter(Date updateDateTime);
 
     @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='idp'")

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -132,60 +133,23 @@ public class IntegrationSetLoader implements CommandLineRunner {
                                 for (int i = 0; i < diff.getNumberOfDiffs(); i++) {
                                     Diff<?> d = diffs.get(i);
                                     logger.debug(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
-                                    String[] diffElements = d.getFieldName().split("\\.");
                                     if (d.getFieldName().contains("configurationEntity.attributes.")) {
-
-                                        // existing = left = "", input = right != ""
-                                        // 1. a new attribute (with a new value) has been added to the integration
-                                        // context
-                                        if (d.getLeft().equals("") && !d.getRight().equals("")) {
-                                            logger.debug("Add diff: " + d.getFieldName());
-                                            Set<Attribute> existingAttributes = existingIntegration.get()
-                                                    .getConfigurationEntity().getAttributes();
-                                            // TODO verify the i+1 and i+2 fieldNames
-                                            // type, name, content
-                                            Attribute newAttr = new Attribute(diffs.get(i + 1).getRight().toString(),
-                                                    diffs.get(i).getRight().toString(),
-                                                    diffs.get(i + 2).getRight().toString());
-                                            existingAttributes.add(newAttr);
-                                            i = i + 2;
-                                            continue;
+                                        existingIntegration = Optional
+                                                .of(updateAttribute(d, existingIntegration.get()));
+                                    } else {
+                                        // differences in the integration fields
+                                        logger.debug("Integration field diff: " + d.getFieldName());
+                                        if (d.getFieldName().contains("configurationEntity.set.name")) {
+                                            existingIntegration.get().getConfigurationEntity().getSet()
+                                                    .setName(d.getRight().toString());
                                         }
-                                        // (existing = left) != (input = right)
-                                        // 2. the value has been changed
-                                        if (!d.getLeft().equals("") && !d.getRight().equals("")
-                                                && !d.getLeft().equals(d.getRight())) {
-                                            // get the attr from the set by name (id exists?)
-                                            for (Attribute a : existingIntegration.get().getConfigurationEntity()
-                                                    .getAttributes()) {
-                                                // attribute name
-                                                if (diffElements.length > 1 && a.getName().equals(diffElements[2])) {
-                                                    // TODO verify diff fieldName matches attribute name -> attribute
-                                                    // content
-                                                    // update existing integration attribute content with input
-                                                    a.setContent(d.getRight().toString());
-                                                    // remove from set, add to set
-                                                    existingIntegration.get().getConfigurationEntity().getAttributes()
-                                                            .remove(a);
-                                                    existingIntegration.get().getConfigurationEntity().getAttributes()
-                                                            .add(a);
-                                                }
-                                            }
-
-                                            i = i + 2;
-                                            continue;
-                                        }
-                                        // existing = left != "", input = right == ""
-                                        // 3. the existing attribute has been removed from the input in the integration
-                                        // context
-                                        if (!d.getLeft().equals("") && d.getRight().equals("")) {
-                                            for (Attribute a : existingIntegration.get().getConfigurationEntity()
-                                                    .getAttributes()) {
-                                                // attribute name
-                                                if (a.getName().equals(diffElements[2])) {
-                                                    existingIntegration.get().getConfigurationEntity().getAttributes()
-                                                            .remove(a);
-                                                }
+                                        if (d.getFieldName().contains("organization.oid")) {
+                                            if (existingIntegration.get().getOrganization() != null) {
+                                                existingIntegration.get().getOrganization()
+                                                        .setOid(d.getRight().toString());
+                                            } else {
+                                                Organization org = new Organization("", d.getRight().toString());
+                                                existingIntegration.get().setOrganization(org);
                                             }
                                         }
                                     }
@@ -193,8 +157,12 @@ public class IntegrationSetLoader implements CommandLineRunner {
                             } else {
                                 logger.debug("Comparison failed. Check input data structure and values.");
                             }
+                            integrationSet = existingIntegration.get();
                         }
                         setIds.remove(integrationSet.getId());
+                    } else {
+                        // a new integration set
+                        logger.debug("A new integration set #" + integrationSet.getId());
                     }
 
                     Organization organization = new Organization();
@@ -224,13 +192,16 @@ public class IntegrationSetLoader implements CommandLineRunner {
 
                     try {
                         // No cascading, Integration:Organization
-                        organization = organizationService.saveOrganization(organization);
+                        if (organization != null && organization.getOid() != null) {
+                            organization = organizationService.saveOrganization(organization);
+                            integrationSet.setOrganization(organization);
+                        }
                     } catch (Exception e) {
                         logger.error("Organization Exception: " + e);
                     }
 
                     try {
-                        integrationRepository.save(integrationSet);
+                        Integration savedIntegration = integrationRepository.save(integrationSet);
                         integrationSetCount++;
                     } catch (Exception e) {
                         logger.error("Integration Exception: " + e + ". Continuing to next.");
@@ -238,7 +209,7 @@ public class IntegrationSetLoader implements CommandLineRunner {
                     }
                 }
             }
-            logger.info("Loaded " + integrationSetCount + " integration sets.");
+            logger.info("Loaded/reloaded " + integrationSetCount + " integration sets.");
         }
         logger.info(setIds.size() + " inactivated integrations.");
         for (Long id : setIds) {
@@ -249,10 +220,84 @@ public class IntegrationSetLoader implements CommandLineRunner {
                 try {
                     integrationRepository.save(inactivatedIntegration.get());
                 } catch (Exception e) {
-                    logger.error("Integration Exception: " + e + ". Could not inactivate integration #" + inactivatedIntegration.get().getId());
+                    logger.error("Integration Exception: " + e + ". Could not inactivate integration #"
+                            + inactivatedIntegration.get().getId());
                     continue;
                 }
             }
         }
+    }
+
+    private Integration updateAttribute(Diff<?> d, Integration existingIntegration) {
+        String[] diffElements = d.getFieldName().split("\\.");
+        // configurationEntity.attributes.<name>
+        // configurationEntity.attributes.<name>.type
+        // configurationEntity.attributes.<name>.content
+        // existing = left = "", input = right != ""
+        // 1. a new attribute (with a new value) has been added to the integration
+        // context
+        if (d.getLeft().equals("") && !d.getRight().equals("")) {
+            logger.debug("Add diff: " + d.getFieldName());
+            Set<Attribute> existingAttributes = existingIntegration.getConfigurationEntity().getAttributes();
+            // name
+            if (diffElements.length == 3) {
+                Attribute newAttr = new Attribute();
+                newAttr.setName(d.getRight().toString());
+                existingAttributes.add(newAttr);
+            }
+            if (diffElements.length == 4) {
+                for (Iterator<Attribute> attrIterator = existingAttributes.iterator(); attrIterator.hasNext();) {
+                    Attribute attr = attrIterator.next();
+                    if (attr.getName().equals(diffElements[2])) {
+                        if (diffElements[3].equals("type")) {
+                            attr.setType(d.getRight().toString());
+                        }
+                        if (diffElements[3].equals("content")) {
+                            attr.setContent(d.getRight().toString());
+                        }
+                    }
+                }
+            }
+        }
+        // (existing = left) != (input = right)
+        // 2. the value has been changed
+        if (!d.getLeft().equals("") && !d.getRight().equals("")
+                && !d.getLeft().equals(d.getRight())) {
+            if (diffElements.length == 4) {
+                for (Iterator<Attribute> attrIterator = existingIntegration.getConfigurationEntity()
+                        .getAttributes().iterator(); attrIterator.hasNext();) {
+                    Attribute attr = attrIterator.next();
+                    if (attr.getName().equals(diffElements[2])) {
+                        if (diffElements[3].equals("type")) {
+                            attr.setType(d.getRight().toString());
+                        }
+                        if (diffElements[3].equals("content")) {
+                            attr.setContent(d.getRight().toString());
+                        }
+                        // update the attribute set
+                        existingIntegration.getConfigurationEntity().getAttributes()
+                                .remove(attr);
+                        existingIntegration.getConfigurationEntity().getAttributes()
+                                .add(attr);
+                    }
+                }
+            }
+        }
+        // existing = left != "", input = right == ""
+        // 3. the existing attribute has been removed from the input in the integration
+        // context
+        if (!d.getLeft().equals("") && d.getRight().equals("")) {
+            for (Iterator<Attribute> attributeIterator = existingIntegration
+                    .getConfigurationEntity()
+                    .getAttributes().iterator(); attributeIterator.hasNext();) {
+                Attribute attr = attributeIterator.next();
+                if (attr.getName().equals(diffElements[2])) {
+                    attr.setConfigurationEntity(null);
+                    attributeIterator.remove();
+                }
+            }
+        }
+
+        return existingIntegration;
     }
 }

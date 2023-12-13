@@ -69,7 +69,8 @@ public class OrganizationService {
    * @return the organization identified by the specified id
    */
   public Organization getById(String id) {
-    return organizationRepository.getByOidOrBusinessId(id, id);
+    //return organizationRepository.getByOidOrBusinessId(id, id);
+    return organizationRepository.getByOid(id);
   }
 
   public Organization saveOrganization(Organization organization) {

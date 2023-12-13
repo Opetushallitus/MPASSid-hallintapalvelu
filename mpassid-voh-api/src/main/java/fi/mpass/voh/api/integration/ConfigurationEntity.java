@@ -1,5 +1,6 @@
 package fi.mpass.voh.api.integration;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.OneToMany;
@@ -36,7 +37,7 @@ public class ConfigurationEntity {
     private long id;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "configurationEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "configurationEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @NotAudited
     private Set<Attribute> attributes;
 
@@ -56,10 +57,12 @@ public class ConfigurationEntity {
     private String role;
 
     public ConfigurationEntity() {
+        this.attributes = new HashSet<Attribute>();
     }
 
     public ConfigurationEntity(long id) {
         this.id = id;
+        this.attributes = new HashSet<Attribute>();
     }
 
     public long getId() {

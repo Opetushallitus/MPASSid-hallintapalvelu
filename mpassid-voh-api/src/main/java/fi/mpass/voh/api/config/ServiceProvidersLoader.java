@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -25,10 +28,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationDiffBuilder;
 import fi.mpass.voh.api.integration.IntegrationRepository;
+import fi.mpass.voh.api.integration.attribute.Attribute;
+import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
+import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
 
+import org.apache.commons.lang3.builder.Diff;
+import org.apache.commons.lang3.builder.DiffResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +78,9 @@ public class ServiceProvidersLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+        List<Long> spIds = integrationRepository.getAllSpIds();
+        logger.debug("Number of existing sp integrations: " + spIds.size());
+
         for (String spInput : this.serviceProvidersInput) {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
@@ -96,7 +108,6 @@ public class ServiceProvidersLoader implements CommandLineRunner {
 
             if (rootNode.isArray()) {
                 for (JsonNode arrayNode : rootNode) {
-
                     Integration integration = null;
                     try {
                         integration = new ObjectMapper()
@@ -106,6 +117,92 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                         logger.error(
                                 "Integration exception: " + e + " continuing to next.");
                         continue;
+                    }
+
+                    // update the associations of the input integration to integration sets
+                    JsonNode groupArrayNode = arrayNode.get("integrationGroups");
+                    if (groupArrayNode != null && groupArrayNode.isArray()) {
+                        for (JsonNode groupNode : groupArrayNode) {
+                            if (groupNode.get("id") != null) {
+                                Optional<Integration> integrationSet = integrationRepository
+                                        .findByIdAll(groupNode.get("id").asLong());
+                                if (integrationSet.isPresent()) {
+                                    integrationSet.get().getConfigurationEntity().getSet().setType("sp");
+                                    logger.debug("Integration set #" + groupNode.get("id"));
+                                    integration.addToSet(integrationSet.get());
+                                    logger.debug("Integration set size: "
+                                            + integrationSet.get().getIntegrationSets().size());
+                                }
+                            }
+                        }
+                    }
+
+                    // an existing integration
+                    if (spIds.contains(integration.getId())) {
+                        Optional<Integration> existingIntegration = this.integrationRepository
+                                .findByIdAll(integration.getId());
+
+                        if (existingIntegration.isPresent()) {
+                            logger.debug("Comparing existing integration " + existingIntegration.get().getId()
+                                    + " version " + existingIntegration.get().getVersion() + " to "
+                                    + integration.getId() + " version " + integration.getVersion());
+
+                            DiffResult<Integration> diff = IntegrationDiffBuilder.compareSp(existingIntegration.get(),
+                                    integration);
+
+                            if (diff != null) {
+                                List<Diff<?>> diffs = diff.getDiffs();
+                                for (int i = 0; i < diff.getNumberOfDiffs(); i++) {
+                                    Diff<?> d = diffs.get(i);
+                                    logger.debug(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
+                                    if (d.getFieldName().contains("configurationEntity.attributes.")) {
+                                        existingIntegration = Optional
+                                                .of(updateAttribute(d, existingIntegration.get()));
+                                    } else {
+                                        // differences in the integration fields
+                                        logger.debug("Integration field diff: " + d.getFieldName());
+                                        if (d.getFieldName().contains("configurationEntity.sp.name")) {
+                                            existingIntegration.get().getConfigurationEntity().getSp()
+                                                    .setName(d.getRight().toString());
+                                        }
+                                        if (d.getFieldName().contains("organization.oid")) {
+                                            if (existingIntegration.get().getOrganization() != null) {
+                                                existingIntegration.get().getOrganization()
+                                                        .setOid(d.getRight().toString());
+                                            } else {
+                                                Organization org = new Organization("", d.getRight().toString());
+                                                existingIntegration.get().setOrganization(org);
+                                            }
+                                        }
+                                        if (d.getFieldName().contains("configurationEntity.sp.entityId")) {
+                                            ((SamlServiceProvider) existingIntegration.get().getConfigurationEntity()
+                                                    .getSp()).setEntityId(d.getRight().toString());
+                                        }
+                                        if (d.getFieldName().contains("configurationEntity.sp.clientId")) {
+                                            ((OidcServiceProvider) existingIntegration.get().getConfigurationEntity()
+                                                    .getSp()).setClientId(d.getRight().toString());
+                                        }
+                                        if (d.getFieldName().contains("configurationEntity.sp.metadata")) {
+                                            existingIntegration = Optional
+                                                    .of(updateMetadata(d, existingIntegration.get()));
+                                        }
+                                        if (d.getFieldName().contains("integrationSets")) {
+                                            // there is a difference in the integration sets to which this integration
+                                            // is associated with
+                                            logger.debug("Integration set diff");
+            
+                                        }
+                                    }
+                                }
+                            } else {
+                                logger.debug("Comparison failed. Check input data structure and values.");
+                            }
+                            integration = existingIntegration.get();
+                        }
+                        spIds.remove(integration.getId());
+                    } else {
+                        // a new sp integration
+                        logger.debug("A new sp integration #" + integration.getId());
                     }
 
                     Organization organization = new Organization();
@@ -133,23 +230,6 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                         logger.error("Organization Exception: " + e);
                     }
 
-                    JsonNode groupArrayNode = arrayNode.get("integrationGroups");
-                    if (groupArrayNode != null && groupArrayNode.isArray()) {
-                        for (JsonNode groupNode : groupArrayNode) {
-                            if (groupNode.get("id") != null) {
-                                Optional<Integration> integrationSet = integrationRepository
-                                        .findByIdAll(groupNode.get("id").asLong());
-                                if (integrationSet.isPresent()) {
-                                    integrationSet.get().getConfigurationEntity().getSet().setType("sp");
-                                    logger.debug("Integration set #" + groupNode.get("id"));
-                                    logger.debug("Integration set size: "
-                                            + integrationSet.get().getIntegrationSets().size());
-                                    integration.addToSet(integrationSet.get());
-                                }
-                            }
-                        }
-                    }
-
                     integration.setOrganization(organization);
                     try {
                         integrationRepository.save(integration);
@@ -160,7 +240,128 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                     }
                 }
             }
-            logger.info("Loaded " + serviceProviderCount + " service providers.");
+            logger.info("Loaded/reloaded " + serviceProviderCount + " service providers.");
         }
+        logger.info(spIds.size() + " inactivated integrations.");
+        for (Long id : spIds) {
+            Optional<Integration> inactivatedIntegration = this.integrationRepository
+                    .findByIdAll(id);
+            if (inactivatedIntegration.isPresent()) {
+                inactivatedIntegration.get().setStatus(1);
+                try {
+                    integrationRepository.save(inactivatedIntegration.get());
+                } catch (Exception e) {
+                    logger.error("Integration Exception: " + e + ". Could not inactivate integration #"
+                            + inactivatedIntegration.get().getId());
+                    continue;
+                }
+            }
+        }
+    }
+
+    private Integration updateMetadata(Diff<?> d, Integration existingIntegration) {
+        String[] diffElements = d.getFieldName().split("\\.");
+        if (d.getLeft().equals("") && !d.getRight().equals("")) {
+            logger.debug("Add diff: " + d.getFieldName());
+            if (diffElements[3].length() > 0) {
+                Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
+                metadata.put(diffElements[3], d.getRight().toString());
+                existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
+            }
+        }
+        if (!d.getLeft().equals("") && d.getRight() != null && !d.getRight().equals("")
+                && !d.getLeft().equals(d.getRight())) {
+            logger.debug("Mod diff: " + d.getFieldName());
+            if (diffElements[3].length() > 0) {
+                Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
+                metadata.put(diffElements[3], d.getRight().toString());
+                existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
+            }
+        }
+        if (!d.getLeft().equals("") && (d.getRight() == null || (d.getRight() != null && d.getRight().equals("")))) {
+            logger.debug("Del diff: " + d.getFieldName());
+            if (diffElements[3].length() > 0) {
+                Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
+                metadata.remove(diffElements[3]);
+                existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
+            }
+        }
+        return existingIntegration;
+    }
+
+    private Integration updateAttribute(Diff<?> d, Integration existingIntegration) {
+        String[] diffElements = d.getFieldName().split("\\.");
+        // configurationEntity.attributes.<name>
+        // configurationEntity.attributes.<name>.type
+        // configurationEntity.attributes.<name>.content
+        // existing = left = "", input = right != ""
+        // 1. a new attribute (with a new value) has been added to the integration
+        // context
+        if (d.getLeft().equals("") && !d.getRight().equals("")) {
+            logger.debug("Add diff: " + d.getFieldName());
+            Set<Attribute> existingAttributes = existingIntegration.getConfigurationEntity().getAttributes();
+            // name
+            if (diffElements.length == 3) {
+                Attribute newAttr = new Attribute();
+                newAttr.setConfigurationEntity(existingIntegration.getConfigurationEntity());
+                newAttr.setName(d.getRight().toString());
+                existingAttributes.add(newAttr);
+            }
+            if (diffElements.length == 4) {
+                for (Iterator<Attribute> attrIterator = existingAttributes.iterator(); attrIterator.hasNext();) {
+                    Attribute attr = attrIterator.next();
+                    if (attr.getName().equals(diffElements[2])) {
+                        if (diffElements[3].equals("type")) {
+                            attr.setType(d.getRight().toString());
+                        }
+                        if (diffElements[3].equals("content")) {
+                            attr.setContent(d.getRight().toString());
+                        }
+                    }
+                }
+            }
+        }
+        // (existing = left) != (input = right)
+        // 2. the value has been changed
+        if (!d.getLeft().equals("") && !d.getRight().equals("")
+                && !d.getLeft().equals(d.getRight())) {
+            logger.debug("Mod diff: " + d.getFieldName());
+            if (diffElements.length == 4) {
+                for (Iterator<Attribute> attrIterator = existingIntegration.getConfigurationEntity()
+                        .getAttributes().iterator(); attrIterator.hasNext();) {
+                    Attribute attr = attrIterator.next();
+                    if (attr.getName().equals(diffElements[2])) {
+                        if (diffElements[3].equals("type")) {
+                            attr.setType(d.getRight().toString());
+                        }
+                        if (diffElements[3].equals("content")) {
+                            attr.setContent(d.getRight().toString());
+                        }
+                        // update the attribute set
+                        existingIntegration.getConfigurationEntity().getAttributes()
+                                .remove(attr);
+                        existingIntegration.getConfigurationEntity().getAttributes()
+                                .add(attr);
+                    }
+                }
+            }
+        }
+        // existing = left != "", input = right == ""
+        // 3. the existing attribute has been removed from the input in the integration
+        // context
+        if (!d.getLeft().equals("") && d.getRight().equals("")) {
+            logger.debug("Del diff: " + d.getFieldName());
+            for (Iterator<Attribute> attributeIterator = existingIntegration
+                    .getConfigurationEntity()
+                    .getAttributes().iterator(); attributeIterator.hasNext();) {
+                Attribute attr = attributeIterator.next();
+                if (attr.getName().equals(diffElements[2])) {
+                    attr.setConfigurationEntity(null);
+                    attributeIterator.remove();
+                }
+            }
+        }
+
+        return existingIntegration;
     }
 }
