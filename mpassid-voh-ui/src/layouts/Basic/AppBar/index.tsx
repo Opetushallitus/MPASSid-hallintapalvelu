@@ -1,5 +1,6 @@
 import { useMe } from "@/api/käyttöoikeus";
 import {
+  katselijaOphGroup,
   openIntegrationsSessionStorageKey,
   tallentajaOphGroup,
 } from "@/config";
@@ -40,7 +41,7 @@ export default function AppBar() {
     />,
   ];
 
-  if (useMe().groups?.includes(tallentajaOphGroup)) {
+  if ((me.groups?.includes(tallentajaOphGroup))||(me.groups?.includes(katselijaOphGroup))) {
     mainNavLinkTabs.push(
       <TabLink
         key="localisations"
