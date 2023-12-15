@@ -187,10 +187,11 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                                                     .of(updateMetadata(d, existingIntegration.get()));
                                         }
                                         if (d.getFieldName().contains("integrationSets")) {
-                                            // there is a difference in the integration sets to which this integration
-                                            // is associated with
                                             logger.debug("Integration set diff");
-            
+                                            existingIntegration.get().removeFromSets();
+                                            for (Integration set : integration.getIntegrationSets()) {
+                                                existingIntegration.get().addToSet(set);
+                                            }
                                         }
                                     }
                                 }
