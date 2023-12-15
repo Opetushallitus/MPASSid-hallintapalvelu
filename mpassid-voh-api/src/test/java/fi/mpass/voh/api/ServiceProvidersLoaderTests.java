@@ -115,28 +115,12 @@ public class ServiceProvidersLoaderTests {
         assertEquals("clientId2",
                 modifiedIntegration.get().getConfigurationEntity().getSp().getMetadata().get("client_id"));
 
-        // TODO changed sp.clientId
-
-        // 5000002, one set 600001 -> 6000002
-        /*Optional<Integration> modifiedIntegrationSet = repository.findByIdAll(5000002L);
+        // a case where input integration set id doesn't exist. This is resolved by
+        // resetting all associations.
+        // 5000002, changed set 600001 -> (not existing) 6000002 => no associations
+        Optional<Integration> modifiedIntegrationSet = repository.findByIdAll(5000002L);
         assertTrue(modifiedIntegrationSet.isPresent());
-        Set<Integration> integrationSets = modifiedIntegrationSet.get().getIntegrationSets();
-        assertEquals(600002L, integrationSets.iterator().next().getId());
-          */ 
-        // changed integration set 6000001 -> 6000002
-        // notice that findByIdAll avoids the lazy initialization issue
-/*        Optional<Integration> modifiedSetIntegration = repository.findByIdAll(5000002L);
-        assertTrue(modifiedSetIntegration.isPresent());
-        Set<Integration> integrationSets = modifiedSetIntegration.get().getIntegrationSets();
-        boolean changed = false;
-        for (Integration i : integrationSets) {
-            if (i.getId().equals(6000002L)) {
-                changed = true;
-                break;
-            }
-        }
-        // TODO check bidirection
-        assertTrue(changed); */
+        assertTrue(modifiedIntegrationSet.get().getIntegrationSets().isEmpty());
     }
 
     @Test
@@ -159,21 +143,6 @@ public class ServiceProvidersLoaderTests {
         serviceLoader.run(spLocation);
 
         assertEquals(66, repository.findAll().size());
-
-        // 5000003, added ce.attributes name allowtestlearnerid, content true, type data
-        Optional<Integration> addedIntegration = repository.findById(5000003L);
-        assertTrue(addedIntegration.isPresent());
-        Set<Attribute> attributes = addedIntegration.get().getConfigurationEntity().getAttributes();
-        boolean addedFound = false;
-        for (Attribute a : attributes) {
-            if (a.getName().equals("allowtestlearnerid")) {
-                assertEquals("true", a.getContent());
-                assertEquals("data", a.getType());
-                addedFound = true;
-                break;
-            }
-        }
-        assertTrue(addedFound);
 
         // changed attribute value
         Optional<Integration> modifiedAttrIntegration = repository.findById(5000001L);
@@ -209,14 +178,34 @@ public class ServiceProvidersLoaderTests {
         Optional<Integration> addedIntegration = repository.findById(5000004L);
         assertTrue(addedIntegration.isPresent());
 
-        // 5000002 added metadata entry "auth_type": "client_secret_basic"
+        // sp integration 5000002, added metadata entry "auth_type":
+        // "client_secret_basic"
         Optional<Integration> addedMetadataIntegration = repository.findById(5000002L);
         assertTrue(addedMetadataIntegration.isPresent());
-        assertEquals("client_secret_basic", addedMetadataIntegration.get().getConfigurationEntity().getSp().getMetadata().get("auth_type"));
+        assertEquals("client_secret_basic",
+                addedMetadataIntegration.get().getConfigurationEntity().getSp().getMetadata().get("auth_type"));
 
-        // TODO 5000003 added attributes array with allowtestlearnerid attribute
+        // sp integration 5000003, added ce.attributes name allowtestlearnerid, content
+        // true, type data
+        Optional<Integration> addedAttrIntegration = repository.findById(5000003L);
+        assertTrue(addedAttrIntegration.isPresent());
+        Set<Attribute> attributes = addedAttrIntegration.get().getConfigurationEntity().getAttributes();
+        boolean addedFound = false;
+        for (Attribute a : attributes) {
+            if (a.getName().equals("allowtestlearnerid")) {
+                assertEquals("false", a.getContent());
+                assertEquals("data", a.getType());
+                addedFound = true;
+                break;
+            }
+        }
+        assertTrue(addedFound);
 
-        // TODO added set association
+        // sp integration 5000003, added to integration set 600003
+        Optional<Integration> spIntegration = repository.findByIdAll(5000003L);
+        assertTrue(spIntegration.isPresent());
+        Set<Integration> integrationSets = spIntegration.get().getIntegrationSets();
+        assertEquals(6000003L, integrationSets.iterator().next().getId());
     }
 
     @Test
@@ -260,9 +249,21 @@ public class ServiceProvidersLoaderTests {
         assertTrue(attributesArray.size() == 0);
 
         // 5000003 whole sp metadata entry "token_endpoint_auth_method" was removed
-        assertNull(inactivatedAttributesIntegration.get().getConfigurationEntity().getSp().getMetadata().get("token_endpoint_auth_method"));
+        assertNull(inactivatedAttributesIntegration.get().getConfigurationEntity().getSp().getMetadata()
+                .get("token_endpoint_auth_method"));
 
-        // TODO remove set association
+        // 5000001, removed the sp integration from the set 6000001
+        Optional<Integration> removedSetIntegration = repository.findByIdAll(5000001L);
+        assertTrue(removedSetIntegration.isPresent());
+        Set<Integration> integrationSets = removedSetIntegration.get().getIntegrationSets();
+        boolean stillFound = false;
+        for (Integration i : integrationSets) {
+            if (i.getId().equals(6000001L)) {
+                stillFound = true;
+                break;
+            }
+        }
+        // TODO check bidirection
+        assertFalse(stillFound);
     }
-
 }

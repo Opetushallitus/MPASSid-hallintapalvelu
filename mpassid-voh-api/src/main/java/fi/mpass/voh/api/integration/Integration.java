@@ -66,7 +66,8 @@ public class Integration implements Persistable<Long> {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIgnoreProperties("integrationSets")
-    @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST })
+    // @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.PERSIST }, fetch = FetchType.EAGER)
     @Audited
     @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
     private Set<Integration> integrationSets = new HashSet<Integration>();
@@ -320,8 +321,8 @@ public class Integration implements Persistable<Long> {
                 if (thisIntegration.getId().equals(this.getId())) {
                     integrationSetIterator.remove();
                 }
-                integrationIterator.remove();
             }
+            integrationIterator.remove();
         }
     }
 

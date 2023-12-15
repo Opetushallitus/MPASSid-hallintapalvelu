@@ -24,11 +24,7 @@
                 "attributes": [
                 ]
             },
-            "integrationGroups": [
-                {
-                    "id": 6000001
-                }
-            ],
+            "integrationGroups": [ ],
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"
             },

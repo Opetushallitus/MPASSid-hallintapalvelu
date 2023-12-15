@@ -83,7 +83,7 @@ public class IntegrationSetLoaderTests {
 
         assertEquals(63, repository.findAll().size());
 
-        // changed attribute value
+        // 6000003, changed attribute value
         Optional<Integration> modifiedAttrIntegration = repository.findById(6000003L);
         assertTrue(modifiedAttrIntegration.isPresent());
         Set<Attribute> attributes = modifiedAttrIntegration.get().getConfigurationEntity().getAttributes();
@@ -93,12 +93,12 @@ public class IntegrationSetLoaderTests {
             }
         }
 
-        // changed set name
+        // 6000004, changed set name
         Optional<Integration> modifiedIntegration = repository.findById(6000004L);
         assertTrue(modifiedIntegration.isPresent());
         assertEquals("muutettu Edita oppimisen palvelut", modifiedIntegration.get().getConfigurationEntity().getSet().getName());
 
-        // added organization
+        // 6000005, added organization
         Optional<Integration> modifiedIntegrationOrg = repository.findById(6000005L);
         assertTrue(modifiedIntegrationOrg.isPresent());
         assertEquals("1.2.246.562.10.33651716236", modifiedIntegrationOrg.get().getOrganization().getOid());
