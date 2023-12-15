@@ -15,3 +15,5 @@ export const testLink =
 
 export const tallentajaOphGroup =
   "APP_MPASSID_TALLENTAJA_1.2.246.562.10.00000000001";
+  export const katselijaOphGroup =
+  "APP_MPASSID_KATSELIJA_1.2.246.562.10.00000000001";  
