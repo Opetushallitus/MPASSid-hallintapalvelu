@@ -193,6 +193,9 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                                                 existingIntegration.get().addToSet(set);
                                             }
                                         }
+                                        if (d.getFieldName().contains("deploymentPhase")) {
+                                            existingIntegration.get().setDeploymentPhase((Integer)d.getRight());
+                                        }
                                     }
                                 }
                             } else {

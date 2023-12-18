@@ -228,6 +228,9 @@ public class IntegrationLoader implements CommandLineRunner {
                                                 existingIntegration.get().setOrganization(org);
                                             }
                                         }
+                                        if (d.getFieldName().contains("deploymentPhase")) {
+                                            existingIntegration.get().setDeploymentPhase((Integer)d.getRight());
+                                        }
                                     }
                                 }
                             } else {

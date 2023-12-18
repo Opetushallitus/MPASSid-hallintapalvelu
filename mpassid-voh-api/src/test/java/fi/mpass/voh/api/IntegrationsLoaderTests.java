@@ -159,6 +159,11 @@ public class IntegrationsLoaderTests {
         DiscoveryInformation di = modifiedDiscoveryInfoIntegration.get().getDiscoveryInformation();
         assertEquals("Va changed", di.getTitle());
         assertEquals(false, di.getShowSchools());
+
+        // 4000004, deployment phase change
+        Optional<Integration> modifiedDeploymentPhaseIntegration = repository.findById(4000004L);
+        assertTrue(modifiedDeploymentPhaseIntegration.isPresent());
+        assertEquals(2, modifiedDeploymentPhaseIntegration.get().getDeploymentPhase());
     }
 
     @Test

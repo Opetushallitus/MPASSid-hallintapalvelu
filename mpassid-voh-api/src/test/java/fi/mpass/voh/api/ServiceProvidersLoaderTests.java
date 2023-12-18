@@ -121,6 +121,11 @@ public class ServiceProvidersLoaderTests {
         Optional<Integration> modifiedIntegrationSet = repository.findByIdAll(5000002L);
         assertTrue(modifiedIntegrationSet.isPresent());
         assertTrue(modifiedIntegrationSet.get().getIntegrationSets().isEmpty());
+
+        // 5000003, changed deployment phase
+        Optional<Integration> modifiedDeploymentPhaseIntegration = repository.findByIdAll(5000003L);
+        assertTrue(modifiedDeploymentPhaseIntegration.isPresent());
+        assertEquals(1, modifiedDeploymentPhaseIntegration.get().getDeploymentPhase());
     }
 
     @Test
