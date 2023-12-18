@@ -451,8 +451,17 @@ public class IntegrationService {
   }
 
   public List<Integration> getIntegrationsSince(LocalDateTime timestamp) {
-    Date since = Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
-    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfter(since);
+    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfter(timestamp);
+    for (Integration integration : integrations) {
+      List<Revision<Integer, Integration>> revisions = findRevisionsSince(integration.getId(), timestamp);
+      logger.debug(
+          "Integration: " + integration.getId() + " Number of revisions: " + revisions.size() + " since " + timestamp);
+    }
+    return integrations;
+  }
+
+  public List<Integration> getIntegrationsSince(LocalDateTime timestamp, int deploymentPhase) {
+    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhase(timestamp, deploymentPhase);
     for (Integration integration : integrations) {
       List<Revision<Integer, Integration>> revisions = findRevisionsSince(integration.getId(), timestamp);
       logger.debug(
@@ -465,10 +474,15 @@ public class IntegrationService {
     Revisions<Integer, Integration> integrationRevisions = integrationRepository.findRevisions(id);
     if (integrationRevisions != null) {
       return integrationRevisions.getContent().stream().filter(
-          revision -> revision.getEntity().getLastUpdatedOn().getTime() > Timestamp.valueOf(since).getTime())
+          revision -> revision.getEntity().getLastUpdatedOn().isAfter(since))
           .collect(Collectors.toList());
     }
     return new ArrayList<Revision<Integer, Integration>>();
+  }
+
+  public List<Integration> getIntegrationsByPermissionUpdateTimeSince(LocalDateTime timestamp, int deploymentPhase) {
+    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhase(timestamp, deploymentPhase);
+    return integrations;
   }
 
   private List<Integration> getIntegrationsBy(String role) {

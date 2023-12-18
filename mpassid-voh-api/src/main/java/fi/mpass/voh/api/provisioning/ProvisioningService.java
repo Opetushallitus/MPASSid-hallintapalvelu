@@ -79,8 +79,12 @@ public class ProvisioningService {
             // lookup integration changes since provision.getLastUpdateTime
             Optional<Provisioning> provision = provisionRepository.findByDeploymentPhase(i);
             if (provision.isPresent()) {
+                /*
+                 * List<Integration> integrationsSince = integrationService
+                 * .getIntegrationsSince(provision.get().getLastTime(), i);
+                 */
                 List<Integration> integrationsSince = integrationService
-                        .getIntegrationsSince(provision.get().getLastTime(), i);
+                        .getIntegrationsByPermissionUpdateTimeSince(provision.get().getLastTime(), i);
                 boolean changes = !integrationsSince.isEmpty();
                 logger.debug("Number of changed integrations: " + integrationsSince.size() + " since "
                         + provision.get().getLastTime() + " in deployment phase " + i);

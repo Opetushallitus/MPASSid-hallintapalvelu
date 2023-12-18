@@ -1,5 +1,7 @@
 package fi.mpass.voh.api.integration;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -34,7 +36,8 @@ public class IntegrationPermission {
 
     @JsonInclude(Include.NON_NULL)
     @UpdateTimestamp
-    private java.sql.Timestamp lastUpdatedOn;
+    // private java.sql.Timestamp lastUpdatedOn;
+    private LocalDateTime lastUpdatedOn;
 
     private IntegrationPermission() {
     }
@@ -86,7 +89,8 @@ public class IntegrationPermission {
         this.to = to;
     }
 
-    public java.sql.Timestamp getLastUpdatedOn() {
+    //public java.sql.Timestamp getLastUpdatedOn() {
+    public LocalDateTime getLastUpdatedOn() {
         return lastUpdatedOn;
     }
 }
