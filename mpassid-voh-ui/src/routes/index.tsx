@@ -1,7 +1,7 @@
 import { useAttributeNames } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
 import NotFound from "@/components/NotFound";
-import { category, tallentajaOphGroup } from "@/config";
+import { category, tallentajaOphGroup, katselijaOphGroup } from "@/config";
 import Basic from "@/layouts/Basic";
 import Localisations from "@/utils/components/Localisations";
 import Suspense from "@/utils/components/Suspense";
@@ -21,7 +21,7 @@ export default function Routes() {
       <Route element={<Basic />}>
         <Route index element={<Home />} />
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
-        {useMe().groups?.includes(tallentajaOphGroup) && (
+        {(useMe().groups?.includes(tallentajaOphGroup) || useMe().groups?.includes(katselijaOphGroup)) && (
           <>
             <Route
               path="lokalisointi"
