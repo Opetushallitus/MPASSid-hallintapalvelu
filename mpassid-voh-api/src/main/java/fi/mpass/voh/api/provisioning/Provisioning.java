@@ -8,8 +8,16 @@ import java.time.LocalDateTime;
 @Entity
 public class Provisioning {
     @Id
-    private final Long id = 1L;
+    private final int deploymentPhase;
     private LocalDateTime lastTime;
+
+    public Provisioning() {
+        this.deploymentPhase = 0;
+    }
+
+    public Provisioning(int deploymentPhase) {
+        this.deploymentPhase = deploymentPhase;
+    }
 
     public LocalDateTime getLastTime() {
         return lastTime;
@@ -17,5 +25,9 @@ public class Provisioning {
 
     public void setLastTime(LocalDateTime lastTime) {
         this.lastTime = lastTime;
+    }
+
+    public int getDeploymentPhase() {
+        return deploymentPhase;
     }
 }

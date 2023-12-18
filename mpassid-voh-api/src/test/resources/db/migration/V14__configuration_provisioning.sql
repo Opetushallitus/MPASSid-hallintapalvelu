@@ -1,5 +1,5 @@
 create table provisioning (
-    id int8 not null,
+    deployment_phase int4 not null,
     last_time timestamp,
-    primary key (id)
+    primary key (deployment_phase)
 );

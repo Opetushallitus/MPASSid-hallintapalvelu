@@ -48,11 +48,11 @@ public class ConfigurationProvisioningTests {
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.registerModule(new JavaTimeModule());
                 objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-                Provisioning provisioning = new Provisioning();
+                Provisioning provisioning = new Provisioning(0);
                 provisioning.setLastTime(LocalDateTime.now());
 
-                when(provisioningService.updateProvisioning()).thenReturn(provisioning);
-                mockMvc.perform(put("/api/v1/provisioning/1")
+                when(provisioningService.updateProvisioning(provisioning)).thenReturn(provisioning);
+                mockMvc.perform(put("/api/v1/provisioning")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(provisioning)).with(csrf()))
                                 .andDo(print())
@@ -62,13 +62,13 @@ public class ConfigurationProvisioningTests {
         @WithMockUser(value = "testuser")
         @Test
         public void testUnauthorizedUpdateProvisioningStatus() throws Exception {
-                mockMvc.perform(put("/api/v1/provisioning/update"))
+                mockMvc.perform(put("/api/v1/provisioning"))
                                 .andExpect(status().isForbidden());
         }
 
         @Test
         public void testUnauthenticatedUpdateProvisioningStatus() throws Exception {
-                mockMvc.perform(put("/api/v1/provisioning/update"))
+                mockMvc.perform(put("/api/v1/provisioning"))
                                 .andExpect(status().isForbidden());
         }
 }

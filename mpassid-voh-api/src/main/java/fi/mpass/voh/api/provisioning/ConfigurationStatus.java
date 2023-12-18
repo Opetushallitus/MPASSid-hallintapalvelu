@@ -1,22 +1,28 @@
 package fi.mpass.voh.api.provisioning;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class ConfigurationStatus {
     private boolean updated;
-    private Date lastUpdateTime;
+    private LocalDateTime lastUpdateTime;
     private int deploymentPhase;
 
-    public ConfigurationStatus(boolean updated, Date lastUpdateTime) {
+    public ConfigurationStatus(boolean updated, LocalDateTime lastUpdateTime) {
         this.updated = updated;
         this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public ConfigurationStatus(boolean updated, LocalDateTime lastUpdateTime, int deploymentPhase) {
+        this.updated = updated;
+        this.lastUpdateTime = lastUpdateTime;
+        this.deploymentPhase = deploymentPhase;
     }
 
     public boolean isUpdated() {
         return updated;
     }
 
-    public Date getLastUpdateTime() {
+    public LocalDateTime getLastUpdateTime() {
         return lastUpdateTime;
     }
 

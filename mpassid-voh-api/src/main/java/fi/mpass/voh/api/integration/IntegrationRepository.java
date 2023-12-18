@@ -1,6 +1,6 @@
 package fi.mpass.voh.api.integration;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +24,6 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
     @Query("SELECT i from Integration i left outer join ConfigurationEntity ce on i.configurationEntity=ce.id left outer join IdentityProvider idp on ce.id=idp.configurationEntity LEFT JOIN FETCH i.permissions where i.id= :id")
     Optional<Integration> findByIdIdpAll(Long id);
 
-    List<Integration> findAllByLastUpdatedOnAfter(Date updateDateTime);
-
     @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='idp'")
     List<Long> getAllIdpIds();
 
@@ -34,4 +32,10 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
 
     @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='sp'")
     List<Long> getAllSpIds();
+
+    List<Integration> findAllByLastUpdatedOnAfter(LocalDateTime updateDateTime);
+
+    List<Integration> findAllByLastUpdatedOnAfterAndDeploymentPhase(LocalDateTime updateDateTime, int deploymentPhase);
+
+    List<Integration> findAllByPermissionsLastUpdatedOnAfterAndDeploymentPhase(LocalDateTime updateDateTime, int deploymentPhase);
 }

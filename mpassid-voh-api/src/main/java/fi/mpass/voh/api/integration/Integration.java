@@ -1,6 +1,7 @@
 package fi.mpass.voh.api.integration;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,10 +50,12 @@ public class Integration implements Persistable<Long> {
     private int version;
 
     @CreationTimestamp
-    private java.sql.Timestamp createdOn;
+    // private java.sql.Timestamp createdOn;
+    private LocalDateTime createdOn;
 
     @UpdateTimestamp
-    private java.sql.Timestamp lastUpdatedOn;
+    // private java.sql.Timestamp lastUpdatedOn;
+    private LocalDateTime lastUpdatedOn;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "configuration_entity_id", referencedColumnName = "id")
@@ -150,11 +153,13 @@ public class Integration implements Persistable<Long> {
         return this.version;
     }
 
-    public java.sql.Timestamp getLastUpdatedOn() {
+    //public java.sql.Timestamp getLastUpdatedOn() {
+    public LocalDateTime getLastUpdatedOn() {
         return this.lastUpdatedOn;
     }
 
-    public void setLastUpdatedOn(java.sql.Timestamp ts) {
+    //public void setLastUpdatedOn(java.sql.Timestamp ts) {
+    public void setLastUpdatedOn(LocalDateTime ts) {
         if (ts != null) {
             this.lastUpdatedOn = ts;
         }

@@ -72,6 +72,7 @@ public class WebSecurityConfig {
                 .and()
                 .authenticationManager(authManager);
         http.anonymous().disable();
+        http.csrf().disable();
 
         return http.build();
     }
