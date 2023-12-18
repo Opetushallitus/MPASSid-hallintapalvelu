@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,19 +31,18 @@ public class ProvisioningController {
 
     @Operation(summary = "Get provisioning configuration status")
     @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ConfigurationStatus.class), mediaType = "application/json"))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurationStatus.class)), mediaType = "application/json"))
     @GetMapping("/configuration/status")
-    public ConfigurationStatus getProvisioningConfigurationStatus() {
-        return provisioningService.getConfigurationStatus();
-        // TODO all deploymentphases
+    public List<ConfigurationStatus> getProvisioningConfigurationStatus() {
+        return provisioningService.getConfigurationStatuses();
     }
 
     @Operation(summary = "Update provisioning status")
-    @PutMapping("{id}")
+    @PutMapping
     @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Provisioning.class), mediaType = "application/json"))
-    public Provisioning updateProvisioningStatus(@Valid @RequestBody Provisioning provisioning, @PathVariable Long id) {
-        return provisioningService.updateProvisioning();
+    public Provisioning updateProvisioningStatus(@Valid @RequestBody Provisioning provisioning) {
+        return provisioningService.updateProvisioning(provisioning);
     }
 
     @Operation(summary = "Get all integrations")
