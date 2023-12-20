@@ -255,13 +255,13 @@ export default function IntegrationSelection({ integration, newIntegration, setN
             <Divider variant="middle" ></Divider>
             <Box display="flex" justifyContent="center" mt={3}> 
             
-            <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label="Salli kaikki palvelut" />
+            <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label={<FormattedMessage defaultMessage="Salli kaikki palvelut" />} />
                   <Button aria-label="delete" 
                           sx={{ marginLeft: "auto" }}
                           variant="text"
                           startIcon={<DeleteIcon />} 
                           onClick={()=>removeIntegrations()} >
-                    Poista valinnat
+                    <FormattedMessage defaultMessage="Poista valinnat" />
                   </Button>
                   
             </Box>
