@@ -204,7 +204,7 @@ public class SamlMetadataProvider {
 
         if (x509InputStream.available() > 0) {
             Certificate cert = cf.generateCertificate(x509InputStream);
-            logger.debug(cert.toString());
+            logger.trace(cert.toString());
             return (java.security.cert.X509Certificate) cert;
         }
         return null;
