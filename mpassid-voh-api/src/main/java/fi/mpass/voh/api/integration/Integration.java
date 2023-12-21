@@ -3,6 +3,8 @@ package fi.mpass.voh.api.integration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -333,5 +335,9 @@ public class Integration implements Persistable<Long> {
 
     public Set<Integration> getIntegrationSets() {
         return this.integrationSets;
+    }
+
+    public void sortPermissionsByLastUpdatedOn() {
+        Collections.sort(permissions, Comparator.comparing(p -> p.getLastUpdatedOn()));   
     }
 }

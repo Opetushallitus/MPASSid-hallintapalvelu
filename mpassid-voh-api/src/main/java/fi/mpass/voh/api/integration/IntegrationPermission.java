@@ -93,4 +93,8 @@ public class IntegrationPermission {
     public LocalDateTime getLastUpdatedOn() {
         return lastUpdatedOn;
     }
+
+    public void setLastUpdatedOn(LocalDateTime lastUpdatedOn) {
+        this.lastUpdatedOn = lastUpdatedOn;
+    }
 }

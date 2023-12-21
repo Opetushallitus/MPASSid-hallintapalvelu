@@ -33,6 +33,7 @@ public class ProvisioningService {
             Optional<Provisioning> provision = provisionRepository
                     .findByDeploymentPhase(provisioning.getDeploymentPhase());
             if (!provision.isPresent()) {
+                logger.info("Updating provisioning for deployment phase " + provisioning.getDeploymentPhase());
                 provision = Optional.of(new Provisioning(provisioning.getDeploymentPhase()));
             }
             if (provisioning.getLastTime() != null) {
@@ -53,15 +54,15 @@ public class ProvisioningService {
             List<Integration> integrationsSince = integrationService
                     .getIntegrationsSince(provision.get().getLastTime());
             boolean changes = !integrationsSince.isEmpty();
-            logger.debug("Number of changed integrations: " + integrationsSince.size() + " since "
+            logger.info("Number of changed integrations: " + integrationsSince.size() + " since "
                     + provision.get().getLastTime());
             if (changes) {
                 Collections.sort(integrationsSince, (o1, o2) -> o1.getLastUpdatedOn().compareTo(o2.getLastUpdatedOn()));
-                logger.debug("Oldest changed integration dated on " + integrationsSince.get(0).getLastUpdatedOn()
+                logger.info("Oldest changed integration dated on " + integrationsSince.get(0).getLastUpdatedOn()
                         + " since " + provision.get().getLastTime());
                 return new ConfigurationStatus(changes, integrationsSince.get(0).getLastUpdatedOn());
             } else {
-                logger.debug("No changes since " + provision.get().getLastTime());
+                logger.info("No changes since " + provision.get().getLastTime());
                 return new ConfigurationStatus(changes, null);
             }
         } else {
@@ -75,29 +76,36 @@ public class ProvisioningService {
         List<ConfigurationStatus> statuses = new ArrayList<ConfigurationStatus>();
 
         // deploymentPhase: 0 testing, 1 production, 2 preproduction, 3 reserved
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             // lookup integration changes since provision.getLastUpdateTime
             Optional<Provisioning> provision = provisionRepository.findByDeploymentPhase(i);
             if (provision.isPresent()) {
-                /*
-                 * List<Integration> integrationsSince = integrationService
-                 * .getIntegrationsSince(provision.get().getLastTime(), i);
-                 */
                 List<Integration> integrationsSince = integrationService
                         .getIntegrationsByPermissionUpdateTimeSince(provision.get().getLastTime(), i);
                 boolean changes = !integrationsSince.isEmpty();
-                logger.debug("Number of changed integrations: " + integrationsSince.size() + " since "
+                logger.info("Number of changed integrations: " + integrationsSince.size() + " since "
                         + provision.get().getLastTime() + " in deployment phase " + i);
                 if (changes) {
+                    for (Integration integration : integrationsSince) {
+                        integration.sortPermissionsByLastUpdatedOn();
+                    }
+                    // TODO should not end up here if no changes to permissions, yet check
+                    // permissions existence (index exception)
                     Collections.sort(integrationsSince,
-                            (o1, o2) -> o1.getLastUpdatedOn().compareTo(o2.getLastUpdatedOn()));
-                    logger.debug("Oldest changed integration dated on " + integrationsSince.get(0).getLastUpdatedOn()
+                            (o1, o2) -> o1.getPermissions().get(0).getLastUpdatedOn()
+                                    .compareTo(o2.getPermissions().get(0).getLastUpdatedOn()));
+                    logger.info("Oldest changed integration (by permission last update time) dated on "
+                            + integrationsSince.get(0).getPermissions().get(0).getLastUpdatedOn()
                             + " since " + provision.get().getLastTime() + " in deployment phase " + i);
-                    statuses.add(new ConfigurationStatus(changes, integrationsSince.get(0).getLastUpdatedOn(), i));
+                    statuses.add(new ConfigurationStatus(changes,
+                            integrationsSince.get(0).getPermissions().get(0).getLastUpdatedOn(), i));
                 } else {
-                    logger.debug("No changes since " + provision.get().getLastTime() + " in deployment phase " + i);
+                    logger.info("No changes (by permission last update time) since  " + provision.get().getLastTime()
+                            + " in deployment phase " + i);
                     statuses.add(new ConfigurationStatus(changes, null, i));
                 }
+            } else {
+                logger.info("No provision information available for deployment phase " + i);
             }
         }
         return statuses;
