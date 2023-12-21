@@ -16,6 +16,8 @@ public class Organization {
     @Id
     private String oid;
     private String name;
+    @JsonProperty("ytunnus")
+    private String businessId;
 
     public Organization() { }
 
@@ -35,6 +37,14 @@ public class Organization {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getBusinessId() {
+        return this.businessId;
+    }
+
+    public void setBusinessId(String businessId) {
+        this.businessId = businessId;
     }
 
     public String getOid() {
