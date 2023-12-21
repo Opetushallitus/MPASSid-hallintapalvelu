@@ -41,7 +41,7 @@ public class ProvisioningService {
             } else {
                 provision.get().setLastTime(localTime);
             }
-            return provisionRepository.save(provision.get());
+            return provisionRepository.saveAndFlush(provision.get());
         }
         return provisioning;
     }
@@ -83,17 +83,24 @@ public class ProvisioningService {
                 List<Integration> integrationsSince = integrationService
                         .getIntegrationsByPermissionUpdateTimeSince(provision.get().getLastTime(), i);
                 boolean changes = !integrationsSince.isEmpty();
-                logger.info("Number of changed integrations: " + integrationsSince.size() + " since "
+                logger.info("Number of changed integration permissions: " + integrationsSince.size() + " since "
                         + provision.get().getLastTime() + " in deployment phase " + i);
                 if (changes) {
+                    // sort the integration's permissions by the last update time
+                    // the first is the oldest
                     for (Integration integration : integrationsSince) {
                         integration.sortPermissionsByLastUpdatedOn();
                     }
-                    // TODO should not end up here if no changes to permissions, yet check
+                    // should not end up here if no changes to permissions, yet check
                     // permissions existence (index exception)
-                    Collections.sort(integrationsSince,
-                            (o1, o2) -> o1.getPermissions().get(0).getLastUpdatedOn()
-                                    .compareTo(o2.getPermissions().get(0).getLastUpdatedOn()));
+                    try {
+                        Collections.sort(integrationsSince,
+                                (o1, o2) -> o1.getPermissions().get(0).getLastUpdatedOn()
+                                        .compareTo(o2.getPermissions().get(0).getLastUpdatedOn()));
+                    } catch (Exception e) {
+                        logger.error("Error in getting the oldest integration by permission last update time.");
+                        continue;
+                    }
                     logger.info("Oldest changed integration (by permission last update time) dated on "
                             + integrationsSince.get(0).getPermissions().get(0).getLastUpdatedOn()
                             + " since " + provision.get().getLastTime() + " in deployment phase " + i);

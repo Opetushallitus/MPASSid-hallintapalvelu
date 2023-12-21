@@ -266,4 +266,13 @@ public class IntegrationServiceTests {
         // then
         assertTrue(integrations.size() == 2);
     }
+
+    @Test
+    void testGetIntegrationsByPermissionUpdateTimeSince() {
+        // when
+        underTest.getIntegrationsByPermissionUpdateTimeSince(LocalDateTime.now(), 0);
+
+        // then
+        verify(integrationRepository).findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(any(LocalDateTime.class), any(Integer.class));
+    }
 }

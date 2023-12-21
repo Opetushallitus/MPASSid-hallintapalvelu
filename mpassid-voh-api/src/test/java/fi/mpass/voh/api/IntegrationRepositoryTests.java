@@ -125,7 +125,7 @@ public class IntegrationRepositoryTests {
 
         // when
         List<Integration> changedIntegrations = underTest
-                .findAllByPermissionsLastUpdatedOnAfterAndDeploymentPhase(lastUpdatedOnTimes.get(1).plusNanos(1000), 0);
+                .findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(lastUpdatedOnTimes.get(1).plusNanos(1000), 0);
 
         // then
         assertEquals(1, changedIntegrations.size());

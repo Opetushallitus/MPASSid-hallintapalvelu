@@ -479,7 +479,7 @@ public class IntegrationService {
   }
 
   public List<Integration> getIntegrationsByPermissionUpdateTimeSince(LocalDateTime timestamp, int deploymentPhase) {
-    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhase(timestamp, deploymentPhase);
+    List<Integration> integrations = integrationRepository.findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(timestamp, deploymentPhase);
     return integrations;
   }
 
