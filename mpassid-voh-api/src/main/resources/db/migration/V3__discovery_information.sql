@@ -3,5 +3,6 @@ create table discovery_information (
     custom_display_name varchar(255),
     title varchar(255),
     show_schools boolean not null,
+    early_education_provider boolean not null,
     primary key (id)
 );

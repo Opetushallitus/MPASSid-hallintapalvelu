@@ -24,6 +24,7 @@ create table discovery_information_history (
     custom_display_name varchar(255),
     show_schools boolean,
     title varchar(255),
+    early_education_provider boolean not null,
     primary key (id, rev)
 );
 

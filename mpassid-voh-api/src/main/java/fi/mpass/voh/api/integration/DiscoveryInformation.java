@@ -60,6 +60,8 @@ public class DiscoveryInformation {
     @Schema(description="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitosnumero/latest")
     private Set<String> excludedSchools = new HashSet<>();
 
+    private boolean earlyEducationProvider;
+
     public DiscoveryInformation() { }
 
     public DiscoveryInformation(String customDisplayName, String title, boolean showSchools) {
@@ -131,4 +133,12 @@ public class DiscoveryInformation {
     public void setExcludedSchools(Set<String> excludedSchools) {
         this.excludedSchools = excludedSchools;
     }
+
+    public boolean getEarlyEducationProvider() {
+        return earlyEducationProvider;
+    }
+
+    public void setEarlyEducationProvider(boolean earlyEducationProvider) {
+        this.earlyEducationProvider = earlyEducationProvider;
+    }    
 }
