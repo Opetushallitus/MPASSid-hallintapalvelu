@@ -72,6 +72,7 @@ public class IntegrationDiffBuilder {
         if (i1.getConfigurationEntity().getSet() != null && i2.getConfigurationEntity().getSet() != null) {
             DiffBuilder<Integration> diffBuilder = new DiffBuilder<Integration>(i1, i2, ToStringStyle.DEFAULT_STYLE)
                     .append("id", i1.getId(), i2.getId())
+                    .append("deploymentPhase", i1.getDeploymentPhase(), i2.getDeploymentPhase())
                     .append("configurationEntity.set.name", i1.getConfigurationEntity().getSet().getName(),
                             i2.getConfigurationEntity().getSet().getName());
 
@@ -95,6 +96,7 @@ public class IntegrationDiffBuilder {
         if (i1.getConfigurationEntity().getSp() != null && i2.getConfigurationEntity().getSp() != null) {
             DiffBuilder<Integration> diffBuilder = new DiffBuilder<Integration>(i1, i2, ToStringStyle.DEFAULT_STYLE)
                     .append("id", i1.getId(), i2.getId())
+                    .append("deploymentPhase", i1.getDeploymentPhase(), i2.getDeploymentPhase())
                     .append("configurationEntity.sp.name", i1.getConfigurationEntity().getSp().getName(),
                             i2.getConfigurationEntity().getSp().getName());
 
@@ -161,6 +163,7 @@ public class IntegrationDiffBuilder {
         if (i1.getConfigurationEntity().getIdp() != null && i2.getConfigurationEntity().getIdp() != null) {
             DiffBuilder<Integration> diffBuilder = new DiffBuilder<Integration>(i1, i2, ToStringStyle.DEFAULT_STYLE)
                     .append("id", i1.getId(), i2.getId())
+                    .append("deploymentPhase", i1.getDeploymentPhase(), i2.getDeploymentPhase())
                     .append("configurationEntity.idp.flowName", i1.getConfigurationEntity().getIdp().getFlowName(),
                             i2.getConfigurationEntity().getIdp().getFlowName())
                     .append("configurationEntity.idp.idpId", i1.getConfigurationEntity().getIdp().getIdpId(),
