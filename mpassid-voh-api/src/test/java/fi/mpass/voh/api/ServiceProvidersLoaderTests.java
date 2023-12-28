@@ -128,7 +128,6 @@ public class ServiceProvidersLoaderTests {
         // resetting all associations.
         // 5000002, changed set 6000001 -> (not existing) 6000002 => no associations
         Optional<Integration> modifiedIntegrationSet = repository.findByIdAll(5000002L);
-
         assertTrue(modifiedIntegrationSet.isPresent());
         assertTrue(modifiedIntegrationSet.get().getIntegrationSets().isEmpty());
 
@@ -140,6 +139,8 @@ public class ServiceProvidersLoaderTests {
         // 5000003, changed metadata redirect_uris
         // assertEquals(1,
         // modifiedDeploymentPhaseIntegration.get().getConfigurationEntity().getSp().getMetadata().get("redirect_uri"));
+
+        // 5000033, changed/corrected integration set
     }
 
     @Test
@@ -224,7 +225,7 @@ public class ServiceProvidersLoaderTests {
         }
         assertTrue(addedFound);
 
-        // sp integration 5000003, added to integration set 600003
+        // sp integration 5000003, added to integration set 6000003
         Optional<Integration> spIntegration = repository.findByIdAll(5000003L);
         assertTrue(spIntegration.isPresent());
         Set<Integration> integrationSets = spIntegration.get().getIntegrationSets();

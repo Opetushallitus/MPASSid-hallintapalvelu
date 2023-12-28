@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -74,7 +72,6 @@ public class ServiceProvidersLoader implements CommandLineRunner {
      * inputs).
      * Assumes to be run before IntegrationLoader ordered by @Order annotation.
      */
-    // @Transactional
     @Override
     public void run(String... args) throws Exception {
 
@@ -144,13 +141,15 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                             existingIntegration = this.integrationRepository
                                     .findByIdAll(integration.getId());
                         } catch (Exception e) {
-                            logger.error("Error in finding existing integration " + integration.getId() + ". Exception " + e);
+                            logger.error("Error in finding existing integration " + integration.getId() + ". Exception "
+                                    + e);
                             continue;
                         }
 
                         if (existingIntegration.isPresent()) {
                             if (!existingIntegration.get().isActive()) {
-                                logger.info("Reloading inactive integration " + existingIntegration.get().getId() + ". Reactivating.");
+                                logger.info("Reloading inactive integration " + existingIntegration.get().getId()
+                                        + ". Reactivating.");
                                 existingIntegration.get().setStatus(0);
                             }
                             logger.debug("Comparing existing integration " + existingIntegration.get().getId()
@@ -198,7 +197,11 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                                         }
                                         if (d.getFieldName().contains("integrationSets")) {
                                             logger.debug("Integration set diff");
-                                            existingIntegration.get().removeFromSets();
+                                            List<Integration> removedSets = existingIntegration.get().removeFromSets();
+                                            for (Integration set : removedSets) {
+                                                logger.debug("Unassociated set " + set.getId());
+                                                integrationRepository.save(set);
+                                            }
                                             for (Integration set : integration.getIntegrationSets()) {
                                                 existingIntegration.get().addToSet(set);
                                             }
@@ -247,6 +250,9 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                     integration.setOrganization(organization);
                     try {
                         integrationRepository.save(integration);
+                            for (Integration set : integration.getIntegrationSets()) {
+                                integrationRepository.save(set);
+                            }
                         serviceProviderCount++;
                     } catch (Exception e) {
                         logger.error("Integration Exception: " + e + ". Continuing to next.");

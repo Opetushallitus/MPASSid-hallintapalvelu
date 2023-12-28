@@ -316,9 +316,10 @@ public class Integration implements Persistable<Long> {
         }
     }
 
-    public void removeFromSets() {
+    public List<Integration> removeFromSets() {
         // if the integration is currently associated with the
         // integrationSet, remove the association
+        List<Integration> removedSets = new ArrayList<Integration>();
         for (Iterator<Integration> integrationIterator = this.getIntegrationSets()
                 .iterator(); integrationIterator.hasNext();) {
             Integration set = integrationIterator.next();
@@ -327,10 +328,12 @@ public class Integration implements Persistable<Long> {
                 Integration thisIntegration = integrationSetIterator.next();
                 if (thisIntegration.getId().equals(this.getId())) {
                     integrationSetIterator.remove();
+                    removedSets.add(set);
                 }
             }
             integrationIterator.remove();
         }
+        return removedSets;
     }
 
     public Set<Integration> getIntegrationSets() {
