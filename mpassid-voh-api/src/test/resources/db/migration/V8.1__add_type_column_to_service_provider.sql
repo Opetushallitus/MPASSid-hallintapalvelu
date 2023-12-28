@@ -1,1 +1,0 @@
-alter table if exists service_provider add column type varchar(31) not null;
