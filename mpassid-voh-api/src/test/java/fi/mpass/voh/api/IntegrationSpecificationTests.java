@@ -114,6 +114,10 @@ public class IntegrationSpecificationTests {
                     i%3, null, organization, "serviceContactAddress" + i + "@example.net");
             integrationSet.setConfigurationEntity(setCe);
             integrationSet.setOrganization(setOrganization);
+            if (i==5) {
+                // inactivate
+                integrationSet.setStatus(1);
+            }
             integrationRepository.save(integrationSet);
         }
     }
@@ -287,6 +291,22 @@ public class IntegrationSpecificationTests {
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
         assertEquals(1, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationWithActiveStatus() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        int status = 0;
+
+        builder.withEqualAnd(Category.INTEGRATION, "status", status);
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        // 1/12 is inactive
+        assertEquals(11, integrationList.size());
     }
 
 }
