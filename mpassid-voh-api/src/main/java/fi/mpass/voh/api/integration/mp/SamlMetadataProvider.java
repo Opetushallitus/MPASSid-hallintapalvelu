@@ -121,12 +121,12 @@ public class SamlMetadataProvider {
         try {
             Document document = registry.getParserPool().parse(stream);
             Element element = document.getDocumentElement();
-            logger.debug(element.toString());
+            logger.trace(element.toString());
 
             UnmarshallerFactory umFactory = registry.getUnmarshallerFactory();
             Unmarshaller unmarshaller = umFactory.getUnmarshaller(element);
             if (unmarshaller == null) {
-                logger.debug("Unable to unmarshall message, no unmarshaller registered for message element");
+                logger.error("Unable to unmarshall message, no unmarshaller registered for message element");
             } else {
                 metadata = unmarshaller.unmarshall(element);
             }
