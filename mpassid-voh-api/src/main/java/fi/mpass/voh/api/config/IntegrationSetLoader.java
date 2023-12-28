@@ -74,7 +74,7 @@ public class IntegrationSetLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         List<Long> setIds = integrationRepository.getAllSetIds();
-        logger.debug("Number of existing integration sets: " + setIds.size());
+        logger.info("Number of existing integration sets: " + setIds.size());
 
         for (String setInput : this.integrationSetInput) {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -115,12 +115,17 @@ public class IntegrationSetLoader implements CommandLineRunner {
                         continue;
                     }
 
-                    // an existing integration
+                    // an existing integration (active or inactive)
                     if (setIds.contains(integrationSet.getId())) {
                         Optional<Integration> existingIntegration = this.integrationRepository
                                 .findByIdAll(integrationSet.getId());
 
                         if (existingIntegration.isPresent()) {
+                            if (!existingIntegration.get().isActive()) {
+                                logger.info("Reloading inactive integration " + existingIntegration.get().getId() + ". Reactivating.");
+                                existingIntegration.get().setStatus(0);
+                            }
+                            
                             logger.debug("Comparing existing integration " + existingIntegration.get().getId()
                                     + " version " + existingIntegration.get().getVersion() + " to "
                                     + integrationSet.getId() + " version " + integrationSet.getVersion());
@@ -153,12 +158,12 @@ public class IntegrationSetLoader implements CommandLineRunner {
                                             }
                                         }
                                         if (d.getFieldName().contains("deploymentPhase")) {
-                                            existingIntegration.get().setDeploymentPhase((Integer)d.getRight());
+                                            existingIntegration.get().setDeploymentPhase((Integer) d.getRight());
                                         }
                                     }
                                 }
                             } else {
-                                logger.debug("Comparison failed. Check input data structure and values.");
+                                logger.info("Comparison failed. Check input data structure and values.");
                             }
                             integrationSet = existingIntegration.get();
                         }
@@ -240,7 +245,7 @@ public class IntegrationSetLoader implements CommandLineRunner {
         // 1. a new attribute (with a new value) has been added to the integration
         // context
         if (d.getLeft().equals("") && !d.getRight().equals("")) {
-            logger.debug("Add diff: " + d.getFieldName());
+            logger.debug("Attribute add diff: " + d.getFieldName());
             Set<Attribute> existingAttributes = existingIntegration.getConfigurationEntity().getAttributes();
             // name
             if (diffElements.length == 3) {
@@ -266,6 +271,7 @@ public class IntegrationSetLoader implements CommandLineRunner {
         // 2. the value has been changed
         if (!d.getLeft().equals("") && !d.getRight().equals("")
                 && !d.getLeft().equals(d.getRight())) {
+            logger.debug("Attribute mod diff: " + d.getFieldName());
             if (diffElements.length == 4) {
                 for (Iterator<Attribute> attrIterator = existingIntegration.getConfigurationEntity()
                         .getAttributes().iterator(); attrIterator.hasNext();) {
@@ -290,6 +296,7 @@ public class IntegrationSetLoader implements CommandLineRunner {
         // 3. the existing attribute has been removed from the input in the integration
         // context
         if (!d.getLeft().equals("") && d.getRight().equals("")) {
+            logger.debug("Attribute del diff: " + d.getFieldName());
             for (Iterator<Attribute> attributeIterator = existingIntegration
                     .getConfigurationEntity()
                     .getAttributes().iterator(); attributeIterator.hasNext();) {

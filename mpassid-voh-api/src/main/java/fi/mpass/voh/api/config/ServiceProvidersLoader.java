@@ -74,7 +74,7 @@ public class ServiceProvidersLoader implements CommandLineRunner {
      * inputs).
      * Assumes to be run before IntegrationLoader ordered by @Order annotation.
      */
-    @Transactional
+    // @Transactional
     @Override
     public void run(String... args) throws Exception {
 
@@ -137,12 +137,22 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                         }
                     }
 
-                    // an existing integration
+                    // an existing integration (active or inactive)
                     if (spIds.contains(integration.getId())) {
-                        Optional<Integration> existingIntegration = this.integrationRepository
-                                .findByIdAll(integration.getId());
+                        Optional<Integration> existingIntegration;
+                        try {
+                            existingIntegration = this.integrationRepository
+                                    .findByIdAll(integration.getId());
+                        } catch (Exception e) {
+                            logger.error("Error in finding existing integration " + integration.getId() + ". Exception " + e);
+                            continue;
+                        }
 
                         if (existingIntegration.isPresent()) {
+                            if (!existingIntegration.get().isActive()) {
+                                logger.info("Reloading inactive integration " + existingIntegration.get().getId() + ". Reactivating.");
+                                existingIntegration.get().setStatus(0);
+                            }
                             logger.debug("Comparing existing integration " + existingIntegration.get().getId()
                                     + " version " + existingIntegration.get().getVersion() + " to "
                                     + integration.getId() + " version " + integration.getVersion());
@@ -194,7 +204,7 @@ public class ServiceProvidersLoader implements CommandLineRunner {
                                             }
                                         }
                                         if (d.getFieldName().contains("deploymentPhase")) {
-                                            existingIntegration.get().setDeploymentPhase((Integer)d.getRight());
+                                            existingIntegration.get().setDeploymentPhase((Integer) d.getRight());
                                         }
                                     }
                                 }
@@ -266,24 +276,24 @@ public class ServiceProvidersLoader implements CommandLineRunner {
     private Integration updateMetadata(Diff<?> d, Integration existingIntegration) {
         String[] diffElements = d.getFieldName().split("\\.");
         if (d.getLeft().equals("") && !d.getRight().equals("")) {
-            logger.debug("Add diff: " + d.getFieldName());
+            logger.debug("Metadata add diff: " + d.getFieldName());
             if (diffElements[3].length() > 0) {
                 Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
-                metadata.put(diffElements[3], d.getRight().toString());
+                metadata.put(diffElements[3], d.getRight());
                 existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
             }
         }
         if (!d.getLeft().equals("") && d.getRight() != null && !d.getRight().equals("")
                 && !d.getLeft().equals(d.getRight())) {
-            logger.debug("Mod diff: " + d.getFieldName());
+            logger.debug("Metadata mod diff: " + d.getFieldName());
             if (diffElements[3].length() > 0) {
                 Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
-                metadata.put(diffElements[3], d.getRight().toString());
+                metadata.put(diffElements[3], d.getRight());
                 existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
             }
         }
         if (!d.getLeft().equals("") && (d.getRight() == null || (d.getRight() != null && d.getRight().equals("")))) {
-            logger.debug("Del diff: " + d.getFieldName());
+            logger.debug("Metadata del diff: " + d.getFieldName());
             if (diffElements[3].length() > 0) {
                 Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
                 metadata.remove(diffElements[3]);
@@ -329,7 +339,7 @@ public class ServiceProvidersLoader implements CommandLineRunner {
         // 2. the value has been changed
         if (!d.getLeft().equals("") && !d.getRight().equals("")
                 && !d.getLeft().equals(d.getRight())) {
-            logger.debug("Mod diff: " + d.getFieldName());
+            logger.debug("Attribute mod diff: " + d.getFieldName());
             if (diffElements.length == 4) {
                 for (Iterator<Attribute> attrIterator = existingIntegration.getConfigurationEntity()
                         .getAttributes().iterator(); attrIterator.hasNext();) {
@@ -354,7 +364,7 @@ public class ServiceProvidersLoader implements CommandLineRunner {
         // 3. the existing attribute has been removed from the input in the integration
         // context
         if (!d.getLeft().equals("") && d.getRight().equals("")) {
-            logger.debug("Del diff: " + d.getFieldName());
+            logger.debug("Attribute del diff: " + d.getFieldName());
             for (Iterator<Attribute> attributeIterator = existingIntegration
                     .getConfigurationEntity()
                     .getAttributes().iterator(); attributeIterator.hasNext();) {

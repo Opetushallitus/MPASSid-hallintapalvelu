@@ -175,4 +175,41 @@ public class IntegrationSetLoaderTests {
         assertTrue(attributesArray.size()==0);
     }
 
+        @Test
+    public void testIntegrationSetLoaderReloadDeletionsRestore() throws Exception {
+        // 63, one with organization
+        String setLocation = "integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
+        setLoader.run(setLocation);
+
+        Optional<Integration> integration_with_organization = repository.findById(6000003L);
+
+        assertTrue(integration_with_organization.isPresent());
+        assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
+        assertEquals(63, repository.findAll().size());
+
+        // 62
+        setLocation = "integration_sets_dels.json";
+        IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
+        setReloader.run(setLocation);
+
+        // all found, one inactive
+        assertEquals(63, repository.findAll().size());
+
+        // 6000003 whole integration set inactivated
+        Optional<Integration> inactivatedIntegration = repository.findById(6000003L);
+        assertTrue(inactivatedIntegration.isPresent());
+        assertFalse(inactivatedIntegration.get().isActive());
+
+        // 63, one with organization
+        String restoreLocation = "integration_sets.json";
+        setLoader = new IntegrationSetLoader(repository, service, loader);
+        setLoader.run(restoreLocation);
+
+        // 6000003 whole integration set was activated again
+        Optional<Integration> activatedIntegration = repository.findById(6000003L);
+        assertTrue(activatedIntegration.isPresent());
+        assertTrue(activatedIntegration.get().isActive());
+    }
+
 }

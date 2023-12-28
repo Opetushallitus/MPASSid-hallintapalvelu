@@ -14,11 +14,13 @@ import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.organization.OrganizationService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -47,7 +49,7 @@ public class ServiceProvidersLoaderTests {
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(location);
 
-        assertEquals(3, repository.findAll().size());
+        assertEquals(4, repository.findAll().size());
     }
 
     @Test
@@ -66,12 +68,12 @@ public class ServiceProvidersLoaderTests {
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
-        // 3
+        // 4
         String location = "oidc_services.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(location);
 
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
         Optional<Integration> integration = repository.findByIdAll(5000002L);
         assertTrue(integration.isPresent());
@@ -94,19 +96,19 @@ public class ServiceProvidersLoaderTests {
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
-        // 3
+        // 4
         String location = "oidc_services.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(location);
 
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
-        // 3
+        // 4
         String spLocation = "oidc_services_mods.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(spLocation);
 
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
         // 5000001, changed sp.name. sp.metadata.clientId
         Optional<Integration> modifiedIntegration = repository.findById(5000001L);
@@ -115,10 +117,18 @@ public class ServiceProvidersLoaderTests {
         assertEquals("clientId2",
                 modifiedIntegration.get().getConfigurationEntity().getSp().getMetadata().get("client_id"));
 
+        // 5000001, changed set 6000001 -> 6000003
+        Set<Integration> integrationSet = modifiedIntegration.get().getIntegrationSets();
+        for (Integration i : integrationSet) {
+            assertEquals(6000003, i.getId());
+            break;
+        }
+
         // a case where input integration set id doesn't exist. This is resolved by
         // resetting all associations.
-        // 5000002, changed set 600001 -> (not existing) 6000002 => no associations
+        // 5000002, changed set 6000001 -> (not existing) 6000002 => no associations
         Optional<Integration> modifiedIntegrationSet = repository.findByIdAll(5000002L);
+
         assertTrue(modifiedIntegrationSet.isPresent());
         assertTrue(modifiedIntegrationSet.get().getIntegrationSets().isEmpty());
 
@@ -126,6 +136,10 @@ public class ServiceProvidersLoaderTests {
         Optional<Integration> modifiedDeploymentPhaseIntegration = repository.findByIdAll(5000003L);
         assertTrue(modifiedDeploymentPhaseIntegration.isPresent());
         assertEquals(1, modifiedDeploymentPhaseIntegration.get().getDeploymentPhase());
+
+        // 5000003, changed metadata redirect_uris
+        // assertEquals(1,
+        // modifiedDeploymentPhaseIntegration.get().getConfigurationEntity().getSp().getMetadata().get("redirect_uri"));
     }
 
     @Test
@@ -135,19 +149,19 @@ public class ServiceProvidersLoaderTests {
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
-        // 3
+        // 4
         String location = "oidc_services.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(location);
 
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
-        // 3
+        // 4
         String spLocation = "oidc_services_mods.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(spLocation);
 
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
         // changed attribute value
         Optional<Integration> modifiedAttrIntegration = repository.findById(5000001L);
@@ -167,19 +181,19 @@ public class ServiceProvidersLoaderTests {
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
-        // 3
+        // 4
         String location = "oidc_services.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(location);
 
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
-        // 4
+        // 5
         String spLocation = "oidc_services_adds.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(spLocation);
 
-        assertEquals(67, repository.findAll().size());
+        assertEquals(68, repository.findAll().size());
         Optional<Integration> addedIntegration = repository.findById(5000004L);
         assertTrue(addedIntegration.isPresent());
 
@@ -189,6 +203,10 @@ public class ServiceProvidersLoaderTests {
         assertTrue(addedMetadataIntegration.isPresent());
         assertEquals("client_secret_basic",
                 addedMetadataIntegration.get().getConfigurationEntity().getSp().getMetadata().get("auth_type"));
+        // sp integration 5000002, added metadata (list) entry "added_redirect_uris": [
+        // "https://S/secondredirect" ]
+        assertThat((List<String>) addedMetadataIntegration.get().getConfigurationEntity().getSp().getMetadata()
+                .get("added_redirect_uris")).contains("https://S/secondredirect");
 
         // sp integration 5000003, added ce.attributes name allowtestlearnerid, content
         // true, type data
@@ -220,20 +238,20 @@ public class ServiceProvidersLoaderTests {
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
-        // 3
+        // 4
         String location = "oidc_services.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(location);
 
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
-        // 2
+        // 3
         String spLocation = "oidc_services_dels.json";
         serviceLoader = new ServiceProvidersLoader(repository, service, loader);
         serviceLoader.run(spLocation);
 
         // all (set and sp integrations) were found, one sp inactive
-        assertEquals(66, repository.findAll().size());
+        assertEquals(67, repository.findAll().size());
 
         // 5000002 integration was inactivated
         Optional<Integration> inactivatedIntegration = repository.findById(5000002L);
@@ -270,5 +288,45 @@ public class ServiceProvidersLoaderTests {
         }
         // TODO check bidirection
         assertFalse(stillFound);
+    }
+
+    @Test
+    public void testOidcSetReloadDeletionsRestore() throws Exception {
+        // 63, all with an attribute, one with organization
+        String setLocation = "integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
+        setLoader.run(setLocation);
+
+        // 4
+        String location = "oidc_services.json";
+        serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        serviceLoader.run(location);
+
+        assertEquals(67, repository.findAll().size());
+
+        // 3
+        String spLocation = "oidc_services_dels.json";
+        serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        serviceLoader.run(spLocation);
+
+        // all (set and sp integrations) were found, one sp inactive
+        assertEquals(67, repository.findAll().size());
+
+        // 5000002 integration was inactivated
+        Optional<Integration> inactivatedIntegration = repository.findById(5000002L);
+        assertTrue(inactivatedIntegration.isPresent());
+        assertFalse(inactivatedIntegration.get().isActive());
+
+        // 4
+        String restoreLocation = "oidc_services.json";
+        serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        serviceLoader.run(restoreLocation);
+
+        assertEquals(67, repository.findAll().size());
+
+        // 5000002 integration was activated again
+        Optional<Integration> activatedIntegration = repository.findById(5000002L);
+        assertTrue(activatedIntegration.isPresent());
+        assertTrue(activatedIntegration.get().isActive());
     }
 }

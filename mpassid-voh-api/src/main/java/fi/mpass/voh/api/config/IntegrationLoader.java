@@ -77,7 +77,7 @@ public class IntegrationLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         List<Long> idpIds = this.integrationRepository.getAllIdpIds();
-        logger.debug("Number of existing idp integrations: " + idpIds.size());
+        logger.info("Number of existing idp integrations: " + idpIds.size());
 
         for (String idpInput : this.homeOrganizationsInput) {
             ObjectMapper objectMapper = JsonMapper.builder()
@@ -115,21 +115,21 @@ public class IntegrationLoader implements CommandLineRunner {
                         continue;
                     }
 
-                    // CASE an existing integration
-                    // TODO if integration (id) is found from the repository,
-                    // check if it has permissions, if so, copy the permissions to the loaded
-                    // integration
-                    // remove the existing integration id from the id list (***)
-                    // continue as usual
+                    // an existing integration (active or inactive)
                     if (idpIds.contains(integration.getId())) {
                         List<IntegrationPermission> permissions = integration.getPermissions();
                         if (permissions.size() > 0) {
-                            logger.debug("Loaded integration " + integration.getId()
+                            logger.info("Loaded integration " + integration.getId()
                                     + " with permissions! Permissions might be not effective.");
                         }
                         Optional<Integration> existingIntegration = this.integrationRepository
                                 .findByIdIdpAll(integration.getId());
                         if (existingIntegration.isPresent()) {
+                            if (!existingIntegration.get().isActive()) {
+                                logger.info("Reloading inactive integration " + existingIntegration.get().getId() + ". Reactivating.");
+                                existingIntegration.get().setStatus(0);
+                            }
+                            
                             logger.debug("Comparing existing integration " + existingIntegration.get().getId()
                                     + " version " + existingIntegration.get().getVersion() + " to "
                                     + integration.getId() + " version " + integration.getVersion());
@@ -234,7 +234,7 @@ public class IntegrationLoader implements CommandLineRunner {
                                     }
                                 }
                             } else {
-                                logger.debug("Comparison failed. Check input data structure and values.");
+                                logger.error("Comparison failed. Check input data structure and values.");
                             }
                             integration = existingIntegration.get();
                         }
@@ -361,7 +361,7 @@ public class IntegrationLoader implements CommandLineRunner {
         // 1. a new attribute (with a new value) has been added to the integration
         // context
         if (d.getLeft().equals("") && !d.getRight().equals("")) {
-            logger.debug("Add diff: " + d.getFieldName());
+            logger.debug("Attribute add diff: " + d.getFieldName());
             Set<Attribute> existingAttributes = existingIntegration.getConfigurationEntity().getAttributes();
             // name
             if (diffElements.length == 3) {
@@ -388,7 +388,7 @@ public class IntegrationLoader implements CommandLineRunner {
         // 2. the value has been changed
         if (!d.getLeft().equals("") && !d.getRight().equals("")
                 && !d.getLeft().equals(d.getRight())) {
-            logger.debug("Mod diff: " + d.getFieldName());
+            logger.debug("Attribute mod diff: " + d.getFieldName());
             if (diffElements.length == 4) {
                 for (Iterator<Attribute> attrIterator = existingIntegration.getConfigurationEntity()
                         .getAttributes().iterator(); attrIterator.hasNext();) {
@@ -408,7 +408,7 @@ public class IntegrationLoader implements CommandLineRunner {
         // 3. the existing attribute has been removed from the input in the integration
         // context
         if (!d.getLeft().equals("") && d.getRight().equals("")) {
-            logger.debug("Del diff: " + d.getFieldName());
+            logger.debug("Attribute del diff: " + d.getFieldName());
             for (Iterator<Attribute> attributeIterator = existingIntegration
                     .getConfigurationEntity()
                     .getAttributes().iterator(); attributeIterator.hasNext();) {

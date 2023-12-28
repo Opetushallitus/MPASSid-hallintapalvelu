@@ -27,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {"spring.h2.console.enabled=true"})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
+        "spring.h2.console.enabled=true" })
 public class IntegrationsLoaderTests {
 
     IntegrationLoader integrationLoader;
@@ -48,7 +49,7 @@ public class IntegrationsLoaderTests {
     void drop() {
         repository.deleteAll();
     }
- 
+
     @Test
     public void testGsuiteLoader() throws Exception {
         // 63
@@ -56,7 +57,7 @@ public class IntegrationsLoaderTests {
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
-        // 3
+        // 4
         String oidcLocation = "oidc_services.json";
         // 2
         String samlLocation = "saml_services.json";
@@ -69,8 +70,8 @@ public class IntegrationsLoaderTests {
         integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
         integrationLoader.run(location);
 
-        // 70
-        assertEquals(70, repository.findAll().size());
+        // 71
+        assertEquals(71, repository.findAll().size());
     }
 
     @Test
@@ -136,11 +137,13 @@ public class IntegrationsLoaderTests {
         // 4000001 azure, logourl, entityid changed
         Optional<Integration> modifiedIntegration = repository.findById(4000001L);
         assertTrue(modifiedIntegration.isPresent());
-        assertEquals("https://btn-t-changed.png", modifiedIntegration.get().getConfigurationEntity().getIdp().getLogoUrl());
-        Azure azure = (Azure)modifiedIntegration.get().getConfigurationEntity().getIdp();
+        assertEquals("https://btn-t-changed.png",
+                modifiedIntegration.get().getConfigurationEntity().getIdp().getLogoUrl());
+        Azure azure = (Azure) modifiedIntegration.get().getConfigurationEntity().getIdp();
         assertEquals("https://df-44d9-bffa-1a-changed/", azure.getEntityId());
 
-        // 4000002, attribute groupLevels content change, attribute surname type (incorrect) change
+        // 4000002, attribute groupLevels content change, attribute surname type
+        // (incorrect) change
         Optional<Integration> modifiedAttrIntegration = repository.findById(4000002L);
         assertTrue(modifiedAttrIntegration.isPresent());
         Set<Attribute> attributeSet = modifiedAttrIntegration.get().getConfigurationEntity().getAttributes();
@@ -186,7 +189,8 @@ public class IntegrationsLoaderTests {
         // 4000001 added institution type 21, total 4 types
         Optional<Integration> addedInstitutionTypeIntegration = repository.findById(4000001L);
         assertTrue(addedInstitutionTypeIntegration.isPresent());
-        Set<Integer> institutionTypes = addedInstitutionTypeIntegration.get().getConfigurationEntity().getIdp().getInstitutionTypes();
+        Set<Integer> institutionTypes = addedInstitutionTypeIntegration.get().getConfigurationEntity().getIdp()
+                .getInstitutionTypes();
         assertEquals(4, institutionTypes.size());
         assertTrue(institutionTypes.contains(21));
 
@@ -253,11 +257,45 @@ public class IntegrationsLoaderTests {
         // 4000003 removed institution types 15, 21, total 1 type
         Optional<Integration> addedInstitutionTypeIntegration = repository.findById(4000003L);
         assertTrue(addedInstitutionTypeIntegration.isPresent());
-        Set<Integer> institutionTypes = addedInstitutionTypeIntegration.get().getConfigurationEntity().getIdp().getInstitutionTypes();
+        Set<Integer> institutionTypes = addedInstitutionTypeIntegration.get().getConfigurationEntity().getIdp()
+                .getInstitutionTypes();
         assertEquals(1, institutionTypes.size());
         assertFalse(institutionTypes.contains(15));
         assertTrue(institutionTypes.contains(11));
 
         // TODO discovery information
     }
+
+    @Test
+    public void testAzureReloadDeletionsRestore() throws Exception {
+        String location = "azure_home_organizations.json";
+        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
+        integrationLoader.run(location);
+
+        assertEquals(4, repository.findAll().size());
+
+        String idpLocation = "azure_home_organizations_dels.json";
+        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
+        integrationLoader.run(idpLocation);
+
+        // all idp integrations were found, one idp inactive
+        assertEquals(4, repository.findAll().size());
+
+        // 4000001 integration was inactivated
+        Optional<Integration> inactivatedIntegration = repository.findById(4000001L);
+        assertTrue(inactivatedIntegration.isPresent());
+        assertFalse(inactivatedIntegration.get().isActive());
+
+        String restoreLocation = "azure_home_organizations.json";
+        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
+        integrationLoader.run(restoreLocation);
+
+        assertEquals(4, repository.findAll().size());
+
+        // 4000001 integration was activated again
+        Optional<Integration> activatedIntegration = repository.findById(4000001L);
+        assertTrue(activatedIntegration.isPresent());
+        assertTrue(activatedIntegration.get().isActive());
+    }
+
 }
