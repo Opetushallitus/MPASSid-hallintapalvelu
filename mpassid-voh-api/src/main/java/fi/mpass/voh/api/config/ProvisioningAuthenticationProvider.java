@@ -29,8 +29,12 @@ public class ProvisioningAuthenticationProvider implements AuthenticationProvide
     public Authentication authenticate(Authentication auth) throws AuthenticationException {
         final String name = auth.getName();
         final String credential = auth.getCredentials()
-            .toString();
+                .toString();
         logger.debug("Authenticating name: " + name);
+
+        if (this.name.isEmpty() || this.credential.isEmpty()) {
+            throw new BadCredentialsException("Authentication failed. Configured username or credential is empty.");
+        }
 
         if (this.name.equals(name) && this.credential.equals(credential)) {
             List<GrantedAuthority> authorities = new ArrayList<>();
@@ -46,4 +50,3 @@ public class ProvisioningAuthenticationProvider implements AuthenticationProvide
         return auth.equals(UsernamePasswordAuthenticationToken.class);
     }
 }
-
