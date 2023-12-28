@@ -1,11 +1,8 @@
 package fi.mpass.voh.api.integration;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -136,6 +133,11 @@ public class IntegrationService {
       builder.withContainOr(Category.SET, "name", search);
       builder.withContainOr(Category.SP, "name", search);
       builder.withContainOr(Category.ORGANIZATION, "name", search);
+      try {
+        builder.withEqualOr(Category.INTEGRATION, "id", Long.valueOf(search));
+      } catch (NumberFormatException e) {
+        logger.debug("Input search string cannot be interpreted as identifier.");
+      }
     }
 
     // filterByType can be a list of types, thus (equality OR equality OR ...) AND
@@ -150,6 +152,9 @@ public class IntegrationService {
     // AND
     if (deploymentPhase != null && deploymentPhase.length() > 0)
       builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
+
+    // search only active integrations
+    builder.withEqualAnd(Category.INTEGRATION, "status", 0);
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -263,6 +268,11 @@ public class IntegrationService {
       builder.withContainOr(Category.SET, "name", search);
       builder.withContainOr(Category.SP, "name", search);
       builder.withContainOr(Category.ORGANIZATION, "name", search);
+      try {
+        builder.withEqualOr(Category.INTEGRATION, "id", Long.valueOf(search));
+      } catch (NumberFormatException e) {
+        logger.debug("Input search string cannot be interpreted as identifier.");
+      }
     }
 
     // filterByType can be a list of types, thus (equality OR equality OR ...) AND
@@ -277,6 +287,9 @@ public class IntegrationService {
     // AND
     if (deploymentPhase != null && deploymentPhase.length() > 0)
       builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
+
+    // search only active integrations
+    builder.withEqualAnd(Category.INTEGRATION, "status", 0);
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -459,7 +472,8 @@ public class IntegrationService {
   }
 
   public List<Integration> getIntegrationsSince(LocalDateTime timestamp, int deploymentPhase) {
-    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhase(timestamp, deploymentPhase);
+    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhase(timestamp,
+        deploymentPhase);
     for (Integration integration : integrations) {
       List<Revision<Integer, Integration>> revisions = findRevisionsSince(integration.getId(), timestamp);
       logger.debug(
@@ -479,7 +493,8 @@ public class IntegrationService {
   }
 
   public List<Integration> getIntegrationsByPermissionUpdateTimeSince(LocalDateTime timestamp, int deploymentPhase) {
-    List<Integration> integrations = integrationRepository.findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(timestamp, deploymentPhase);
+    List<Integration> integrations = integrationRepository
+        .findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(timestamp, deploymentPhase);
     return integrations;
   }
 
