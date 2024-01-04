@@ -56,7 +56,7 @@ public class AttributeControllerTest {
     @Test
     public void testAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
-        mockMvc.perform(get("/api/v1/attribute/names").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -68,7 +68,7 @@ public class AttributeControllerTest {
     @Test
     public void testUnauthorizedAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
-        mockMvc.perform(get("/api/v1/attribute/names").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$").doesNotExist());
@@ -78,7 +78,7 @@ public class AttributeControllerTest {
     @Test
     public void testPartiallyUnauthorizedAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
-        mockMvc.perform(get("/api/v1/attribute/names").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$").doesNotExist());
@@ -88,7 +88,7 @@ public class AttributeControllerTest {
     @Test
     public void testOrganizationalAuthorizedAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
-        mockMvc.perform(get("/api/v1/attribute/names").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -100,7 +100,7 @@ public class AttributeControllerTest {
     @Test
     public void testInvalidOrganizationOidAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
-        mockMvc.perform(get("/api/v1/attribute/names").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$").doesNotExist());

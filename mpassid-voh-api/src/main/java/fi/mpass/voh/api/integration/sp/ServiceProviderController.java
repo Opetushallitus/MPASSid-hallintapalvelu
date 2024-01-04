@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 
 @RestController
-@RequestMapping(path = "api/v1/sp")
+@RequestMapping(path = "api/v2/sp")
 public class ServiceProviderController {
     
     private final ServiceProviderRepository serviceProviderRepository;

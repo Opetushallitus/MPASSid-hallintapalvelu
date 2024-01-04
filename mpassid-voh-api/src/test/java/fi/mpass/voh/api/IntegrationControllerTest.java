@@ -99,7 +99,7 @@ public class IntegrationControllerTest {
     public void testLeastAuthorizedGetIntegrationList() throws Exception {
         when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -112,7 +112,7 @@ public class IntegrationControllerTest {
     public void testAuthorizedGetIntegrationList() throws Exception {
         when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -125,7 +125,7 @@ public class IntegrationControllerTest {
     public void testUnauthorizedGetIntegrationList() throws Exception {
         when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(false);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$").doesNotExist());
@@ -136,7 +136,7 @@ public class IntegrationControllerTest {
     public void testPartiallyUnauthorizedGetIntegrationList() throws Exception {
         when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("TALLENTAJA"))).thenReturn(false);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$").doesNotExist());
@@ -147,7 +147,7 @@ public class IntegrationControllerTest {
     public void testOrganizationalAuthorizedGetIntegrationList() throws Exception {
         when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
         when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v1/integration/list").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -161,7 +161,7 @@ public class IntegrationControllerTest {
 
         when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("TALLENTAJA"))).thenReturn(true);
 
-        mockMvc.perform(get("/api/v1/integration/search")
+        mockMvc.perform(get("/api/v2/integration/search")
                 .param("role", "set")
                 .param("search", "test")
                 .param("type", "oidc")
@@ -197,7 +197,7 @@ public class IntegrationControllerTest {
         when(permissionEvaluator.hasPermission(any(Authentication.class), eq(99L), eq("TALLENTAJA")))
                 .thenReturn(true);
         when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
-        mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
                 // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
                 .content(objectMapper.writeValueAsString(integration)).with(csrf()))
                 .andDo(print())
@@ -218,7 +218,7 @@ public class IntegrationControllerTest {
         when(permissionEvaluator.hasPermission(any(Authentication.class), eq(99L), eq("TALLENTAJA")))
                 .thenReturn(false);
         when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
-        mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
                 // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
                 .content(objectMapper.writeValueAsString(integration)).with(csrf()))
                 .andDo(print())
@@ -259,7 +259,7 @@ public class IntegrationControllerTest {
         when(permissionEvaluator.hasPermission(any(Authentication.class), eq(99L), eq("TALLENTAJA")))
                 .thenReturn(true);
         when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
-        mockMvc.perform(put("/api/v1/integration/99").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
                 // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
                 .content(json).with(csrf()))
                 .andDo(print())

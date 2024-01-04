@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @RestController
-@RequestMapping(path = "api/v1/attribute")
+@RequestMapping(path = "api/v2/attribute")
 public class AttributeController {
 
     private final AttributeRepository attributeRepository;

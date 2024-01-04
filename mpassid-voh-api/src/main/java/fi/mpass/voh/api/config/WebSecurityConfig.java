@@ -65,7 +65,7 @@ public class WebSecurityConfig {
             @Qualifier("provisioningAuthManager") AuthenticationManager authManager)
             throws Exception {
 
-        http.requestMatchers().antMatchers("/api/v1/provisioning/**")
+        http.requestMatchers().antMatchers("/api/v2/provisioning/**")
                 .and()
                 .authorizeRequests().anyRequest().authenticated();
         http.httpBasic()

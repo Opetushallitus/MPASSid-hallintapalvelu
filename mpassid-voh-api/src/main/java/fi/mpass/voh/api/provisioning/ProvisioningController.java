@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @SecurityRequirement(name = "provisioning")
-@RequestMapping(path = "api/v1/provisioning")
+@RequestMapping(path = "api/v2/provisioning")
 public class ProvisioningController {
 
     private final ProvisioningService provisioningService;

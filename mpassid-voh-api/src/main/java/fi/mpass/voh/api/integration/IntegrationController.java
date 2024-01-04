@@ -34,7 +34,7 @@ import fi.mpass.voh.api.config.IntegrationView;
 import fi.mpass.voh.api.exception.IntegrationError;
 
 @RestController
-@RequestMapping(path = "api/v1/integration")
+@RequestMapping(path = "api/v2/integration")
 public class IntegrationController {
 
     private final IntegrationService integrationService;

@@ -37,7 +37,7 @@ public class ConfigurationProvisioningTests {
         @WithMockUser(value = "testuser", authorities = { "ROLE_APP_MPASSID_ADMIN" })
         @Test
         public void testGetConfigurationStatus() throws Exception {
-                mockMvc.perform(get("/api/v1/provisioning/configuration/status"))
+                mockMvc.perform(get("/api/v2/provisioning/configuration/status"))
                                 .andDo(print())
                                 .andExpect(status().isOk());
         }
@@ -52,7 +52,7 @@ public class ConfigurationProvisioningTests {
                 provisioning.setLastTime(LocalDateTime.now());
 
                 when(provisioningService.updateProvisioning(provisioning)).thenReturn(provisioning);
-                mockMvc.perform(put("/api/v1/provisioning")
+                mockMvc.perform(put("/api/v2/provisioning")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(provisioning)).with(csrf()))
                                 .andDo(print())
@@ -62,13 +62,13 @@ public class ConfigurationProvisioningTests {
         @WithMockUser(value = "testuser")
         @Test
         public void testUnauthorizedUpdateProvisioningStatus() throws Exception {
-                mockMvc.perform(put("/api/v1/provisioning"))
+                mockMvc.perform(put("/api/v2/provisioning"))
                                 .andExpect(status().isForbidden());
         }
 
         @Test
         public void testUnauthenticatedUpdateProvisioningStatus() throws Exception {
-                mockMvc.perform(put("/api/v1/provisioning"))
+                mockMvc.perform(put("/api/v2/provisioning"))
                                 .andExpect(status().isForbidden());
         }
 }
