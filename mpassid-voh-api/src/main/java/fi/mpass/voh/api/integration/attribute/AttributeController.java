@@ -13,10 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 
 @RestController
-@RequestMapping(path = "api/v1/attribute")
+@RequestMapping(path = "api/v2/attribute")
 public class AttributeController {
 
     private final AttributeRepository attributeRepository;
@@ -28,10 +27,9 @@ public class AttributeController {
     @Operation(summary = "Get a list of available attribute names")
     @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Provides a list of available attribute names",
+            @ApiResponse(responseCode = "200", description = "OK",
                 content = @Content(mediaType = "application/json",
-                                array = @ArraySchema(schema = @Schema(implementation = String.class)), 
-                                examples = { @ExampleObject(name = "Attribute names", value = "[ \"foo\", \"bar\", \"zoo\" ]") } )),
+                                array = @ArraySchema(schema = @Schema(implementation = String.class)))),
             @ApiResponse(responseCode = "403", description = "Forbidden operation")
     })
     @GetMapping("/names")

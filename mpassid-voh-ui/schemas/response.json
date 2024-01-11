@@ -1,0 +1,487 @@
+[
+    {
+        "id": 172,
+        "configurationEntity": {
+            "attributes": [
+                {
+                    "type": "user",
+                    "name": "learnerId",
+                    "content": "extension_fa141bf9f837433eaf0e57de18dbbba7_iamOphOID"
+                },
+                {
+                    "type": "data",
+                    "name": "clientId",
+                    "content": "***,"
+                },
+                {
+                    "type": "data",
+                    "name": "datasource",
+                    "content": "azurev4"
+                },
+                {
+                    "type": "user",
+                    "name": "firstName",
+                    "content": "givenName"
+                },
+                {
+                    "type": "data",
+                    "name": "tenantId",
+                    "content": "35d439eb-8fa0-42d6-89bc-7acbdc497f30"
+                },
+                {
+                    "type": "user",
+                    "name": "legacyId",
+                    "content": "extension_fa141bf9f837433eaf0e57de18dbbba7_extensionAttribute6"
+                },
+                {
+                    "type": "user",
+                    "name": "groupLevels",
+                    "content": "extension_fa141bf9f837433eaf0e57de18dbbba7_iamSchoolGrade"
+                },
+                {
+                    "type": "data",
+                    "name": "clientKey",
+                    "content": "***"
+                },
+                {
+                    "type": "user",
+                    "name": "roles",
+                    "content": "extension_fa141bf9f837433eaf0e57de18dbbba7_iamMpassRole"
+                },
+                {
+                    "type": "user",
+                    "name": "surname",
+                    "content": "surname"
+                },
+                {
+                    "type": "user",
+                    "name": "groups",
+                    "content": "extension_fa141bf9f837433eaf0e57de18dbbba7_iamStudyGroup"
+                }
+            ],
+            "idp": {
+                "type": "azure",
+                "institutionTypes": [
+                    21,
+                    11,
+                    12,
+                    15
+                ],
+                "idpId": "azure_helsinki",
+                "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-helsinki.png",
+                "flowName": "ShibHelsinki",
+                "entityId": "https://sts.windows.net/35d439eb-8fa0-42d6-89bc-7acbdc497f30/",
+                "signingCertificateValidUntil": "2027-10-02",
+                "metadataUrl": "https://login.microsoftonline.com/35d439eb-8fa0-42d6-89bc-7acbdc497f30/FederationMetadata/2007-06/FederationMetadata.xml"
+            }
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.346830761110",
+            "name": "Helsingin kaupunki",
+            "ytunnus": "0201256-6"
+        },
+        "integrationGroups": [],
+        "allowedIntegrations": [
+            {
+                "id": 199,
+                "name": "Palvelu 1"
+            },
+            {
+                "id": 19999,
+                "name": "Palvelu 2"
+            }
+        ],
+        "serviceContactAddress": null
+    },
+    {
+        "id": 5,
+        "configurationEntity": {
+            "attributes": [
+                {
+                    "name": "clientKey",
+                    "type": "user",
+                    "content": "{{opinsysKauniainen.clientKey}}"
+                },
+                {
+                    "name": "class",
+                    "type": "user",
+                    "content": "OpinsysDataSource"
+                },
+                {
+                    "name": "municipality",
+                    "type": "user",
+                    "content": "Kauniainen"
+                },
+                {
+                    "name": "tenantId",
+                    "type": "data",
+                    "content": "kauniainen.opinsys.fi"
+                },
+                {
+                    "name": "clientId",
+                    "type": "data",
+                    "content": "{{opinsysKauniainen.clientId}}"
+                },
+                {
+                    "name": "datasource",
+                    "type": "data",
+                    "content": "datasources.opinsys"
+                },
+                {
+                    "name": "municipalityCode",
+                    "type": "user",
+                    "content": "235"
+                }
+            ],
+            "idp": {
+                "type": "opinsys",
+                "institutionTypes": [
+                    11,
+                    15
+                ],
+                "idpId": "opinsys_kauniainen",
+                "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                "flowName": "OpinsysKauniainen"
+            }
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.98343673038",
+            "name": "Kauniaisten kaupunki",
+            "ytunnus": "0203026-2"
+        },
+        "discoveryInformation": {
+            "showSchools": true,
+            "schools": [],
+            "excludedSchools": []
+        },
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-01-31",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example290@example.org"
+    },
+    {
+        "id": 18,
+        "configurationEntity": {
+            "attributes": [
+                {
+                    "name": "username",
+                    "type": "user",
+                    "content": "mpassAccountName"
+                },
+                {
+                    "name": "roles",
+                    "type": "user",
+                    "content": "userRole"
+                },
+                {
+                    "name": "schoolIds",
+                    "type": "user",
+                    "content": "schoolCode"
+                },
+                {
+                    "name": "firstName",
+                    "type": "user",
+                    "content": "firstName"
+                },
+                {
+                    "name": "legacyId",
+                    "type": "data",
+                    "content": "legacyId"
+                },
+                {
+                    "name": "groupLevels",
+                    "type": "data",
+                    "content": "classLevel"
+                },
+                {
+                    "name": "groups",
+                    "type": "data",
+                    "content": "class"
+                },
+                {
+                    "name": "surname",
+                    "type": "user",
+                    "content": "surname"
+                },
+                {
+                    "name": "learnerId",
+                    "type": "data",
+                    "content": "learnerId"
+                }
+            ],
+            "idp": {
+                "type": "adfs",
+                "institutionTypes": [
+                    11,
+                    15
+                ],
+                "idpId": "shib_grankulla",
+                "logoUrl": "https://mpass-proxy.csc.fi/images/buttons/btn-kauniainen.png",
+                "flowName": "ShibGrankulla",
+                "metadataUrl": "https://login.example.com/dfghdfghdfghdfgh/FederationMetadata/2007-06/FederationMetadata.xml",
+                "entityId": "http://eduadfs.kauniainen.fi/adfs/services/trust",
+                "metadataValidUntil": "2023-12-31",
+                "signingCertificateValidUntil": "2023-12-31",
+                "encryptionCertificateValidUntil": "2023-12-31"
+            }
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.98343673038",
+            "name": "Kauniaisten kaupunki",
+            "ytunnus": "0203026-2"
+        },
+        "integrationGroups": [],
+        "discoveryInformation": {
+            "customDisplayName": "Grankulla stad",
+            "showSchools": true,
+            "schools": [],
+            "excludedSchools": []
+        },
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-06-30",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "examplesp2@example.org"
+    },
+    {
+        "id": 99,
+        "configurationEntity": {
+            "sp": {
+                "type": "oidc",
+                "name": "example",
+                "clientId": "example_clientId",
+                "metadata": {
+                    "scope": "openid profile",
+                    "redirect_uris": [
+                        "https://maailmanparaspalvelu.fi/oidc/callback/"
+                    ],
+                    "client_id": "abc_123",
+                    "response_types": [
+                        "code"
+                    ],
+                    "grant_types": [
+                        "authorization_code"
+                    ]
+                },
+                "clientSecret": "secret"
+            },
+            "attributes": []
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.48587687889",
+            "name": "Palveluntarjoaja 1",
+            "ytunnus": "2769790-1"
+        },
+        "integrationGroups": [
+            {
+                "id": 1,
+                "name": "Palveluryhmä 1"
+            }
+        ],
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-03-02",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example287@example.org"
+    },
+    {
+        "id": 9999,
+        "configurationEntity": {
+            "sp": {
+                "type": "saml",
+                "name": "mpass-prod",
+                "entityId": "mpass-prod.example.com",
+                "metadata": {
+                    "encoding": "base64",
+                    "content": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPG1kOkVudGl0eURlc2NyaXB0b3IgeG1sbnM6bWQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDptZXRhZGF0YSIgZW50aXR5SUQ9Imh0dHBzOi8vc2FudGEuY2xhdXMuZmkiPgogICAgPG1kOlNQU1NPRGVzY3JpcHRvciBBdXRoblJlcXVlc3RzU2lnbmVkPSJ0cnVlIiBwcm90b2NvbFN1cHBvcnRFbnVtZXJhdGlvbj0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0ic2lnbmluZyI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0iZW5jcnlwdGlvbiI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpOYW1lSURGb3JtYXQ+dXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6IDIuMDpuYW1laWQtZm9ybWF0OnRyYW5zaWVudDwvbWQ6TmFtZUlERm9ybWF0PgogICAgPG1kOkFzc2VydGlvbkNvbnN1bWVyU2VydmljZSBCaW5kaW5nPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YmluZGluZ3M6SFRUUC1QT1NUIiBMb2NhdGlvbj0iaHR0cHM6Ly9zYW50YS5jbGF1cy5maS9hY3MiIGluZGV4PSIwIiBpc0RlZmF1bHQ9InRydWUiLz4KICAgIDwvbWQ6U1BTU09EZXNjcmlwdG9yPgo8L21kOkVudGl0eURlc2NyaXB0b3I+"
+                }
+            },
+            "attributes": []
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.48587687889",
+            "name": "Palveluntarjoaja 2",
+            "ytunnus": "2769790-1"
+        },
+        "integrationGroups": [
+            {
+                "id": 1,
+                "name": "Palveluryhmä 1"
+            }
+        ],
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-10-19",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example285@example.org"
+    },
+    {
+        "id": 9998,
+        "configurationEntity": {
+            "sp": {
+              "type": "oidc",
+              "name": "mpass-prod",
+              "clientId": "mpass-prod.example.com",
+              "metadata": {
+                  "scope": "openid profile",
+                  "redirect_uris": [
+                      "https://maailmanparaspalvelu.fi/oidc/callback/"
+                  ],
+                  "client_id": "abc_123",
+                  "response_types": [
+                      "code"
+                  ],
+                  "grant_types": [
+                      "authorization_code"
+                  ]
+              },
+              "clientSecret": "secret"
+            },
+            "attributes": []
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.48587687889",
+            "name": "Palveluntarjoaja 2",
+            "ytunnus": "2769790-1"
+        },
+        "integrationGroups": [
+            {
+                "id": 1,
+                "name": "Palveluryhmä 1"
+            }
+        ],
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-10-19",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example285@example.org"
+    },
+    {
+        "id": 8888,
+        "configurationEntity": {
+            "sp": {
+                "type": "saml",
+                "name": "mpass-prod2",
+                "entityId": "mpass-prod2.example.com",
+                "metadata": {
+                    "encoding": "base64",
+                    "content": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPG1kOkVudGl0eURlc2NyaXB0b3IgeG1sbnM6bWQ9InVybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDptZXRhZGF0YSIgZW50aXR5SUQ9Imh0dHBzOi8vc2FudGEuY2xhdXMuZmkiPgogICAgPG1kOlNQU1NPRGVzY3JpcHRvciBBdXRoblJlcXVlc3RzU2lnbmVkPSJ0cnVlIiBwcm90b2NvbFN1cHBvcnRFbnVtZXJhdGlvbj0idXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnByb3RvY29sIj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0ic2lnbmluZyI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpLZXlEZXNjcmlwdG9yIHVzZT0iZW5jcnlwdGlvbiI+CiAgICA8ZHM6S2V5SW5mbyB4bWxuczpkcz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC8wOS94bWxkc2lnIyI+CiAgICAgICAgPGRzOlg1MDlEYXRhPgogICAgICAgIDxkczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgTUlJRGV6Q0NBbUtnQXdJQkFnSUJBREFOQmdrcWhraUc5dzBCQVEwRkFEQlhNUXN3Q1FZRFZRUUdFd0ptYVRFVgogICAgICAgIE1CTUdBMVVFQ0F3TVMyOXlkbUYwZFc1MGRYSnBNUmd3RmdZRFZRUUtEQTlLYjNWc2RYQjFhMmx1SUhCaGFtRXgKICAgICAgICBGekFWQmdOVkJBTU1Ebk5oYm5SaExtTnNZWFZ6TG1acE1CNFhEVEl5TVRFeU1URTFORE13TlZvWERUTXlNVEV4CiAgICAgICAgT0RFMU5ETXdOVm93VnpFTE1Ba0dBMVVFQmhNQ1pta3hGVEFUQmdOVkJBZ01ERXR2Y25aaGRIVnVkSFZ5YVRFWQogICAgICAgIE1CWUdBMVVFQ2d3UFNtOTFiSFZ3ZFd0cGJpQndZV3BoTVJjd0ZRWURWUVFEREE1ellXNTBZUzVqYkdGMWN5NW0KICAgICAgICBhVENDQVNNd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUUFEQ0NBUXNDZ2dFQ0FMQmRiVHp5MHhkQW15NlN2cWsvCiAgICAgICAgRW5TQUJqUTQzaCs4N3RuVzljaXgreEhkbEU4WE9KQmx5YjljZjhOWkNQaHlFaHR6ODlhZkh5b28ybDZMaUtCZQogICAgICAgIEJSNXZKbnVzY3R0WExzeDYrRTlKUDU4YWU3d1k2NjA1MzVscXFBV2I5ZWFNdHdLVzNkRUJXcHNkZ3pTSVZpbzIKICAgICAgICA2Nm4zbFhxR1p5YkY1NG1YK3dHTFRFZlJDcjFGUkFZRnM3K2c4WnNIVWZzaUFSWEFXR3NVRHRBalY5R2xvbENmCiAgICAgICAgQVgrdG82TVRNSFR2T2hDWnJ6UkNBcHVRaVMycEdtOWRHSUZ3eENjeWR6SjZHNTNyZGJYeVUrMlB6YmdFbmVnMgogICAgICAgIGUvRlZQWkNhUDUzcndtZndjQWRIVlY1OWQwWURES2pXem1QcWR4MDd6VWU0TG1hcnVWTkJRWHVKR0N1RnVkMlAKICAgICAgICA5bG9kQWdNQkFBR2pVREJPTUIwR0ExVWREZ1FXQkJUSXFrSGVCSnQ0K2NOdzhIRUo0bG54ZjZaZHlqQWZCZ05WCiAgICAgICAgSFNNRUdEQVdnQlRJcWtIZUJKdDQrY053OEhFSjRsbnhmNlpkeWpBTUJnTlZIUk1FQlRBREFRSC9NQTBHQ1NxRwogICAgICAgIFNJYjNEUUVCRFFVQUE0SUJBZ0NMWGxNS1ZyekpuYVdkVGdUR1pDalR1ejNCeHpyYzAyQXNlbEdQK2JSVHNMZW8KICAgICAgICBGR0JJQmpPZDYrZUJGc3UzNEM3ZUZHUUNXb2xYakpyL0ZLSUNCNnNFMi90V2N3U3lyd3NORFZONFJMbG96V3dMCiAgICAgICAgWkdMYUtwNmNBNjJneEFacStlbndvSEFXMDJTcTFKWEdhNG42NEVVandId0R2OGVpcmZrR2cvOWNqdlVkUjlMWAogICAgICAgIGdqNTZORCs1L0RaSlE0YWdPZURVRVl0ZGVrRTVWbGVYSTBid1hBYkFJMmtOM2JISVRNUGFsSmtRcnhTdVYrK1gKICAgICAgICBmdmhSTE5WTndlTWswY1lJekJYRDRkYitYcXhNQWpjeXZkVFhTSTR0aFN2Q0M5c1JoOFZvd0oyb1NPdDNKc05yCiAgICAgICAgQkd6WTA4b2NyU2FwdnpaQnlxRVcxZm1waUhKcUtMUjNOb00rN3pwYWNnPT0KICAgICAgICAtLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCiAgICAgICAgPC9kczpYNTA5Q2VydGlmaWNhdGU+CiAgICAgICAgPC9kczpYNTA5RGF0YT4KICAgIDwvZHM6S2V5SW5mbz4KICAgIDwvbWQ6S2V5RGVzY3JpcHRvcj4KICAgIDxtZDpOYW1lSURGb3JtYXQ+dXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6IDIuMDpuYW1laWQtZm9ybWF0OnRyYW5zaWVudDwvbWQ6TmFtZUlERm9ybWF0PgogICAgPG1kOkFzc2VydGlvbkNvbnN1bWVyU2VydmljZSBCaW5kaW5nPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyLjA6YmluZGluZ3M6SFRUUC1QT1NUIiBMb2NhdGlvbj0iaHR0cHM6Ly9zYW50YS5jbGF1cy5maS9hY3MiIGluZGV4PSIwIiBpc0RlZmF1bHQ9InRydWUiLz4KICAgIDwvbWQ6U1BTU09EZXNjcmlwdG9yPgo8L21kOkVudGl0eURlc2NyaXB0b3I+"
+                }
+            },
+            "attributes": []
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.48587687889",
+            "name": "Palveluntarjoaja 3",
+            "ytunnus": "2769790-1"
+        },
+        "integrationGroups": [],
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-10-19",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example285@example.org"
+    },
+    {
+        "id": 199,
+        "configurationEntity": {
+            "set": {
+                "type": "Palvelu",
+                "name": "example"
+                },
+                "attributes": []
+            },
+            
+        "organization": {
+            "oid": "1.2.246.562.10.48587687889",
+            "name": "Palveluntarjoaja 1",
+            "ytunnus": "2769790-1"
+        },
+        "integrationSet": [
+          {
+            "id": 99,
+            "configurationEntity": {
+              "set": {
+                  "type": "Palvelu",
+                  "name": "example"
+                  },
+                  "attributes": []
+              }
+          }
+        ],
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-03-02",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example287@example.org"
+    },
+    {
+        "id": 19999,
+        "configurationEntity": {
+            "set": {
+                "type": "Palvelu",
+                "name": "mpass-prod"
+            },
+            "attributes": []
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.48587687889",
+            "name": "Palveluntarjoaja 2",
+            "ytunnus": "2769790-1"
+        },
+        "integrationSet": [
+            {
+                "id": 9999,
+                "configurationEntity": {
+                  "sp": {
+                      "type": "Palvelu",
+                      "name": "mpass-prod saml",
+                      "entityId": "mpass-prod.example.com"
+                      },
+                      "attributes": []
+                  }
+            },
+            {
+              "id": 9998,
+              "configurationEntity": {
+                "sp": {
+                    "type": "Palvelu",
+                    "name": "mpass-prod oidc",
+                    "clientId": "mpass-prod.example.com"
+                    },
+                    "attributes": []
+                }
+          }
+        ],
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-10-19",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example285@example.org"
+    },
+    {
+        "id": 18888,
+        "configurationEntity": {
+            "set": {
+                "type": "Palvelu",
+                "name": "mpass-prod2"
+            },
+            "attributes": []
+        },
+        "organization": {
+            "oid": "1.2.246.562.10.48587687889",
+            "name": "Palveluntarjoaja 3",
+            "ytunnus": "2769790-1"
+        },
+        "integrationSet": [
+          {
+            "id": 9999,
+            "configurationEntity": {
+              "sp": {
+                  "type": "Palvelu",
+                  "name": "mpass-prod2",
+                  "entityId": "mpass-prod.example.com"
+                  },
+                  "attributes": []
+              }
+          }
+        ],
+        "deploymentPhase": 0,
+        "deploymentDate": "2023-10-19",
+        "acceptanceDate": "2022-11-29",
+        "serviceContactAddress": "example285@example.org"
+    }
+]

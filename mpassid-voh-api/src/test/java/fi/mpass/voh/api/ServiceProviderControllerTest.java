@@ -35,7 +35,7 @@ public class ServiceProviderControllerTest {
     public void testUnauthorizedGetServiceProviderTypes() throws Exception {
         List<String> types = List.of("oidc");
         when(serviceProviderRepository.findDistinctType()).thenReturn(types);
-        mockMvc.perform(get("/api/v1/sp/types").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/sp/types").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$").doesNotExist());
@@ -46,7 +46,7 @@ public class ServiceProviderControllerTest {
     public void testGetServiceProviderTypes() throws Exception {
         List<String> types = List.of("oidc", "saml");
         when(serviceProviderRepository.findDistinctType()).thenReturn(types);
-        mockMvc.perform(get("/api/v1/sp/types").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/sp/types").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))

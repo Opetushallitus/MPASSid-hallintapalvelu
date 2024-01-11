@@ -2,6 +2,7 @@ package fi.mpass.voh.api.exception;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -25,6 +26,19 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
         return buildResponseEntity(integrationError);
     }
 
+    /**
+     * Handles EntityUpdateException.
+     * 
+     * @param ex the EntityUpdateException
+     * @return the IntegrationError object
+     */
+    @ExceptionHandler(EntityUpdateException.class)
+    protected ResponseEntity<Object> handleEntityUpdate(EntityUpdateException ex) {
+        IntegrationError integrationError = new IntegrationError(HttpStatus.CONFLICT);
+        integrationError.setMessage(ex.getMessage());
+        return buildResponseEntity(integrationError);
+    }
+
      /**
      * Handles MethodArgumentTypeMismatchException.
      *
@@ -40,5 +54,18 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
 
     private ResponseEntity<Object> buildResponseEntity(IntegrationError integrationError) {
         return new ResponseEntity<>(integrationError, integrationError.getStatus());
+    }
+
+    /**
+     * Handles InvalidDataAccessApiUsageException.
+     *
+     * @param ex the InvalidDataAccessApiUsageException
+     * @return the IntegrationError object
+     */
+    @ExceptionHandler(InvalidDataAccessApiUsageException.class)
+    protected ResponseEntity<Object> handleInvalidData(InvalidDataAccessApiUsageException ex) {
+        IntegrationError integrationError = new IntegrationError(HttpStatus.BAD_REQUEST);
+        integrationError.setMessage(ex.getMessage());
+        return buildResponseEntity(integrationError);
     }
 }

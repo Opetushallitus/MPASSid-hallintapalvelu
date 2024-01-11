@@ -1,13 +1,11 @@
 # MPASSid-hallinta
 
-## 1.0.2
-- Näytetään wilma hostname integraation perustiedoissa tietokentän yksilöllinen tunniste arvona
+## 2.0.0
 
-## 1.0.1
-- Käyttäjän usean organisaation käyttöoikeudet
+- Koulutustoimija voi hallinnoida MPASSid-tunnistuksenvälityspalvelussa sallittuja palveluita.
 
 ## 1.0.0
 
-- Opetuksen- ja koulutuksenjärjestäjien tietojen tarkastelu
+- Koulutustoimijoiden tietojen tarkastelu
 - Palveluntarjoajien tietojen tarkastelu
 - Tietojen haku, järjestäminen ja valinta

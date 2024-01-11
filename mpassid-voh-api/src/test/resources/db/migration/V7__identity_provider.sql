@@ -17,9 +17,4 @@ create table identity_provider (
 alter table
     if exists identity_provider
 add
-    constraint UK_cmbir4y84uolep40kgx3qfy04 unique (flow_name);
-
-alter table
-    if exists identity_provider
-add
     constraint FK964vbdbnxq7qqo1cw0qgl9h6d foreign key (configuration_entity_id) references configuration_entity;

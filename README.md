@@ -27,8 +27,8 @@ Tarkennuksia projektin rakenteeseen:
 
 ```
 mpassid-voh-ui/                     Frontend
-    schemas/                        Tuodut ulkopuolisten palveluiden osittaiset
-                                    rajapintakuvaukset API-generointia varten,
+    schemas/resources               Sovelluksen ja tuotujen ulkopuolisten palveluiden osittaiset
+                                    konfiguroitavat rajapintakuvaukset API-generointia varten,
                                     sekä mock-arvot
     scripts/export-messages.js      Oletustekstien vienti tiedostoon, jotta
                                     tekstit voidaan tarvittaessa viedä
@@ -39,5 +39,4 @@ mpassid-voh-ui/                     Frontend
                                     (sekä samat kuin `client.ts`-tiedostosta)
         utils/                      Apukoodi. Voidaan viedä toiseen repoon
                                     muiden projektien käytettäväksi.
-schema.json                         Sovelluksen rajapintakuvaus
 ```

@@ -3,12 +3,18 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
+import exampleData from "../../schemas/response.json";
+
 
 export { definition };
 
+/*
 let allIntegrations = definition.paths["/api/v1/integration/list"].get
   .responses["200"].content["application/json"].examples.integrations
   .value as Components.Schemas.Integration[];
+*/
+let allIntegrations = exampleData as unknown as Components.Schemas.Integration[];
+
 
 const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
   "200"
@@ -16,12 +22,19 @@ const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
   value?: Components.Schemas.Integration;
 };
 
-const searchIntegrations: { value?: Components.Schemas.PageIntegration } =
+const updateIntegration = definition.paths["/api/v1/integration/{id}"].put.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
+const searchIntegrations: { value?: Components.Schemas.PageIntegration } = 
   definition.paths["/api/v1/integration/search"].get.responses["200"].content[
     "application/json"
   ].examples.searchIntegrations;
+  
 
-allIntegrations = Array(21).fill(allIntegrations).flat();
+allIntegrations = Array(1).fill(allIntegrations).flat();
 
 allIntegrations.push(
   ...allIntegrations.map((row) => ({
@@ -32,17 +45,11 @@ allIntegrations.push(
     },
     deploymentPhase: 1,
     organization: {
-      ...row.organization,
+      ...row?.organization,
       //name: `${row.organization!.name} (julkaistu)`,
     },
   }))
 );
-
-let id = 1000;
-allIntegrations = allIntegrations.map((row) => ({
-  ...row,
-  id: id++,
-}));
 
 const defaults = {
   page: 1,
@@ -50,6 +57,17 @@ const defaults = {
 };
 
 export default {
+  updateIntegration(request) {
+    const id = Number(request.params.id);
+    const index=allIntegrations.map(i=>i.id).indexOf(id);
+    if (index !== -1) {
+      allIntegrations[index] = request.requestBody;
+    }
+    request.requestBody?.permissions?.forEach((p: Components.Schemas.IntegrationPermission)=>{
+      p.lastUpdatedOn = new Date().toISOString();
+    })
+    updateIntegration.value = request.requestBody
+  },
   getIntegration(request) {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);
@@ -71,13 +89,14 @@ export default {
         ].some((path) => get(element, path)?.toLowerCase().includes(search))
       );
     }
-    const deploymentPhase = JSON.parse(
-      (query.deploymentPhase as string) ?? "1"
-    );
 
-    filteredElements = filteredElements.filter(
-      (row) => row.deploymentPhase === deploymentPhase
-    );
+    if ("deploymentPhase" in query) {
+      const deploymentPhases = (query.deploymentPhase as string).split(",").filter(Boolean);
+
+      filteredElements = filteredElements.filter(
+        (row) => deploymentPhases.includes(String(row.deploymentPhase!))
+      );
+    }
 
     if ("type" in query) {
       const types = (query.type as string).split(",").filter(Boolean);

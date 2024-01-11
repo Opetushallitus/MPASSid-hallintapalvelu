@@ -4,7 +4,7 @@ import {
   useIdentityProviderTypes,
   useServiceProviderTypes,
 } from "@/api";
-import { roles } from "@/config";
+import { environments, roles } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
@@ -23,15 +23,18 @@ import {
 } from "@mui/material";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Link } from "react-router-dom";
-import type { DataRowProps } from "../integraatio/IntegrationDetails/DataRow";
-import { DataRowContainer } from "../integraatio/IntegrationDetails/DataRow";
-import UniqueId from "../integraatio/IntegrationDetails/UniqueId";
+import type { DataRowProps } from "../integraatio/IntegrationTab/DataRow";
+import { DataRowContainer } from "../integraatio/IntegrationTab/DataRow";
+import UniqueId from "../integraatio/IntegrationTab/IntegrationDetails/UniqueId";
 
 export const typeAbbreviations = defineMessages({
   idp: {
     defaultMessage: "OKJ",
   },
   sp: {
+    defaultMessage: "PI",
+  },
+  set: {
     defaultMessage: "PT",
   },
 });
@@ -41,13 +44,43 @@ export const typeTooltips = defineMessages({
     defaultMessage: "Opetuksen ja koulutuksen järjestäjä",
   },
   sp: {
+    defaultMessage: "Palveluintegraatio",
+  },
+  set: {
     defaultMessage: "Palveluntarjoaja",
   },
 });
+export const envAbbreviationValues = defineMessages({
+  0: {
+    defaultMessage: "Testi",
+  },
+  1: {
+    defaultMessage: "Tuotanto",
+  },
+  2: {
+    defaultMessage: "Tuotanto-Testi",
+  }
+});
+export const envAbbreviations = (index:string) =>  {
+  if("0"==index) {
+    return envAbbreviationValues[index]
+  }
+  if("1"==index) {
+    return envAbbreviationValues[index]
+  }
+  if("2"==index) {
+    return envAbbreviationValues[index]
+  }
+  return {
+    defaultMessage: "Ei tiedossa"
+  };
+}
+
 
 const typeColors = {
   idp: "primary",
   sp: "success",
+  set: "success"
 } as const;
 
 export default function IntegrationsTable() {
@@ -71,10 +104,20 @@ export default function IntegrationsTable() {
 
   const roleFilter = useFilterMenuItems({
     options: roles,
+    searchParamName: "rooli",
     optionsLabels: Object.fromEntries(
       roles.map((role) => [role, intl.formatMessage(typeAbbreviations[role])])
     ),
-    searchParamName: "rooli",
+    
+  });
+
+  const envFilter = useFilterMenuItems({
+    options: environments,
+    searchParamName: "ympäristö",
+    optionsLabels: Object.fromEntries(
+      environments.map((env) => [env, intl.formatMessage(envAbbreviationValues[env])])
+    ),
+    
   });
 
   return (
@@ -83,57 +126,73 @@ export default function IntegrationsTable() {
         <TableHead component="div">
           <TableRow component="div">
             <TableHeaderCell sort="id" component="div">
-              <FormattedMessage defaultMessage="Tunniste" />
+                <FormattedMessage defaultMessage="Tunniste" />
             </TableHeaderCell>
             <TableHeaderCell
-              sort={[
-                "configurationEntity.idp.flowName",
-                "configurationEntity.idp.entityId",
-                "configurationEntity.sp.name",
-              ]}
-              component="div"
-            >
-              <FormattedMessage defaultMessage="Palvelu" />
+                sort={[
+                  "configurationEntity.idp.flowName",
+                  "configurationEntity.idp.entityId",
+                  "configurationEntity.sp.name",
+                ]}
+                component="div">
+                <FormattedMessage defaultMessage="Palvelu" />
             </TableHeaderCell>
             <TableHeaderCell
-              sort={[
-                "configurationEntity.idp.type",
-                "configurationEntity.sp.type",
-              ]}
-              menuProps={{
-                MenuListProps: {
-                  subheader: (
-                    <ListSubheader>
-                      <FormattedMessage defaultMessage="Suodata tyypin mukaan" />
-                    </ListSubheader>
-                  ),
-                },
-                active: typeFilter.modified,
-                children: typeFilter.children,
-              }}
-              component="div"
-            >
-              <FormattedMessage defaultMessage="Tyyppi" />
+                sort={[
+                  "configurationEntity.idp.type",
+                  "configurationEntity.set.type",
+                  "configurationEntity.sp.type",
+                ]}
+                menuProps={{
+                  MenuListProps: {
+                    subheader: (
+                      <ListSubheader>
+                        <FormattedMessage defaultMessage="Suodata tyypin mukaan" />
+                      </ListSubheader>
+                    ),
+                  },
+                  active: typeFilter.modified,
+                  children: typeFilter.children,
+                }}
+                component="div">
+                <FormattedMessage defaultMessage="Tyyppi" />
             </TableHeaderCell>
             <TableHeaderCell
-              sort={["configurationEntity.idp", "configurationEntity.sp"]}
-              menuProps={{
-                MenuListProps: {
-                  subheader: (
-                    <ListSubheader>
-                      <FormattedMessage defaultMessage="Suodata roolin mukaan" />
-                    </ListSubheader>
-                  ),
-                },
-                active: roleFilter.modified,
-                children: roleFilter.children,
-              }}
-              component="div"
-            >
-              <FormattedMessage defaultMessage="Rooli" />
+                sort={["configurationEntity.idp", 
+                       "configurationEntity.set",
+                       "configurationEntity.sp"]}
+                menuProps={{
+                  MenuListProps: {
+                    subheader: (
+                      <ListSubheader>
+                        <FormattedMessage defaultMessage="Suodata roolin mukaan" />
+                      </ListSubheader>
+                    ),
+                  },
+                  active: roleFilter.modified,
+                  children: roleFilter.children,
+                }}
+                component="div">
+                <FormattedMessage defaultMessage="Rooli" />
+            </TableHeaderCell>
+            <TableHeaderCell 
+                sort={["deploymentPhase"]}
+                menuProps={{
+                  MenuListProps: {
+                    subheader: (
+                      <ListSubheader>
+                        <FormattedMessage defaultMessage="Suodata ympäristön mukaan" />
+                      </ListSubheader>
+                    ),
+                  },
+                  active: envFilter.modified,
+                  children: envFilter.children,
+                }} 
+                component="div">
+                <FormattedMessage defaultMessage="Ympäristö" />
             </TableHeaderCell>
             <TableHeaderCell sort="organization.name" component="div">
-              <FormattedMessage defaultMessage="Organisaatio" />
+                <FormattedMessage defaultMessage="Organisaatio" />
             </TableHeaderCell>
           </TableRow>
         </TableHead>
@@ -206,6 +265,11 @@ function Row(row: Components.Schemas.Integration) {
         </Tooltip>
       </TableCell>
       <TableCell component="div">
+        <span>
+        <FormattedMessage {...envAbbreviations(row?.deploymentPhase as unknown as string)} />
+        </span>
+      </TableCell>
+      <TableCell component="div">
         <Stack>
           {row.organization?.name}
           <Secondary sx={{ lineHeight: "initial" }}>
@@ -244,6 +308,18 @@ const palveluCellContents = {
         <UniqueId
           configurationEntity={props}
           role="sp"
+          ValueComponent={UniqueIdValue}
+        />
+      </Stack>
+    );
+  },
+  set: function Set(props: Components.Schemas.ConfigurationEntity) {
+    return (
+      <Stack>
+        {props.set!.name}
+        <UniqueId
+          configurationEntity={props}
+          role="set"
           ValueComponent={UniqueIdValue}
         />
       </Stack>

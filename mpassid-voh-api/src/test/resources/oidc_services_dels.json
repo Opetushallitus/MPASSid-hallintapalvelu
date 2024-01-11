@@ -1,0 +1,97 @@
+{
+    "services": [
+        {
+            "id": 5000001,
+            "configurationEntity": {
+                "sp": {
+                    "type": "oidc",
+                    "name": "K H",
+                    "metadata": {
+                        "scope": "openid profile",
+                        "redirect_uris": [
+                            "https://kh/callback/"
+                        ],
+                        "client_id": "clientId",
+                        "client_secret": "s",
+                        "response_types": [
+                            "code"
+                        ],
+                        "grant_types": [
+                            "authorization_code"
+                        ]
+                    }
+                },
+                "attributes": [
+                ]
+            },
+            "integrationGroups": [ ],
+            "organization": {
+                "oid": "1.2.246.562.10.00000000001"
+            },
+            "deploymentPhase": 1
+        },
+        {
+            "id": 5000003,
+            "configurationEntity": {
+                "sp": {
+                    "type": "oidc",
+                    "name": "L a e",
+                    "metadata": {
+                        "scope": "openid profile",
+                        "redirect_uris": [
+                            "https://lae/sso/authenticate",
+                            "https://eal/sso/authenticate"
+                        ],
+                        "client_id": "Wuoluc1FARWBe6yocK9J6hiHh5gAjB7pyw4KXRQjVDvWnY21srEDJl50ae4OtBz4NovyCvxrTvaukDUa",
+                        "client_secret": "",
+                        "response_types": [
+                            "code"
+                        ],
+                        "grant_types": [
+                            "authorization_code"
+                        ]
+                    }
+                }
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.00000000001"
+            },
+            "deploymentPhase": 0
+        },
+        {
+            "id": 5000033,
+            "configurationEntity": {
+                "sp": {
+                    "type": "oidc",
+                    "name": "L a e",
+                    "metadata": {
+                        "scope": "openid profile",
+                        "redirect_uris": [
+                            "https://lae/sso/authenticate",
+                            "https://eal/sso/authenticate"
+                        ],
+                        "client_id": "AjB7pyw4KXRQjVDvWnY21srEDJl50ae4OtBz4NovyCvxrTvaukDUa",
+                        "client_secret": "",
+                        "response_types": [
+                            "code"
+                        ],
+                        "grant_types": [
+                            "authorization_code"
+                        ],
+                        "token_endpoint_auth_method": "client_secret_post"
+                    }
+                },
+                "attributes": []
+            },
+            "integrationGroups": [
+                {
+                    "id": 6000033
+                }
+            ],
+            "organization": {
+                "oid": "1.2.246.562.10.00000000001"
+            },
+            "deploymentPhase": 0
+        }
+    ]
+}

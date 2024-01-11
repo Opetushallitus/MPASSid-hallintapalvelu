@@ -1,6 +1,10 @@
 create table service_provider (
     configuration_entity_id int8 not null,
     name varchar(255),
+    type varchar(31) not null,
+    metadata_json text,
+    client_id varchar(2048),
+    entity_id varchar(1024),
     primary key (configuration_entity_id)
 );
 

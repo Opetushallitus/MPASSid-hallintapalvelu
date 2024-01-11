@@ -7,6 +7,7 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,13 +17,18 @@ import javax.persistence.JoinColumn;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import org.hibernate.envers.Audited;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(Include.NON_NULL)
+@Audited
 @Entity
 public class DiscoveryInformation {
     private final static Logger logger = LoggerFactory.getLogger(DiscoveryInformation.class);
@@ -42,17 +48,19 @@ public class DiscoveryInformation {
     private String title;
     private boolean showSchools;
  
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "discovery_information_schools", joinColumns = @JoinColumn(name = "discovery_information_id"))
     @Column(name = "schools")
     @Schema(description="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitosnumero/latest")
     private Set<String> schools = new HashSet<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "discovery_information_excludedSchools", joinColumns = @JoinColumn(name = "discovery_information_id"))
     @Column(name = "schools")
     @Schema(description="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitosnumero/latest")
     private Set<String> excludedSchools = new HashSet<>();
+
+    private boolean earlyEducationProvider;
 
     public DiscoveryInformation() { }
 
@@ -90,6 +98,10 @@ public class DiscoveryInformation {
         return this.title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public void setCustomTitle(String customTitle) {
         this.title = customTitle;
     }
@@ -121,4 +133,12 @@ public class DiscoveryInformation {
     public void setExcludedSchools(Set<String> excludedSchools) {
         this.excludedSchools = excludedSchools;
     }
+
+    public boolean getEarlyEducationProvider() {
+        return earlyEducationProvider;
+    }
+
+    public void setEarlyEducationProvider(boolean earlyEducationProvider) {
+        this.earlyEducationProvider = earlyEducationProvider;
+    }    
 }

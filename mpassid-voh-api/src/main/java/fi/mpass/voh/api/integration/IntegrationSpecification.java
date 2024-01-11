@@ -13,6 +13,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.ServiceProvider;
 import fi.mpass.voh.api.organization.Organization;
 
@@ -54,6 +55,14 @@ public class IntegrationSpecification implements Specification<Integration> {
 		return false;
 	}
 
+	private boolean isSetType(String type) {
+		for (IntegrationSet.Type spType : IntegrationSet.Type.values()) {
+			if (spType.name().equals(type))
+				return true;
+		}
+		return false;
+	}
+
 	@Override
 	public Predicate toPredicate(final Root<Integration> root, final CriteriaQuery<?> query,
 			final CriteriaBuilder builder) {
@@ -73,6 +82,11 @@ public class IntegrationSpecification implements Specification<Integration> {
 								JoinType.LEFT);
 						return builder.equal(integrationSp.get(criteria.getKey()), criteria.getValue());
 					}
+					case SET: {
+						Join<Integration, IntegrationSet> integrationSet = root.join("configurationEntity").join("set",
+								JoinType.LEFT);
+						return builder.equal(integrationSet.get(criteria.getKey()), criteria.getValue());
+					}
 					case ROLE: {
 						Join<Integration, ConfigurationEntity> integrationCE = root.join("configurationEntity");
 						if (criteria.getValue() != null) {
@@ -90,6 +104,22 @@ public class IntegrationSpecification implements Specification<Integration> {
 							}
 						}
 					}
+					case DEPLOYMENT_PHASE: {
+						if (criteria.getValue() != null) {
+							// TODO consider refactoring/moving to Criteria
+							if (criteria.isStringList()) {
+								List<Predicate> predicateList = new ArrayList<>();
+								for (String byPhase : ((String) criteria.getValue()).split(",")) {
+									Predicate phasePredicate = builder.equal(root.get(criteria.getKey()),
+											byPhase);
+									predicateList.add(phasePredicate);
+								}
+								return builder.or(predicateList.toArray(Predicate[]::new));
+							} else {
+								return builder.equal(root.get(criteria.getKey()), criteria.getValue());
+							}
+						}
+					}
 					case TYPE: {
 						if (criteria.getValue() != null) {
 							Join<Integration, IdentityProvider> integrationIdp = root.join("configurationEntity").join(
@@ -97,6 +127,9 @@ public class IntegrationSpecification implements Specification<Integration> {
 									JoinType.LEFT);
 							Join<Integration, ServiceProvider> integrationSp = root.join("configurationEntity").join(
 									"sp",
+									JoinType.LEFT);
+							Join<Integration, ServiceProvider> integrationSet = root.join("configurationEntity").join(
+									"set",
 									JoinType.LEFT);
 
 							// TODO consider refactoring/moving to Criteria
@@ -113,6 +146,11 @@ public class IntegrationSpecification implements Specification<Integration> {
 												byType);
 										predicateList.add(typePredicate);
 									}
+									if (isSetType(byType)) {
+										Predicate typePredicate = builder.equal(integrationSet.get(criteria.getKey()),
+												byType);
+										predicateList.add(typePredicate);
+									}
 								}
 								return builder.or(predicateList.toArray(Predicate[]::new));
 							} else {
@@ -121,6 +159,9 @@ public class IntegrationSpecification implements Specification<Integration> {
 								}
 								if (isSpType((String) criteria.getValue())) {
 									return builder.equal(integrationSp.get(criteria.getKey()), criteria.getValue());
+								}
+								if (isSetType((String) criteria.getValue())) {
+									return builder.equal(integrationSet.get(criteria.getKey()), criteria.getValue());
 								}
 							}
 						}
@@ -141,7 +182,7 @@ public class IntegrationSpecification implements Specification<Integration> {
 							return builder.equal(integrationOrganization.get(criteria.getKey()), criteria.getValue());
 						}
 					}
-					// Integration, e.g. id and deploymentPhase
+					// Integration, e.g. id
 					default:
 						return builder.equal(root.get(criteria.getKey()), criteria.getValue());
 				}
@@ -156,6 +197,11 @@ public class IntegrationSpecification implements Specification<Integration> {
 						Join<Integration, Organization> integrationOrganization = root.join("organization");
 						return builder.like(integrationOrganization.get(criteria.getKey()),
 								"%" + criteria.getValue() + "%");
+					}
+					case SET: {
+						Join<Integration, IntegrationSet> integrationSet = root.join("configurationEntity").join("set",
+								JoinType.LEFT);
+						return builder.like(integrationSet.get(criteria.getKey()), "%" + criteria.getValue() + "%");
 					}
 					default:
 						return builder.like(root.get(criteria.getKey()), "%" + criteria.getValue() + "%");

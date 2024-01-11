@@ -1,0 +1,686 @@
+
+{
+    "integrationGroups": [
+         {
+            "id": 6000004,
+            "configurationEntity": {
+                "set": {
+                    "name": "Edita oppimisen palvelut"
+                },
+                "attributes": [
+                ]
+            }
+         },
+         {
+            "id": 6000005,
+            "configurationEntity": {
+                "set": {
+                    "name": "Examina"
+                }
+            }
+         },
+         {
+            "id": 6000006,
+            "configurationEntity": {
+                "set": {
+                    "name": "haltu-eop"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000007,
+            "configurationEntity": {
+                "set": {
+                    "name": "innowise-purotwiki"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000008,
+            "configurationEntity": {
+                "set": {
+                    "name": "Itslearning"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000009,
+            "configurationEntity": {
+                "set": {
+                    "name": "KuopioTV"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000010,
+            "configurationEntity": {
+                "set": {
+                    "name": "Lukuseula"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000011,
+            "configurationEntity": {
+                "set": {
+                    "name": "mfka-laksyvihko"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000012,
+            "configurationEntity": {
+                "set": {
+                    "name": "mpass-proxy-test"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000013,
+            "configurationEntity": {
+                "set": {
+                    "name": "Meidän Seinäjoki -portaali, digitaalinen osallistuvan budjetoinnin ratkaisu"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000014,
+            "configurationEntity": {
+                "set": {
+                    "name": "digivisiodev"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000015,
+            "configurationEntity": {
+                "set": {
+                    "name": "Osallistu Oulu"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000016,
+            "configurationEntity": {
+                "set": {
+                    "name": "Tuusulan osallistumisalusta"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000017,
+            "configurationEntity": {
+                "set": {
+                    "name": "Peda.net"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000018,
+            "configurationEntity": {
+                "set": {
+                    "name": "Qridi"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000019,
+            "configurationEntity": {
+                "set": {
+                    "name": "Sanoma Pro"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000020,
+            "configurationEntity": {
+                "set": {
+                    "name": "seppo.io"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000021,
+            "configurationEntity": {
+                "set": {
+                    "name": "snellmanedu"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000022,
+            "configurationEntity": {
+                "set": {
+                    "name": "Studeon sähköiset oppimateriaalit"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000023,
+            "configurationEntity": {
+                "set": {
+                    "name": "tabletkoulu"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000024,
+            "configurationEntity": {
+                "set": {
+                    "name": "CSC Asiakastunnistusymparisto testaus"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000025,
+            "configurationEntity": {
+                "set": {
+                    "name": "Tiera Edustore"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000026,
+            "configurationEntity": {
+                "set": {
+                    "name": "Digioppikirja - www.digioppikirja.fi"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000027,
+            "configurationEntity": {
+                "set": {
+                    "name": "workseed"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000028,
+            "configurationEntity": {
+                "set": {
+                    "name": "NäppisTaituri"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000029,
+            "configurationEntity": {
+                "set": {
+                    "name": "utu-ville"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000030,
+            "configurationEntity": {
+                "set": {
+                    "name": "digisnellmaneduvisiodev"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000031,
+            "configurationEntity": {
+                "set": {
+                    "name": "Virkailijan Opintopolku - Hahtuva"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000032,
+            "configurationEntity": {
+                "set": {
+                    "name": "Jyu"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000033,
+            "configurationEntity": {
+                "set": {
+                    "name": "pedanetdev"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000034,
+            "configurationEntity": {
+                "set": {
+                    "name": "Kirjavälitys"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000035,
+            "configurationEntity": {
+                "set": {
+                    "name": "Desku"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000036,
+            "configurationEntity": {
+                "set": {
+                    "name": "turnitin"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000037,
+            "configurationEntity": {
+                "set": {
+                    "name": "Reactored"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000038,
+            "configurationEntity": {
+                "set": {
+                    "name": "Opepalvelu;Oppilaan maailma"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000039,
+            "configurationEntity": {
+                "set": {
+                    "name": "Kuntien ID"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000040,
+            "configurationEntity": {
+                "set": {
+                    "name": "Lukulumo, esiopetus ja alakoulu"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000041,
+            "configurationEntity": {
+                "set": {
+                    "name": "Skillgrower"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000042,
+            "configurationEntity": {
+                "set": {
+                    "name": "Sumo Apps"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000043,
+            "configurationEntity": {
+                "set": {
+                    "name": "Qridi"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000044,
+            "configurationEntity": {
+                "set": {
+                    "name": "Opiq"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000045,
+            "configurationEntity": {
+                "set": {
+                    "name": "Äly"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000046,
+            "configurationEntity": {
+                "set": {
+                    "name": "MAOL²"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000047,
+            "configurationEntity": {
+                "set": {
+                    "name": "Kidnet"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000048,
+            "configurationEntity": {
+                "set": {
+                    "name": "haltu_niven"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000049,
+            "configurationEntity": {
+                "set": {
+                    "name": "Alfons Education"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000050,
+            "configurationEntity": {
+                "set": {
+                    "name": "Helsingin Sanomat / Aamulehti / Satakunnan Kansa"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000051,
+            "configurationEntity": {
+                "set": {
+                    "name": "Koulun Hyvinvointiprofiili"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000052,
+            "configurationEntity": {
+                "set": {
+                    "name": "Edulyzer"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000053,
+            "configurationEntity": {
+                "set": {
+                    "name": "digma"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000054,
+            "configurationEntity": {
+                "set": {
+                    "name": "Koejakaja"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000055,
+            "configurationEntity": {
+                "set": {
+                    "name": "VILLE"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000056,
+            "configurationEntity": {
+                "set": {
+                    "name": "Wilma"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000057,
+            "configurationEntity": {
+                "set": {
+                    "name": "kidescience"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000058,
+            "configurationEntity": {
+                "set": {
+                    "name": "freeedtest"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000059,
+            "configurationEntity": {
+                "set": {
+                    "name": "Thinglink"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000060,
+            "configurationEntity": {
+                "set": {
+                    "name": "turnitin"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000061,
+            "configurationEntity": {
+                "set": {
+                    "name": "Airo"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000062,
+            "configurationEntity": {
+                "set": {
+                    "name": "LukuTähti"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000063,
+            "configurationEntity": {
+                "set": {
+                    "name": "Claned"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000064,
+            "configurationEntity": {
+                "set": {
+                    "name": "Taagi-palvelut"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "false", "type": "data" }
+                ]
+            }
+         },
+         {
+            "id": 6000001,
+            "configurationEntity": {
+                "set": {
+                    "name": "MPASSid attribute test (old)"
+                },
+                "attributes": [
+                    { "name": "allowtestlearnerid", "content": "true", "type": "data" }
+                ]
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.33651716236"
+            }
+       }
+    ]
+}

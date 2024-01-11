@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Profile("!dev")
+@Profile({"!dev", "!devlocal"})
 @Configuration
 class WebMvcConfig implements WebMvcConfigurer {  
 

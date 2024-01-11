@@ -45,6 +45,14 @@ public class Attribute {
         this.description = description;
     }
 
+    public Attribute(String type, String name, String content) {
+        this.oid = "";
+        this.type = type;
+        this.name = name;
+        this.content = content;
+        this.description = "";
+    }
+
     public long getId() {
         return this.id;
     }

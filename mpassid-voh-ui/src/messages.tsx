@@ -164,6 +164,27 @@ defineMessage({
   id: "attribuutti.encryptionCertificateValidUntil",
   description: "attribuutti",
 });
+defineMessage({
+  defaultMessage: "Sallitut palvelut",
+  id: "attribuutti.allowedIntegrations",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Palveluryhmä",
+  id: "attribuutti.integrationGroups",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Integraatio lista",
+  id: "attribuutti.integrationSets",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Testioppijanumero sallittu",
+  id: "attribuutti.allowtestlearnerid",
+  description: "attribuutti",
+});
+
 
 // Attribuuttien työkaluvihjeet
 defineMessage({
@@ -193,6 +214,22 @@ defineMessage({
   id: "työkaluvihje.customTitle",
   description: "attribuutin työkaluvihje",
 });
+defineMessage({
+  defaultMessage: "Listauksessa näytetään palvelun nimi ja suluissa palvelun tarjoajan organisaatio.",
+  id: "työkaluvihje.allowedIntegrations",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Listauksessa näytetään palvelu integraation entityId tai clientId",
+  id: "työkaluvihje.integrationSets",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Palveluun kirjautuminen tunnuksella jolla on testioppijanumero on sallittu",
+  id: "työkaluvihje.allowtestlearnerid",
+  description: "attribuutin työkaluvihje",
+});
+
 
 // Tyypit
 defineMessage({
@@ -238,5 +275,10 @@ defineMessage({
 defineMessage({
   defaultMessage: "OpenID Connect",
   id: "tyyppi.oidc",
+  description: "tyyppi",
+});
+defineMessage({
+  defaultMessage: "Palvelu",
+  id: "tyyppi.sp",
   description: "tyyppi",
 });

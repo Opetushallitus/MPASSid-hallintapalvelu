@@ -6,8 +6,6 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -18,13 +16,13 @@ import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
+
+import org.hibernate.envers.Audited;
+
 import javax.persistence.DiscriminatorType;
 import javax.persistence.ElementCollection;
-import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -34,8 +32,8 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 
 import fi.mpass.voh.api.integration.ConfigurationEntity;
-import fi.mpass.voh.api.integration.sp.ServiceProvider;
 
+@Audited
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
@@ -52,7 +50,9 @@ import fi.mpass.voh.api.integration.sp.ServiceProvider;
 @JsonInclude(Include.NON_NULL)
 public abstract class IdentityProvider {
 
-    public enum Type { adfs , azure, gsuite, opinsys, wilma }
+    public enum Type {
+        adfs, azure, gsuite, opinsys, wilma
+    }
 
     @Id
     @Column(name = "configuration_entity_id")
@@ -65,35 +65,32 @@ public abstract class IdentityProvider {
     @JsonIgnore
     private ConfigurationEntity configurationEntity;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "identity_provider_institution_types", joinColumns = @JoinColumn(name = "configuration_entity_id"))
     @Column(name = "institution_type")
     // @Schema(ref="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitostyyppi/latest")
     private Set<Integer> institutionTypes = new HashSet<>();
-
-    // Instruct Jackson not to deserialize input allowed service providers json, i.e. Object vs. List,
-    // instead handle the conversion through the IntegrationConfig class
-    @JsonManagedReference
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @ManyToMany(cascade = { CascadeType.MERGE })
-    @JoinTable(name = "allowedServiceProviders", joinColumns = @JoinColumn(name = "idp_ce_id", referencedColumnName = "configuration_entity_id"),
-                                                inverseJoinColumns = @JoinColumn(name = "sp_ce_id", referencedColumnName = "configuration_entity_id"))
-    private Set<ServiceProvider> allowedServiceProviders = new HashSet<>();
 
     @Column(name = "type", insertable = false, updatable = false)
     private String type;
 
     private String idpId;
     private String logoUrl;
-    @Column(unique = true)
+    // @Column(unique = true)
     private String flowName;
 
-    /* Identity Provider type specific identifiers used for the default sorting/search implementation should be also declared here */
-    /* No getter or setter methods declared for these fields, only the corresponding child class contains those methods */
+    /*
+     * Identity Provider type specific identifiers used for the default
+     * sorting/search implementation should be also declared here
+     */
+    /*
+     * No getter or setter methods declared for these fields, only the corresponding
+     * child class contains those methods
+     */
     @Schema(example = "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32")
     private String entityId;
     private String tenantId;
-    @Column(name="wilma_hostname")
+    @Column(name = "wilma_hostname")
     private String hostname;
 
     @Column(name = "metadata_valid_until", columnDefinition = "DATE")
@@ -105,15 +102,15 @@ public abstract class IdentityProvider {
     @Column(name = "encryption_certificate_valid_until", columnDefinition = "DATE")
     private LocalDate encryptionCertificateValidUntil;
 
-
-    public IdentityProvider() { }
+    public IdentityProvider() {
+    }
 
     public IdentityProvider(String idpId, String logoUrl, String flowName) {
         this.idpId = idpId;
         this.logoUrl = logoUrl;
         this.flowName = flowName;
     }
- 
+
     public String getIdpId() {
         return this.idpId;
     }
@@ -167,25 +164,5 @@ public abstract class IdentityProvider {
             return this.type;
         }
         return this.getClass().getSimpleName().toLowerCase();
-    }
- 
-    public void addAllowedServiceProvider(ServiceProvider sp) {
-        allowedServiceProviders.add(sp);
-        sp.getAllowingIdentityProviders().add(this);
-    }
-
-    public void removeAllowedServiceProvider(ServiceProvider sp) {
-        allowedServiceProviders.remove(sp);
-        sp.getAllowingIdentityProviders().remove(this);
-    }
-
-    public Set<ServiceProvider> getAllowedServiceProviders() {
-        return this.allowedServiceProviders;
-    }
-
-    public void setAllowedServiceProviders(Set<ServiceProvider> allowedServiceProviders) {
-        for (ServiceProvider sp : allowedServiceProviders) {
-            this.addAllowedServiceProvider(sp);
-        }
     }
 }

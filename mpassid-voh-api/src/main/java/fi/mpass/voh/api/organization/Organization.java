@@ -21,9 +21,8 @@ public class Organization {
 
     public Organization() { }
 
-    public Organization(String name, String businessId, String oid) {
+    public Organization(String name, String oid) {
         this.name = name;
-        this.businessId = businessId;
         this.oid = oid;
     }
 
@@ -60,7 +59,6 @@ public class Organization {
     public String toString() {
         return "{" +
                 " name='" + getName() + "'" +
-                ", businessId='" + getBusinessId() + "'" +
                 ", oid='" + getOid() + "'" +
                 "}";
     }

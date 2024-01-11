@@ -35,7 +35,7 @@ public class IdentityProviderControllerTest {
     public void testGetIdentityProviderTypes() throws Exception {
         List<String> types = List.of("azure", "opinsys", "wilma");
         when(identityProviderRepository.findDistinctType()).thenReturn(types);
-        mockMvc.perform(get("/api/v1/idp/types").contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/api/v2/idp/types").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))

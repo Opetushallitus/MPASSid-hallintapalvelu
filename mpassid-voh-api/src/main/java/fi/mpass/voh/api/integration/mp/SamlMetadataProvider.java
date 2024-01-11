@@ -46,7 +46,7 @@ public class SamlMetadataProvider {
 
     XMLObjectProviderRegistry registry;
 
-    private final String metadata;
+    private String metadata;
 
     private LocalDate metadataValidUntil;
     private LocalDate signingCertificateValidUntil;
@@ -63,8 +63,12 @@ public class SamlMetadataProvider {
         registry.setParserPool(getParserPool());
 
         WebClient client = WebClient.create();
-        WebClient.ResponseSpec response = client.get().uri(metadataUrl).retrieve();
-        metadata = response.bodyToMono(String.class).block();
+        try {
+            WebClient.ResponseSpec response = client.get().uri(metadataUrl).retrieve();
+            metadata = response.bodyToMono(String.class).block();
+        } catch (Exception ex) {
+            metadata = null;
+        }
 
         if (metadata != null) {
             extractValidUntilDates();
@@ -117,12 +121,12 @@ public class SamlMetadataProvider {
         try {
             Document document = registry.getParserPool().parse(stream);
             Element element = document.getDocumentElement();
-            logger.debug(element.toString());
+            logger.trace(element.toString());
 
             UnmarshallerFactory umFactory = registry.getUnmarshallerFactory();
             Unmarshaller unmarshaller = umFactory.getUnmarshaller(element);
             if (unmarshaller == null) {
-                logger.debug("Unable to unmarshall message, no unmarshaller registered for message element");
+                logger.error("Unable to unmarshall message, no unmarshaller registered for message element");
             } else {
                 metadata = unmarshaller.unmarshall(element);
             }
@@ -200,7 +204,7 @@ public class SamlMetadataProvider {
 
         if (x509InputStream.available() > 0) {
             Certificate cert = cf.generateCertificate(x509InputStream);
-            logger.debug(cert.toString());
+            logger.trace(cert.toString());
             return (java.security.cert.X509Certificate) cert;
         }
         return null;

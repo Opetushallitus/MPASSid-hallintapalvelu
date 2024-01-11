@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -16,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
-@PropertySource("classpath:organization.properties")
 public class OrganizationService {
   private final static Logger logger = LoggerFactory.getLogger(OrganizationService.class);
 
@@ -62,10 +60,10 @@ public class OrganizationService {
   }
 
   /**
-   * Returns a cached Organization object by id (oid or businessId) from the
+   * Returns a cached Organization object by id (oid) from the
    * repository
    * 
-   * @param id oid or businessId
+   * @param id oid
    * @return the organization identified by the specified id
    */
   public Organization getById(String id) {

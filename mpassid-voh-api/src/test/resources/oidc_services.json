@@ -1,6 +1,7 @@
 {
     "services": [
         {
+            "id": 5000001,
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",
@@ -20,14 +21,26 @@
                         ]
                     }
                 },
-                "attributes": []
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "true",
+                        "type": "data"
+                    }
+                ]
             },
+            "integrationGroups": [
+                {
+                    "id": 6000001
+                }
+            ],
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"
             },
             "deploymentPhase": 1
         },
         {
+            "id": 5000002,
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",
@@ -52,12 +65,18 @@
                 },
                 "attributes": []
             },
+            "integrationGroups": [
+                {
+                    "id": 6000001
+                }
+            ],
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"
             },
             "deploymentPhase": 1
         },
         {
+            "id": 5000003,
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",
@@ -81,6 +100,41 @@
                 },
                 "attributes": []
             },
+            "organization": {
+                "oid": "1.2.246.562.10.00000000001"
+            },
+            "deploymentPhase": 0
+        },
+        {
+            "id": 5000033,
+            "configurationEntity": {
+                "sp": {
+                    "type": "oidc",
+                    "name": "L a e",
+                    "metadata": {
+                        "scope": "openid profile",
+                        "redirect_uris": [
+                            "https://lae/sso/authenticate",
+                            "https://eal/sso/authenticate"
+                        ],
+                        "client_id": "AjB7pyw4KXRQjVDvWnY21srEDJl50ae4OtBz4NovyCvxrTvaukDUa",
+                        "client_secret": "",
+                        "response_types": [
+                            "code"
+                        ],
+                        "grant_types": [
+                            "authorization_code"
+                        ],
+                        "token_endpoint_auth_method": "client_secret_post"
+                    }
+                },
+                "attributes": []
+            },
+            "integrationGroups": [
+                {
+                    "id": 6000333
+                }
+            ],
             "organization": {
                 "oid": "1.2.246.562.10.00000000001"
             },

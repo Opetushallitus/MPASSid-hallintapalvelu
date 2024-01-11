@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.transaction.Transactional;
 
@@ -24,6 +22,7 @@ import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationSpecificationsBuilder;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.idp.Wilma;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.ServiceProvider;
 import fi.mpass.voh.api.organization.Organization;
@@ -45,24 +44,28 @@ public class IntegrationSpecificationTests {
     @BeforeEach
     public void setup() {
 
-        Organization organization = new Organization("Organization zyx", "123456-7", "1.2.3.4.5.6.7.8");
+        Organization organization = new Organization("Organization zyx", "1.2.3.4.5.6.7.8");
         organizationRepository.save(organization);
+        Organization spOrg = new Organization("SP Organization 321", "1.2.3.4.5.6.7.1");
+        organizationRepository.save(spOrg);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Wilma wilma = new Wilma("wilmaHostname");
 
-        // Allowed services, ConfigurationEntity (OIDC Service Provider) wo/ Integration
+        // Allowed services, ConfigurationEntity (OIDC Service Provider)
+        DiscoveryInformation spDiscoveryInformation = new DiscoveryInformation("SP Custom Display Name",
+                "SP Custom Title", true);
         ConfigurationEntity ce = new ConfigurationEntity();
         OidcServiceProvider serviceProvider = new OidcServiceProvider("clientId");
         serviceProvider.setConfigurationEntity(ce);
         ce.setSp(serviceProvider);
-        serviceProvider.addAllowingIdentityProvider(wilma);
-        Set<ServiceProvider> allowedServices = new HashSet<>();
-        allowedServices.add(serviceProvider);
+        Integration spInt = new Integration(66L, LocalDate.now(), ce, LocalDate.of(2023, 6, 30),
+                0, spDiscoveryInformation, spOrg,
+                "spContactAddress@example.net");
+        integrationRepository.save(spInt);
 
-        wilma.setAllowedServiceProviders(allowedServices);
         wilma.setFlowName("wilmaFlowname");
         configurationEntity.setIdp(wilma);
 
@@ -70,11 +73,13 @@ public class IntegrationSpecificationTests {
                 0, discoveryInformation, organization,
                 "serviceContactAddress@example.net");
 
+        integration.addPermissionTo(spInt);
+
         integrationRepository.save(integration);
 
         // ServiceProvider
-        
-        Organization spOrganization = new Organization("Organization xyz", "123456-9", "1.2.3.4.5.6.7.9");
+
+        Organization spOrganization = new Organization("Organization xyz", "1.2.3.4.5.6.7.9");
         organizationRepository.save(spOrganization);
 
         ConfigurationEntity configurationEntitySp = new ConfigurationEntity();
@@ -87,6 +92,34 @@ public class IntegrationSpecificationTests {
                 "serviceProviderContactAddress@example.net");
 
         integrationRepository.save(spIntegration);
+
+        // Integration sets
+        for (int i = 1; i < 10; i++) {
+            Organization setOrganization;
+            if (i<5) {
+                setOrganization = new Organization("Organization set 1234", "1.2.3.4.5.6.7.2");
+                organizationRepository.save(setOrganization);
+            } else {
+                setOrganization = new Organization("Organization set 56789", "1.2.3.4.5.6.7.3");
+                organizationRepository.save(setOrganization);
+            }
+
+            ConfigurationEntity setCe = new ConfigurationEntity();
+            IntegrationSet set = new IntegrationSet();
+            set.setConfigurationEntity(setCe);
+            setCe.setSet(set);
+            set.setName("Integration set " + i);
+            // set deployment phase modulo 3
+            Integration integrationSet = new Integration(3000L + i, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
+                    i%3, null, organization, "serviceContactAddress" + i + "@example.net");
+            integrationSet.setConfigurationEntity(setCe);
+            integrationSet.setOrganization(setOrganization);
+            if (i==5) {
+                // inactivate
+                integrationSet.setStatus(1);
+            }
+            integrationRepository.save(integrationSet);
+        }
     }
 
     @Test
@@ -97,7 +130,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(2, integrationList.size());
+        assertEquals(12, integrationList.size());
     }
 
     @Test
@@ -169,7 +202,22 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(2, integrationList.size());
+        assertEquals(3, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationWithDeploymentPhases() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        String deploymentPhase = "2,1";
+
+        builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        assertEquals(7, integrationList.size());
     }
 
     @Test
@@ -184,7 +232,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(1, integrationList.size());
+        assertEquals(2, integrationList.size());
     }
 
     @Test
@@ -204,7 +252,7 @@ public class IntegrationSpecificationTests {
     public void testIntegrationWithEqualOrganizations() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
-        List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.8", "1.2.3.4.5.6.7.9");
+        List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.8", "1.2.3.4.5.6.7.9", "1.2.3.4.5.6.7.2");
 
         builder.withEqualAnd(Category.ORGANIZATION, "oid", userOrganizationOids);
 
@@ -212,7 +260,7 @@ public class IntegrationSpecificationTests {
 
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
-        assertEquals(2, integrationList.size());
+        assertEquals(6, integrationList.size());
     }
 
     @Test
@@ -228,6 +276,37 @@ public class IntegrationSpecificationTests {
         List<Integration> integrationList = integrationRepository.findAll(spec);
 
         assertEquals(1, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationSetWithEqualName() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        String setName = "Integration set 5";
+
+        builder.withEqualAnd(Category.SET, "name", setName);
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        assertEquals(1, integrationList.size());
+    }
+
+    @Test
+    public void testIntegrationWithActiveStatus() {
+        IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+
+        int status = 0;
+
+        builder.withEqualAnd(Category.INTEGRATION, "status", status);
+
+        Specification<Integration> spec = builder.build();
+
+        List<Integration> integrationList = integrationRepository.findAll(spec);
+
+        // 1/12 is inactive
+        assertEquals(11, integrationList.size());
     }
 
 }

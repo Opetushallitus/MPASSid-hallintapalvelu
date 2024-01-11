@@ -1,6 +1,6 @@
 import { usePaginationPage } from "@/utils/components/pagination";
 import { defaults } from "@/utils/components/RowsPerPage";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import * as client from "./client";
 
 export * from "./client";
@@ -10,20 +10,28 @@ export * from "./client";
 export function useIntegrationsSpecSearchPageable() {
   const [page] = usePaginationPage();
   const [searchParams] = useSearchParams();
+  const location = useLocation()
+
+  const locationPath = location.pathname.split("/");
+  const IntegrationId = locationPath.pop();
+  const integrationName = locationPath.pop();
+
+  if(integrationName==="integraatio"){
+    searchParams.set("referenceIntegration",String(IntegrationId))
+    searchParams.set("rooli","set")
+    searchParams.set("ympäristö","1")
+  }
 
   return client.useIntegrationsSpecSearchPageable({
     search: searchParams.get("hae") ?? "",
     role: searchParams.get("rooli") ?? undefined,
+    deploymentPhase: searchParams.get("ympäristö") ?? undefined,
     type: searchParams.get("tyyppi") ?? undefined,
-    deploymentPhase: searchParams.has("testi")
-      ? JSON.parse(searchParams.get("testi")!)
-        ? "0"
-        : "1"
-      : undefined,
+    referenceIntegration: searchParams.get("referenceIntegration") ?? undefined,
     page: page - 1,
     size: searchParams.has(defaults.searchParamName)
       ? JSON.parse(searchParams.get(defaults.searchParamName)!)
       : defaults.default,
     sort: searchParams.getAll("sort") ?? undefined,
-  });
+  } as any);
 }

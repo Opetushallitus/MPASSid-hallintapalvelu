@@ -1,4 +1,5 @@
-export const roles = ["idp", "sp"] as const;
+export const roles = ["idp", "sp", "set"] as const;
+export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
   "mpassid-open-integration-tabs";
 export const attributePreferredOrder = ["firstName", "surname"]
@@ -14,3 +15,5 @@ export const testLink =
 
 export const tallentajaOphGroup =
   "APP_MPASSID_TALLENTAJA_1.2.246.562.10.00000000001";
+  export const katselijaOphGroup =
+  "APP_MPASSID_KATSELIJA_1.2.246.562.10.00000000001";  
