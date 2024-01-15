@@ -104,12 +104,12 @@ public class ProvisioningService {
                     logger.info("Oldest changed integration (by permission last update time) dated on "
                             + integrationsSince.get(0).getPermissions().get(0).getLastUpdatedOn()
                             + " since " + provision.get().getLastTime() + " in deployment phase " + i);
-                    statuses.add(new ConfigurationStatus(changes,
+                    statuses.add(new ConfigurationStatus(changes, provision.get().getLastTime(),
                             integrationsSince.get(0).getPermissions().get(0).getLastUpdatedOn(), i));
                 } else {
                     logger.info("No changes (by permission last update time) since  " + provision.get().getLastTime()
                             + " in deployment phase " + i);
-                    statuses.add(new ConfigurationStatus(changes, null, i));
+                    statuses.add(new ConfigurationStatus(changes, provision.get().getLastTime(), null, i));
                 }
             } else {
                 logger.info("No provision information available for deployment phase " + i);
