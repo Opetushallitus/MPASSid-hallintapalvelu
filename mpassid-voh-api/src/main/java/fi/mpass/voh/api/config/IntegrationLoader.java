@@ -126,10 +126,11 @@ public class IntegrationLoader implements CommandLineRunner {
                                 .findByIdIdpAll(integration.getId());
                         if (existingIntegration.isPresent()) {
                             if (!existingIntegration.get().isActive()) {
-                                logger.info("Reloading inactive integration " + existingIntegration.get().getId() + ". Reactivating.");
+                                logger.info("Reloading inactive integration " + existingIntegration.get().getId()
+                                        + ". Reactivating.");
                                 existingIntegration.get().setStatus(0);
                             }
-                            
+
                             logger.debug("Comparing existing integration " + existingIntegration.get().getId()
                                     + " version " + existingIntegration.get().getVersion() + " to "
                                     + integration.getId() + " version " + integration.getVersion());
@@ -229,7 +230,7 @@ public class IntegrationLoader implements CommandLineRunner {
                                             }
                                         }
                                         if (d.getFieldName().contains("deploymentPhase")) {
-                                            existingIntegration.get().setDeploymentPhase((Integer)d.getRight());
+                                            existingIntegration.get().setDeploymentPhase((Integer) d.getRight());
                                         }
                                     }
                                 }
@@ -333,20 +334,19 @@ public class IntegrationLoader implements CommandLineRunner {
                 }
             }
             logger.info("Loaded/reloaded " + integrationCount + " home organizations.");
-
-            logger.info(idpIds.size() + " inactivated integrations.");
-            for (Long id : idpIds) {
-                Optional<Integration> inactivatedIntegration = this.integrationRepository
-                        .findByIdAll(id);
-                if (inactivatedIntegration.isPresent()) {
-                    inactivatedIntegration.get().setStatus(1);
-                    try {
-                        integrationRepository.save(inactivatedIntegration.get());
-                    } catch (Exception e) {
-                        logger.error("Integration Exception: " + e + ". Could not inactivate integration #"
-                                + inactivatedIntegration.get().getId());
-                        continue;
-                    }
+        }
+        logger.info(idpIds.size() + " inactivated integrations.");
+        for (Long id : idpIds) {
+            Optional<Integration> inactivatedIntegration = this.integrationRepository
+                    .findByIdAll(id);
+            if (inactivatedIntegration.isPresent()) {
+                inactivatedIntegration.get().setStatus(1);
+                try {
+                    integrationRepository.save(inactivatedIntegration.get());
+                } catch (Exception e) {
+                    logger.error("Integration Exception: " + e + ". Could not inactivate integration #"
+                            + inactivatedIntegration.get().getId());
+                    continue;
                 }
             }
         }
