@@ -2,7 +2,7 @@ import { updateIntegration } from "@/api";
 import type { Components } from "@/api";
 import { useIntegrationsSpecSearchPageable } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
-import { roles, tallentajaOphGroup } from "@/config";
+import { roles, tallentajaOphGroup, mpassIdUserAttributeTestService } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
@@ -468,6 +468,7 @@ function PalveluRyhmaContent(props: Components.Schemas.ConfigurationEntity) {
 function SallittuPalvelu(props:RowListProps) {
     
   const allowed=props.newIntegration?.permissions?.find(i => i.to?.id === props.row.id );
+  const userTestService:boolean=(mpassIdUserAttributeTestService===props.row.id)
   let checked=false;
   let switchOpacity=1;
   if(allowed) {
@@ -477,9 +478,13 @@ function SallittuPalvelu(props:RowListProps) {
     checked=props.activateAllServices;
     switchOpacity=0.4
   }
+  if(userTestService) {
+    checked=true;
+    switchOpacity=0.4
+  }
   
   return(
-      <Switch sx={{ opacity: switchOpacity}} disabled={props.activateAllServices} checked={checked} onChange={()=>props.handleSwitch(props.row)}/>
+      <Switch sx={{ opacity: switchOpacity}} disabled={props.activateAllServices||userTestService} checked={checked} onChange={()=>props.handleSwitch(props.row)}/>
   );
   
 };
