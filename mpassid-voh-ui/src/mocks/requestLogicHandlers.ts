@@ -16,20 +16,20 @@ let allIntegrations = definition.paths["/api/v1/integration/list"].get
 let allIntegrations = exampleData as unknown as Components.Schemas.Integration[];
 
 
-const integration = definition.paths["/api/v1/integration/{id}"].get.responses[
+const integration = definition.paths["/api/v2/integration/{id}"].get.responses[
   "200"
 ].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
 };
 
-const updateIntegration = definition.paths["/api/v1/integration/{id}"].put.responses[
+const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.responses[
   "200"
 ].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
 };
 
 const searchIntegrations: { value?: Components.Schemas.PageIntegration } = 
-  definition.paths["/api/v1/integration/search"].get.responses["200"].content[
+  definition.paths["/api/v2/integration/search"].get.responses["200"].content[
     "application/json"
   ].examples.searchIntegrations;
   
