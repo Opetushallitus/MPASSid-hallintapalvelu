@@ -339,7 +339,6 @@ public class IntegrationService {
       }
 
       integrations = sortIntegrations(integrations, referenceIntegration, pageable);
-      integrations.forEach(integration -> extendPermissions(Optional.of(integration)));
 
       // logger.debug("Distinct integrations size: " + distinctIntegrations.size());
       return pageIntegrations(integrations, pageable);
@@ -378,7 +377,7 @@ public class IntegrationService {
       if (!integration.isPresent()) {
         throw new EntityNotFoundException("Not found Integration " + id);
       }
-      return extendPermissions(integration);
+      return integration;
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
@@ -477,6 +476,10 @@ public class IntegrationService {
               "Permitted integrations count : " + integration.getPermissions().size());
           existingIntegration.removePermissions();
           for (IntegrationPermission permission : integration.getPermissions()) {
+            // permission updates to the configurable default test service are skipped
+            if (permission.getTo().getId().equals(defaultTestServiceIntegrationId)) {
+              continue;
+            }
             // permission to integration set
             Integration integrationSet = getIntegrationSetById(permission.getTo().getId()).get();
             existingIntegration.addPermissionTo(integrationSet);
