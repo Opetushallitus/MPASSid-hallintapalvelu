@@ -523,7 +523,8 @@ function SelectedElements(integration: Components.Schemas.Integration) {
   const allIntegrations = useIntegrationsSpecSearchPageable();
   
   if(integration.permissions!=undefined&&integration.permissions?.length>0) {
-    return <>{integration.permissions.length}</>;
+    //Add mpassIdUserAttributeTestService to total length
+    return <>{(integration.permissions.length+1)}</>;
   } else {
     return <>{allIntegrations.totalElements}</>;
   }
