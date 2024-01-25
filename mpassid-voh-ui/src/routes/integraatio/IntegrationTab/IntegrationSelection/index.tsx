@@ -244,7 +244,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
               <FormattedMessage defaultMessage="Palvelun tarjoajat" />
               <Secondary>
               <Suspense inline>
-              &nbsp;( <SelectedElements {...newIntegration}/>/<TotalElements /> )
+              &nbsp;( <SelectedElements activateAllServices={activateAllServices} integration={newIntegration} />/<TotalElements /> )
               </Suspense>
             </Secondary>
             </Typography>
@@ -519,12 +519,23 @@ function TotalElements() {
   return <>{integrations.totalElements}</>;
 }
 
-function SelectedElements(integration: Components.Schemas.Integration) {
+export type SelectedElementsProps = {
+  integration: Components.Schemas.Integration|undefined;
+  activateAllServices: boolean
+};
+
+function SelectedElements(props:SelectedElementsProps) {
   const allIntegrations = useIntegrationsSpecSearchPageable();
+  const integration=props.integration;
+  const activateAllServices=props.activateAllServices;
   
-  if(integration.permissions!=undefined&&integration.permissions?.length>0) {
-    //Add mpassIdUserAttributeTestService to total length
-    return <>{(integration.permissions.length+1)}</>;
+  if(!activateAllServices) {
+    if(integration&&integration.permissions!=undefined&&(integration?.permissions?.length>0))  {
+      return <>{(integration.permissions.length)}</>;
+    } else {
+      return <>0</>;
+    }
+    
   } else {
     return <>{allIntegrations.totalElements}</>;
   }
