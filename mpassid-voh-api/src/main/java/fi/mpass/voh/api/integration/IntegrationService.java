@@ -338,6 +338,7 @@ public class IntegrationService {
         integrations = new ArrayList<Integration>(existingIntegrations);
       }
 
+      integrations.forEach(integration -> extendPermissions(Optional.of(integration)));
       integrations = sortIntegrations(integrations, referenceIntegration, pageable);
 
       // logger.debug("Distinct integrations size: " + distinctIntegrations.size());
@@ -377,7 +378,7 @@ public class IntegrationService {
       if (!integration.isPresent()) {
         throw new EntityNotFoundException("Not found Integration " + id);
       }
-      return integration;
+      return extendPermissions(integration);
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
