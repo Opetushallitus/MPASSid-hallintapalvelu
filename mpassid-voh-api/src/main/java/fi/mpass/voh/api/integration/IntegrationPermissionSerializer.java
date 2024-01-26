@@ -1,7 +1,7 @@
 package fi.mpass.voh.api.integration;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -25,8 +25,8 @@ public class IntegrationPermissionSerializer extends StdSerializer<Integration> 
         gen.writeStartObject();
         gen.writeObjectField("id", value.getId());
         if (value.getIntegrationSets() != null) {
-            // get service provider integrations
-            Set<Integration> integrations = value.getIntegrationSets();
+            // get sorted service provider integration sets
+            List<Integration> integrations = value.getIntegrationSetsList();
             // "integrations" : [
             gen.writeArrayFieldStart("integrations");
             for (Integration integration : integrations) {

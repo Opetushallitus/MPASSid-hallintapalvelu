@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Version;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -88,6 +90,7 @@ public class Integration implements Persistable<Long> {
     @JsonManagedReference
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @OneToMany(mappedBy = "from", cascade = { CascadeType.ALL }, orphanRemoval = true)
+    @OrderBy("id")
     private List<IntegrationPermission> permissions = new ArrayList<IntegrationPermission>();
 
     // @JsonView(value = IntegrationView.Default.class)
@@ -338,6 +341,13 @@ public class Integration implements Persistable<Long> {
 
     public Set<Integration> getIntegrationSets() {
         return this.integrationSets;
+    }
+
+    @JsonIgnore
+    public List<Integration> getIntegrationSetsList() {
+        List<Integration> integrationSetsList = this.integrationSets.stream().collect(Collectors.toList());
+        Collections.sort(integrationSetsList, Comparator.comparing(i -> i.getId()));
+        return integrationSetsList;
     }
 
     public void sortPermissionsByLastUpdatedOn() {
