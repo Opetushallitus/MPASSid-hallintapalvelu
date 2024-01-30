@@ -493,7 +493,7 @@ public class IntegrationService {
         throw new EntityUpdateException(
             "Integration #" + existingIntegration.getId() + " update not successful. Please re-update.");
       }
-      return integration;
+      return extendPermissions(Optional.of(integration)).get();
     }
     return existingIntegration;
   }
