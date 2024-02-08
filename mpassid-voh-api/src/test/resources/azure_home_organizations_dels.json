@@ -81,8 +81,7 @@
       "discoveryInformation": {
         "showSchools": "true",
         "schools": [],
-        "excludedSchools": [],
-        "title": "Ur"
+        "excludedSchools": []
       },
       "organization": {
         "oid": "1.2.246.562.10.00000000001"

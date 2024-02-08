@@ -113,7 +113,11 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
       if(copy!==undefined) {
         if(!activateAllServices) {
-          copy.permissions = [];
+          const newServiceIntgeration:Components.Schemas.IntegrationPermission={};
+          newServiceIntgeration.to={}; 
+          newServiceIntgeration.to.id=mpassIdUserAttributeTestService;
+          copy.permissions=[];
+          copy.permissions.push(newServiceIntgeration);
         } else {
           copy.permissions = structuredClone(integration.permissions);
         }
@@ -130,7 +134,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const cannotSave = () => {
     
-    if(newIntegration&&newIntegration.permissions&&(newIntegration?.permissions?.length>0||activateAllServices)) {
+    if(newIntegration&&newIntegration.permissions&&(newIntegration?.permissions?.length>1||activateAllServices)) {
       return true;
     }
     return false;
@@ -200,7 +204,11 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     if(writeAccess()) {
       const copy = structuredClone(newIntegration)
       if(copy!==undefined) {
+        const newServiceIntgeration:Components.Schemas.IntegrationPermission={};
+        newServiceIntgeration.to={}; 
+        newServiceIntgeration.to.id=mpassIdUserAttributeTestService;
         copy.permissions=[];
+        copy.permissions.push(newServiceIntgeration);
         setNewIntegration(copy);
         setSaveDialogState(true);
       }
