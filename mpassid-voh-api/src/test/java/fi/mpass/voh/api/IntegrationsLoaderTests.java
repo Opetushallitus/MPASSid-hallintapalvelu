@@ -25,6 +25,7 @@ import fi.mpass.voh.api.organization.OrganizationService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
@@ -263,7 +264,10 @@ public class IntegrationsLoaderTests {
         assertFalse(institutionTypes.contains(15));
         assertTrue(institutionTypes.contains(11));
 
-        // TODO discovery information
+        // 4000002 removed discovery information title field
+        Optional<Integration> removedDiscoveryInformationTitleIntegration = repository.findById(4000002L);
+        assertTrue(removedDiscoveryInformationTitleIntegration.isPresent());
+        assertNull(removedDiscoveryInformationTitleIntegration.get().getDiscoveryInformation().getTitle());
     }
 
     @Test
