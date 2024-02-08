@@ -67,8 +67,10 @@ public class IntegrationSpecificationCriteria {
             }
         }
         if (this.value instanceof List) {
-            if (((List)this.value).get(0) instanceof String)
-            return true;
+            if (((List) this.value).size() == 0)
+                return false;
+            if (((List) this.value).get(0) instanceof String)
+                return true;
         }
         return false;
     }
