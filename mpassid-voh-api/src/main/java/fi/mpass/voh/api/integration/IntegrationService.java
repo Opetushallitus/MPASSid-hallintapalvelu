@@ -79,7 +79,7 @@ public class IntegrationService {
         String[] authorityElements = authority.getAuthority().split("_");
 
         if (authorityElements.length == 5) {
-          String oidRegex = "[0-2](\\.(0|[1-9][0-9]*))+";
+          String oidRegex = "[0-2](\\.([0-9]*))+";
           Pattern p = Pattern.compile(oidRegex);
           Matcher m = p.matcher(authorityElements[4]);
           boolean b = m.matches();
