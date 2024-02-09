@@ -71,7 +71,7 @@ export default function Home() {
               </Suspense>
             </Secondary>
           </PageHeader>
-           {(false&&(me.groups?.includes(tallentajaOphGroup))||(me.groups?.includes(katselijaOphGroup)))&&
+           {((me.groups?.includes(tallentajaOphGroup))||(me.groups?.includes(katselijaOphGroup)))&&
               <FormControlLabel
                 control={
                   <Switch
@@ -80,7 +80,7 @@ export default function Home() {
                     onChange={(event) => {
                       setSearchParams((searchParams) => {
                         if (event.target.checked) {
-                          searchParams.set("passiiviset", JSON.stringify(true));
+                          searchParams.set("passiiviset", JSON.stringify(1));
                         } else {
                           searchParams.delete("passiiviset");
                         }
