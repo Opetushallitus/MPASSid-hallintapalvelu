@@ -27,6 +27,7 @@ export function useIntegrationsSpecSearchPageable() {
     role: searchParams.get("rooli") ?? undefined,
     deploymentPhase: searchParams.get("ympäristö") ?? undefined,
     type: searchParams.get("tyyppi") ?? undefined,
+    status: searchParams.get("passiiviset") ?? undefined,
     referenceIntegration: searchParams.get("referenceIntegration") ?? undefined,
     page: page - 1,
     size: searchParams.has(defaults.searchParamName)

@@ -1,4 +1,5 @@
 import { useIntegrationSafe } from "@/api";
+import { mpassIdUserAttributeTestService } from "@/config";
 import {
   getRole,
 } from "@/routes/home/IntegrationsTable";
@@ -78,7 +79,7 @@ export default function IntegrationTab({ id }: Props) {
   }, [origInteg]);
 
   useEffect(() => {
-    if(integration?.permissions === undefined || integration?.permissions?.length===0) {
+    if(integration?.permissions === undefined || integration?.permissions?.length===0 || (integration?.permissions?.length===1&&integration.permissions.map(i=>i.to?.id).indexOf(mpassIdUserAttributeTestService)>=0 )) {
       setActivateAllServices(true);
     } else {
       setActivateAllServices(false);

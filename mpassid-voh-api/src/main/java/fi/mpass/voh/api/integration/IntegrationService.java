@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
+import fi.mpass.voh.api.integration.idp.IdentityProvider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,9 @@ public class IntegrationService {
 
   @Value("${application.admin-organization-oid}")
   private String adminOrganizationOid;
+
+  @Value("${application.defaultTestServiceIntegrationId}")
+  private Long defaultTestServiceIntegrationId;
 
   private final IntegrationRepository integrationRepository;
 
@@ -75,7 +79,7 @@ public class IntegrationService {
         String[] authorityElements = authority.getAuthority().split("_");
 
         if (authorityElements.length == 5) {
-          String oidRegex = "[0-2](\\.(0|[1-9][0-9]*))+";
+          String oidRegex = "[0-2](\\.([0-9]*))+";
           Pattern p = Pattern.compile(oidRegex);
           Matcher m = p.matcher(authorityElements[4]);
           boolean b = m.matches();
@@ -334,6 +338,7 @@ public class IntegrationService {
         integrations = new ArrayList<Integration>(existingIntegrations);
       }
 
+      integrations.forEach(integration -> extendPermissions(Optional.of(integration)));
       integrations = sortIntegrations(integrations, referenceIntegration, pageable);
 
       // logger.debug("Distinct integrations size: " + distinctIntegrations.size());
@@ -373,10 +378,38 @@ public class IntegrationService {
       if (!integration.isPresent()) {
         throw new EntityNotFoundException("Not found Integration " + id);
       }
-      return integration;
+      return extendPermissions(integration);
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
+  }
+
+  /**
+   * The method extends the integration permissions.
+   * Requires the default test service integration identifier to be set in application properties.
+   * 
+   * @param integration
+   * @return integration with extended permissions
+   */
+  private Optional<Integration> extendPermissions(Optional<Integration> integration) {
+    if (integration.isPresent()) {
+      if (integration.get().getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+        if (defaultTestServiceIntegrationId == null) {
+          logger.error("Configuration error of the default test service integration identifier");
+          return integration;
+        }
+
+        Optional<Integration> defaultTestServiceIntegration = integrationRepository
+            .findById(defaultTestServiceIntegrationId);
+        if (defaultTestServiceIntegration.isPresent()) {
+          integration.get().addPermissionTo(defaultTestServiceIntegration.get());
+        } else {
+          logger.error("Cannot find the default test service integration");
+          return integration;
+        }
+      }
+    }
+    return integration;
   }
 
   /**
@@ -444,6 +477,10 @@ public class IntegrationService {
               "Permitted integrations count : " + integration.getPermissions().size());
           existingIntegration.removePermissions();
           for (IntegrationPermission permission : integration.getPermissions()) {
+            // permission updates to the configurable default test service are skipped
+            if (permission.getTo().getId().equals(defaultTestServiceIntegrationId)) {
+              continue;
+            }
             // permission to integration set
             Integration integrationSet = getIntegrationSetById(permission.getTo().getId()).get();
             existingIntegration.addPermissionTo(integrationSet);
@@ -456,7 +493,7 @@ public class IntegrationService {
         throw new EntityUpdateException(
             "Integration #" + existingIntegration.getId() + " update not successful. Please re-update.");
       }
-      return integration;
+      return extendPermissions(Optional.of(integration)).get();
     }
     return existingIntegration;
   }

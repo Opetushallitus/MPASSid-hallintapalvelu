@@ -76,7 +76,7 @@ public class ServiceProvidersLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         List<Long> spIds = integrationRepository.getAllSpIds();
-        logger.debug("Number of existing sp integrations: " + spIds.size());
+        logger.info("Number of existing sp integrations: " + spIds.size());
 
         for (String spInput : this.serviceProvidersInput) {
             ObjectMapper objectMapper = new ObjectMapper();

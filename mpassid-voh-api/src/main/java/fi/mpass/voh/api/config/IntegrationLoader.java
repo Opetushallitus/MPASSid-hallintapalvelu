@@ -126,10 +126,11 @@ public class IntegrationLoader implements CommandLineRunner {
                                 .findByIdIdpAll(integration.getId());
                         if (existingIntegration.isPresent()) {
                             if (!existingIntegration.get().isActive()) {
-                                logger.info("Reloading inactive integration " + existingIntegration.get().getId() + ". Reactivating.");
+                                logger.info("Reloading inactive integration " + existingIntegration.get().getId()
+                                        + ". Reactivating.");
                                 existingIntegration.get().setStatus(0);
                             }
-                            
+
                             logger.debug("Comparing existing integration " + existingIntegration.get().getId()
                                     + " version " + existingIntegration.get().getVersion() + " to "
                                     + integration.getId() + " version " + integration.getVersion());
@@ -141,96 +142,107 @@ public class IntegrationLoader implements CommandLineRunner {
                                 List<Diff<?>> diffs = diff.getDiffs();
                                 for (int i = 0; i < diff.getNumberOfDiffs(); i++) {
                                     Diff<?> d = diffs.get(i);
-                                    logger.debug(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
-                                    if (d.getFieldName().contains("configurationEntity.attributes.")) {
-                                        existingIntegration = Optional
-                                                .of(updateAttribute(d, existingIntegration.get()));
-                                    } else {
-                                        // differences in the integration fields
-                                        logger.debug("Integration field diff: " + d.getFieldName());
-                                        IdentityProvider idp = existingIntegration.get().getConfigurationEntity()
-                                                .getIdp();
-                                        if (d.getFieldName().contains("configurationEntity.idp.flowName")) {
-                                            idp.setFlowName(d.getRight().toString());
-                                        }
-                                        if (d.getFieldName().contains("configurationEntity.idp.idpId")) {
-                                            idp.setIdpId(d.getRight().toString());
-                                        }
-                                        if (d.getFieldName().contains("configurationEntity.idp.logoUrl")) {
-                                            idp.setLogoUrl(d.getRight().toString());
-                                        }
-                                        if (d.getFieldName().contains("configurationEntity.idp.entityId")) {
-                                            if (idp instanceof Azure) {
-                                                ((Azure) idp).setEntityId(d.getRight().toString());
+                                    logger.debug("Integration #" + existingIntegration.get().getId() + " "
+                                            + d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
+                                    try {
+                                        if (d.getFieldName().contains("configurationEntity.attributes.")) {
+                                            existingIntegration = Optional
+                                                    .of(updateAttribute(d, existingIntegration.get()));
+                                        } else {
+                                            // differences in the integration fields
+                                            IdentityProvider idp = existingIntegration.get().getConfigurationEntity()
+                                                    .getIdp();
+                                            if (d.getFieldName().contains("configurationEntity.idp.flowName")) {
+                                                idp.setFlowName((String) d.getRight());
                                             }
-                                            if (idp instanceof Adfs) {
-                                                ((Adfs) idp).setEntityId(d.getRight().toString());
+                                            if (d.getFieldName().contains("configurationEntity.idp.idpId")) {
+                                                idp.setIdpId((String) d.getRight());
                                             }
-                                            if (idp instanceof Gsuite) {
-                                                ((Gsuite) idp).setEntityId(d.getRight().toString());
+                                            if (d.getFieldName().contains("configurationEntity.idp.logoUrl")) {
+                                                idp.setLogoUrl((String) d.getRight());
                                             }
-                                        }
-                                        if (d.getFieldName().contains("configurationEntity.idp.metadataUrl")) {
-                                            if (idp instanceof Azure) {
-                                                ((Azure) idp).setMetadataUrl(d.getRight().toString());
+                                            if (d.getFieldName().contains("configurationEntity.idp.entityId")) {
+                                                if (idp instanceof Azure) {
+                                                    ((Azure) idp).setEntityId((String) d.getRight());
+                                                }
+                                                if (idp instanceof Adfs) {
+                                                    ((Adfs) idp).setEntityId((String) d.getRight());
+                                                }
+                                                if (idp instanceof Gsuite) {
+                                                    ((Gsuite) idp).setEntityId((String) d.getRight());
+                                                }
                                             }
-                                            if (idp instanceof Adfs) {
-                                                ((Adfs) idp).setMetadataUrl(d.getRight().toString());
+                                            if (d.getFieldName().contains("configurationEntity.idp.metadataUrl")) {
+                                                if (idp instanceof Azure) {
+                                                    ((Azure) idp).setMetadataUrl((String) d.getRight());
+                                                }
+                                                if (idp instanceof Adfs) {
+                                                    ((Adfs) idp).setMetadataUrl((String) d.getRight());
+                                                }
+                                                if (idp instanceof Gsuite) {
+                                                    ((Gsuite) idp).setMetadataUrl((String) d.getRight());
+                                                }
                                             }
-                                            if (idp instanceof Gsuite) {
-                                                ((Gsuite) idp).setMetadataUrl(d.getRight().toString());
+                                            if (d.getFieldName().contains("configurationEntity.idp.tenantId")) {
+                                                if (idp instanceof Opinsys) {
+                                                    ((Opinsys) idp).setTenantId((String) d.getRight());
+                                                }
                                             }
-                                        }
-                                        if (d.getFieldName().contains("configurationEntity.idp.tenantId")) {
-                                            if (idp instanceof Opinsys) {
-                                                ((Opinsys) idp).setTenantId(d.getRight().toString());
+                                            if (d.getFieldName().contains("configurationEntity.idp.hostname")) {
+                                                if (idp instanceof Wilma) {
+                                                    ((Wilma) idp).setHostname((String) d.getRight());
+                                                }
                                             }
-                                        }
-                                        if (d.getFieldName().contains("configurationEntity.idp.hostname")) {
-                                            if (idp instanceof Wilma) {
-                                                ((Wilma) idp).setHostname(d.getRight().toString());
+                                            if (d.getFieldName().contains("configurationEntity.idp.institutionTypes")) {
+                                                if (d.getRight() instanceof Set) {
+                                                    idp.setInstitutionTypes((Set<Integer>) d.getRight());
+                                                }
                                             }
-                                        }
-                                        if (d.getFieldName().contains("configurationEntity.idp.institutionTypes")) {
-                                            idp.setInstitutionTypes((Set<Integer>) d.getRight());
-                                        }
 
-                                        if (d.getFieldName().contains("discoveryInformation.title")) {
-                                            existingIntegration.get().getDiscoveryInformation()
-                                                    .setTitle(d.getRight().toString());
-                                        }
-                                        if (d.getFieldName().contains("discoveryInformation.customDisplayName")) {
-                                            existingIntegration.get().getDiscoveryInformation()
-                                                    .setCustomDisplayName(d.getRight().toString());
-                                        }
-                                        if (d.getFieldName().contains("discoveryInformation.showSchools")) {
-                                            existingIntegration.get().getDiscoveryInformation()
-                                                    .setShowSchools((boolean) d.getRight());
-                                        }
-                                        if (d.getFieldName().contains("discoveryInformation.schools")) {
-                                            logger.debug("diff in discoveryInformation.schools: " + d.getRight());
-                                            existingIntegration.get().getDiscoveryInformation()
-                                                    .setSchools((Set<String>) d.getRight());
-                                        }
-                                        if (d.getFieldName().contains("discoveryInformation.excludedSchools")) {
-                                            logger.debug(
-                                                    "diff in discoveryInformation.excludedSchools: " + d.getRight());
-                                            existingIntegration.get().getDiscoveryInformation()
-                                                    .setExcludedSchools((Set<String>) d.getRight());
-                                        }
+                                            if (d.getFieldName().contains("discoveryInformation.title")) {
+                                                existingIntegration.get().getDiscoveryInformation()
+                                                        .setTitle((String) d.getRight());
+                                            }
+                                            if (d.getFieldName().contains("discoveryInformation.customDisplayName")) {
+                                                existingIntegration.get().getDiscoveryInformation()
+                                                        .setCustomDisplayName((String) d.getRight());
+                                            }
+                                            if (d.getFieldName().contains("discoveryInformation.showSchools")) {
+                                                existingIntegration.get().getDiscoveryInformation()
+                                                        .setShowSchools((boolean) d.getRight());
+                                            }
+                                            if (d.getFieldName().contains("discoveryInformation.schools")) {
+                                                logger.debug("diff in discoveryInformation.schools: " + d.getRight());
+                                                if (d.getRight() instanceof Set) {
+                                                    existingIntegration.get().getDiscoveryInformation()
+                                                            .setSchools((Set<String>) d.getRight());
+                                                }
+                                            }
+                                            if (d.getFieldName().contains("discoveryInformation.excludedSchools")) {
+                                                logger.debug(
+                                                        "diff in discoveryInformation.excludedSchools: "
+                                                                + d.getRight());
+                                                existingIntegration.get().getDiscoveryInformation()
+                                                        .setExcludedSchools((Set<String>) d.getRight());
+                                            }
 
-                                        if (d.getFieldName().contains("organization.oid")) {
-                                            if (existingIntegration.get().getOrganization() != null) {
-                                                existingIntegration.get().getOrganization()
-                                                        .setOid(d.getRight().toString());
-                                            } else {
-                                                Organization org = new Organization("", d.getRight().toString());
-                                                existingIntegration.get().setOrganization(org);
+                                            if (d.getFieldName().contains("organization.oid")) {
+                                                if (existingIntegration.get().getOrganization() != null) {
+                                                    existingIntegration.get().getOrganization()
+                                                            .setOid((String) d.getRight());
+                                                } else {
+                                                    Organization org = new Organization("", (String) d.getRight());
+                                                    existingIntegration.get().setOrganization(org);
+                                                }
+                                            }
+                                            if (d.getFieldName().contains("deploymentPhase")) {
+                                                existingIntegration.get().setDeploymentPhase((Integer) d.getRight());
                                             }
                                         }
-                                        if (d.getFieldName().contains("deploymentPhase")) {
-                                            existingIntegration.get().setDeploymentPhase((Integer)d.getRight());
-                                        }
+                                    } catch (Exception e) {
+                                        logger.error(
+                                                "Error in updating integration #" + existingIntegration.get().getId()
+                                                        + ": " + e);
                                     }
                                 }
                             } else {
@@ -333,20 +345,19 @@ public class IntegrationLoader implements CommandLineRunner {
                 }
             }
             logger.info("Loaded/reloaded " + integrationCount + " home organizations.");
-
-            logger.info(idpIds.size() + " inactivated integrations.");
-            for (Long id : idpIds) {
-                Optional<Integration> inactivatedIntegration = this.integrationRepository
-                        .findByIdAll(id);
-                if (inactivatedIntegration.isPresent()) {
-                    inactivatedIntegration.get().setStatus(1);
-                    try {
-                        integrationRepository.save(inactivatedIntegration.get());
-                    } catch (Exception e) {
-                        logger.error("Integration Exception: " + e + ". Could not inactivate integration #"
-                                + inactivatedIntegration.get().getId());
-                        continue;
-                    }
+        }
+        logger.info(idpIds.size() + " inactivated integrations.");
+        for (Long id : idpIds) {
+            Optional<Integration> inactivatedIntegration = this.integrationRepository
+                    .findByIdAll(id);
+            if (inactivatedIntegration.isPresent()) {
+                inactivatedIntegration.get().setStatus(1);
+                try {
+                    integrationRepository.save(inactivatedIntegration.get());
+                } catch (Exception e) {
+                    logger.error("Integration Exception: " + e + ". Could not inactivate integration #"
+                            + inactivatedIntegration.get().getId());
+                    continue;
                 }
             }
         }
@@ -360,14 +371,14 @@ public class IntegrationLoader implements CommandLineRunner {
         // existing = left = "", input = right != ""
         // 1. a new attribute (with a new value) has been added to the integration
         // context
-        if (d.getLeft().equals("") && !d.getRight().equals("")) {
+        if ("".equals(d.getLeft()) && !"".equals(d.getRight())) {
             logger.debug("Attribute add diff: " + d.getFieldName());
             Set<Attribute> existingAttributes = existingIntegration.getConfigurationEntity().getAttributes();
             // name
             if (diffElements.length == 3) {
                 Attribute newAttr = new Attribute();
                 newAttr.setConfigurationEntity(existingIntegration.getConfigurationEntity());
-                newAttr.setName(d.getRight().toString());
+                newAttr.setName((String) d.getRight());
                 existingAttributes.add(newAttr);
             }
             if (diffElements.length == 4) {
@@ -375,10 +386,10 @@ public class IntegrationLoader implements CommandLineRunner {
                     Attribute attr = attrIterator.next();
                     if (attr.getName().equals(diffElements[2])) {
                         if (diffElements[3].equals("type")) {
-                            attr.setType(d.getRight().toString());
+                            attr.setType((String) d.getRight());
                         }
                         if (diffElements[3].equals("content")) {
-                            attr.setContent(d.getRight().toString());
+                            attr.setContent((String) d.getRight());
                         }
                     }
                 }
@@ -386,7 +397,7 @@ public class IntegrationLoader implements CommandLineRunner {
         }
         // (existing = left) != (input = right)
         // 2. the value has been changed
-        if (!d.getLeft().equals("") && !d.getRight().equals("")
+        if (!"".equals(d.getLeft()) && !"".equals(d.getRight())
                 && !d.getLeft().equals(d.getRight())) {
             logger.debug("Attribute mod diff: " + d.getFieldName());
             if (diffElements.length == 4) {
@@ -395,10 +406,10 @@ public class IntegrationLoader implements CommandLineRunner {
                     Attribute attr = attrIterator.next();
                     if (attr.getName().equals(diffElements[2])) {
                         if (diffElements[3].equals("type")) {
-                            attr.setType(d.getRight().toString());
+                            attr.setType((String) d.getRight());
                         }
                         if (diffElements[3].equals("content")) {
-                            attr.setContent(d.getRight().toString());
+                            attr.setContent((String) d.getRight());
                         }
                     }
                 }
@@ -407,7 +418,7 @@ public class IntegrationLoader implements CommandLineRunner {
         // existing = left != "", input = right == ""
         // 3. the existing attribute has been removed from the input in the integration
         // context
-        if (!d.getLeft().equals("") && d.getRight().equals("")) {
+        if (!"".equals(d.getLeft()) && "".equals(d.getRight())) {
             logger.debug("Attribute del diff: " + d.getFieldName());
             for (Iterator<Attribute> attributeIterator = existingIntegration
                     .getConfigurationEntity()

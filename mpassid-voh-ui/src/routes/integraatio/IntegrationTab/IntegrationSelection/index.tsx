@@ -2,7 +2,7 @@ import { updateIntegration } from "@/api";
 import type { Components } from "@/api";
 import { useIntegrationsSpecSearchPageable } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
-import { roles, tallentajaOphGroup } from "@/config";
+import { roles, tallentajaOphGroup, mpassIdUserAttributeTestService } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
@@ -113,7 +113,11 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
       if(copy!==undefined) {
         if(!activateAllServices) {
-          copy.permissions = [];
+          const newServiceIntgeration:Components.Schemas.IntegrationPermission={};
+          newServiceIntgeration.to={}; 
+          newServiceIntgeration.to.id=mpassIdUserAttributeTestService;
+          copy.permissions=[];
+          copy.permissions.push(newServiceIntgeration);
         } else {
           copy.permissions = structuredClone(integration.permissions);
         }
@@ -130,7 +134,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const cannotSave = () => {
     
-    if(newIntegration&&newIntegration.permissions&&(newIntegration?.permissions?.length>0||activateAllServices)) {
+    if(newIntegration&&newIntegration.permissions&&(newIntegration?.permissions?.length>1||activateAllServices)) {
       return true;
     }
     return false;
@@ -200,7 +204,11 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     if(writeAccess()) {
       const copy = structuredClone(newIntegration)
       if(copy!==undefined) {
+        const newServiceIntgeration:Components.Schemas.IntegrationPermission={};
+        newServiceIntgeration.to={}; 
+        newServiceIntgeration.to.id=mpassIdUserAttributeTestService;
         copy.permissions=[];
+        copy.permissions.push(newServiceIntgeration);
         setNewIntegration(copy);
         setSaveDialogState(true);
       }
@@ -244,7 +252,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
               <FormattedMessage defaultMessage="Palvelun tarjoajat" />
               <Secondary>
               <Suspense inline>
-              &nbsp;( <SelectedElements {...newIntegration}/>/<TotalElements /> )
+              &nbsp;( <SelectedElements activateAllServices={activateAllServices} integration={newIntegration} />/<TotalElements /> )
               </Suspense>
             </Secondary>
             </Typography>
@@ -468,6 +476,7 @@ function PalveluRyhmaContent(props: Components.Schemas.ConfigurationEntity) {
 function SallittuPalvelu(props:RowListProps) {
     
   const allowed=props.newIntegration?.permissions?.find(i => i.to?.id === props.row.id );
+  const userTestService:boolean=(mpassIdUserAttributeTestService===props.row.id)
   let checked=false;
   let switchOpacity=1;
   if(allowed) {
@@ -477,9 +486,13 @@ function SallittuPalvelu(props:RowListProps) {
     checked=props.activateAllServices;
     switchOpacity=0.4
   }
+  if(userTestService) {
+    checked=true;
+    switchOpacity=0.4
+  }
   
   return(
-      <Switch sx={{ opacity: switchOpacity}} disabled={props.activateAllServices} checked={checked} onChange={()=>props.handleSwitch(props.row)}/>
+      <Switch sx={{ opacity: switchOpacity}} disabled={props.activateAllServices||userTestService} checked={checked} onChange={()=>props.handleSwitch(props.row)}/>
   );
   
 };
@@ -514,11 +527,23 @@ function TotalElements() {
   return <>{integrations.totalElements}</>;
 }
 
-function SelectedElements(integration: Components.Schemas.Integration) {
+export type SelectedElementsProps = {
+  integration: Components.Schemas.Integration|undefined;
+  activateAllServices: boolean
+};
+
+function SelectedElements(props:SelectedElementsProps) {
   const allIntegrations = useIntegrationsSpecSearchPageable();
+  const integration=props.integration;
+  const activateAllServices=props.activateAllServices;
   
-  if(integration.permissions!=undefined&&integration.permissions?.length>0) {
-    return <>{integration.permissions.length}</>;
+  if(!activateAllServices) {
+    if(integration&&integration.permissions!=undefined&&(integration?.permissions?.length>0))  {
+      return <>{(integration.permissions.length)}</>;
+    } else {
+      return <>0</>;
+    }
+    
   } else {
     return <>{allIntegrations.totalElements}</>;
   }

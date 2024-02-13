@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.hibernate.envers.Audited;
@@ -39,7 +40,8 @@ public class ConfigurationEntity {
     @JsonManagedReference
     @OneToMany(mappedBy = "configurationEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @NotAudited
-    private Set<Attribute> attributes;
+    @OrderBy("name")
+    private Set<Attribute> attributes = new HashSet<Attribute>();
 
     @OneToOne(mappedBy = "configurationEntity", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn

@@ -1,3 +1,9 @@
+import { useState } from "react";
+import { useMe } from "@/api/käyttöoikeus";
+import {
+  katselijaOphGroup,
+  tallentajaOphGroup,
+} from "@/config";
 import { useIntegrationsSpecSearchPageable } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
@@ -10,8 +16,10 @@ import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import {
   Box,
   Divider,
+  FormControlLabel,
   Paper,
   Stack,
+  Switch,
   TableContainer,
   Typography,
 } from "@mui/material";
@@ -36,7 +44,9 @@ const copyFormDataToURLSearchParams =
 export default function Home() {
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [showPassive, setShowPassive] = useState(false); 
   const intl = useIntl();
+  const me=useMe();
 
   function handleSearch(formData: FormData) {
     const copy = copyFormDataToURLSearchParams(formData);
@@ -61,7 +71,28 @@ export default function Home() {
               </Suspense>
             </Secondary>
           </PageHeader>
-          
+           {((me.groups?.includes(tallentajaOphGroup))||(me.groups?.includes(katselijaOphGroup)))&&
+              <FormControlLabel
+                control={
+                  <Switch
+                    color="warning"
+                    checked={JSON.parse(searchParams.get("passiiviset") ?? "false")}
+                    onChange={(event) => {
+                      setSearchParams((searchParams) => {
+                        if (event.target.checked) {
+                          searchParams.set("passiiviset", JSON.stringify(1));
+                        } else {
+                          searchParams.delete("passiiviset");
+                        }
+    
+                        return resetPage(searchParams);
+                      });
+                    }}
+                  />
+                }
+                label={intl.formatMessage({ defaultMessage: "Passiiviset" })}
+              />
+          }
           <HelpLinkButton />
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
