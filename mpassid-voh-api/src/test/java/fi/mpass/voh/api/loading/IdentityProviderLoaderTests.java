@@ -1,11 +1,10 @@
-package fi.mpass.voh.api;
+package fi.mpass.voh.api.loading;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +17,6 @@ import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.Azure;
-import fi.mpass.voh.api.integration.sp.ServiceProviderRepository;
-import fi.mpass.voh.api.config.IntegrationLoader;
 import fi.mpass.voh.api.config.IntegrationSetLoader;
 import fi.mpass.voh.api.config.ServiceProvidersLoader;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -29,21 +26,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Disabled
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
         "spring.h2.console.enabled=true" })
-public class IntegrationsLoaderTests {
+class IdentityProviderLoaderTests {
 
-    IntegrationLoader integrationLoader;
+    IdentityProviderLoader idpLoader;
 
     @Autowired
     IntegrationRepository repository;
 
     @Autowired
-    ServiceProviderRepository serviceProviderRepository;
-
-    @Autowired
-    OrganizationService service;
+    OrganizationService organizationService;
 
     @Autowired
     ResourceLoader loader;
@@ -54,53 +47,77 @@ public class IntegrationsLoaderTests {
     }
 
     @Test
-    public void testGsuiteLoader() throws Exception {
+    void testGsuiteLoader() throws Exception {
         // 63
-        String setLocation = "integration_sets.json";
-        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
+        String setLocation = "set/integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, organizationService, loader);
         setLoader.run(setLocation);
 
         // 4
         String oidcLocation = "oidc_services.json";
         // 2
         String samlLocation = "saml_services.json";
-        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, service, loader);
+        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, organizationService, loader);
         serviceLoader.run(oidcLocation);
         serviceLoader.run(samlLocation);
 
         // 2, one with integration permissions
         String location = "gsuite_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         // 71
         assertEquals(71, repository.count());
     }
 
     @Test
-    public void testAzureLoader() throws Exception {
+    void testAzureLoader() throws Exception {
         String location = "azure_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(4, repository.count());
     }
 
     @Test
-    public void testWilmaLoader() throws Exception {
+    void testWilmaLoader() throws Exception {
         String location = "wilma_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        loading = idpLoader.init(loading);
 
         assertEquals(3, repository.count());
+        // no errors
+        assertEquals(0, loading.getIntegrationStatus().size());
+    }
+
+    @Test
+    void testWilmaLoaderWithoutOrganization() throws Exception {
+        String location = "wilma_home_organizations_without_organization.json";
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        loading = idpLoader.init(loading);
+
+        // one correct integration with organization out of three
+        assertEquals(1, repository.count());
+        // only errors are reported, two incorrect integrations without organization
+        assertEquals(2, loading.getIntegrationStatus().size());
     }
 
     @Test
     @Transactional
-    public void testOpinsysLoader() throws Exception {
+    void testOpinsysLoader() throws Exception {
         String location = "opinsys_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         List<Integration> integrations = repository.findAll();
         DiscoveryInformation di = integrations.get(0).getDiscoveryInformation();
@@ -115,25 +132,31 @@ public class IntegrationsLoaderTests {
     }
 
     @Test
-    public void testWilmaLoaderWithoutPreassignedId() throws Exception {
+    void testWilmaLoaderWithoutPreassignedId() throws Exception {
         String location = "wilma_home_organizations_without_id.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(1, repository.count());
     }
 
     @Test
-    public void testAzureReloadModifications() throws Exception {
+    void testAzureReloadModifications() throws Exception {
         String location = "azure_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_mods.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(idpLocation);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(idpLocation);
+        loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(4, repository.count());
 
@@ -173,16 +196,20 @@ public class IntegrationsLoaderTests {
     }
 
     @Test
-    public void testAzureReloadAdditions() throws Exception {
+    void testAzureReloadAdditions() throws Exception {
         String location = "azure_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_adds.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(idpLocation);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(idpLocation);
+        loading = new Loading();
+        idpLoader.init(loading);
 
         // 4000005 added integration
         assertEquals(5, repository.count());
@@ -223,16 +250,20 @@ public class IntegrationsLoaderTests {
     }
 
     @Test
-    public void testAzureReloadDeletions() throws Exception {
+    void testAzureReloadDeletions() throws Exception {
         String location = "azure_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_dels.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(idpLocation);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(idpLocation);
+        loading = new Loading();
+        idpLoader.init(loading);
 
         // all idp integrations were found, one idp inactive
         assertEquals(4, repository.count());
@@ -273,16 +304,20 @@ public class IntegrationsLoaderTests {
     }
 
     @Test
-    public void testAzureReloadDeletionsRestore() throws Exception {
+    void testAzureReloadDeletionsRestore() throws Exception {
         String location = "azure_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(location);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_dels.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(idpLocation);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(idpLocation);
+        loading = new Loading();
+        idpLoader.init(loading);
 
         // all idp integrations were found, one idp inactive
         assertEquals(4, repository.count());
@@ -293,8 +328,10 @@ public class IntegrationsLoaderTests {
         assertFalse(inactivatedIntegration.get().isActive());
 
         String restoreLocation = "azure_home_organizations.json";
-        integrationLoader = new IntegrationLoader(repository, service, serviceProviderRepository, loader);
-        integrationLoader.run(restoreLocation);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(restoreLocation);
+        loading = new Loading();
+        idpLoader.init(loading);
 
         assertEquals(4, repository.count());
 
