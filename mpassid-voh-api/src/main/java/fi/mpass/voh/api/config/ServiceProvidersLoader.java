@@ -40,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Profile("!default")
-@Order(2)
-@Component
+//@Order(2)
+//@Component
 public class ServiceProvidersLoader implements CommandLineRunner {
     private final static Logger logger = LoggerFactory.getLogger(ServiceProvidersLoader.class);
 
