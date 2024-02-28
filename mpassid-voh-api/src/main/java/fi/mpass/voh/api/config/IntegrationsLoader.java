@@ -41,8 +41,8 @@ public class IntegrationsLoader implements CommandLineRunner {
                         loading.setType(LoadingType.ALL);
                         loadingService.start(loading);
                         logger.info("{} {}", LOADING_STATUS, loading.getStatus());
-                        if (!loading.getIntegrationStatus().isEmpty()) {
-                                loading.getIntegrationStatus()
+                        if (!loading.getErrors().isEmpty()) {
+                                loading.getErrors()
                                                 .forEach((id, status) -> logger.error("{} #{}: {}", INTEGRATION, id,
                                                                 status));
                         }

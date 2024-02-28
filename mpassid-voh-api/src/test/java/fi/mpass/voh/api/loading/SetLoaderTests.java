@@ -52,7 +52,7 @@ class SetLoaderTests {
 
         assertTrue(integration_with_organization.isPresent());
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
-        assertEquals(63, repository.count());
+        assertEquals(64, repository.count());
     }
 
     @Test
@@ -64,12 +64,15 @@ class SetLoaderTests {
         Loading loading = new Loading();
         setLoader.init(loading);
 
-        assertEquals(64, repository.count());
+        // the input was discarded since there were duplicate integrations
+        assertEquals(0, repository.count());
+        // Duplicate error
+        assertEquals(1, loading.getErrors().size());
     }
 
     @Test
     void testIntegrationSetLoaderWithLessThanThreshold() throws Exception {
-        // 63, one with organization
+        // 64
         String setLocation = "set/integration_sets.json";
         setLoader = new SetLoader(repository, organizationService, loader);
         setLoader.setInput(setLocation);
@@ -80,10 +83,10 @@ class SetLoaderTests {
 
         assertTrue(integration_with_organization.isPresent());
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
-        assertEquals(63, repository.count());
-        
-        // 4 in input, 63 should remain
-        setLocation = "set/integration_sets_less_than_threshold.json";
+        assertEquals(64, repository.count());
+
+        // 4 in input, 64 should remain due to exceeded maximum removal number
+        setLocation = "set/integration_sets_more_than_max_removals.json";
         setLoader = new SetLoader(repository, organizationService, loader);
         setLoader.setMaxRemovalNumber(8);
         setLoader.setInput(setLocation);
@@ -107,7 +110,7 @@ class SetLoaderTests {
 
         assertTrue(integration_with_organization.isPresent());
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
-        assertEquals(63, repository.findAll().size());
+        assertEquals(64, repository.count());
 
         setLocation = "set/integration_sets_mods.json";
         SetLoader setReloader = new SetLoader(repository, organizationService, loader);
@@ -115,7 +118,7 @@ class SetLoaderTests {
         loading = new Loading();
         setReloader.init(loading);
 
-        assertEquals(63, repository.count());
+        assertEquals(64, repository.count());
 
         // 6000003, changed attribute value
         Optional<Integration> modifiedAttrIntegration = repository.findById(6000003L);
@@ -137,6 +140,11 @@ class SetLoaderTests {
         Optional<Integration> modifiedIntegrationOrg = repository.findById(6000005L);
         assertTrue(modifiedIntegrationOrg.isPresent());
         assertEquals("1.2.246.562.10.33651716236", modifiedIntegrationOrg.get().getOrganization().getOid());
+
+        // 6000006, changed organization
+        modifiedIntegrationOrg = repository.findById(6000006L);
+        assertTrue(modifiedIntegrationOrg.isPresent());
+        assertEquals("1.2.246.562.10.52429530125", modifiedIntegrationOrg.get().getOrganization().getOid());
     }
 
     @Test
@@ -152,8 +160,9 @@ class SetLoaderTests {
 
         assertTrue(integration_with_organization.isPresent());
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
-        assertEquals(63, repository.count());
+        assertEquals(64, repository.count());
 
+        // 6000002 add allowtestlearnerid2 attribute to integration
         setLocation = "set/integration_sets_adds.json";
         SetLoader setReloader = new SetLoader(repository, organizationService, loader);
         setReloader.setInput(setLocation);
@@ -172,12 +181,13 @@ class SetLoaderTests {
         }
 
         assertTrue(addedFound);
-        assertEquals(64, repository.count());
+        // 6000065 new integration
+        assertEquals(65, repository.count());
     }
 
     @Test
     void testIntegrationSetLoaderReloadDeletions() throws Exception {
-        // 63, one with organization
+        // 64
         String setLocation = "set/integration_sets.json";
         setLoader = new SetLoader(repository, organizationService, loader);
         setLoader.setInput(setLocation);
@@ -188,7 +198,7 @@ class SetLoaderTests {
 
         assertTrue(integration_with_organization.isPresent());
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
-        assertEquals(63, repository.count());
+        assertEquals(64, repository.count());
 
         // 62
         setLocation = "set/integration_sets_dels.json";
@@ -197,11 +207,16 @@ class SetLoaderTests {
         loading = new Loading();
         setReloader.init(loading);
 
-        // all found, one inactive
-        assertEquals(63, repository.count());
+        // all found, two inactive
+        assertEquals(64, repository.count());
+
+        // 6000002 whole integration set inactivated
+        Optional<Integration> inactivatedIntegration = repository.findById(6000002L);
+        assertTrue(inactivatedIntegration.isPresent());
+        assertFalse(inactivatedIntegration.get().isActive());
 
         // 6000003 whole integration set inactivated
-        Optional<Integration> inactivatedIntegration = repository.findById(6000003L);
+        inactivatedIntegration = repository.findById(6000003L);
         assertTrue(inactivatedIntegration.isPresent());
         assertFalse(inactivatedIntegration.get().isActive());
 
@@ -221,7 +236,7 @@ class SetLoaderTests {
 
     @Test
     void testIntegrationSetLoaderReloadDeletionsRestore() throws Exception {
-        // 63, one with organization
+        // 64
         String setLocation = "set/integration_sets.json";
         setLoader = new SetLoader(repository, organizationService, loader);
         setLoader.setInput(setLocation);
@@ -232,7 +247,7 @@ class SetLoaderTests {
 
         assertTrue(integration_with_organization.isPresent());
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
-        assertEquals(63, repository.count());
+        assertEquals(64, repository.count());
 
         // 62
         setLocation = "set/integration_sets_dels.json";
@@ -241,23 +256,33 @@ class SetLoaderTests {
         loading = new Loading();
         setReloader.init(loading);
 
-        // all found, one inactive
-        assertEquals(63, repository.count());
+        // all found, two inactive
+        assertEquals(64, repository.count());
 
-        // 6000003 whole integration set inactivated
-        Optional<Integration> inactivatedIntegration = repository.findById(6000003L);
+        // 6000002 whole integration set inactivated
+        Optional<Integration> inactivatedIntegration = repository.findById(6000002L);
         assertTrue(inactivatedIntegration.isPresent());
         assertFalse(inactivatedIntegration.get().isActive());
 
-        // 63, one with organization
+        // 6000003 whole integration set inactivated
+        inactivatedIntegration = repository.findById(6000003L);
+        assertTrue(inactivatedIntegration.isPresent());
+        assertFalse(inactivatedIntegration.get().isActive());
+
+        // 64
         String restoreLocation = "set/integration_sets.json";
         setReloader = new SetLoader(repository, organizationService, loader);
         setReloader.setInput(restoreLocation);
         loading = new Loading();
         setReloader.init(loading);
 
+        // 6000002 whole integration set was activated again
+        Optional<Integration> activatedIntegration = repository.findById(6000002L);
+        assertTrue(activatedIntegration.isPresent());
+        assertTrue(activatedIntegration.get().isActive());
+
         // 6000003 whole integration set was activated again
-        Optional<Integration> activatedIntegration = repository.findById(6000003L);
+        activatedIntegration = repository.findById(6000003L);
         assertTrue(activatedIntegration.isPresent());
         assertTrue(activatedIntegration.get().isActive());
     }

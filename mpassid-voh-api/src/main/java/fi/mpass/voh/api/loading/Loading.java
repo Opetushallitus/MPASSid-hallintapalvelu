@@ -35,7 +35,7 @@ public class Loading {
             @JoinColumn(name = "loading_id", referencedColumnName = "id") })
     @MapKeyColumn(name = "integration_id")
     @Column(name = "status")
-    private Map<Long, String> integrationStatus = new HashMap<>();
+    private Map<Long, String> errors = new HashMap<>();
 
     public Loading() {
         this.time = LocalDateTime.now();
@@ -73,32 +73,40 @@ public class Loading {
         this.time = time;
     }
 
-    public Map<Long, String> getIntegrationStatus() {
-        return integrationStatus;
+    public Map<Long, String> getErrors() {
+        return errors;
     }
 
-    public void setIntegrationStatus(Map<Long, String> integrationStatus) {
-        this.integrationStatus = integrationStatus;
+    public void setErrors(Map<Long, String> errors) {
+        this.errors = errors;
     }
 
-    public void addIntegrationLoadingStatus(Integration integration, String status) {
-        if (this.integrationStatus != null && status != null) {
-            String existingStatus = this.integrationStatus.get(integration.getId());
-            if (existingStatus != null) {
-                integrationStatus.put(integration.getId(), existingStatus + ";" + status);
-            } else {
-                integrationStatus.put(integration.getId(), status);
+    public void addError(Integration integration, String error) {
+        if (integration != null) {
+            if (this.errors != null && error != null) {
+                Long identifier = integration.getId();
+                if (identifier == null) {
+                    identifier = Long.valueOf(0);
+                }
+                String existingStatus = this.errors.get(identifier);
+                if (existingStatus != null) {
+                    errors.put(identifier, existingStatus + ";" + error);
+                } else {
+                    errors.put(identifier, error);
+                }
             }
+        } else {
+            this.addError(Long.valueOf(0), error);
         }
     }
 
-    public void addIntegrationLoadingStatus(Long id, String status) {
-        if (this.integrationStatus != null && status != null) {
-            String existingStatus = this.integrationStatus.get(id);
+    public void addError(Long id, String error) {
+        if (this.errors != null && error != null) {
+            String existingStatus = this.errors.get(id);
             if (existingStatus != null) {
-                integrationStatus.put(id, existingStatus + ";" + status);
+                errors.put(id, existingStatus + ";" + error);
             } else {
-                integrationStatus.put(id, status);
+                errors.put(id, error);
             }
         }
     }

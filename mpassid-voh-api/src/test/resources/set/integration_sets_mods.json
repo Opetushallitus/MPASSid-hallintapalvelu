@@ -68,6 +68,9 @@
                     }
                 ]
             },
+            "organization": {
+                "oid": "1.2.246.562.10.52429530125"
+            },
             "deploymentPhase": 0
         },
         {

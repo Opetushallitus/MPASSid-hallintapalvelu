@@ -1038,6 +1038,25 @@
             "organization": {
                 "oid": "1.2.246.562.10.33651716236"
             }
+        },
+        {
+            "id": 6000065,
+            "configurationEntity": {
+                "set": {
+                    "name": "Lisätty"
+                },
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "false",
+                        "type": "data"
+                    }
+                ]
+            },
+            "deploymentPhase": 0,
+            "organization": {
+                "oid": "1.2.246.562.10.33651716236"
+            }
         }
     ]
 }

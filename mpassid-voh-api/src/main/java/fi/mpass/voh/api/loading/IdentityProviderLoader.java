@@ -1,5 +1,7 @@
 package fi.mpass.voh.api.loading;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -7,10 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -27,9 +31,7 @@ import org.springframework.util.ResourceUtils;
 
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationDiffBuilder;
-import fi.mpass.voh.api.integration.IntegrationPermission;
 import fi.mpass.voh.api.integration.IntegrationRepository;
-import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.Adfs;
 import fi.mpass.voh.api.integration.idp.Azure;
 import fi.mpass.voh.api.integration.idp.Gsuite;
@@ -45,33 +47,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
-public class IdentityProviderLoader {
+public class IdentityProviderLoader extends Loader {
     private static final Logger logger = LoggerFactory.getLogger(IdentityProviderLoader.class);
 
     @Value("#{${application.home-organizations.input}}")
     private List<String> homeOrganizationsInput;
 
-    IntegrationRepository integrationRepository;
-    OrganizationService organizationService;
-    ResourceLoader resourceLoader;
-    InputStream inputStream;
-
     public IdentityProviderLoader(IntegrationRepository repository, OrganizationService organizationService,
             ResourceLoader loader) {
-        this.integrationRepository = repository;
-        this.organizationService = organizationService;
-        this.resourceLoader = loader;
+        super(repository, organizationService, loader);
         if (this.homeOrganizationsInput == null) {
             this.homeOrganizationsInput = Arrays.asList("home_organizations.json");
         }
     }
 
+    /**
+     * Loads identity provider integrations from the given, configurable resource (a
+     * list of inputs).
+     */
     public Loading init(Loading loading) {
 
         loading.setStatus(LoadingStatus.LOADING);
-
-        List<Long> idpIds = this.integrationRepository.getAllIdpIds();
-        logger.info("Number of existing idp integrations: {}", idpIds.size());
 
         for (String idpInput : this.homeOrganizationsInput) {
             ObjectMapper objectMapper = JsonMapper.builder()
@@ -86,182 +82,83 @@ public class IdentityProviderLoader {
                     inputStream = new FileInputStream(file);
                 } catch (FileNotFoundException e) {
                     logger.error("{} not found.", idpInput);
-                    loading.addIntegrationLoadingStatus(new Integration(Long.valueOf(0)), idpInput + " not found");
+                    loading.addError(Long.valueOf(0), idpInput + " not found");
                     inputStream = null;
-                    continue;
+                    break;
                 }
             }
 
+            JsonNode preRootNode = null;
             JsonNode rootNode = null;
             try {
-                rootNode = (objectMapper.readTree(inputStream)).path("identityProviders");
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                inputStream.transferTo(baos);
+                InputStream preInputStream = new ByteArrayInputStream(baos.toByteArray());
+                InputStream actualInputStream = new ByteArrayInputStream(baos.toByteArray());
+
+                preRootNode = (objectMapper.readTree(preInputStream)).path("identityProviders");
+                rootNode = (objectMapper.readTree(actualInputStream)).path("identityProviders");
+
             } catch (StreamReadException e) {
                 logger.error("{} contains invalid content.", idpInput);
-                loading.addIntegrationLoadingStatus(new Integration(Long.valueOf(0)), idpInput + " contains invalid content");
+                loading.addError(Long.valueOf(0),
+                        idpInput + " contains invalid content");
+                inputStream = null;
+                break;
             } catch (IOException e) {
                 logger.error("{} IO exception.", idpInput);
-                loading.addIntegrationLoadingStatus(new Integration(Long.valueOf(0)), idpInput + " IO exception");
+                loading.addError(Long.valueOf(0), idpInput + " IO exception");
             }
 
-            int integrationCount = 0;
+            // precheck for, e.g., the number of removed integrations
+            Map<Integer, List<Long>> preProcessed = processNodes(loading, preRootNode, true);
 
-            if (rootNode != null && rootNode.isArray()) {
-                for (JsonNode arrayNode : rootNode) {
-                    Integration integration = null;
-                    try {
-                        integration = objectMapper.readValue(arrayNode.toString(), Integration.class);
-                    } catch (Exception e) {
-                        logger.error("Integration exception: {}. Continuing to next.", e.toString());
-                        loading.addIntegrationLoadingStatus(integration, "Read failed");
+            // if preprocessing detects any errors, fail fast
+            if (preProcessed.keySet().isEmpty() || loading.getErrors().size() > 0) {
+                logger.error("Preprocessing input {} failed.", idpInput);
+                inputStream = null;
+                break;
+            }
 
-                        continue;
-                    }
+            // check for duplicate integrations in the input
+            if (duplicates(loading, preProcessed)) {
+                inputStream = null;
+                break;
+            }
 
-                    // an existing integration (active or inactive)
-                    if (idpIds.contains(integration.getId())) {
-                        List<IntegrationPermission> permissions = integration.getPermissions();
-                        if (!permissions.isEmpty()) {
-                            logger.info("Loaded integration #{} with permissions! Permissions might be not effective.",
-                                    integration.getId());
-                        }
-                        Optional<Integration> existingIntegration = this.integrationRepository
-                                .findByIdIdpAll(integration.getId());
-                        if (existingIntegration.isPresent()) {
-                            if (!existingIntegration.get().isActive()) {
-                                logger.info("Reloading inactive integration #{}. Reactivating.",
-                                        existingIntegration.get().getId());
-                                existingIntegration.get().setStatus(0);
-                            }
+            // assuming the input can only contain integrations in one deployment phase
+            int deploymentPhase = (int) preProcessed.keySet().toArray()[0];
+            List<Long> existingIds = integrationRepository.getAllIdpIdsByDeploymentPhase(deploymentPhase);
+            logger.info("Number of existing set integrations in deployment phase {}: {}", deploymentPhase,
+                    existingIds.size());
 
-                            logger.debug("Comparing existing integration #{} version {} to #{} version {}",
-                                    existingIntegration.get().getId(), existingIntegration.get().getVersion(),
-                                    integration.getId(), integration.getVersion());
-
-                            existingIntegration = applyUpdate(loading, integration, existingIntegration);
-                            integration = existingIntegration.get();
-                        }
-                        idpIds.remove(integration.getId());
-                    } else {
-                        // a new idp integration
-                        logger.debug("A new idp integration #{}", integration.getId());
-                    }
-
-                    Organization organization = new Organization();
-                    if (integration.getOrganization() != null && integration.getOrganization().getOid() != null
-                            && integration.getOrganization().getOid().length() > 0) {
-                        logger.debug("Organization oid: {}", integration.getOrganization().getOid());
-                        try {
-                            organization = organizationService.getById(integration.getOrganization().getOid());
-                        } catch (Exception ex) {
-                            logger.error(
-                                    "Organization cache lookup exception: {}. Continuing to next integration.",
-                                    ex.toString());
-                            loading.addIntegrationLoadingStatus(integration, "Organization cache lookup exception");
-                            continue;
-                        }
-                        if (organization == null) {
-                            try {
-                                logger.debug(
-                                        "A new integration organization: {}", integration.getOrganization().getOid());
-                                organization = organizationService
-                                        .retrieveOrganization(integration.getOrganization().getOid());
-                            } catch (Exception ex) {
-                                logger.error("Organization retrieval exception: {}. Continuing to next.",
-                                        ex.toString());
-                                loading.addIntegrationLoadingStatus(integration, "Organization retrieval exception");
-                                continue;
-                            }
-                        }
-                    }
-
-                    try {
-                        // No cascading, Integration:Organization
-                        organization = organizationService.saveOrganization(organization);
-                    } catch (Exception e) {
-                        logger.error("Organization Exception: {}", e.toString());
-                        loading.addIntegrationLoadingStatus(integration, "Organization caching exception");
-                    }
-                    integration.setOrganization(organization);
-
-                    // check if existing permissions were found
-                    if (integration.getPermissions().isEmpty()) {
-                        IdentityProvider idp = integration.getConfigurationEntity().getIdp();
-                        if (idp != null) {
-                            JsonNode allowedNode = arrayNode.get("configurationEntity").get("idp")
-                                    .get("allowedServiceProviders");
-                            if (allowedNode != null) {
-                                final Integration i = integration;
-                                allowedNode.forEach(c -> {
-                                    if (c.get("entityId") != null) {
-                                        // find the corresponding integration set and make that set the allowed
-                                        // integration
-                                        Integration samlSp = integrationRepository
-                                                .findByConfigurationEntitySpEntityId(c.get("entityId").asText());
-                                        if (samlSp != null) {
-                                            logger.debug("Allowed SAML SP: {}", samlSp);
-                                            Set<Integration> integrationSet = samlSp.getIntegrationSets();
-                                            // assuming that an SP can belong to only one set
-                                            if (!integrationSet.isEmpty()) {
-                                                Integration setIntegration = integrationSet.iterator().next();
-                                                logger.debug("Set #{}", setIntegration.getId());
-                                                i.addPermissionTo(setIntegration);
-                                            }
-                                        }
-                                    }
-                                    if (c.get("clientId") != null) {
-                                        // find the corresponding integration set and make that set the allowed
-                                        // integration
-                                        Integration oidcRp = integrationRepository
-                                                .findByConfigurationEntitySpClientId(c.get("clientId").asText());
-                                        if (oidcRp != null) {
-                                            logger.debug("Allowed OIDC RP: {}", oidcRp);
-                                            Set<Integration> integrationSet = oidcRp.getIntegrationSets();
-                                            // assuming that an RP can belong to only one set
-                                            if (!integrationSet.isEmpty()) {
-                                                Integration setIntegration = integrationSet.iterator().next();
-                                                logger.debug("Set #{}", setIntegration.getId());
-                                                i.addPermissionTo(setIntegration);
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    }
-
-                    try {
-                        integrationRepository.save(integration);
-                        integrationCount++;
-                    } catch (Exception e) {
-                        logger.error("Integration Exception: {}. Continuing to next.", e.toString());
-                        loading.addIntegrationLoadingStatus(integration, "Save failed");
-                    }
+            List<Long> preRemovedIds = new ArrayList<>(existingIds);
+            if (preRemovedIds.removeAll(preProcessed.get(deploymentPhase))) {
+                logger.info("Prechecking {} inactivated integrations.", preRemovedIds.size());
+                if (preRemovedIds.size() > this.maxRemovalNumber) {
+                    logger.error("Maximum number of removals ({}) exceeded. Skipping input from {}",
+                            this.maxRemovalNumber, idpInput);
+                    loading.addError(Long.valueOf(0),
+                            "Maximum number of removals exceeded. Skipping input.");
+                    inputStream = null;
+                    break;
                 }
-            } else {
-                logger.error("{} does not contain array.", idpInput);
-                loading.addIntegrationLoadingStatus(new Integration(Long.valueOf(0)), idpInput + " does not contain array");
             }
-            logger.info("Loaded/reloaded {} integrations.", integrationCount);
+
+            Map<Integer, List<Long>> processed = processNodes(loading, rootNode, false);
+
+            logger.info("Loaded/reloaded {} integrations in deployment phase {}", processed.get(deploymentPhase).size(),
+                    deploymentPhase);
             inputStream = null;
-        }
 
-        logger.info("{} inactivated integrations.", idpIds.size());
-        for (Long id : idpIds) {
-            Optional<Integration> inactivatedIntegration = this.integrationRepository
-                    .findByIdAll(id);
-            if (inactivatedIntegration.isPresent()) {
-                inactivatedIntegration.get().setStatus(1);
-                try {
-                    integrationRepository.save(inactivatedIntegration.get());
-                } catch (Exception e) {
-                    logger.error("Integration Exception: {}. Could not inactivate integration #{}", e,
-                            inactivatedIntegration.get().getId());
-                    loading.addIntegrationLoadingStatus(inactivatedIntegration.get(), "Inactivation failed");
-                }
+            List<Long> removedIds = new ArrayList<>(existingIds);
+            if (removedIds.removeAll(processed.get(deploymentPhase))) {
+                logger.info("{} inactivated integrations in deployment phase {}", removedIds.size(), deploymentPhase);
+                inactivateIntegrations(loading, removedIds);
             }
         }
 
-        if (loading.getIntegrationStatus().isEmpty()) {
+        if (loading.getErrors().isEmpty()) {
             loading.setStatus(LoadingStatus.SUCCEEDED);
         } else {
             loading.setStatus(LoadingStatus.FAILED);
@@ -270,9 +167,50 @@ public class IdentityProviderLoader {
         return loading;
     }
 
-    private Optional<Integration> applyUpdate(Loading loading, Integration integration,
+    @Override
+    protected boolean validIntegration(Loading loading, Integration integration) {
+        // validate integration identifier
+        if (integration != null) {
+            if (integration.getId() == null) {
+                logger.error("Integration identifier missing");
+                loading.addError(Long.valueOf(0), "Integration identifier missing");
+                return false;
+            }
+
+            // validate integration organization oid, it must exist
+            if (integration.getOrganization() != null) {
+                if (integration.getOrganization().getOid().length() < 256) {
+                    String oidRegex = "[0-2](\\.([0-9]*))+";
+                    Pattern p = Pattern.compile(oidRegex);
+                    Matcher m = p.matcher(integration.getOrganization().getOid());
+                    boolean b = m.matches();
+                    if (!b) {
+                        logger.error("Integration #{} organization oid is not valid", integration.getId());
+                        loading.addError(integration, "Not valid organization oid");
+                        return false;
+                    }
+                } else {
+                    logger.error("Integration #{} organization oid maximum length exceeded", integration.getId());
+                    loading.addError(integration, "Organization oid maximum length exceeded");
+                    return false;
+                }
+            } else {
+                logger.error("Integration #{} organization does not exist", integration.getId());
+                loading.addError(integration, "Organization does not exist");
+                return false;
+            }
+        } else
+            return false;
+        return true;
+    }
+
+    @Override
+    protected Optional<Integration> applyUpdate(Loading loading, Integration integration,
             Optional<Integration> existingIntegration) {
 
+        logger.debug("Comparing existing integration #{} version {} to #{} version {}",
+                existingIntegration.get().getId(), existingIntegration.get().getVersion(),
+                integration.getId(), integration.getVersion());
         DiffResult<Integration> diff = IntegrationDiffBuilder.compareIdp(existingIntegration.get(),
                 integration);
 
@@ -365,9 +303,11 @@ public class IdentityProviderLoader {
                             if (existingIntegration.get().getOrganization() != null) {
                                 existingIntegration.get().getOrganization()
                                         .setOid((String) d.getRight());
+                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
                             } else {
                                 Organization org = new Organization("", (String) d.getRight());
                                 existingIntegration.get().setOrganization(org);
+                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
                             }
                         }
                         if (d.getFieldName().contains("deploymentPhase")) {
@@ -377,84 +317,13 @@ public class IdentityProviderLoader {
                 } catch (Exception e) {
                     logger.error(
                             "Error in updating integration #{}: {}", existingIntegration.get().getId(), e.toString());
-                    loading.addIntegrationLoadingStatus(existingIntegration.get(), "Update failed");
+                    loading.addError(existingIntegration.get(), "Update failed");
                 }
             }
         } else {
             logger.error("Comparison failed. Check input data structure and values.");
-            loading.addIntegrationLoadingStatus(integration, "Comparison failed");
+            loading.addError(integration, "Comparison failed");
         }
-        return existingIntegration;
-    }
-
-    private Integration updateAttribute(Diff<?> d, Integration existingIntegration) {
-        String[] diffElements = d.getFieldName().split("\\.");
-        // configurationEntity.attributes.<name>
-        // configurationEntity.attributes.<name>.type
-        // configurationEntity.attributes.<name>.content
-        // existing = left = "", input = right != ""
-        // 1. a new attribute (with a new value) has been added to the integration
-        // context
-        if ("".equals(d.getLeft()) && !"".equals(d.getRight())) {
-            logger.debug("Attribute add diff: " + d.getFieldName());
-            Set<Attribute> existingAttributes = existingIntegration.getConfigurationEntity().getAttributes();
-            // name
-            if (diffElements.length == 3) {
-                Attribute newAttr = new Attribute();
-                newAttr.setConfigurationEntity(existingIntegration.getConfigurationEntity());
-                newAttr.setName((String) d.getRight());
-                existingAttributes.add(newAttr);
-            }
-            if (diffElements.length == 4) {
-                for (Iterator<Attribute> attrIterator = existingAttributes.iterator(); attrIterator.hasNext();) {
-                    Attribute attr = attrIterator.next();
-                    if (attr.getName().equals(diffElements[2])) {
-                        if (diffElements[3].equals("type")) {
-                            attr.setType((String) d.getRight());
-                        }
-                        if (diffElements[3].equals("content")) {
-                            attr.setContent((String) d.getRight());
-                        }
-                    }
-                }
-            }
-        }
-        // (existing = left) != (input = right)
-        // 2. the value has been changed
-        if (!"".equals(d.getLeft()) && !"".equals(d.getRight())
-                && !d.getLeft().equals(d.getRight())) {
-            logger.debug("Attribute mod diff: " + d.getFieldName());
-            if (diffElements.length == 4) {
-                for (Iterator<Attribute> attrIterator = existingIntegration.getConfigurationEntity()
-                        .getAttributes().iterator(); attrIterator.hasNext();) {
-                    Attribute attr = attrIterator.next();
-                    if (attr.getName().equals(diffElements[2])) {
-                        if (diffElements[3].equals("type")) {
-                            attr.setType((String) d.getRight());
-                        }
-                        if (diffElements[3].equals("content")) {
-                            attr.setContent((String) d.getRight());
-                        }
-                    }
-                }
-            }
-        }
-        // existing = left != "", input = right == ""
-        // 3. the existing attribute has been removed from the input in the integration
-        // context
-        if (!"".equals(d.getLeft()) && "".equals(d.getRight())) {
-            logger.debug("Attribute del diff: " + d.getFieldName());
-            for (Iterator<Attribute> attributeIterator = existingIntegration
-                    .getConfigurationEntity()
-                    .getAttributes().iterator(); attributeIterator.hasNext();) {
-                Attribute attr = attributeIterator.next();
-                if (attr.getName().equals(diffElements[2])) {
-                    attr.setConfigurationEntity(null);
-                    attributeIterator.remove();
-                }
-            }
-        }
-
         return existingIntegration;
     }
 

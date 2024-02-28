@@ -17,8 +17,6 @@ import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.Azure;
-import fi.mpass.voh.api.config.IntegrationSetLoader;
-import fi.mpass.voh.api.config.ServiceProvidersLoader;
 import fi.mpass.voh.api.organization.OrganizationService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,18 +46,27 @@ class IdentityProviderLoaderTests {
 
     @Test
     void testGsuiteLoader() throws Exception {
-        // 63
+        // 64
         String setLocation = "set/integration_sets.json";
-        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, organizationService, loader);
-        setLoader.run(setLocation);
+        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader.setInput(setLocation);
+        Loading setLoading = new Loading();
+        setLoader.init(setLoading);
+
+        assertEquals(64, repository.count());
 
         // 4
         String oidcLocation = "oidc_services.json";
         // 2
         String samlLocation = "saml_services.json";
-        ServiceProvidersLoader serviceLoader = new ServiceProvidersLoader(repository, organizationService, loader);
-        serviceLoader.run(oidcLocation);
-        serviceLoader.run(samlLocation);
+        ServiceProviderLoader spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader.setInput(oidcLocation);
+        Loading spLoading = new Loading();
+        spLoader.init(spLoading);
+        spLoader.setInput(samlLocation);
+        spLoader.init(spLoading);
+
+        assertEquals(70, repository.count());
 
         // 2, one with integration permissions
         String location = "gsuite_home_organizations.json";
@@ -68,8 +75,8 @@ class IdentityProviderLoaderTests {
         Loading loading = new Loading();
         idpLoader.init(loading);
 
-        // 71
-        assertEquals(71, repository.count());
+        // 72
+        assertEquals(72, repository.count());
     }
 
     @Test
@@ -93,7 +100,21 @@ class IdentityProviderLoaderTests {
 
         assertEquals(3, repository.count());
         // no errors
-        assertEquals(0, loading.getIntegrationStatus().size());
+        assertEquals(0, loading.getErrors().size());
+    }
+
+    @Test
+    void testWilmaWithDuplicates() throws Exception {
+        String location = "wilma_home_organizations_duplicates.json";
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        loading = idpLoader.init(loading);
+
+        // the input was discarded since there were duplicate integrations
+        assertEquals(0, repository.count());
+        // Duplicate error
+        assertEquals(1, loading.getErrors().size());
     }
 
     @Test
@@ -104,10 +125,12 @@ class IdentityProviderLoaderTests {
         Loading loading = new Loading();
         loading = idpLoader.init(loading);
 
-        // one correct integration with organization out of three
-        assertEquals(1, repository.count());
-        // only errors are reported, two incorrect integrations without organization
-        assertEquals(2, loading.getIntegrationStatus().size());
+        // one correct integration with organization out of three, however fail fast
+        // assertEquals(1, repository.count());
+        assertEquals(0, repository.count());
+        // only errors are reported, two incorrect integrations without organization,
+        // only one error result due to the fail fast approach
+        assertEquals(1, loading.getErrors().size());
     }
 
     @Test
@@ -139,7 +162,10 @@ class IdentityProviderLoaderTests {
         Loading loading = new Loading();
         idpLoader.init(loading);
 
-        assertEquals(1, repository.count());
+        // 1 / 3 integration without identifier, fail fast
+        assertEquals(0, repository.count());
+        // Save failed for one integration
+        assertEquals(1, loading.getErrors().size());
     }
 
     @Test

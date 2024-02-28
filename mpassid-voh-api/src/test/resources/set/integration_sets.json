@@ -1,6 +1,22 @@
 {
     "integrationGroups": [
         {
+            "id": 6000002,
+            "configurationEntity": {
+                "set": {
+                    "name": "dev-ops.sanomapro.fi"
+                },
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "false",
+                        "type": "data"
+                    }
+                ]
+            },
+            "deploymentPhase": 0
+        },
+        {
             "id": 6000003,
             "configurationEntity": {
                 "set": {
@@ -64,6 +80,9 @@
                         "type": "data"
                     }
                 ]
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.33651716236"
             },
             "deploymentPhase": 0
         },

@@ -106,7 +106,7 @@
             "deploymentPhase": 0
         },
         {
-            "id": 5000033,
+            "id": 5000001,
             "configurationEntity": {
                 "sp": {
                     "type": "oidc",
@@ -132,7 +132,7 @@
             },
             "integrationGroups": [
                 {
-                    "id": 6000033
+                    "id": 6000003
                 }
             ],
             "organization": {
