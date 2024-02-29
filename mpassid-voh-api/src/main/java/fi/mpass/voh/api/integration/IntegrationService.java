@@ -182,10 +182,12 @@ public class IntegrationService {
    * @return
    */
   private Page<Integration> pageIntegrations(List<Integration> results, Pageable pageable) {
-    final int toIndex = Math.min((pageable.getPageNumber() + 1) * pageable.getPageSize(), results.size());
-    final int fromIndex = Math.max(toIndex - pageable.getPageSize(), 0);
-    Page<Integration> integrations = new PageImpl<Integration>(results.subList(fromIndex, toIndex), pageable,
+    final int fromIndex = (int) pageable.getOffset();
+    final int toIndex = Math.min(fromIndex + pageable.getPageSize(), results.size());
+    Page<Integration> integrations = new PageImpl<>(results.subList(fromIndex, toIndex), pageable,
         results.size());
+    logger.debug("toIndex: {}, fromIndex: {}, results size: {}, page size: {}, page number: {}, page offset: {}",
+        toIndex, fromIndex, results.size(), pageable.getPageSize(), pageable.getPageNumber(), pageable.getOffset());
 
     return integrations;
   }
