@@ -43,7 +43,7 @@
             "id": 5000002,
             "configurationEntity": {
                 "sp": {
-                    "type": "oidc",
+                    "type": "oidc"
                     "name": "R",
                     "metadata": {
                         "scope": "openid profile",
@@ -67,7 +67,7 @@
             },
             "integrationGroups": [
                 {
-                    "id": 6000001
+                    "id": 6000111
                 }
             ],
             "organization": {
@@ -132,7 +132,7 @@
             },
             "integrationGroups": [
                 {
-                    "id": 6000033
+                    "id": 6000333
                 }
             ],
             "organization": {

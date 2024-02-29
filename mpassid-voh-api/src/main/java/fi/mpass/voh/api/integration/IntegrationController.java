@@ -69,13 +69,14 @@ public class IntegrationController {
             @RequestParam(required = false, value = "role") String role,
             @RequestParam(required = false, value = "deploymentPhase") String deploymentPhase,
             @RequestParam(required = false, value = "referenceIntegration") Long referenceIntegration,
+            @RequestParam(required = false, value = "status") Integer status,
             Pageable pageable) {
         try {
             if (!(referenceIntegration == null)) {
-                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, referenceIntegration,
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, referenceIntegration, status,
                         pageable);
             } else {
-                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase,
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, status,
                         pageable);
             }
         } catch (PropertyReferenceException exc) {

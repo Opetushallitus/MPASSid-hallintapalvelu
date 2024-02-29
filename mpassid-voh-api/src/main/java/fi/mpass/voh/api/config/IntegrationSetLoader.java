@@ -39,8 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Profile("!default")
-@Order(value = Ordered.HIGHEST_PRECEDENCE)
-@Component
+//@Order(value = Ordered.HIGHEST_PRECEDENCE)
+//@Component
 public class IntegrationSetLoader implements CommandLineRunner {
     private final static Logger logger = LoggerFactory.getLogger(IntegrationSet.class);
 
