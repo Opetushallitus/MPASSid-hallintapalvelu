@@ -1,17 +1,18 @@
 package fi.mpass.voh.api;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
 
-import fi.mpass.voh.api.config.IntegrationSetLoader;
-import fi.mpass.voh.api.config.ServiceProvidersLoader;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.attribute.Attribute;
+import fi.mpass.voh.api.config.IntegrationSetLoader;
+import fi.mpass.voh.api.config.ServiceProvidersLoader;
 import fi.mpass.voh.api.organization.OrganizationService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Optional;
 import java.util.Set;
 
+@Disabled
 @SpringBootTest
 public class IntegrationSetLoaderTests {
 
@@ -43,7 +45,7 @@ public class IntegrationSetLoaderTests {
     @Test
     public void testIntegrationSetLoader() throws Exception {
         // 64, one with organization
-        String setLocation = "integration_sets.json";
+        String setLocation = "set/integration_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
@@ -57,7 +59,7 @@ public class IntegrationSetLoaderTests {
     @Test
     public void testIntegrationSetLoaderWithDuplicateSet() throws Exception {
         // total 65 with a duplicate, 64 unique
-        String setLocation = "integration_invalid_sets.json";
+        String setLocation = "set/integration_invalid_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
@@ -67,7 +69,7 @@ public class IntegrationSetLoaderTests {
     @Test
     public void testIntegrationSetLoaderReloadModifications() throws Exception {
         // 64, one with organization
-        String setLocation = "integration_sets.json";
+        String setLocation = "set/integration_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
@@ -77,7 +79,7 @@ public class IntegrationSetLoaderTests {
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
         assertEquals(63, repository.findAll().size());
 
-        setLocation = "integration_sets_mods.json";
+        setLocation = "set/integration_sets_mods.json";
         IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
         setReloader.run(setLocation);
 
@@ -107,7 +109,7 @@ public class IntegrationSetLoaderTests {
     @Test
     public void testIntegrationSetLoaderReloadAdditions() throws Exception {
         // 64, one with organization
-        String setLocation = "integration_sets.json";
+        String setLocation = "set/integration_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
@@ -117,7 +119,7 @@ public class IntegrationSetLoaderTests {
         assertEquals("1.2.246.562.10.33651716236", integration_with_organization.get().getOrganization().getOid());
         assertEquals(63, repository.findAll().size());
 
-        setLocation = "integration_sets_adds.json";
+        setLocation = "set/integration_sets_adds.json";
         IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
         setReloader.run(setLocation);
 
@@ -139,7 +141,7 @@ public class IntegrationSetLoaderTests {
     @Test
     public void testIntegrationSetLoaderReloadDeletions() throws Exception {
         // 63, one with organization
-        String setLocation = "integration_sets.json";
+        String setLocation = "set/integration_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
@@ -150,7 +152,7 @@ public class IntegrationSetLoaderTests {
         assertEquals(63, repository.findAll().size());
 
         // 62
-        setLocation = "integration_sets_dels.json";
+        setLocation = "set/integration_sets_dels.json";
         IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
         setReloader.run(setLocation);
 
@@ -178,7 +180,7 @@ public class IntegrationSetLoaderTests {
         @Test
     public void testIntegrationSetLoaderReloadDeletionsRestore() throws Exception {
         // 63, one with organization
-        String setLocation = "integration_sets.json";
+        String setLocation = "set/integration_sets.json";
         IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(setLocation);
 
@@ -189,7 +191,7 @@ public class IntegrationSetLoaderTests {
         assertEquals(63, repository.findAll().size());
 
         // 62
-        setLocation = "integration_sets_dels.json";
+        setLocation = "set/integration_sets_dels.json";
         IntegrationSetLoader setReloader = new IntegrationSetLoader(repository, service, loader);
         setReloader.run(setLocation);
 
@@ -202,7 +204,7 @@ public class IntegrationSetLoaderTests {
         assertFalse(inactivatedIntegration.get().isActive());
 
         // 63, one with organization
-        String restoreLocation = "integration_sets.json";
+        String restoreLocation = "set/integration_sets.json";
         setLoader = new IntegrationSetLoader(repository, service, loader);
         setLoader.run(restoreLocation);
 

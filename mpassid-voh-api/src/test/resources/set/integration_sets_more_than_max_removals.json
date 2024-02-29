@@ -1,0 +1,73 @@
+{
+    "integrationGroups": [
+        {
+            "id": 6000003,
+            "configurationEntity": {
+                "set": {
+                    "name": "digivisiodev"
+                },
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "false",
+                        "type": "data"
+                    }
+                ]
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.33651716236"
+            },
+            "deploymentPhase": 0
+        },
+        {
+            "id": 6000004,
+            "configurationEntity": {
+                "set": {
+                    "name": "Edita oppimisen palvelut"
+                },
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "false",
+                        "type": "data"
+                    }
+                ]
+            },
+            "deploymentPhase": 0
+        },
+        {
+            "id": 6000005,
+            "configurationEntity": {
+                "set": {
+                    "name": "Examina"
+                },
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "false",
+                        "type": "data"
+                    }
+                ]
+            },
+            "deploymentPhase": 0
+        },
+        {
+            "id": 6000001,
+            "configurationEntity": {
+                "set": {
+                    "name": "MPASSid attribute test (old)"
+                },
+                "attributes": [
+                    {
+                        "name": "allowtestlearnerid",
+                        "content": "true",
+                        "type": "data"
+                    }
+                ]
+            },
+            "organization": {
+                "oid": "1.2.246.562.10.33651716236"
+            }
+        }
+    ]
+}
