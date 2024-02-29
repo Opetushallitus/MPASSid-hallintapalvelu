@@ -109,6 +109,10 @@ public class Integration implements Persistable<Long> {
     public Integration() {
     }
 
+    public Integration(Long id) {
+        this.id = id;
+    }
+
     public Integration(ConfigurationEntity configurationEntity) {
         this.configurationEntity = configurationEntity;
     }

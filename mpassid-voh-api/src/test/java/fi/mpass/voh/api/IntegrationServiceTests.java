@@ -145,7 +145,7 @@ public class IntegrationServiceTests {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "idp", "0", pageable);
+        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "idp", "0", 0, pageable);
 
         // then
         verify(integrationRepository).findAll(any(Specification.class), any(Pageable.class));
@@ -157,7 +157,7 @@ public class IntegrationServiceTests {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "", "0", pageable);
+        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "", "0", 0, pageable);
 
         // then
         verify(integrationRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
@@ -174,7 +174,7 @@ public class IntegrationServiceTests {
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(referenceIntegration));
 
         // when
-        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L,
+        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L, 0,
                 pageable);
 
         // then

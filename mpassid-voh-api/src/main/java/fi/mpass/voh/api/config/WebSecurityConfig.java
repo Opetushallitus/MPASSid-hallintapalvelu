@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 
 @Profile("!default")
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 public class WebSecurityConfig {
-    private final static Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
 
     private AuthenticationEntryPoint entryPoint;
     private CasAuthenticationFilter casAuthenticationFilter;
@@ -65,7 +65,9 @@ public class WebSecurityConfig {
             @Qualifier("provisioningAuthManager") AuthenticationManager authManager)
             throws Exception {
 
-        http.requestMatchers().antMatchers("/api/v2/provisioning/**")
+        http.requestMatchers()
+                .antMatchers("/api/v2/provisioning/**")
+                .antMatchers("/api/v2/loading/**")
                 .and()
                 .authorizeRequests().anyRequest().authenticated();
         http.httpBasic()

@@ -167,6 +167,7 @@ public class IntegrationControllerTest {
                 .param("type", "oidc")
                 .param("deploymentPhase", "1")
                 .param("referenceIntegration", "12345")
+                .param("status", "0")
                 .param("page", "5")
                 .param("size", "10")
                 .param("sort", "id,desc") // <-- no space after comma!
@@ -175,7 +176,7 @@ public class IntegrationControllerTest {
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(integrationService).getIntegrationsSpecSearchPageable(any(String.class), any(String.class),
-                any(String.class), any(String.class), any(Long.class), pageableCaptor.capture());
+                any(String.class), any(String.class), any(Long.class), any(Integer.class), pageableCaptor.capture());
 
         PageRequest pageable = (PageRequest) pageableCaptor.getValue();
 
