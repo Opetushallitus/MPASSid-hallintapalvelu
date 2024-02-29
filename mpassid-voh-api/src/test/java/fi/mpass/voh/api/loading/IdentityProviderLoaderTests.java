@@ -80,6 +80,34 @@ class IdentityProviderLoaderTests {
     }
 
     @Test
+    void testGsuiteLoaderWithChangedOrganization() throws Exception {
+        // 2, one with integration permissions
+        String location = "gsuite_home_organizations.json";
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
+
+        // 2
+        assertEquals(2, repository.count());
+
+        // 2, one with integration permissions
+        location = "gsuite_home_organizations_mods_organization.json";
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading reloading = new Loading();
+        idpLoader.init(reloading);
+
+        // 2
+        assertEquals(2, repository.count());
+
+        // 4000010 changed organization
+        Optional<Integration> changedOrganizationIntegration = repository.findById(4000010L);
+        assertTrue(changedOrganizationIntegration.isPresent());
+        assertEquals("1.2.246.562.10.71600741632", changedOrganizationIntegration.get().getOrganization().getOid());
+    }
+
+    @Test
     void testAzureLoader() throws Exception {
         String location = "azure_home_organizations.json";
         idpLoader = new IdentityProviderLoader(repository, organizationService, loader);

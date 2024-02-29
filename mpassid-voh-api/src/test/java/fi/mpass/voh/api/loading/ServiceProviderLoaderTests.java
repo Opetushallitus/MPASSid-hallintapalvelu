@@ -496,4 +496,35 @@ class ServiceProviderLoaderTests {
         assertTrue(activatedIntegration.isPresent());
         assertTrue(activatedIntegration.get().isActive());
     }
+
+    @Test
+    void testSamlReloadModifications() throws Exception {
+        // 64, all with an attribute
+        String setLocation = "set/integration_sets.json";
+        IntegrationSetLoader setLoader = new IntegrationSetLoader(repository, organizationService, loader);
+        setLoader.run(setLocation);
+
+        // 2
+        String location = "saml_services.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader.setInput(location);
+        Loading loading = new Loading();
+        spLoader.init(loading);
+
+        assertEquals(66, repository.count());
+
+        // 2
+        String spLocation = "saml_services_mods_organization.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader.setInput(spLocation);
+        loading = new Loading();
+        spLoader.init(loading);
+
+        assertEquals(66, repository.count());
+
+        // 5000010, changed organization oid
+        Optional<Integration> modifiedIntegration = repository.findById(5000010L);
+        assertTrue(modifiedIntegration.isPresent());
+        assertEquals("1.2.246.562.10.65243241471", modifiedIntegration.get().getOrganization().getOid());
+    }
 }
