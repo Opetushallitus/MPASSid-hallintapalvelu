@@ -5,6 +5,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -39,6 +40,19 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
         return buildResponseEntity(integrationError);
     }
 
+    /**
+     * Handles LoadingException.
+     * 
+     * @param ex the EntityUpdateException
+     * @return the IntegrationError object
+     */
+    @ExceptionHandler(LoadingException.class)
+    protected ResponseEntity<Object> handleLoading(LoadingException ex) {
+        IntegrationError integrationError = new IntegrationError(HttpStatus.CONFLICT);
+        integrationError.setMessage(ex.getMessage());
+        return buildResponseEntity(integrationError);
+    }
+
      /**
      * Handles MethodArgumentTypeMismatchException.
      *
@@ -64,6 +78,19 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
      */
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
     protected ResponseEntity<Object> handleInvalidData(InvalidDataAccessApiUsageException ex) {
+        IntegrationError integrationError = new IntegrationError(HttpStatus.BAD_REQUEST);
+        integrationError.setMessage(ex.getMessage());
+        return buildResponseEntity(integrationError);
+    }
+
+    /**
+     * Handles RequestRejectedException.
+     *
+     * @param ex the RequestRejectedException.
+     * @return the IntegrationError object
+     */
+    @ExceptionHandler(RequestRejectedException.class)
+    protected ResponseEntity<Object> handleRejectedRequest(RequestRejectedException ex) {
         IntegrationError integrationError = new IntegrationError(HttpStatus.BAD_REQUEST);
         integrationError.setMessage(ex.getMessage());
         return buildResponseEntity(integrationError);

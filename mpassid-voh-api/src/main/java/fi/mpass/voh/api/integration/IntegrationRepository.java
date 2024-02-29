@@ -30,6 +30,15 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
     @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='set'")
     List<Long> getAllSetIds();
 
+    @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='set' AND i.deploymentPhase=:deploymentPhase")
+    List<Long> getAllSetIdsByDeploymentPhase(int deploymentPhase);
+
+    @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='idp' AND i.deploymentPhase=:deploymentPhase")
+    List<Long> getAllIdpIdsByDeploymentPhase(int deploymentPhase);
+
+    @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='sp' AND i.deploymentPhase=:deploymentPhase")
+    List<Long> getAllSpIdsByDeploymentPhase(int deploymentPhase);
+
     @Query("SELECT i.id FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity=ce.id WHERE ce.role='sp'")
     List<Long> getAllSpIds();
 

@@ -122,7 +122,7 @@ public class IntegrationService {
    * @throws EntityNotFoundException
    */
   public Page<Integration> getIntegrationsSpecSearchPageable(String search, String filterByType, String role,
-      String deploymentPhase, Pageable pageable) {
+      String deploymentPhase, Integer status, Pageable pageable) {
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
@@ -157,8 +157,12 @@ public class IntegrationService {
     if (deploymentPhase != null && deploymentPhase.length() > 0)
       builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
 
-    // search only active integrations
-    builder.withEqualAnd(Category.INTEGRATION, "status", 0);
+    // status of the integration
+    if (status != null) {
+      builder.withEqualAnd(Category.INTEGRATION, "status", status);
+    } else {
+      builder.withEqualAnd(Category.INTEGRATION, "status", 0);
+    }
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -182,10 +186,12 @@ public class IntegrationService {
    * @return
    */
   private Page<Integration> pageIntegrations(List<Integration> results, Pageable pageable) {
-    final int toIndex = Math.min((pageable.getPageNumber() + 1) * pageable.getPageSize(), results.size());
-    final int fromIndex = Math.max(toIndex - pageable.getPageSize(), 0);
-    Page<Integration> integrations = new PageImpl<Integration>(results.subList(fromIndex, toIndex), pageable,
+    final int fromIndex = (int) pageable.getOffset();
+    final int toIndex = Math.min(fromIndex + pageable.getPageSize(), results.size());
+    Page<Integration> integrations = new PageImpl<>(results.subList(fromIndex, toIndex), pageable,
         results.size());
+    logger.debug("toIndex: {}, fromIndex: {}, results size: {}, page size: {}, page number: {}, page offset: {}",
+        toIndex, fromIndex, results.size(), pageable.getPageSize(), pageable.getPageNumber(), pageable.getOffset());
 
     return integrations;
   }
@@ -255,7 +261,7 @@ public class IntegrationService {
    * @throws EntityNotFoundException
    */
   public Page<Integration> getIntegrationsSpecSearchPageable(String search, String filterByType, String role,
-      String deploymentPhase, Long referenceIntegrationId, Pageable pageable) {
+      String deploymentPhase, Long referenceIntegrationId, Integer status, Pageable pageable) {
 
     List<Integration> integrations = new ArrayList<Integration>();
 
@@ -292,8 +298,12 @@ public class IntegrationService {
     if (deploymentPhase != null && deploymentPhase.length() > 0)
       builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
 
-    // search only active integrations
-    builder.withEqualAnd(Category.INTEGRATION, "status", 0);
+    // status of the integration
+    if (status != null) {
+      builder.withEqualAnd(Category.INTEGRATION, "status", status);
+    } else {
+      builder.withEqualAnd(Category.INTEGRATION, "status", 0);
+    }
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -386,7 +396,8 @@ public class IntegrationService {
 
   /**
    * The method extends the integration permissions.
-   * Requires the default test service integration identifier to be set in application properties.
+   * Requires the default test service integration identifier to be set in
+   * application properties.
    * 
    * @param integration
    * @return integration with extended permissions
