@@ -12,6 +12,7 @@ import { Navigate, Route, Routes as ReactRouterRoutes } from "react-router-dom";
 import defaultMessages from "../../lang/fi-FI.json";
 import Home from "./home";
 import Integraatio from "./integraatio";
+import IntegraatioMuokkaus from "./integraationMuokkaus";
 
 export default function Routes() {
   const defaultMessages = useDefaultMessagesWithAvailableAttributeKeys();
@@ -21,6 +22,8 @@ export default function Routes() {
       <Route element={<Basic />}>
         <Route index element={<Home />} />
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
+        <Route path="uusi/:role/:type/:id" element={<IntegraatioMuokkaus />} />
+        <Route path="muokkaa/:role/:type/:id" element={<IntegraatioMuokkaus />} />
         {(useMe().groups?.includes(tallentajaOphGroup) || useMe().groups?.includes(katselijaOphGroup)) && (
           <>
             <Route

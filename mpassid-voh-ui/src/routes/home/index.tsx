@@ -15,6 +15,7 @@ import Suspense from "@/utils/components/Suspense";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import {
   Box,
+  Fab,
   Divider,
   FormControlLabel,
   Paper,
@@ -23,10 +24,13 @@ import {
   TableContainer,
   Typography,
 } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 import { FormattedMessage, useIntl } from "react-intl";
 import { useSearchParams } from "react-router-dom";
 import IntegrationsTable from "./IntegrationsTable";
 import SearchForm from "./SearchForm";
+import AddIntegrationButton from "./AddIntegrationButton"
+import NewIntegrationSelection from "./NewIntegrationSelection";
 
 const copyFormDataToURLSearchParams =
   (formData: FormData) => (searchParams: URLSearchParams) => {
@@ -44,7 +48,8 @@ const copyFormDataToURLSearchParams =
 export default function Home() {
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [showPassive, setShowPassive] = useState(false); 
+  const [showPassive, setShowPassive] = useState(false);
+  const [addIntegration, setAddIntegration] = useState(false); 
   const intl = useIntl();
   const me=useMe();
 
@@ -108,6 +113,8 @@ export default function Home() {
           </ErrorBoundary>
         </Suspense>
       </TableContainer>
+      <AddIntegrationButton setOpen={setAddIntegration}></AddIntegrationButton>     
+      <NewIntegrationSelection open={addIntegration} setOpen={setAddIntegration} /> 
     </>
   );
 }

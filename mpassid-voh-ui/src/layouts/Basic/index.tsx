@@ -40,7 +40,7 @@ export default function Basic() {
           sx={{
             position: "absolute",
             bottom: 16,
-            right: 16,
+            right: 86,
           }}
         >
           <StyleIcon />

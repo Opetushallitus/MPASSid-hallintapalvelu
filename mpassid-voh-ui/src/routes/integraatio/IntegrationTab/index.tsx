@@ -3,6 +3,7 @@ import { mpassIdUserAttributeTestService } from "@/config";
 import {
   getRole,
 } from "@/routes/home/IntegrationsTable";
+import UniqueId from "../IntegrationTab/IntegrationDetails/UniqueId"
 import {
   Alert,
   AlertTitle,

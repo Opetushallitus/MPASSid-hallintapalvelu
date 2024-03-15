@@ -1,6 +1,11 @@
-import { useState } from "react";
-import { useIntegrationSafe } from "@/api";
+import type { Components } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import _ from "lodash";
+
+import {
+  useIdentityProviderTypes,
+  useServiceProviderTypes,
+} from "@/api";
 import {
   getRole,
   typeAbbreviations,
@@ -11,53 +16,113 @@ import {
   AlertTitle,
   Grid,
   Link as MuiLink,
-  Typography,
+  Typography
 } from "@mui/material";
-import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
-import Attributes from "./Attributes";
-import type { DataRowProps } from "../DataRow";
-import { DataRow } from "../DataRow";
-import Metadata from "./Metadata";
+import { Dispatch, useEffect, useState } from "react";
+import { FormattedMessage } from 'react-intl';
+import { useParams, Link } from "react-router-dom";
 import Role from "./Role";
+import { useIntegrationSafe } from "@/api";
+import { DataRow } from "../integraatio/IntegrationTab/DataRow";
+import type { DataRowProps } from "../integraatio/IntegrationTab/DataRow";
+
+import Metadata from "./Metadata";
+import Attributes from "./Attributes";
 import UniqueId from "./UniqueId";
-import EditIntegrationButton from "./EditIntegrationButton";
+import { inits } from "./Inits";
+
 interface Props {
   id: number;
+  setSaveDialogState: Dispatch<boolean>;
+  setCannotSave: Dispatch<boolean>;
 }
 
-export default function IntegrationDetails({ id }: Props) {
-  const [error, integration] = useIntegrationSafe({ id });
+export default function IntegrationDetails({ id, setSaveDialogState, setCannotSave }: Props) {
+    
+    var { role } = useParams();
+    const { type } = useParams();
+    const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
+    const [ newServiceProviderData, setNewServiceProviderData] = useState<Components.Schemas.ServiceProvider|undefined>();
+    const [ newIdentityProviderData, setNewIdentityProviderData] = useState<Components.Schemas.IdentityProvider|undefined>();
+    const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity|undefined>();
+    var [error, integration] = useIntegrationSafe({id});
+    if(id===0) {
+      integration = inits.idp.wilma
+    } 
 
-  if (error?.response?.status === 404) {
-    return (
-      <Alert severity="error">
-        <FormattedMessage
-          defaultMessage="<title>Integraatiota {id} ei löydy</title>Siirry <link>etusivulle</link>."
-          values={{
-            id,
-            title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
-            link: (chunks) => (
-              <MuiLink color="error" component={Link} to="/">
-                {chunks}
-              </MuiLink>
-            ),
-          }}
-        />
-      </Alert>
-    );
-  }
+    useEffect(() => {
+      if(role !== undefined) {
+        setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
+        if(role==="sp") {
+          setNewServiceProviderData(_.cloneDeep(integration.configurationEntity[role]))
+        }
+        if(role==="idp") {
+          setNewIdentityProviderData(_.cloneDeep(integration.configurationEntity[role]))
+        }
+      }
+      
+    }, [role, integration]);
 
-  const role = getRole(integration);
+    useEffect(() => {
+          if(newServiceProviderData&&role) {
+            setSaveDialogState(true);
+            if(_.isEqual(newServiceProviderData,integration.configurationEntity[role])){
+              setCannotSave(false)
+            } else {
+              setCannotSave(true)
+            }
+          }  else {
+            if(newIdentityProviderData&&role) {
+              setSaveDialogState(true);
+              if(_.isEqual(newIdentityProviderData,integration.configurationEntity[role])){
+                setCannotSave(false)
+              } else {
+                setCannotSave(true)
+              } 
+            } else {
+              setSaveDialogState(false);
+            }
+          }
+        
+    }, [newConfigurationEntityData,newServiceProviderData,newIdentityProviderData,integration,role,setCannotSave,setSaveDialogState]);
+    
+    
+    console.log("id: ",id)
+    console.log("role: ",role)
+    console.log("integration: ",integration)
+    console.log("error: ",error)
 
-  const hasAttributes =
-    role === "idp" &&
-    !["opinsys", "wilma"].includes(
-      integration.configurationEntity?.[role]?.type!
-    );
+    var hasAttributes =
+                role === "idp" &&
+                !["opinsys", "wilma"].includes(
+                  integration.configurationEntity?.[role]?.type!
+                );
 
-  return (
-    <>
+    
+           
+
+    if (error?.response?.status === 404||id===undefined||role===undefined||type===undefined) {
+      return (
+        <Alert severity="error">
+          <FormattedMessage
+            defaultMessage="<title>Integraatiota {id} ei löydy</title>Siirry <link>etusivulle</link>."
+            values={{
+              id,
+              title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
+              link: (chunks) => (
+                <MuiLink color="error" component={Link} to="/">
+                  {chunks}
+                </MuiLink>
+              ),
+            }}
+          />
+        </Alert>
+      );
+    }
+
+    if(integration) {
+      console.log("hasAttributes: ",hasAttributes)  
+    return(<>
     
       <Typography component={"div"} variant="h2" gutterBottom >
         <FormattedMessage defaultMessage="Organisaation tiedot" />
@@ -146,10 +211,13 @@ export default function IntegrationDetails({ id }: Props) {
       )}    
       <Role integration={integration} />
 
-      <Metadata
+      {newServiceProviderData&&<Metadata
+        newServiceProviderData={newServiceProviderData}
+        setNewServiceProviderData={setNewServiceProviderData}
         configurationEntity={integration.configurationEntity!}
         role={role}
-      />
+        type={type}
+      />}
 
       <Grid mb={hasAttributes ? 3 : undefined}>
         <ErrorBoundary>
@@ -167,16 +235,19 @@ export default function IntegrationDetails({ id }: Props) {
           </Typography>
           <ErrorBoundary>
             <Attributes
+              newConfigurationEntityData={newConfigurationEntityData}
+              setNewConfigurationEntityData={setNewConfigurationEntityData}  
               attributes={integration.configurationEntity?.attributes ?? []}
               type="user"
             />
           </ErrorBoundary>
-            
+             
         </>
       )}
-      <EditIntegrationButton integration={integration}></EditIntegrationButton>   
-    </>
-  );
+      
+    </>)} else {
+      return(<></>)
+    }
 }
 
 export function UniqueIdValue({ name, label, children }: DataRowProps) {
