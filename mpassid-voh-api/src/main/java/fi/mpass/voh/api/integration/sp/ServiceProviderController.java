@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 @RestController
 @RequestMapping(path = "api/v2/sp")
 public class ServiceProviderController {
-    
+
     private final ServiceProviderRepository serviceProviderRepository;
 
     public ServiceProviderController(ServiceProviderRepository serviceProviderRepository) {
@@ -29,12 +29,10 @@ public class ServiceProviderController {
     }
 
     @Operation(summary = "Get a list of distinct ServiceProvider types")
-    @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "OK",
-            content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = String.class)))),
-        @ApiResponse(responseCode = "403", description = "Forbidden operation")
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = String.class)))),
+            @ApiResponse(responseCode = "403", description = "Forbidden operation")
     })
     @GetMapping("/types")
     public List<String> getServiceProviderTypes() {
@@ -42,7 +40,7 @@ public class ServiceProviderController {
     }
 
     @Operation(summary = "Get the specific Service Provider")
-    // @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Provides the specific service provider", content = @Content(schema = @Schema(implementation = ServiceProvider.class), mediaType = "application/json", examples = {
                     @ExampleObject(name = "serviceprovider", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
@@ -52,7 +50,7 @@ public class ServiceProviderController {
     public ServiceProvider getServiceProvider(@PathVariable String id) {
         ServiceProvider oidcSp = serviceProviderRepository.findByClientId(id);
         ServiceProvider samlSp = serviceProviderRepository.findByEntityId(id);
-        
+
         return Optional.ofNullable(oidcSp).orElse(samlSp);
     }
 }

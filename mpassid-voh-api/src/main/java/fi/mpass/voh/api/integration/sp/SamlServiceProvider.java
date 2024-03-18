@@ -1,8 +1,8 @@
 package fi.mpass.voh.api.integration.sp;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import org.hibernate.envers.Audited;
 
@@ -16,7 +16,7 @@ public class SamlServiceProvider extends ServiceProvider {
     @Column(unique=true)
     private String entityId;
 
-    public SamlServiceProvider() {};
+    public SamlServiceProvider() {}
 
     public SamlServiceProvider(String entityId) {
         this.entityId = entityId;
