@@ -213,9 +213,11 @@ public class ServiceProviderLoader extends Loader {
                             if (existingIntegration.get().getOrganization() != null) {
                                 existingIntegration.get().getOrganization()
                                         .setOid((String) d.getRight());
+                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
                             } else {
                                 Organization org = new Organization("", (String) d.getRight());
                                 existingIntegration.get().setOrganization(org);
+                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
                             }
                         }
                         if (d.getFieldName().contains("deploymentPhase")) {
