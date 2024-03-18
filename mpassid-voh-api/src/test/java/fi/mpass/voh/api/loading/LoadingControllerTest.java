@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
-import fi.mpass.voh.api.integration.OPHPermissionEvaluator;
+import fi.mpass.voh.api.config.OPHPermissionEvaluator;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -56,7 +56,7 @@ class LoadingControllerTest {
         postLoading.setStatus(LoadingStatus.SUCCEEDED);
         postLoading.setType(LoadingType.ALL);
 
-        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("ADMIN")))
+        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("ADMIN")))
                 .thenReturn(true);
         when(loadingService.start(preLoading)).thenReturn(postLoading);
         mockMvc.perform(post("/api/v2/loading/start").contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ class LoadingControllerTest {
         Loading postLoading = new Loading();
         postLoading.setStatus(LoadingStatus.FAILED);
 
-        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("ADMIN")))
+        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("ADMIN")))
                 .thenReturn(false);
         when(loadingService.start(preLoading)).thenReturn(postLoading);
         mockMvc.perform(post("/api/v2/loading/start").contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +98,7 @@ class LoadingControllerTest {
         postLoading.setStatus(LoadingStatus.SUCCEEDED);
         postLoading.setType(LoadingType.ALL);
 
-        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("ADMIN")))
+        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("ADMIN")))
                 .thenReturn(true);
         when(loadingService.getLoadingStatus()).thenReturn(postLoading);
         mockMvc.perform(get("/api/v2/loading/status").contentType(MediaType.APPLICATION_JSON))
@@ -113,7 +113,7 @@ class LoadingControllerTest {
         postLoading.setStatus(LoadingStatus.SUCCEEDED);
         postLoading.setType(LoadingType.ALL);
 
-        when(permissionEvaluator.hasPermission(any(Authentication.class), any(Object.class), eq("ADMIN")))
+        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("ADMIN")))
                 .thenReturn(false);
         when(loadingService.getLoadingStatus()).thenReturn(postLoading);
         mockMvc.perform(get("/api/v2/loading/status").contentType(MediaType.APPLICATION_JSON))

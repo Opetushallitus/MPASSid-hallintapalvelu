@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
@@ -24,8 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
-        "spring.h2.console.enabled=true" })
+@Isolated
+@SpringBootTest
+//(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = { "spring.h2.console.enabled=true" })
 class IdentityProviderLoaderTests {
 
     IdentityProviderLoader idpLoader;
@@ -42,6 +43,7 @@ class IdentityProviderLoaderTests {
     @BeforeEach
     void drop() {
         repository.deleteAll();
+        repository.flush();
     }
 
     @Test
