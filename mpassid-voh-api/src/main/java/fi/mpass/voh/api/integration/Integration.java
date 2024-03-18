@@ -11,18 +11,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.OrderBy;
-import javax.persistence.Version;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Version;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -54,11 +54,9 @@ public class Integration implements Persistable<Long> {
     private int version;
 
     @CreationTimestamp
-    // private java.sql.Timestamp createdOn;
     private LocalDateTime createdOn;
 
     @UpdateTimestamp
-    // private java.sql.Timestamp lastUpdatedOn;
     private LocalDateTime lastUpdatedOn;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -77,7 +75,7 @@ public class Integration implements Persistable<Long> {
     @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.PERSIST }, fetch = FetchType.EAGER)
     @Audited
     @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
-    private Set<Integration> integrationSets = new HashSet<Integration>();
+    private Set<Integration> integrationSets = new HashSet<>();
 
     @JsonManagedReference
     // TODO cascade review
@@ -91,7 +89,7 @@ public class Integration implements Persistable<Long> {
     @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
     @OneToMany(mappedBy = "from", cascade = { CascadeType.ALL }, orphanRemoval = true)
     @OrderBy("id")
-    private List<IntegrationPermission> permissions = new ArrayList<IntegrationPermission>();
+    private List<IntegrationPermission> permissions = new ArrayList<>();
 
     // @JsonView(value = IntegrationView.Default.class)
     @Schema(description = "0:testing, 1:production, 2:preproduction, 3:reserved")
@@ -162,12 +160,10 @@ public class Integration implements Persistable<Long> {
         return this.version;
     }
 
-    //public java.sql.Timestamp getLastUpdatedOn() {
     public LocalDateTime getLastUpdatedOn() {
         return this.lastUpdatedOn;
     }
 
-    //public void setLastUpdatedOn(java.sql.Timestamp ts) {
     public void setLastUpdatedOn(LocalDateTime ts) {
         if (ts != null) {
             this.lastUpdatedOn = ts;
@@ -326,7 +322,7 @@ public class Integration implements Persistable<Long> {
     public List<Integration> removeFromSets() {
         // if the integration is currently associated with the
         // integrationSet, remove the association
-        List<Integration> removedSets = new ArrayList<Integration>();
+        List<Integration> removedSets = new ArrayList<>();
         for (Iterator<Integration> integrationIterator = this.getIntegrationSets()
                 .iterator(); integrationIterator.hasNext();) {
             Integration set = integrationIterator.next();
