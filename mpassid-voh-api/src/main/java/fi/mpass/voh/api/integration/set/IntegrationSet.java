@@ -1,11 +1,11 @@
 package fi.mpass.voh.api.integration.set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 @Audited
 @Entity
 public class IntegrationSet {
-    private final static Logger logger = LoggerFactory.getLogger(IntegrationSet.class);
+    private static final Logger logger = LoggerFactory.getLogger(IntegrationSet.class);
 
     public enum Type {
         sp, idp;
