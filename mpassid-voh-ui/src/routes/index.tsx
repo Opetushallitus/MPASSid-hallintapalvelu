@@ -20,6 +20,7 @@ export default function Routes() {
     <ReactRouterRoutes>
       <Route element={<Basic />}>
         <Route index element={<Home />} />
+        <Route path="index.html" element={<Home />} />
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
         {(useMe().groups?.includes(tallentajaOphGroup) || useMe().groups?.includes(katselijaOphGroup)) && (
           <>
