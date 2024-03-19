@@ -92,9 +92,9 @@ public abstract class ServiceProvider {
      */
     @Schema(example = "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea64")
     //@Column(unique = true)
-    private String entityId;
+    protected String entityId;
     //@Column(unique = true)
-    private String clientId;
+    protected String clientId;
 
     @Transient
     private final ObjectMapper objectMapper = new ObjectMapper();

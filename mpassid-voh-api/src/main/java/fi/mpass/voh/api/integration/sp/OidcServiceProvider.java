@@ -1,6 +1,5 @@
 package fi.mpass.voh.api.integration.sp;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
@@ -13,9 +12,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @DiscriminatorValue("oidc")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OidcServiceProvider extends ServiceProvider {
-
-    @Column(unique=true)
-    private String clientId;
 
     public OidcServiceProvider() {}
 
