@@ -112,7 +112,7 @@ class ServiceProviderLoaderTests {
 
     @Test
     void testOidcSetLoader() throws Exception {
-        // 63, all with an attribute
+        // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
         SetLoader setLoader = new SetLoader(repository, organizationService, loader);
         Loading loading = new Loading();
@@ -159,6 +159,45 @@ class ServiceProviderLoaderTests {
         // the input was discarded since there were duplicate integrations
         assertEquals(64, repository.count());
         assertEquals(1, loading.getErrors().size());
+
+        // the duplicate (by identifier) should not cause changes to the existing integration
+        Optional<Integration> duplicateIntegration = repository.findById(5000001L);
+        assertFalse(duplicateIntegration.isPresent());
+    }
+
+    @Test
+    void testOidcWithReloadDuplicates() throws Exception {
+        // 64, all with an attribute, one with organization
+        String setLocation = "set/integration_sets.json";
+        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        Loading loading = new Loading();
+        setLoader.setInput(setLocation);
+        setLoader.init(loading);
+
+        // 4
+        String location = "oidc_services.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader.setInput(location);
+        spLoader.init(loading);
+
+        assertEquals(68, repository.count());
+
+        // 4
+        location = "oidc_services_duplicates.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        Loading reloading = new Loading();
+        spLoader.setInput(location);
+        spLoader.init(reloading);
+
+        // the input was discarded since there were duplicate integrations
+        assertEquals(68, repository.count());
+        assertEquals(1, reloading.getErrors().size());
+
+        // reloading an input containing duplicates (by identifier) should not cause changes to the existing integration
+        Optional<Integration> duplicateIntegration = repository.findById(5000001L);
+        assertTrue(duplicateIntegration.isPresent());
+
+        assertEquals(1, duplicateIntegration.get().getDeploymentPhase());
     }
 
     @Test
