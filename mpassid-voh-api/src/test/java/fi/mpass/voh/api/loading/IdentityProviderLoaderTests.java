@@ -131,6 +131,11 @@ class IdentityProviderLoaderTests {
         assertEquals(3, repository.count());
         // no errors
         assertEquals(0, loading.getErrors().size());
+
+        // organization
+        Optional<Integration> integration = repository.findById(4000052L);
+        assertTrue(integration.isPresent());
+        assertEquals("1.2.246.562.10.00000000001", integration.get().getOrganization().getOid());
     }
 
     @Test
