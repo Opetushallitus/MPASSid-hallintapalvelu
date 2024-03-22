@@ -5,45 +5,60 @@ import { useIntl, FormattedMessage } from 'react-intl';
 import { DataRow } from "../integraatio/IntegrationTab/DataRow";
 import InputForm from "./Form/InputForm";
 import { Dispatch } from "react";
+import IntegraatioForm from "./Form";
+import { dataConfiguration, UiConfiguration } from '../../config';
 
 
 interface Props {
+  uiConfiguration?: any;
+  role?: any;
   attributes: Components.Schemas.Attribute[];
-  type: Components.Schemas.Attribute["type"];
-  newConfigurationEntityData?: Components.Schemas.ConfigurationEntity; 
-  setNewConfigurationEntityData?: Dispatch<Components.Schemas.ConfigurationEntity>
+  attributeType: Components.Schemas.Attribute["type"];
+  type: any;
+  newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
+  setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
 }
 
-export default function Attributes({ attributes, type, newConfigurationEntityData, setNewConfigurationEntityData }: Props) {
+export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration }: Props) {
   const intl = useIntl();
+  const emptyAttribute:Components.Schemas.Attribute={ 
+    name: "empty"
+
+  }
   
   const logUpdateValue = (value:String) => {  
     console.log("attributes: ",attributes)
   }
 
-  const updateAttribute = (value:string,type:string) => {  
+  const logValidateValue = (value:String) => {  
+    console.log("attributes: ",attributes)
+    return true;
+  }
+
+  const updateAttribute = (value:string,attributeType:string) => {  
     console.log("value: ",value)
-    console.log("type: ",type)
+    console.log("attributeType: ",attributeType)
     
     attributes.forEach(attribute=>{
-      if(attribute.name===type) {
+      if(attribute.name===attributeType) {
         attribute.content=value;
       }
     })
   
     if(newConfigurationEntityData?.attributes&&setNewConfigurationEntityData) {
+      console.log("newConfigurationEntityData: ",newConfigurationEntityData)
       newConfigurationEntityData.attributes=attributes;
-      setNewConfigurationEntityData({...newConfigurationEntityData})
+      setNewConfigurationEntityData({ ...newConfigurationEntityData })
     }
     
     console.log("attributes: ",attributes)
   }
   
-  if(type==="data") {
+  if(attributeType==="data") {
     return (
     <Grid container spacing={2}>
       {attributes
-        .filter((attribute) => attribute.type === type)
+        .filter((attribute) => attribute.type === attributeType)
         .map((attribute) => {
           const id = `attribuutti.${attribute.name}`;
           const label = id in intl.messages ? { id } : undefined;
@@ -67,17 +82,17 @@ export default function Attributes({ attributes, type, newConfigurationEntityDat
     </Grid>)
   } 
 
-  if(type==="user") {
+  if(attributeType==="user") {
     return (
       <Grid container >
-        {attributes
-          .filter((attribute) => attribute.type === type)
-          .map((attribute) => {
-            const id = `attribuutti.${attribute.name}`;
+        {dataConfiguration
+          .filter((configuration) => configuration.type === attributeType)
+          .map((configuration) => {
+            const id = `attribuutti.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;
   
             return {
-              ...attribute,
+              ...configuration,
               label: label && intl.formatMessage(label),
             };
           })
@@ -89,46 +104,18 @@ export default function Attributes({ attributes, type, newConfigurationEntityDat
                   attributePreferredOrder.indexOf(a.name!)) -
               (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
           )
-          .map((attribute) => {
-            const id = `attribuutti.${attribute.name}`;
-            const label = id in intl.messages ? { id } : undefined;
-            const tooltipId = `työkaluvihje.${attribute.name}`;
-            const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
-            return (
-              <Grid key={attribute.name} container spacing={2} mb={3} >
-                <Grid item xs={4}>
-                <Tooltip
-                    title={
-                      <>
-                        {tooltip && (
-                          <Box mb={1}>
-                            <FormattedMessage {...tooltip} />
-                          </Box>
-                        )}
-                        <code>{attribute.name}</code>
-                      </>
-                    }
-                    >
-                    <span>{label ? <FormattedMessage {...label} /> : attribute.name}</span>
-                  </Tooltip>
-                  
-                  
-                </Grid>
-                <Grid item xs={8} sx={{}}>
-                  <Typography
-                    sx={{
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-all",
-                    }}
-                    variant="caption"
-                  >
-                    
-                    <InputForm key={attribute.name} object={attribute} path="content" type={attribute.name!} isEditable={true} onUpdate={updateAttribute}/>
-                  </Typography>
-                </Grid>
-              </Grid>
-          )
-          }
+          .map((configuration) => (
+            <IntegraatioForm 
+              key={configuration.name!}
+              onUpdate={updateAttribute}
+              onValidate={logValidateValue}
+              newConfigurationEntityData={newConfigurationEntityData}
+              setNewConfigurationEntityData={setNewConfigurationEntityData}  
+              attribute={attributes.find(a=>a.name===configuration.name)||{ type: attributeType, content: '',name: configuration.name}}
+              attributeType="user"
+              type={type}
+              role={role} />
+              )
           )}
       </Grid>
     );

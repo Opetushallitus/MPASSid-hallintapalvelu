@@ -1,6 +1,7 @@
 import { Grid, Typography } from "@mui/material";
 import type { Components } from "@/api";
 import { useParams } from "react-router-dom";
+import _ from "lodash";
 import { FormattedMessage } from 'react-intl';
 import { DataRow, DataRowProps } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Role from "@/routes/integraationMuokkaus/Role";
@@ -14,6 +15,7 @@ import {
   } from "@/routes/home/IntegrationsTable";
 import UniqueId from "@/routes/integraationMuokkaus/UniqueId";
 import { useIntegrationSafe } from "@/api/client";
+import { useEffect, useState } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;
@@ -24,7 +26,15 @@ export default function PalveluIntegraatio({ integration }: Props) {
     const { type } = useParams();
     const hasAttributes = false ;
     const role = "sp";
+    const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     
+
+    useEffect(() => {
+      
+      setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
+      
+      
+    }, [integration]);
 
     if(integrationType==='Palveluintegraatio') {
         return(<>
@@ -83,24 +93,32 @@ export default function PalveluIntegraatio({ integration }: Props) {
         role={role}
       />
 
-      <Grid mb={hasAttributes ? 3 : undefined}>
+      {newConfigurationEntityData&&(<Grid mb={hasAttributes ? 3 : undefined}>
         <ErrorBoundary>
           <Attributes
+            newConfigurationEntityData={newConfigurationEntityData}
+            setNewConfigurationEntityData={setNewConfigurationEntityData} 
             attributes={integration.configurationEntity?.attributes ?? []}
-            type="data"
+            type={type}
+            attributeType="data"
+            role={role}
           />
         </ErrorBoundary>
-      </Grid>
+      </Grid>)}
       
-      {hasAttributes && (
+      {hasAttributes && newConfigurationEntityData &&(
         <>
           <Typography variant="h2" gutterBottom>
             <FormattedMessage defaultMessage="Attribuutit" />
           </Typography>
           <ErrorBoundary>
             <Attributes
+              newConfigurationEntityData={newConfigurationEntityData}
+              setNewConfigurationEntityData={setNewConfigurationEntityData} 
               attributes={integration.configurationEntity?.attributes ?? []}
-              type="user"
+              type={type}
+              attributeType="user"
+              role={role}
             />
           </ErrorBoundary>
         </>

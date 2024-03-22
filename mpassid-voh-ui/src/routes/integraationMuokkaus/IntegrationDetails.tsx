@@ -42,9 +42,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
     var { role } = useParams();
     const { type } = useParams();
     const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
-    const [ newServiceProviderData, setNewServiceProviderData] = useState<Components.Schemas.ServiceProvider|undefined>();
-    const [ newIdentityProviderData, setNewIdentityProviderData] = useState<Components.Schemas.IdentityProvider|undefined>();
-    const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity|undefined>();
+    const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     var [error, integration] = useIntegrationSafe({id});
     if(id===0) {
       integration = inits.idp.wilma
@@ -53,53 +51,30 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
     useEffect(() => {
       if(role !== undefined) {
         setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
-        if(role==="sp") {
-          setNewServiceProviderData(_.cloneDeep(integration.configurationEntity[role]))
-        }
-        if(role==="idp") {
-          setNewIdentityProviderData(_.cloneDeep(integration.configurationEntity[role]))
-        }
       }
       
     }, [role, integration]);
 
     useEffect(() => {
-          if(newServiceProviderData&&role) {
+          if(newConfigurationEntityData) {
             setSaveDialogState(true);
-            if(_.isEqual(newServiceProviderData,integration.configurationEntity[role])){
+            if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){
+              //if(JSON.stringify(newConfigurationEntityData)===JSON.stringify(integration.configurationEntity)){  
               setCannotSave(false)
             } else {
               setCannotSave(true)
             }
-          }  else {
-            if(newIdentityProviderData&&role) {
-              setSaveDialogState(true);
-              if(_.isEqual(newIdentityProviderData,integration.configurationEntity[role])){
-                setCannotSave(false)
-              } else {
-                setCannotSave(true)
-              } 
-            } else {
-              setSaveDialogState(false);
-            }
+          } else {
+              setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData,newServiceProviderData,newIdentityProviderData,integration,role,setCannotSave,setSaveDialogState]);
-    
-    
-    console.log("id: ",id)
-    console.log("role: ",role)
-    console.log("integration: ",integration)
-    console.log("error: ",error)
+    }, [newConfigurationEntityData,integration,setCannotSave,setSaveDialogState]);
 
     var hasAttributes =
                 role === "idp" &&
                 !["opinsys", "wilma"].includes(
                   integration.configurationEntity?.[role]?.type!
                 );
-
-    
-           
 
     if (error?.response?.status === 404||id===undefined||role===undefined||type===undefined) {
       return (
@@ -121,7 +96,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
     }
 
     if(integration) {
-      console.log("hasAttributes: ",hasAttributes)  
+      
     return(<>
     
       <Typography component={"div"} variant="h2" gutterBottom >
@@ -211,24 +186,28 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
       )}    
       <Role integration={integration} />
 
-      {newServiceProviderData&&<Metadata
-        newServiceProviderData={newServiceProviderData}
-        setNewServiceProviderData={setNewServiceProviderData}
+      {newConfigurationEntityData&&<Metadata
+        newConfigurationEntityData={newConfigurationEntityData}
+        setNewConfigurationEntityData={setNewConfigurationEntityData}
         configurationEntity={integration.configurationEntity!}
         role={role}
         type={type}
       />}
 
-      <Grid mb={hasAttributes ? 3 : undefined}>
+      {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
         <ErrorBoundary>
           <Attributes
-            attributes={integration.configurationEntity?.attributes ?? []}
-            type="data"
+            newConfigurationEntityData={newConfigurationEntityData}
+            setNewConfigurationEntityData={setNewConfigurationEntityData}  
+            attributes={newConfigurationEntityData?.attributes ?? []}
+            attributeType="data"
+            type={type}
+            role={role}
           />
         </ErrorBoundary>
-      </Grid>
+      </Grid>}
       
-      {hasAttributes && (
+      {hasAttributes && newConfigurationEntityData &&(
         <>
           <Typography variant="h2" gutterBottom>
             <FormattedMessage defaultMessage="Attribuutit" />
@@ -237,8 +216,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             <Attributes
               newConfigurationEntityData={newConfigurationEntityData}
               setNewConfigurationEntityData={setNewConfigurationEntityData}  
-              attributes={integration.configurationEntity?.attributes ?? []}
-              type="user"
+              attributes={newConfigurationEntityData?.attributes ?? []}
+              role={role}
+              attributeType="user"
+              type={type}
             />
           </ErrorBoundary>
              

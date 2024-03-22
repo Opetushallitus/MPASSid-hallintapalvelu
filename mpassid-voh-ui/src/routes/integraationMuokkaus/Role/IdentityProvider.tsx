@@ -25,7 +25,6 @@ export default function Koulutustoimija({ integration }: Props) {
         "mpassidnsallimatoppilaitostyypit"
       );
       const language = toLanguage(useIntl().locale).toUpperCase();
-    console.log("****************",integration)
       const identityProvider = integration.configurationEntity!.idp!;
     
       const testLinkHref =
@@ -33,12 +32,6 @@ export default function Koulutustoimija({ integration }: Props) {
         new Function("flowName", `return \`${testLink}\``)(
           identityProvider.flowName
         );
-
-    console.log("role: ",role)
-    console.log("type: ",type)
-    console.log("id: ",id)
-    
-    console.log("integration: ",integration)
 
     if(role==='idp') {
         

@@ -1,5 +1,3 @@
-
-
 export const inits:any = {
     idp: {
       wilma: {

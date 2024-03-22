@@ -1,7 +1,7 @@
 import { DataRow } from '@/routes/integraatio/IntegrationTab/DataRow';
 import { Box, TextField } from "@mui/material";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
-import { useIntl } from "react-intl";
+import { useIntl, FormattedMessage } from 'react-intl';
 import { get, last, toPath } from "lodash";
 
 interface Props {
@@ -9,18 +9,20 @@ interface Props {
   type: string;
   isEditable: boolean;
   path: any;
-  onUpdate?: (data: string,type: string) => void;
+  helperText?: JSX.Element;
+  onUpdate: (data: string,type: string) => void;
+  onValidate: (data: any) => boolean;
 }
 
-export default function InputForm({ object, type, isEditable=false, path, onUpdate }: Props) {
+export default function InputForm({ object, type, isEditable=false, helperText=<></>, path, onUpdate, onValidate }: Props) {
   const intl = useIntl();
-  const defaultValue = get(object, path);;
+  const defaultValue = get(object, path);
   const [isEmpty, setIsEmpty] = useState(!defaultValue);
   const [isDirty, setIsDirty] = useState(false);
+  const [isValid, setIsValid] = useState(true);
+  const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLFormElement>(null);
-
-  console.log("*************",object)
 
   const updateFormState = useCallback(
     function updateFormState() {
@@ -34,14 +36,35 @@ export default function InputForm({ object, type, isEditable=false, path, onUpda
     updateFormState();
   }, [updateFormState]);
 
+  useEffect(() => {
+    updateFormState();
+  }, [object]);
+
   if(isEditable) {
     return (
       <form 
         onSubmit={(event) => {
           event.preventDefault();
-          if(onUpdate&&inputRef.current?.value) {
-            onUpdate(inputRef.current.value,type);
-          }   
+          if(onValidate(inputRef.current?.value)&&isDirty) {
+            setIsValid(true)
+            console.log("inputRef.current?.value", inputRef.current?.value)
+            if(inputRef.current?.value&&inputRef.current.value!=="") {
+              onUpdate(inputRef.current.value,type);
+              inputRef.current!.value = "";
+              setUsedHelperText(<></>)
+            } else {
+
+              setUsedHelperText(<FormattedMessage defaultMessage="{type} on pakollinen kenttä" values={{type: type}} />)
+              setIsValid(false)  
+            }
+            
+          } else {
+            setUsedHelperText(helperText)
+            setIsValid(false)  
+          }
+          //if(onUpdate&&inputRef.current?.value) {
+          //  onUpdate(inputRef.current.value,type);
+          //}   
         }}
         onChange={updateFormState}
       >
@@ -54,6 +77,8 @@ export default function InputForm({ object, type, isEditable=false, path, onUpda
           )}
           defaultValue={defaultValue}
           fullWidth
+          error={!isValid}
+          helperText={usedHelperText}
           inputProps={{
             ref: inputRef,
             autoComplete: "off",

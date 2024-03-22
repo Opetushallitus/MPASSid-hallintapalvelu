@@ -8,14 +8,14 @@ import ListForm from "./Form/ListForm";
 import React, { Dispatch, useEffect } from "react";
 
 export default function Metadata({
-  newServiceProviderData,
-  setNewServiceProviderData,
+  newConfigurationEntityData,
+  setNewConfigurationEntityData,
   configurationEntity,
   role,
   type,
 }: {
-  newServiceProviderData?: Components.Schemas.ServiceProvider; 
-  setNewServiceProviderData?: Dispatch<Components.Schemas.ServiceProvider>
+  newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
+  setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
   configurationEntity: Components.Schemas.ConfigurationEntity;
   role: string;
   type: string; 
@@ -26,10 +26,11 @@ export default function Metadata({
   
 
   if(role=="sp") {
+
     const providerData:Components.Schemas.ServiceProvider = configurationEntity[role]!;
     
     const logUpdateValue = (value:String) => {  
-      console.log("newServiceProviderData: ",newServiceProviderData)
+      console.log("newConfigurationEntityData: ",newConfigurationEntityData)
     }
     const emptyValidate = (value:String) => {  
       return true;
@@ -37,7 +38,7 @@ export default function Metadata({
 
     const updateScope = (value:String) => {
       console.log("value: ",value)
-        console.log("newServiceProviderData: ",newServiceProviderData)
+        console.log("newConfigurationEntityData: ",newConfigurationEntityData)
 
     }
     
@@ -58,25 +59,25 @@ export default function Metadata({
       console.log("updateRedirectUri value: ",value)
       //var newUris:Array<String> = [];
 
-      if(newServiceProviderData?.metadata?.redirect_uris) {
-          const index = newServiceProviderData.metadata.redirect_uris.indexOf(value)
+      if(role&&providerData?.metadata?.redirect_uris) {
+          const index = providerData.metadata.redirect_uris.indexOf(value)
           if(index>=0) {
-              newServiceProviderData.metadata.redirect_uris.splice(index, 1);
+            providerData.metadata.redirect_uris.splice(index, 1);
           } else {
-            newServiceProviderData.metadata.redirect_uris.push(value)
+            providerData.metadata.redirect_uris.push(value)
           }
       } 
       
       
-      if(setNewServiceProviderData) {
-        setNewServiceProviderData({ ...newServiceProviderData})
+      if(newConfigurationEntityData) {
+        setNewConfigurationEntityData({ ...newConfigurationEntityData})
       }
       
     }
-    if (newServiceProviderData !== undefined&&newServiceProviderData.metadata && newServiceProviderData.metadata !== undefined) {  
-      const value = newServiceProviderData.metadata.encoding && newServiceProviderData.metadata.content !== undefined
-        ? atob(newServiceProviderData.metadata.content as unknown as string)
-        : JSON.stringify(newServiceProviderData.metadata, null, 2);
+    if (role&&providerData !== undefined&&providerData.metadata && providerData.metadata !== undefined) {  
+      const value = providerData.metadata.encoding && providerData.metadata.content !== undefined
+        ? atob(providerData.metadata.content as unknown as string)
+        : JSON.stringify(providerData.metadata, null, 2);
       if(type==="oidc") {
         return (<>
           <Grid container spacing={2} mb={3}>
@@ -91,7 +92,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <ListForm object={newServiceProviderData.metadata.grant_types} type="grant_type" onUpdate={logUpdateValue} onValidate={emptyValidate}></ListForm>
+              <ListForm object={providerData.metadata.grant_types} type="grant_type" onUpdate={logUpdateValue} onValidate={emptyValidate}></ListForm>
             </Typography>
           </Grid>
         </Grid>
@@ -107,7 +108,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={newServiceProviderData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope}></InputForm>
+              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope}></InputForm>
             </Typography>
           </Grid>
         </Grid>
@@ -123,7 +124,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <ListForm object={newServiceProviderData.metadata.redirect_uris} type="redirect_uri" isEditable={true} onUpdate={updateRedirectUri} onValidate={validateRedirectUri} helperText={helperTextForRedirectUri}></ListForm>
+              <ListForm object={providerData.metadata.redirect_uris} type="redirect_uri" isEditable={true} onUpdate={updateRedirectUri} onValidate={validateRedirectUri} helperText={helperTextForRedirectUri}></ListForm>
             </Typography>
           </Grid>
         </Grid>
@@ -139,7 +140,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={newServiceProviderData} path="metadata.client_id" type="client_id" isEditable={false} onUpdate={logUpdateValue}></InputForm>
+              <InputForm object={providerData} path="metadata.client_id" type="client_id" isEditable={false} onUpdate={logUpdateValue}></InputForm>
            
             </Typography>
           </Grid>
@@ -156,7 +157,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={newServiceProviderData} path="metadata.client_secret" type="client_secret" isEditable={false} onUpdate={logUpdateValue}></InputForm>
+              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" isEditable={false} onUpdate={logUpdateValue}></InputForm>
             </Typography>
           </Grid>
         </Grid>
@@ -172,7 +173,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <ListForm object={newServiceProviderData.metadata.response_types} type="response_type" onUpdate={logUpdateValue} onValidate={emptyValidate}></ListForm>
+              <ListForm object={providerData.metadata.response_types} type="response_type" onUpdate={logUpdateValue} onValidate={emptyValidate}></ListForm>
             </Typography>
           </Grid>
         </Grid>
