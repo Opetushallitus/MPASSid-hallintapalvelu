@@ -171,7 +171,7 @@ export const dataConfiguration:UiConfiguration[] = [
       integrationType: [
           {
               name: 'azure',
-              editable: true,
+              editable: false,
               visible: true,
           }
       ]

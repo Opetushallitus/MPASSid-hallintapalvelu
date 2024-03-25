@@ -20,6 +20,7 @@ interface Props {
 
 export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid }: Props) {
   const intl = useIntl();
+  const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   
   const logUpdateValue = (value:String) => {  
     console.log("attributes: ",attributes)
@@ -59,7 +60,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
       <Grid container >
         {dataConfiguration
           .filter((configuration) => configuration.type === attributeType)
-          .filter((configuration) => !configuration.oid || configuration.oid === oid)
+          .filter((configuration) => (specialConfiguration.includes(configuration.name)&&configuration.oid)||(!specialConfiguration.includes(configuration.name)&&!configuration.oid))
           .map((configuration) => {
             const id = `attribuutti.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;

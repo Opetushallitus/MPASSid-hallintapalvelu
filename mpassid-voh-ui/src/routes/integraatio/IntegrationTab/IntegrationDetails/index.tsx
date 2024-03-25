@@ -53,7 +53,8 @@ export default function IntegrationDetails({ id }: Props) {
 
   const writeAccess = () => {
     
-    if(integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    //Tuki ainoastaan azure palveluille 
+    if(integration?.configurationEntity?.idp?.type === "azure" && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
       return true;
     }
     return false;

@@ -56,7 +56,8 @@ export default function Home() {
   const writeAccess = () => {
     
     if((me?.groups?.includes("APP_MPASSID_TALLENTAJA_")||me?.groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_")||me?.groups?.includes(tallentajaOphGroup))) {
-      return true;
+      //Kun attribuutit konfiguroitu ja testattu, niin muuta true:ksi;
+      return false;
     }
     return false;
   }
