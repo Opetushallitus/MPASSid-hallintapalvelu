@@ -28,6 +28,7 @@ export interface IntegrationType {
 export interface UiConfiguration {
   name: string;
   type: string;
+  oid?: string;
   mandatory: boolean;
   multivalue?: boolean;
   environment: string;
@@ -87,6 +88,38 @@ export const defaultDataConfiguration:UiConfiguration = {
 }
 export const dataConfiguration:UiConfiguration[] = [
   {
+      name: 'clientId',
+      type: 'data',
+      mandatory: true,
+      environment: 'prod',
+      validation: [],
+      integrationType: []
+  },
+  {
+      name: 'clientKey',
+      type: 'data',
+      mandatory: true,
+      environment: 'prod',
+      validation: [],
+      integrationType: []
+  },
+  {
+    name: 'datasource',
+    type: 'data',
+    mandatory: true,
+    environment: 'prod',
+    validation: [],
+    integrationType: []
+  },
+  {
+    name: 'tenantId',
+    type: 'data',
+    mandatory: true,
+    environment: 'prod',
+    validation: [],
+    integrationType: []
+  },
+  {
       name: 'firstName',
       type: 'user',
       mandatory: true,
@@ -130,6 +163,7 @@ export const dataConfiguration:UiConfiguration[] = [
   },
   {
       name: 'schoolIdStatic',
+      oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: true,
       environment: 'prod',
@@ -200,6 +234,7 @@ export const dataConfiguration:UiConfiguration[] = [
   },
   {
       name: 'studentGroupGuid',
+      oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: true,
       environment: 'prod',
@@ -214,6 +249,7 @@ export const dataConfiguration:UiConfiguration[] = [
   },
   {
       name: 'customTeacherRole',
+      oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: true,
       environment: 'prod',
@@ -242,8 +278,9 @@ export const dataConfiguration:UiConfiguration[] = [
   },
   {
       name: 'customStudentRole',
+      oid: '1.2.246.562.10.21199106507',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       environment: 'prod',
       validation: [],
       integrationType: [
@@ -306,21 +343,6 @@ export const dataConfiguration:UiConfiguration[] = [
       integrationType: [
           {
               name: 'oidcrp',
-              editable: true,
-              visible: true,
-          }
-      ]
-  },
-  {
-      name: 'samlmetadata',
-      type: 'data',
-      mandatory: true,
-      multivalue: false,
-      environment: 'prod',
-      validation: [ 'samlschema' ],
-      integrationType: [
-          {
-              name: 'samlidp',
               editable: true,
               visible: true,
           }

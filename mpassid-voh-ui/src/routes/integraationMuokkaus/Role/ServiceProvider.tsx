@@ -19,9 +19,10 @@ import { useEffect, useState } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;
+  oid: string;
 }
 
-export default function PalveluIntegraatio({ integration }: Props) {
+export default function PalveluIntegraatio({ integration,oid }: Props) {
     const { integrationType } = useParams();
     const { type } = useParams();
     const hasAttributes = false ;
@@ -83,7 +84,7 @@ export default function PalveluIntegraatio({ integration }: Props) {
             </Grid>
           </>
          
-      <Role integration={integration} />
+      <Role integration={integration} oid={oid}/>
 
       <Typography variant="h2" gutterBottom>
               <FormattedMessage defaultMessage="Metadatatiedot" />
@@ -102,6 +103,7 @@ export default function PalveluIntegraatio({ integration }: Props) {
             type={type}
             attributeType="data"
             role={role}
+            oid={oid}
           />
         </ErrorBoundary>
       </Grid>)}
@@ -119,6 +121,7 @@ export default function PalveluIntegraatio({ integration }: Props) {
               type={type}
               attributeType="user"
               role={role}
+              oid={oid}
             />
           </ErrorBoundary>
         </>

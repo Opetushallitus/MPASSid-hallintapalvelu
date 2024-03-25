@@ -53,6 +53,14 @@ export default function Home() {
   const intl = useIntl();
   const me=useMe();
 
+  const writeAccess = () => {
+    
+    if((me?.groups?.includes("APP_MPASSID_TALLENTAJA_")||me?.groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_")||me?.groups?.includes(tallentajaOphGroup))) {
+      return true;
+    }
+    return false;
+  }
+
   function handleSearch(formData: FormData) {
     const copy = copyFormDataToURLSearchParams(formData);
     setSearchParams((searchParams) => resetPage(copy(searchParams)));
@@ -113,8 +121,8 @@ export default function Home() {
           </ErrorBoundary>
         </Suspense>
       </TableContainer>
-      <AddIntegrationButton setOpen={setAddIntegration}></AddIntegrationButton>     
-      <NewIntegrationSelection open={addIntegration} setOpen={setAddIntegration} /> 
+      {writeAccess()&&<AddIntegrationButton setOpen={setAddIntegration}></AddIntegrationButton>}
+      {writeAccess()&&<NewIntegrationSelection open={addIntegration} setOpen={setAddIntegration} />} 
     </>
   );
 }

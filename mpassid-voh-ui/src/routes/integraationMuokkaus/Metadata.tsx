@@ -36,7 +36,7 @@ export default function Metadata({
       return true;
     }
 
-    const updateScope = (value:String) => {
+    const updateScope = (name: string, value:String, type: Components.Schemas.Attribute["type"]) => {
       console.log("value: ",value)
         console.log("newConfigurationEntityData: ",newConfigurationEntityData)
 
@@ -108,7 +108,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope}></InputForm>
+              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope} attributeType="data" onValidate={emptyValidate} mandatory={true} label="Scope"></InputForm>
             </Typography>
           </Grid>
         </Grid>
@@ -140,7 +140,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.client_id" type="client_id" isEditable={false} onUpdate={logUpdateValue}></InputForm>
+              <InputForm object={providerData} path="metadata.client_id" type="client_id" label="client_id" isEditable={false} onUpdate={logUpdateValue} onValidate={emptyValidate} attributeType="data"  mandatory={true}></InputForm>
            
             </Typography>
           </Grid>
@@ -157,7 +157,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" isEditable={false} onUpdate={logUpdateValue}></InputForm>
+              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" label="client_secret" isEditable={false} onUpdate={logUpdateValue} attributeType="data" onValidate={emptyValidate} mandatory={true}></InputForm>
             </Typography>
           </Grid>
         </Grid>

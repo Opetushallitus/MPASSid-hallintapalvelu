@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useIntegrationSafe } from "@/api";
+import { useMe } from "@/api/käyttöoikeus";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import {
   getRole,
@@ -22,12 +23,14 @@ import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
+import { tallentajaOphGroup } from '../../../../config';
 interface Props {
   id: number;
 }
 
 export default function IntegrationDetails({ id }: Props) {
   const [error, integration] = useIntegrationSafe({ id });
+  const { groups } = useMe();
 
   if (error?.response?.status === 404) {
     return (
@@ -46,6 +49,14 @@ export default function IntegrationDetails({ id }: Props) {
         />
       </Alert>
     );
+  }
+
+  const writeAccess = () => {
+    
+    if(integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+      return true;
+    }
+    return false;
   }
 
   const role = getRole(integration);
@@ -174,7 +185,7 @@ export default function IntegrationDetails({ id }: Props) {
             
         </>
       )}
-      <EditIntegrationButton integration={integration}></EditIntegrationButton>   
+      {writeAccess()&&<EditIntegrationButton integration={integration}></EditIntegrationButton>}
     </>
   );
 }

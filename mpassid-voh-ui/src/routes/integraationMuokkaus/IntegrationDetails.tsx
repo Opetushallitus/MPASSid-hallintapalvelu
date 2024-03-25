@@ -35,18 +35,22 @@ interface Props {
   id: number;
   setSaveDialogState: Dispatch<boolean>;
   setCannotSave: Dispatch<boolean>;
+  setNewIntegration: Dispatch<Components.Schemas.Integration>;
 }
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCannotSave }: Props) {
+export default function IntegrationDetails({ id, setSaveDialogState, setCannotSave, setNewIntegration }: Props) {
     
     var { role } = useParams();
     const { type } = useParams();
     const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     var [error, integration] = useIntegrationSafe({id});
+    var oid:string = "";
     if(id===0) {
       integration = inits.idp.wilma
-    } 
+    } else {
+      oid = integration.organization.oid
+    }
 
     useEffect(() => {
       if(role !== undefined) {
@@ -57,11 +61,14 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
 
     useEffect(() => {
           if(newConfigurationEntityData) {
+            console.log("newConfigurationEntityData:",newConfigurationEntityData)
             setSaveDialogState(true);
             if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){
               //if(JSON.stringify(newConfigurationEntityData)===JSON.stringify(integration.configurationEntity)){  
               setCannotSave(false)
             } else {
+              integration.ConfigurationEntity=newConfigurationEntityData
+              setNewIntegration(integration)
               setCannotSave(true)
             }
           } else {
@@ -184,7 +191,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             </Grid>
           </>
       )}    
-      <Role integration={integration} />
+      <Role integration={integration} oid={oid} />
 
       {newConfigurationEntityData&&<Metadata
         newConfigurationEntityData={newConfigurationEntityData}
@@ -203,6 +210,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             attributeType="data"
             type={type}
             role={role}
+            oid={oid}
           />
         </ErrorBoundary>
       </Grid>}
@@ -220,6 +228,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
               role={role}
               attributeType="user"
               type={type}
+              oid={oid}
             />
           </ErrorBoundary>
              

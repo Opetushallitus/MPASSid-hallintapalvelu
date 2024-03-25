@@ -3,18 +3,22 @@ import { Box, TextField } from "@mui/material";
 import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get, last, toPath } from "lodash";
+import { Components } from '@/api';
 
 interface Props {
   object: any;
   type: string;
+  label: string;
+  attributeType: Components.Schemas.Attribute["type"];
   isEditable: boolean;
+  mandatory: boolean;
   path: any;
   helperText?: JSX.Element;
-  onUpdate: (data: string,type: string) => void;
+  onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
   onValidate: (data: any) => boolean;
 }
 
-export default function InputForm({ object, type, isEditable=false, helperText=<></>, path, onUpdate, onValidate }: Props) {
+export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText=<></>, path, onUpdate, onValidate, attributeType, label }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
   const [isEmpty, setIsEmpty] = useState(!defaultValue);
@@ -29,8 +33,7 @@ export default function InputForm({ object, type, isEditable=false, helperText=<
       setIsEmpty(!inputRef.current!);
       setIsDirty(inputRef.current! !== (defaultValue ?? ""));
     },
-    [defaultValue]
-  );
+    [defaultValue]);
 
   useEffect(() => {
     updateFormState();
@@ -47,15 +50,16 @@ export default function InputForm({ object, type, isEditable=false, helperText=<
           event.preventDefault();
           if(onValidate(inputRef.current?.value)&&isDirty) {
             setIsValid(true)
-            console.log("inputRef.current?.value", inputRef.current?.value)
-            if(inputRef.current?.value&&inputRef.current.value!=="") {
-              onUpdate(inputRef.current.value,type);
-              inputRef.current!.value = "";
-              setUsedHelperText(<></>)
-            } else {
-
-              setUsedHelperText(<FormattedMessage defaultMessage="{type} on pakollinen kenttä" values={{type: type}} />)
+            if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
+              setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
               setIsValid(false)  
+            } else {
+              if(inputRef.current?.value) {
+                onUpdate(type,inputRef.current.value,attributeType);  
+              } else {
+                onUpdate(type,"",attributeType);
+              }
+              setUsedHelperText(<></>)
             }
             
           } else {
@@ -72,8 +76,8 @@ export default function InputForm({ object, type, isEditable=false, helperText=<
           sx={{ width: '80%'}}
           variant="standard"
           placeholder={intl.formatMessage({
-            defaultMessage: "Lisää {type}"},
-            { type: type} 
+            defaultMessage: "Lisää {label}"},
+            { label: label} 
           )}
           defaultValue={defaultValue}
           fullWidth

@@ -9,12 +9,13 @@ import { useParams } from "react-router-dom";
 import { useSessionStorage } from "usehooks-ts";
 import IntegrationTab from "./IntegrationTab";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
+import { openIntegrationsSessionStorageKey } from '../../config';
 
 export default function Integraatio() {
   const { integrationId } = useParams();
 
   const [tabs, setValue] = useSessionStorage<string[]>(
-    "mpassid-open-integration-tabs",
+    openIntegrationsSessionStorageKey,
     []
   );
   

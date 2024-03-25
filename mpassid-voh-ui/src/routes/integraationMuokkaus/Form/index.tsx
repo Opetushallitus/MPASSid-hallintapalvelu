@@ -9,13 +9,13 @@ import { Dispatch } from 'react';
 import { IntegrationType, dataConfiguration, defaultDataConfiguration, defaultIntegrationType, UiConfiguration } from "../../../config"
 
 interface Props {
-    uiConfiguration?: any;
+    uiConfiguration: UiConfiguration;
     role?: any;
     type?: any;
     attribute: Components.Schemas.Attribute;
     attributeType: Components.Schemas.Attribute["type"];
     newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
-    onUpdate: (data: string,type: string) => void;
+    onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
     onValidate: (data: any) => boolean;
     setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
 }
@@ -23,10 +23,14 @@ interface Props {
 export default function IntegraatioForm({ attribute, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate }: Props) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
-    const label = id in intl.messages ? { id } : undefined;            
+    const label = id in intl.messages ? { id } : undefined;           
     const tooltipId = `työkaluvihje.${attribute.name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
-    const configuration=dataConfiguration.find((c:UiConfiguration) => c.type===attribute.type&&c.name===attribute.name) || defaultDataConfiguration;
+    /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
+                        dataConfiguration.find((c:UiConfiguration) => !c.oid && c.type===attribute.type&&c.name===attribute.name) || 
+                        defaultDataConfiguration;
+                        */
+    const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
     
     if(roleConfiguration.visible) {
@@ -61,7 +65,16 @@ export default function IntegraatioForm({ attribute, role, type, attributeType, 
                         variant="caption"
                         >
                         {configuration&&roleConfiguration&&
-                            (<InputForm key={attribute.name} object={attribute} path="content" type={attribute.name!} isEditable={roleConfiguration.editable} onUpdate={onUpdate} onValidate={onValidate}/>)
+                            (<InputForm key={attribute.name} 
+                                object={attribute} 
+                                path="content" 
+                                type={attribute.name!} 
+                                isEditable={roleConfiguration.editable} 
+                                onUpdate={onUpdate} 
+                                onValidate={onValidate} 
+                                mandatory={configuration.mandatory}
+                                label={label?intl.formatMessage(label):attribute.name!}
+                                attributeType={attributeType}/>)
                         }
                         
                         
