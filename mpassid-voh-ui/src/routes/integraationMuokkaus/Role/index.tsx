@@ -6,6 +6,7 @@ import SetProvider from "./SetProvider";
 
 interface Props {
   integration: Components.Schemas.Integration;
+  oid: string;
 }
 
 const roleComponents = {
@@ -14,14 +15,14 @@ const roleComponents = {
   set: SetProvider
 };
 
-export default function Role({ integration }: Props) {
+export default function Role({ integration, oid }: Props) {
   const role = getRole(integration);
 
   const Component = roleComponents[role];
 
   return (
     <>
-      <Component integration={integration} />
+      <Component integration={integration} oid={oid}/>
     </>
   );
 }
