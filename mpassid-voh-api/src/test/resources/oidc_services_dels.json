@@ -67,7 +67,6 @@
                     "metadata": {
                         "scope": "openid profile",
                         "redirect_uris": [
-                            "https://lae/sso/authenticate",
                             "https://eal/sso/authenticate"
                         ],
                         "client_id": "AjB7pyw4KXRQjVDvWnY21srEDJl50ae4OtBz4NovyCvxrTvaukDUa",

@@ -1,7 +1,7 @@
 package fi.mpass.voh.api.integration;
 
 import java.io.Serializable;
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class IntegrationPermissionId implements Serializable {

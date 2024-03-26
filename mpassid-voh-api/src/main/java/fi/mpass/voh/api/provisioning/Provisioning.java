@@ -1,7 +1,7 @@
 package fi.mpass.voh.api.provisioning;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 import java.time.LocalDateTime;
 

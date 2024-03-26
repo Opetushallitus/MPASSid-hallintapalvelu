@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.http.HttpStatus;
 import org.springframework.data.domain.Page;
@@ -44,7 +44,7 @@ public class IntegrationController {
     }
 
     @Operation(summary = "Get all integrations", ignoreJsonView = true)
-    @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
             @ExampleObject(name = "integrations", externalValue = "https://mpassid-rr-test.csc.fi/integrations.json") }))
     @GetMapping("/list")
@@ -54,7 +54,7 @@ public class IntegrationController {
     }
 
     @Operation(summary = "Search paged integrations", ignoreJsonView = true)
-    @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PageIntegration.class), mediaType = "application/json", examples = {
                     @ExampleObject(name = "searchIntegrations", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
@@ -69,13 +69,14 @@ public class IntegrationController {
             @RequestParam(required = false, value = "role") String role,
             @RequestParam(required = false, value = "deploymentPhase") String deploymentPhase,
             @RequestParam(required = false, value = "referenceIntegration") Long referenceIntegration,
+            @RequestParam(required = false, value = "status") Integer status,
             Pageable pageable) {
         try {
             if (!(referenceIntegration == null)) {
-                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, referenceIntegration,
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, referenceIntegration, status,
                         pageable);
             } else {
-                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase,
+                return integrationService.getIntegrationsSpecSearchPageable(search, filterByType, role, deploymentPhase, status,
                         pageable);
             }
         } catch (PropertyReferenceException exc) {
@@ -85,7 +86,7 @@ public class IntegrationController {
     }
 
     @Operation(summary = "Get the specific integration", ignoreJsonView = true)
-    @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, #id, 'KATSELIJA') or @authorize.hasPermission(#root, #id, 'TALLENTAJA')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
                     @ExampleObject(name = "integration", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
@@ -98,7 +99,7 @@ public class IntegrationController {
     }
 
     @Operation(summary = "Update the specific integration")
-    @PreAuthorize("hasPermission(#id, 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, #id, 'TALLENTAJA')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
@@ -112,7 +113,7 @@ public class IntegrationController {
     }
  
     @Operation(summary = "Get integrations since a point in time", ignoreJsonView = true)
-    @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
                     @ExampleObject(name = "integration", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),

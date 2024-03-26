@@ -21,6 +21,7 @@ export default function Routes() {
     <ReactRouterRoutes>
       <Route element={<Basic />}>
         <Route index element={<Home />} />
+        <Route path="index.html" element={<Home />} />
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
         <Route path="uusi/:role/:type/:id" element={<IntegraatioMuokkaus />} />
         <Route path="muokkaa/:role/:type/:id" element={<IntegraatioMuokkaus />} />

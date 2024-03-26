@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>fi.mpass</groupId>
 		<artifactId>mpassid-voh</artifactId>
-		<version>2.0.1</version>
+		<version>2.1.1</version>
 	</parent>
 	<artifactId>mpassid-voh-api</artifactId>
 
@@ -96,14 +96,18 @@
 			<artifactId>spring-data-envers</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.7.0</version>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -116,7 +120,6 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>9.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>fi.vm.sade.java-utils</groupId>

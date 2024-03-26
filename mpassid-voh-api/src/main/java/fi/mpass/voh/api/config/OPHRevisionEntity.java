@@ -1,12 +1,11 @@
 package fi.mpass.voh.api.config;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
-import org.hibernate.annotations.Proxy;
 import org.hibernate.envers.DefaultRevisionEntity;
 import org.hibernate.envers.RevisionEntity;
 
@@ -16,7 +15,6 @@ import org.hibernate.envers.RevisionEntity;
     @AttributeOverride(name = "id", column = @Column(name = "rev")),
     @AttributeOverride(name = "timestamp", column = @Column(name = "revtstmp"))
 })
-@Proxy(lazy = false)
 @Entity
 public class OPHRevisionEntity extends DefaultRevisionEntity {
 

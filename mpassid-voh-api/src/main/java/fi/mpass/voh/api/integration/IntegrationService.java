@@ -6,13 +6,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -40,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 @Service
 public class IntegrationService {
-  private final static Logger logger = LoggerFactory.getLogger(IntegrationService.class);
+  private static final Logger logger = LoggerFactory.getLogger(IntegrationService.class);
 
   @Value("${application.admin-organization-oid}")
   private String adminOrganizationOid;
@@ -106,6 +104,59 @@ public class IntegrationService {
     return false;
   }
 
+  private IntegrationSpecificationsBuilder configureSearch(IntegrationSpecificationsBuilder builder, String search) {
+
+    if (builder != null && search != null && search.length() > 0) {
+      builder.withEqualOr(Category.IDP, "flowName", search);
+      builder.withEqualOr(Category.IDP, "entityId", search);
+      builder.withEqualOr(Category.IDP, "tenantId", search);
+      builder.withEqualOr(Category.IDP, "hostname", search);
+      builder.withEqualOr(Category.SP, "entityId", search);
+      builder.withEqualOr(Category.SP, "clientId", search);
+      builder.withEqualOr(Category.ORGANIZATION, "oid", search);
+      builder.withContainOr(Category.SET, "name", search);
+      builder.withContainOr(Category.SP, "name", search);
+      builder.withContainOr(Category.ORGANIZATION, "name", search);
+      try {
+        builder.withEqualOr(Category.INTEGRATION, "id", Long.valueOf(search));
+      } catch (NumberFormatException e) {
+        logger.debug("Input search string cannot be interpreted as identifier.");
+      }
+
+      return builder;
+    }
+
+    return new IntegrationSpecificationsBuilder();
+  }
+
+  private IntegrationSpecificationsBuilder configureFilter(IntegrationSpecificationsBuilder builder, String type,
+      String role, String deploymentPhase, Integer status) {
+
+    if (builder != null) {
+      // filterByType can be a list of types, thus (equality OR equality OR ...) AND
+      if (type != null && type.length() > 0)
+        builder.withEqualAnd(Category.TYPE, "type", type);
+
+      // role can be a list of roles, thus (equality OR equality OR ...) AND
+      if (role != null && role.length() > 0)
+        builder.withEqualAnd(Category.ROLE, "role", role);
+
+      // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
+      // AND
+      if (deploymentPhase != null && deploymentPhase.length() > 0)
+        builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
+
+      // status of the integration
+      if (status != null) {
+        builder.withEqualAnd(Category.INTEGRATION, "status", status);
+      } else {
+        builder.withEqualAnd(Category.INTEGRATION, "status", 0);
+      }
+      return builder;
+    }
+    return new IntegrationSpecificationsBuilder();
+  }
+
   /**
    * The method creates a specification from the given search criteria, filtering
    * types and roles. The method queries a repository through the specification
@@ -122,43 +173,12 @@ public class IntegrationService {
    * @throws EntityNotFoundException
    */
   public Page<Integration> getIntegrationsSpecSearchPageable(String search, String filterByType, String role,
-      String deploymentPhase, Pageable pageable) {
+      String deploymentPhase, Integer status, Pageable pageable) {
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
-    if (search != null && search.length() > 0) {
-      builder.withEqualOr(Category.IDP, "flowName", search);
-      builder.withEqualOr(Category.IDP, "entityId", search);
-      builder.withEqualOr(Category.IDP, "tenantId", search);
-      builder.withEqualOr(Category.IDP, "hostname", search);
-      builder.withEqualOr(Category.SP, "entityId", search);
-      builder.withEqualOr(Category.SP, "clientId", search);
-      builder.withEqualOr(Category.ORGANIZATION, "oid", search);
-      builder.withContainOr(Category.SET, "name", search);
-      builder.withContainOr(Category.SP, "name", search);
-      builder.withContainOr(Category.ORGANIZATION, "name", search);
-      try {
-        builder.withEqualOr(Category.INTEGRATION, "id", Long.valueOf(search));
-      } catch (NumberFormatException e) {
-        logger.debug("Input search string cannot be interpreted as identifier.");
-      }
-    }
-
-    // filterByType can be a list of types, thus (equality OR equality OR ...) AND
-    if (filterByType != null && filterByType.length() > 0)
-      builder.withEqualAnd(Category.TYPE, "type", filterByType);
-
-    // role can be a list of roles, thus (equality OR equality OR ...) AND
-    if (role != null && role.length() > 0)
-      builder.withEqualAnd(Category.ROLE, "role", role);
-
-    // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
-    // AND
-    if (deploymentPhase != null && deploymentPhase.length() > 0)
-      builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
-
-    // search only active integrations
-    builder.withEqualAnd(Category.INTEGRATION, "status", 0);
+    builder = configureSearch(builder, search);
+    builder = configureFilter(builder, filterByType, role, deploymentPhase, status);
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -182,10 +202,12 @@ public class IntegrationService {
    * @return
    */
   private Page<Integration> pageIntegrations(List<Integration> results, Pageable pageable) {
-    final int toIndex = Math.min((pageable.getPageNumber() + 1) * pageable.getPageSize(), results.size());
-    final int fromIndex = Math.max(toIndex - pageable.getPageSize(), 0);
-    Page<Integration> integrations = new PageImpl<Integration>(results.subList(fromIndex, toIndex), pageable,
+    final int fromIndex = (int) pageable.getOffset();
+    final int toIndex = Math.min(fromIndex + pageable.getPageSize(), results.size());
+    Page<Integration> integrations = new PageImpl<>(results.subList(fromIndex, toIndex), pageable,
         results.size());
+    logger.debug("toIndex: {}, fromIndex: {}, results size: {}, page size: {}, page number: {}, page offset: {}",
+        toIndex, fromIndex, results.size(), pageable.getPageSize(), pageable.getPageNumber(), pageable.getOffset());
 
     return integrations;
   }
@@ -255,45 +277,14 @@ public class IntegrationService {
    * @throws EntityNotFoundException
    */
   public Page<Integration> getIntegrationsSpecSearchPageable(String search, String filterByType, String role,
-      String deploymentPhase, Long referenceIntegrationId, Pageable pageable) {
+      String deploymentPhase, Long referenceIntegrationId, Integer status, Pageable pageable) {
 
-    List<Integration> integrations = new ArrayList<Integration>();
+    List<Integration> integrations = new ArrayList<>();
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
-    if (search != null && search.length() > 0) {
-      builder.withEqualOr(Category.IDP, "flowName", search);
-      builder.withEqualOr(Category.IDP, "entityId", search);
-      builder.withEqualOr(Category.IDP, "tenantId", search);
-      builder.withEqualOr(Category.IDP, "hostname", search);
-      builder.withEqualOr(Category.SP, "entityId", search);
-      builder.withEqualOr(Category.SP, "clientId", search);
-      builder.withEqualOr(Category.ORGANIZATION, "oid", search);
-      builder.withContainOr(Category.SET, "name", search);
-      builder.withContainOr(Category.SP, "name", search);
-      builder.withContainOr(Category.ORGANIZATION, "name", search);
-      try {
-        builder.withEqualOr(Category.INTEGRATION, "id", Long.valueOf(search));
-      } catch (NumberFormatException e) {
-        logger.debug("Input search string cannot be interpreted as identifier.");
-      }
-    }
-
-    // filterByType can be a list of types, thus (equality OR equality OR ...) AND
-    if (filterByType != null && filterByType.length() > 0)
-      builder.withEqualAnd(Category.TYPE, "type", filterByType);
-
-    // role can be a list of roles, thus (equality OR equality OR ...) AND
-    if (role != null && role.length() > 0)
-      builder.withEqualAnd(Category.ROLE, "role", role);
-
-    // deploymentPhase can be a list of phases, thus (equality OR equality OR ...)
-    // AND
-    if (deploymentPhase != null && deploymentPhase.length() > 0)
-      builder.withEqualAnd(Category.DEPLOYMENT_PHASE, "deploymentPhase", deploymentPhase);
-
-    // search only active integrations
-    builder.withEqualAnd(Category.INTEGRATION, "status", 0);
+    builder = configureSearch(builder, search);
+    builder = configureFilter(builder, filterByType, role, deploymentPhase, status);
 
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -311,7 +302,7 @@ public class IntegrationService {
       if (referenceIntegration.isPresent()) {
         // permitted integrations
         List<IntegrationPermission> permissions = referenceIntegration.get().getPermissions();
-        List<Integration> permittedIntegrations = new ArrayList<Integration>();
+        List<Integration> permittedIntegrations = new ArrayList<>();
         for (IntegrationPermission p : permissions) {
           permittedIntegrations.add(p.getTo());
         }
@@ -386,7 +377,8 @@ public class IntegrationService {
 
   /**
    * The method extends the integration permissions.
-   * Requires the default test service integration identifier to be set in application properties.
+   * Requires the default test service integration identifier to be set in
+   * application properties.
    * 
    * @param integration
    * @return integration with extended permissions

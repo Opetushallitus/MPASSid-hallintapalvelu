@@ -2,7 +2,7 @@ package fi.mpass.voh.api.provisioning;
 
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +30,7 @@ public class ProvisioningController {
     }
 
     @Operation(summary = "Get provisioning configuration status")
-    @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Provisioning', 'ADMIN')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConfigurationStatus.class)), mediaType = "application/json"))
     @GetMapping("/configuration/status")
     public List<ConfigurationStatus> getProvisioningConfigurationStatus() {
@@ -39,14 +39,14 @@ public class ProvisioningController {
 
     @Operation(summary = "Update provisioning status")
     @PutMapping
-    @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Provisioning', 'ADMIN')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Provisioning.class), mediaType = "application/json"))
     public Provisioning updateProvisioningStatus(@Valid @RequestBody Provisioning provisioning) {
         return provisioningService.updateProvisioning(provisioning);
     }
 
     @Operation(summary = "Get all integrations")
-    @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Provisioning', 'ADMIN')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json"))
     @GetMapping("/list")
     public List<Integration> getIntegrations() {
@@ -54,7 +54,7 @@ public class ProvisioningController {
     }
 
     @Operation(summary = "Get all identity providers")
-    @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Provisioning', 'ADMIN')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = IdentityProviders.class), mediaType = "application/json"))
     @GetMapping("/identityproviders")
     public IdentityProviders getIdentityProviders() {
@@ -62,7 +62,7 @@ public class ProvisioningController {
     }
 
     @Operation(summary = "Get all service providers")
-    @PreAuthorize("hasPermission('Provisioning', 'ADMIN')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Provisioning', 'ADMIN')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ServiceProviders.class), mediaType = "application/json"))
     @GetMapping("/serviceproviders")
     public ServiceProviders getServiceProviders() {

@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import fi.mpass.voh.api.organization.OrganizationRepository;
 
 @SpringBootTest
 @Transactional
-public class IntegrationSpecificationTests {
+class IntegrationSpecificationTests {
 
     @Autowired
     private IntegrationRepository integrationRepository;
@@ -123,7 +123,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testEmptySpecification() {
+    void testEmptySpecification() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         Specification<Integration> spec = builder.build();
@@ -134,7 +134,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithWilmaHostnameAndFlowname() {
+    void testIntegrationWithWilmaHostnameAndFlowname() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         builder.withEqualOr(Category.IDP, "flowName", "wilmaFlowname");
@@ -148,7 +148,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithFalseOrganizationOid() {
+    void testIntegrationWithFalseOrganizationOid() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         builder.withEqualOr(Category.ORGANIZATION, "oid", "1.2.3.4.5.6.7.10");
@@ -161,7 +161,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIsIdpTypes() {
+    void testIsIdpTypes() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         String filterByType = "azure,wilma";
@@ -176,7 +176,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIsIdpType() {
+    void testIsIdpType() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         String filterByType = "azure";
@@ -191,7 +191,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithRoles() {
+    void testIntegrationWithRoles() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         String role = "idp,sp";
@@ -206,7 +206,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithDeploymentPhases() {
+    void testIntegrationWithDeploymentPhases() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         String deploymentPhase = "2,1";
@@ -221,7 +221,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithRole() {
+    void testIntegrationWithRole() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         String role = "sp";
@@ -236,7 +236,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithContainingOrganizationName() {
+    void testIntegrationWithContainingOrganizationName() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         builder.withContainOr(Category.ORGANIZATION, "name", "zyx");
@@ -249,7 +249,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithEqualOrganizations() {
+    void testIntegrationWithEqualOrganizations() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.8", "1.2.3.4.5.6.7.9", "1.2.3.4.5.6.7.2");
@@ -264,7 +264,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithEqualOrganization() {
+    void testIntegrationWithEqualOrganization() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         List<String> userOrganizationOids = Arrays.asList("1.2.3.4.5.6.7.9");
@@ -279,7 +279,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationSetWithEqualName() {
+    void testIntegrationSetWithEqualName() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         String setName = "Integration set 5";
@@ -294,7 +294,7 @@ public class IntegrationSpecificationTests {
     }
 
     @Test
-    public void testIntegrationWithActiveStatus() {
+    void testIntegrationWithActiveStatus() {
         IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
 
         int status = 0;

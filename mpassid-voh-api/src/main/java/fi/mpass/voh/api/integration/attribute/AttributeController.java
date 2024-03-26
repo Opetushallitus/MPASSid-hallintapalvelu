@@ -25,11 +25,9 @@ public class AttributeController {
     }
 
     @Operation(summary = "Get a list of available attribute names")
-    @PreAuthorize("hasPermission('Integration', 'KATSELIJA') or hasPermission('Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                content = @Content(mediaType = "application/json",
-                                array = @ArraySchema(schema = @Schema(implementation = String.class)))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = String.class)))),
             @ApiResponse(responseCode = "403", description = "Forbidden operation")
     })
     @GetMapping("/names")

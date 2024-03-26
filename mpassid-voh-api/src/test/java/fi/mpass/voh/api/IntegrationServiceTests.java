@@ -36,11 +36,12 @@ import static org.mockito.Mockito.times;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class IntegrationServiceTests {
+class IntegrationServiceTests {
 
     @Mock
     private IntegrationRepository integrationRepository;
@@ -145,7 +146,7 @@ public class IntegrationServiceTests {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "idp", "0", pageable);
+        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "idp", "0", 0, pageable);
 
         // then
         verify(integrationRepository).findAll(any(Specification.class), any(Pageable.class));
@@ -157,7 +158,7 @@ public class IntegrationServiceTests {
         Pageable pageable = PageRequest.of(0, 20);
 
         // when
-        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "", "0", pageable);
+        underTest.getIntegrationsSpecSearchPageable("search", "opinsys,wilma", "", "0", 0, pageable);
 
         // then
         verify(integrationRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
@@ -166,22 +167,19 @@ public class IntegrationServiceTests {
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     void testGetIntegrationsSpecSearchPageableWithReferenceId() {
-        List<Integration> integrations = new ArrayList<Integration>();
-        integrations.add(updatedIntegration);
-        integrations.add(updatedAllowingIntegration);
+        
         Pageable pageable = PageRequest.of(0, 20, Sort.by("permissions"));
         given(integrationRepository.findAll(any(Specification.class))).willReturn(integrationSets);
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(referenceIntegration));
 
         // when
-        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L,
+        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L, 0,
                 pageable);
 
         // then
-        assertTrue(pageIntegration.getContent().size() == 9);
-        assertTrue(pageIntegration.getContent().get(8).getId() == 1006);
-        assertTrue(pageIntegration.getContent().get(7).getId() == 1003);
-
+        assertEquals(9, pageIntegration.getContent().size());
+        assertEquals(1006, pageIntegration.getContent().get(8).getId());
+        assertEquals(1003, pageIntegration.getContent().get(7).getId());
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
@@ -197,7 +195,7 @@ public class IntegrationServiceTests {
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
-    public void testUpdateIntegration() {
+    void testUpdateIntegration() {
         // given
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedIntegration);
@@ -206,13 +204,13 @@ public class IntegrationServiceTests {
         Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedIntegration);
 
         // then - verify the output
-        assertTrue(resultIntegration.getId() == 999);
-        assertTrue(resultIntegration.getServiceContactAddress().equals("zyx@domain"));
+        assertEquals(999, resultIntegration.getId());
+        assertEquals("zyx@domain", resultIntegration.getServiceContactAddress());
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
-    public void testUpdateIntegrationPermissions() {
+    void testUpdateIntegrationPermissions() {
         // given
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
@@ -221,13 +219,13 @@ public class IntegrationServiceTests {
         Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
 
         // then - verify the output
-        assertTrue(resultIntegration.getId() == 999);
-        assertTrue(resultIntegration.getPermissions().size() == 9);
+        assertEquals(999, resultIntegration.getId());
+        assertEquals(9, resultIntegration.getPermissions().size());
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
-    public void testUpdateIntegrationWhenNoExistingIntegration() {
+    void testUpdateIntegrationWhenNoExistingIntegration() {
         // given
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.empty());
         given(integrationRepository.saveAndFlush(updatedIntegration)).willReturn(updatedIntegration);
@@ -252,7 +250,7 @@ public class IntegrationServiceTests {
         List<Integration> integrations = underTest.getIntegrationsSince(sinceTime);
 
         // then
-        assertTrue(integrations.size() == 2);
+        assertEquals(2, integrations.size());
     }
 
     @Test
@@ -264,7 +262,7 @@ public class IntegrationServiceTests {
         List<Integration> integrations = underTest.getIdentityProviders();
 
         // then
-        assertTrue(integrations.size() == 2);
+        assertEquals(2, integrations.size());
     }
 
     @Test

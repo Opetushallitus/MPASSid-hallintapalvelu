@@ -85,7 +85,6 @@
                         "scope": "openid profile",
                         "redirect_uris": [
                             "https://lae/sso/authenticate",
-                            "https://eal/sso/authenticate",
                             "https://eal/sso/authenticate2"
                         ],
                         "client_id": "Wuoluc1FARWBe6yocK9J6hiHh5gAjB7pyw4KXRQjVDvWnY21srEDJl50ae4OtBz4NovyCvxrTvaukDUa",
