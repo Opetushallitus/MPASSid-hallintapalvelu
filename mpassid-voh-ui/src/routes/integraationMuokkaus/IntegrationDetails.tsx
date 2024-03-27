@@ -46,10 +46,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     var [error, integration] = useIntegrationSafe({id});
     var oid:string = "";
+    var environment:number = 0
     if(id===0) {
       integration = inits.idp.wilma
     } else {
       oid = integration.organization.oid
+      environment = integration.deploymentPhase
     }
 
     useEffect(() => {
@@ -191,7 +193,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             </Grid>
           </>
       )}    
-      <Role integration={integration} oid={oid} />
+      <Role integration={integration} oid={oid} environment={environment}/>
 
       {newConfigurationEntityData&&<Metadata
         newConfigurationEntityData={newConfigurationEntityData}
@@ -208,6 +210,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             setNewConfigurationEntityData={setNewConfigurationEntityData}  
             attributes={newConfigurationEntityData?.attributes ?? []}
             attributeType="data"
+            environment={environment}
             type={type}
             role={role}
             oid={oid}
@@ -227,6 +230,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
               attributes={newConfigurationEntityData?.attributes ?? []}
               role={role}
               attributeType="user"
+              environment={environment}
               type={type}
               oid={oid}
             />

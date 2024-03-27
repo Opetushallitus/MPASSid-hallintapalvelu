@@ -11,6 +11,7 @@ import { dataConfiguration } from '../../config';
 interface Props {
   role?: any;
   oid: string;
+  environment: number;
   attributes: Components.Schemas.Attribute[];
   attributeType: Components.Schemas.Attribute["type"];
   type: any;
@@ -18,10 +19,10 @@ interface Props {
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
 }
 
-export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid }: Props) {
+export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid,environment }: Props) {
   const intl = useIntl();
   const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
-  
+  console.log("environment: ",environment)
   const logUpdateValue = (value:String) => {  
     console.log("attributes: ",attributes)
   }
@@ -60,11 +61,12 @@ export default function Attributes({ attributes, role, type, attributeType, newC
       <Grid container >
         {dataConfiguration
           .filter((configuration) => configuration.type === attributeType)
+          .filter((configuration) => configuration.environment===undefined||configuration.environment==environment )
           .filter((configuration) => (specialConfiguration.includes(configuration.name)&&configuration.oid)||(!specialConfiguration.includes(configuration.name)&&!configuration.oid))
           .map((configuration) => {
             const id = `attribuutti.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;
-  
+
             return {
               ...configuration,
               label: label && intl.formatMessage(label),

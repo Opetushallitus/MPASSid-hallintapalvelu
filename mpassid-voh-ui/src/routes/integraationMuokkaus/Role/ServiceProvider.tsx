@@ -16,13 +16,15 @@ import {
 import UniqueId from "@/routes/integraationMuokkaus/UniqueId";
 import { useIntegrationSafe } from "@/api/client";
 import { useEffect, useState } from "react";
+import { environments } from "@/config";
 
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
+  environment: number;
 }
 
-export default function PalveluIntegraatio({ integration,oid }: Props) {
+export default function PalveluIntegraatio({ integration,oid,environment }: Props) {
     const { integrationType } = useParams();
     const { type } = useParams();
     const hasAttributes = false ;
@@ -84,7 +86,7 @@ export default function PalveluIntegraatio({ integration,oid }: Props) {
             </Grid>
           </>
          
-      <Role integration={integration} oid={oid}/>
+      <Role integration={integration} oid={oid} environment={environment}/>
 
       <Typography variant="h2" gutterBottom>
               <FormattedMessage defaultMessage="Metadatatiedot" />
@@ -104,6 +106,7 @@ export default function PalveluIntegraatio({ integration,oid }: Props) {
             attributeType="data"
             role={role}
             oid={oid}
+            environment={environment}
           />
         </ErrorBoundary>
       </Grid>)}
@@ -122,6 +125,7 @@ export default function PalveluIntegraatio({ integration,oid }: Props) {
               attributeType="user"
               role={role}
               oid={oid}
+              environment={environment}
             />
           </ErrorBoundary>
         </>
