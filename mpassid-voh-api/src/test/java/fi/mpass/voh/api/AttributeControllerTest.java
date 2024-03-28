@@ -24,7 +24,7 @@ import fi.mpass.voh.api.integration.attribute.AttributeRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AttributeControllerTest {
+class AttributeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,7 +54,7 @@ public class AttributeControllerTest {
 
     @WithMockUser(value = "testuser", roles={"APP_MPASSID_KATSELIJA"})
     @Test
-    public void testAttributeNameList() throws Exception {
+    void testAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
         mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -66,7 +66,7 @@ public class AttributeControllerTest {
 
     @WithMockUser(value = "testuser")
     @Test
-    public void testUnauthorizedAttributeNameList() throws Exception {
+    void testUnauthorizedAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
         mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -76,7 +76,7 @@ public class AttributeControllerTest {
 
     @WithMockUser(value = "testuser", roles={"APP_MPASSID"})
     @Test
-    public void testPartiallyUnauthorizedAttributeNameList() throws Exception {
+    void testPartiallyUnauthorizedAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
         mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -86,7 +86,7 @@ public class AttributeControllerTest {
 
     @WithMockUser(value = "testuser", roles={"APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA"})
     @Test
-    public void testOrganizationalAuthorizedAttributeNameList() throws Exception {
+    void testOrganizationalAuthorizedAttributeNameList() throws Exception {
         when(attributeRepository.findDistinctName()).thenReturn(attributeNames);
         mockMvc.perform(get("/api/v2/attribute/names").contentType(MediaType.APPLICATION_JSON))
             .andDo(print())

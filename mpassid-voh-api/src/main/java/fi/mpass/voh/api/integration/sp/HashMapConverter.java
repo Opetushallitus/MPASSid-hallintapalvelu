@@ -3,7 +3,7 @@ package fi.mpass.voh.api.integration.sp;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HashMapConverter implements AttributeConverter<Map<String, Object>, String> {
-    private final static Logger logger = LoggerFactory.getLogger(HashMapConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(HashMapConverter.class);
 
     ObjectMapper objectMapper;
 

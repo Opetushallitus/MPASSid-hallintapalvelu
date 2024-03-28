@@ -14,22 +14,22 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
 
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 
 import org.hibernate.envers.Audited;
 
-import javax.persistence.DiscriminatorType;
-import javax.persistence.ElementCollection;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
 
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 
@@ -81,17 +81,18 @@ public abstract class IdentityProvider {
 
     /*
      * Identity Provider type specific identifiers used for the default
-     * sorting/search implementation should be also declared here
+     * sorting/search implementation should be declared here
      */
     /*
      * No getter or setter methods declared for these fields, only the corresponding
      * child class contains those methods
      */
-    @Schema(example = "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32")
-    private String entityId;
-    private String tenantId;
-    @Column(name = "wilma_hostname")
-    private String hostname;
+    //@Schema(example = "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea32")
+    protected String entityId;
+    protected String tenantId;
+    @Schema(description = "Kirjautumisosoite")
+    @Column(name="wilma_hostname")
+    protected String hostname;
 
     @Column(name = "metadata_valid_until", columnDefinition = "DATE")
     private LocalDate metadataValidUntil;
@@ -102,10 +103,10 @@ public abstract class IdentityProvider {
     @Column(name = "encryption_certificate_valid_until", columnDefinition = "DATE")
     private LocalDate encryptionCertificateValidUntil;
 
-    public IdentityProvider() {
+    protected IdentityProvider() {
     }
 
-    public IdentityProvider(String idpId, String logoUrl, String flowName) {
+    protected IdentityProvider(String idpId, String logoUrl, String flowName) {
         this.idpId = idpId;
         this.logoUrl = logoUrl;
         this.flowName = flowName;

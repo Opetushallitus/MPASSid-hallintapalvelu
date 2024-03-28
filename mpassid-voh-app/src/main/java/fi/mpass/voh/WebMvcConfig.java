@@ -5,19 +5,15 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Profile({"!dev", "!devlocal"})
+@Profile({ "dev", "test", "prod" })
 @Configuration
-class WebMvcConfig implements WebMvcConfigurer {  
+class WebMvcConfig implements WebMvcConfigurer {
 
     public WebMvcConfig() {}
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // single element level, no need to exclude i.e. "api"
-        registry.addViewController("/{x:\\w+}")
-                .setViewName("forward:/index.html");
-        // multi-level element path, excluding paths starting with "api", "v3", "index.html", or "assets"
-        registry.addViewController("/{x:(?!api|v3|index\\.html|assets|swagger-ui).*}/{*path}")
-                .setViewName("forward:/index.html");
+        registry.addRedirectViewController("/", "/index.html");
+        registry.addRedirectViewController("/{x:(?!api|v3|index\\.html|assets|swagger-ui).*}/{*path}", "/");
     }
 }

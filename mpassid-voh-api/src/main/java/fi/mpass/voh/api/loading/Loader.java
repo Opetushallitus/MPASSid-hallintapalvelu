@@ -171,13 +171,13 @@ public class Loader {
         Organization organization = new Organization();
         if (integration.getOrganization() != null && integration.getOrganization().getOid() != null
                 && integration.getOrganization().getOid().length() > 0) {
-            logger.debug("Integration #{} organization oid: {}", integration.getId(),
-                    integration.getOrganization().getOid());
+            logger.debug("Integration #{} organization oid: {}. [{},{}]", integration.getId(),
+                    integration.getOrganization().getOid(), precheck, refresh);
             if (!refresh) {
                 try {
                     organization = organizationService.getById(integration.getOrganization().getOid());
                 } catch (Exception ex) {
-                    logger.error("Organization cache lookup exception: {}.", ex.toString());
+                    logger.error("Organization cache lookup exception: {}. [{},{}]", ex, precheck, refresh);
                     loading.addError(integration, "Organization cache lookup exception");
                     return null;
                 }
@@ -187,12 +187,12 @@ public class Loader {
             if (organization == null) {
                 try {
                     logger.debug(
-                            "Retrieving integration #{} organization {}", integration.getId(),
-                            integration.getOrganization().getOid());
+                            "Retrieving integration #{} organization {}. [{},{}]", integration.getId(),
+                            integration.getOrganization().getOid(), precheck, refresh);
                     organization = organizationService
                             .retrieveOrganization(integration.getOrganization().getOid());
                 } catch (Exception ex) {
-                    logger.error("Organization retrieval exception: {}.", ex.toString());
+                    logger.error("Organization retrieval exception: {}. [{},{}]", ex, precheck, refresh);
                     loading.addError(integration, "Organization retrieval exception");
                     return null;
                 }
@@ -207,11 +207,57 @@ public class Loader {
                     integration.setOrganization(organization);
                 }
             } catch (Exception e) {
-                logger.error("Organization Exception: {}", e.toString());
+                logger.error("Organization caching exception: {}. [{},{}]", e, precheck, refresh);
                 loading.addError(integration, "Organization caching exception");
             }
         }
         return integration;
+    }
+
+    protected Integration updateIntegrationOrganization(Loading loading, Integration existingIntegration, String oid,
+            boolean precheck, boolean refresh) {
+        Organization organization = new Organization();
+        if (existingIntegration != null && oid != null && oid.length() > 0) {
+            logger.debug("Updating integration #{} to organization oid: {}. [{},{}]", existingIntegration.getId(),
+                    oid, precheck, refresh);
+            if (!refresh) {
+                try {
+                    organization = organizationService.getById(oid);
+                } catch (Exception ex) {
+                    logger.error("Organization cache lookup exception: {}. [{},{}]", ex, precheck, refresh);
+                    loading.addError(existingIntegration, "Organization cache lookup exception");
+                    return null;
+                }
+            } else {
+                organization = null;
+            }
+            if (organization == null) {
+                try {
+                    logger.debug(
+                            "Retrieving organization {}. [{},{}]", oid, precheck, refresh);
+                    organization = organizationService.retrieveOrganization(oid);
+                } catch (Exception ex) {
+                    logger.error("Organization retrieval exception: {}. [{},{}]", ex, precheck, refresh);
+                    loading.addError(existingIntegration, "Organization retrieval exception");
+                    return null;
+                }
+            }
+        }
+
+        if (!precheck) {
+            try {
+                // No cascading, Integration:Organization
+                if (existingIntegration != null && organization != null && organization.getOid() != null) {
+                    if (refresh)
+                        organization = organizationService.saveOrganization(organization);
+                    existingIntegration.setOrganization(organization);
+                }
+            } catch (Exception e) {
+                logger.error("Organization caching exception: {}. [{},{}]", e, precheck, refresh);
+                loading.addError(existingIntegration, "Organization caching exception");
+            }
+        }
+        return existingIntegration;
     }
 
     protected Integration updateExistingIntegration(Loading loading, Integration integration) {

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 @Service
 public class OrganizationService {
-  private final static Logger logger = LoggerFactory.getLogger(OrganizationService.class);
+  private static final Logger logger = LoggerFactory.getLogger(OrganizationService.class);
 
   private String externalOrganizationServiceUrl;
 
@@ -44,7 +44,7 @@ public class OrganizationService {
 
     String url = externalOrganizationServiceUrl.replaceAll("/$", "") + "/";
 
-    logger.debug("Retrieving organization information from " + url);
+    logger.debug("Retrieving organization information from {}", url);
 
     WebClient client = WebClient.create();
     WebClient.ResponseSpec response = client.get()

@@ -1,6 +1,6 @@
 package fi.mpass.voh.api.loading;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +26,7 @@ public class LoadingController {
     }
 
     @Operation(summary = "Get status of the most recently initiated integration loadings per type")
-    @PreAuthorize("hasPermission('Loading', 'ADMIN')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Loading', 'ADMIN')")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = LoadingStatus.class)), mediaType = "application/json"))
     @GetMapping("/status")
     public Loading getLoadingStatus() {
@@ -34,7 +34,7 @@ public class LoadingController {
     }
 
     @Operation(summary = "Start integration loading")
-    @PreAuthorize("hasPermission('Loading', 'ADMIN')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Loading', 'ADMIN')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Loading.class), mediaType = "application/json")),
             @ApiResponse(responseCode = "409", description = "Loading conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))

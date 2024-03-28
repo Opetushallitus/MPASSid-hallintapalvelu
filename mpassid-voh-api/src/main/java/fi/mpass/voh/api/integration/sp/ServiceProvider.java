@@ -16,18 +16,18 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.InheritanceType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -92,14 +92,14 @@ public abstract class ServiceProvider {
      */
     @Schema(example = "https://example.org/6ab309b7-f4d4-455a-9c88-857474ceea64")
     //@Column(unique = true)
-    private String entityId;
+    protected String entityId;
     //@Column(unique = true)
-    private String clientId;
+    protected String clientId;
 
     @Transient
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ServiceProvider() {
+    protected ServiceProvider() {
     }
 
     public Long getId() {
@@ -173,17 +173,17 @@ public abstract class ServiceProvider {
                 }
             } catch (CertificateException | IOException e) {
                 hashMap.put(propertyPrefix + "Error", e.getMessage());
-                logger.error("Exception: " + e);
+                logger.error("Exception: {}", e.toString());
             }
         }
         return hashMap;
     }
 
     public void setMetadata(Map<String, Object> hashMap) {
-        logger.debug("instance type: " + this.getClass());
+        logger.debug("instance type: {}", this.getClass());
         try {
             if (this instanceof SamlServiceProvider) {
-                logger.info("SAML entityId: " + hashMap.get("entityId"));
+                logger.info("SAML entityId: {}", hashMap.get("entityId"));
                 List<String> certificateTypes = List.of("encryptionCertificates", "signingCertificates");
                 for (String certType : certificateTypes) {
                     if (hashMap.get(certType) instanceof java.util.ArrayList) {
@@ -199,7 +199,7 @@ public abstract class ServiceProvider {
                 ((SamlServiceProvider) this).setEntityId((String) hashMap.get("entityId"));
             }
             if (this instanceof OidcServiceProvider) {
-                logger.info("OIDC clientId: " + hashMap.get("client_id"));
+                logger.info("OIDC clientId: {}", hashMap.get("client_id"));
                 ((OidcServiceProvider) this).setClientId((String) hashMap.get("client_id"));
             }
             this.metadataJson = hashMap;

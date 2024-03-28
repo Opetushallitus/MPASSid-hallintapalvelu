@@ -1,25 +1,28 @@
-package fi.mpass.voh.api.integration;
+package fi.mpass.voh.api.config;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.access.PermissionEvaluator;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OPHPermissionEvaluator implements PermissionEvaluator {
-    private final static Logger logger = LoggerFactory.getLogger(OPHPermissionEvaluator.class);
+@Component("authorize")
+public class OPHPermissionEvaluator {
+    private static final Logger logger = LoggerFactory.getLogger(OPHPermissionEvaluator.class);
 
     @Value("${application.admin-organization-oid}")
     private String adminOrganizationOid;
 
     private final IntegrationRepository integrationRepository;
 
-    @Lazy
     public OPHPermissionEvaluator(IntegrationRepository integrationRepository) {
         this.integrationRepository = integrationRepository;
     }
@@ -43,9 +46,9 @@ public class OPHPermissionEvaluator implements PermissionEvaluator {
      *         permission in valid format, otherwise false
      */
     private boolean hasPrivilege(Authentication auth, String targetType, String requiredPermission) {
-        logger.debug("number of granted authorities: " + auth.getAuthorities().size());
+        logger.debug("number of granted authorities: {}", auth.getAuthorities().size());
         for (GrantedAuthority grantedAuth : auth.getAuthorities()) {
-            logger.info("granted authority: " + grantedAuth.getAuthority());
+            logger.info("granted authority: {}", grantedAuth.getAuthority());
 
             if (grantedAuth.getAuthority().length() > 0) {
                 String[] authorityElements = (grantedAuth.getAuthority()).split("_");
@@ -98,10 +101,10 @@ public class OPHPermissionEvaluator implements PermissionEvaluator {
         Optional<Integration> existingIntegration = this.integrationRepository.findById(id);
 
         if (existingIntegration.isPresent()) {
-            logger.debug("target integration #" + existingIntegration.get().getId());
-            logger.debug("number of granted authorities: " + auth.getAuthorities().size());
+            logger.debug("target integration #{}", existingIntegration.get().getId());
+            logger.debug("number of granted authorities: {}", auth.getAuthorities().size());
             for (GrantedAuthority grantedAuth : auth.getAuthorities()) {
-                logger.info("granted authority: " + grantedAuth.getAuthority());
+                logger.info("granted authority: {}", grantedAuth.getAuthority());
 
                 if (grantedAuth.getAuthority().length() > 0) {
                     String[] authorityElements = (grantedAuth.getAuthority()).split("_");
@@ -139,28 +142,21 @@ public class OPHPermissionEvaluator implements PermissionEvaluator {
         return false;
     }
 
-    @Override
-    public boolean hasPermission(Authentication auth, Object targetDomainObject, Object permission) {
-        if ((auth == null) || (targetDomainObject == null) || !(permission instanceof String)) {
+    public boolean hasPermission(MethodSecurityExpressionOperations operations, Object targetDomainObject,
+            Object permission) {
+        if ((operations.getAuthentication() == null) || (targetDomainObject == null)
+                || !(permission instanceof String)) {
             return false;
         }
 
         if (targetDomainObject instanceof Long) {
-            return hasPrivilege(auth, (Long) targetDomainObject, permission.toString().toUpperCase());
+            return hasPrivilege(operations.getAuthentication(), (Long) targetDomainObject,
+                    permission.toString().toUpperCase());
         }
         if (targetDomainObject instanceof String) {
             String targetType = targetDomainObject.getClass().getSimpleName().toUpperCase();
-            return hasPrivilege(auth, targetType, permission.toString().toUpperCase());
+            return hasPrivilege(operations.getAuthentication(), targetType, permission.toString().toUpperCase());
         }
         return false;
-    }
-
-    @Override
-    public boolean hasPermission(Authentication auth, Serializable targetId, String targetType,
-            Object permission) {
-        if ((auth == null) || (targetType == null) || !(permission instanceof String)) {
-            return false;
-        }
-        return hasPrivilege(auth, targetType.toUpperCase(), permission.toString().toUpperCase());
     }
 }

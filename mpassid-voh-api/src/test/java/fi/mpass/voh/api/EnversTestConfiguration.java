@@ -1,6 +1,6 @@
 package fi.mpass.voh.api;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

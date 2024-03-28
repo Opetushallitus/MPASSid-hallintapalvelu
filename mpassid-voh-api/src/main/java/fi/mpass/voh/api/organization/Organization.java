@@ -2,8 +2,8 @@ package fi.mpass.voh.api.organization;
 
 import java.util.Map;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

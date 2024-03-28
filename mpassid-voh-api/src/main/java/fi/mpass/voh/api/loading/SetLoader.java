@@ -183,13 +183,14 @@ public class SetLoader extends Loader {
                         }
                         if (d.getFieldName().contains("organization.oid")) {
                             if (existingIntegration.get().getOrganization() != null) {
-                                existingIntegration.get().getOrganization()
-                                        .setOid(d.getRight().toString());
-                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
+                                /* existingIntegration.get().getOrganization().setOid(d.getRight().toString()); */
+                                updateIntegrationOrganization(loading, existingIntegration.get(), (String) d.getRight(),
+                                        false, true);
                             } else {
                                 Organization org = new Organization("", d.getRight().toString());
                                 existingIntegration.get().setOrganization(org);
-                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
+                                updateIntegrationOrganization(loading, existingIntegration.get(), (String) d.getRight(),
+                                        false, true);
                             }
                         }
                         if (d.getFieldName().contains("deploymentPhase")) {

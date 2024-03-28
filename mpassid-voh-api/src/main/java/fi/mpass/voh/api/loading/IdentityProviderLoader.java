@@ -301,13 +301,14 @@ public class IdentityProviderLoader extends Loader {
 
                         if (d.getFieldName().contains("organization.oid")) {
                             if (existingIntegration.get().getOrganization() != null) {
-                                existingIntegration.get().getOrganization()
-                                        .setOid((String) d.getRight());
-                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
+                                /* existingIntegration.get().getOrganization().setOid((String) d.getRight()); */
+                                updateIntegrationOrganization(loading, existingIntegration.get(), (String) d.getRight(),
+                                        false, true);
                             } else {
                                 Organization org = new Organization("", (String) d.getRight());
                                 existingIntegration.get().setOrganization(org);
-                                updateIntegrationOrganization(loading, existingIntegration.get(), false, true);
+                                updateIntegrationOrganization(loading, existingIntegration.get(), (String) d.getRight(),
+                                        false, true);
                             }
                         }
                         if (d.getFieldName().contains("deploymentPhase")) {

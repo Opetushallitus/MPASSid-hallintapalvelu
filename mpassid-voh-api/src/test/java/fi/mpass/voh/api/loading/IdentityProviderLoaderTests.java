@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
@@ -24,8 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = {
-        "spring.h2.console.enabled=true" })
+@Isolated
+@SpringBootTest
+//(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = { "spring.h2.console.enabled=true" })
 class IdentityProviderLoaderTests {
 
     IdentityProviderLoader idpLoader;
@@ -42,6 +43,7 @@ class IdentityProviderLoaderTests {
     @BeforeEach
     void drop() {
         repository.deleteAll();
+        repository.flush();
     }
 
     @Test
@@ -80,6 +82,34 @@ class IdentityProviderLoaderTests {
     }
 
     @Test
+    void testGsuiteLoaderWithChangedOrganization() throws Exception {
+        // 2, one with integration permissions
+        String location = "gsuite_home_organizations.json";
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading loading = new Loading();
+        idpLoader.init(loading);
+
+        // 2
+        assertEquals(2, repository.count());
+
+        // 2, one with integration permissions
+        location = "gsuite_home_organizations_mods_organization.json";
+        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader.setInput(location);
+        Loading reloading = new Loading();
+        idpLoader.init(reloading);
+
+        // 2
+        assertEquals(2, repository.count());
+
+        // 4000010 changed organization
+        Optional<Integration> changedOrganizationIntegration = repository.findById(4000010L);
+        assertTrue(changedOrganizationIntegration.isPresent());
+        assertEquals("1.2.246.562.10.71600741632", changedOrganizationIntegration.get().getOrganization().getOid());
+    }
+
+    @Test
     void testAzureLoader() throws Exception {
         String location = "azure_home_organizations.json";
         idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
@@ -101,6 +131,11 @@ class IdentityProviderLoaderTests {
         assertEquals(3, repository.count());
         // no errors
         assertEquals(0, loading.getErrors().size());
+
+        // organization
+        Optional<Integration> integration = repository.findById(4000052L);
+        assertTrue(integration.isPresent());
+        assertEquals("1.2.246.562.10.00000000001", integration.get().getOrganization().getOid());
     }
 
     @Test

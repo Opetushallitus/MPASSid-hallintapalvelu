@@ -2,7 +2,7 @@ package fi.mpass.voh.api.loading;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.parallel.Isolated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ResourceLoader;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Isolated
 @SpringBootTest
 class SetLoaderTests {
 
@@ -37,6 +38,7 @@ class SetLoaderTests {
     @BeforeEach
     void drop() {
         repository.deleteAll();
+        repository.flush();
     }
 
     @Test
