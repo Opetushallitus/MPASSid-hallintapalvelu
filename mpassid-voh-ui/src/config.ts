@@ -31,7 +31,7 @@ export interface UiConfiguration {
   oid?: string;
   mandatory: boolean;
   multivalue?: boolean;
-  environment: string;
+  environment?: number;
   validation: string[];
   integrationType: IntegrationType[];
 }
@@ -46,7 +46,7 @@ export const defaultDataConfiguration:UiConfiguration = {
   name: 'default',
   type: 'user',
   mandatory: true,
-  environment: 'prod',
+  
   validation: [],
   integrationType: [
       {
@@ -91,7 +91,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'clientId',
       type: 'data',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: []
   },
@@ -99,7 +99,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'clientKey',
       type: 'data',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: []
   },
@@ -107,7 +107,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'datasource',
     type: 'data',
     mandatory: true,
-    environment: 'prod',
+    
     validation: [],
     integrationType: []
   },
@@ -115,7 +115,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'tenantId',
     type: 'data',
     mandatory: true,
-    environment: 'prod',
+    
     validation: [],
     integrationType: []
   },
@@ -123,7 +123,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'firstName',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -137,7 +137,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'surname',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -151,7 +151,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'groups',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -166,7 +166,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -180,7 +180,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'learningMaterialsCharges',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -194,7 +194,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'azureApplicationIdUri',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -208,7 +208,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'schoolIds',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -222,7 +222,6 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'nickname',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
       validation: [],
       integrationType: [
           {
@@ -237,7 +236,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -252,7 +251,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -266,7 +265,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'groupLevels',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -281,7 +280,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -295,7 +294,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'username',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -309,7 +308,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'learnerId',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -323,7 +322,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'roles',
       type: 'user',
       mandatory: true,
-      environment: 'prod',
+      
       validation: [],
       integrationType: [
           {
@@ -338,7 +337,7 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'metadata',
       mandatory: true,
       multivalue: true,
-      environment: 'prod',
+      environment: 1,
       validation: [ 'fqdn', 'nohash', 'https' ],
       integrationType: [
           {
