@@ -13,12 +13,14 @@ export default function Metadata({
   configurationEntity,
   role,
   type,
+  setCanSave,
 }: {
   newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
   configurationEntity: Components.Schemas.ConfigurationEntity;
   role: string;
   type: string; 
+  setCanSave: Dispatch<boolean>;
 }) {
   
 
@@ -108,7 +110,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope} attributeType="data" onValidate={emptyValidate} mandatory={true} label="Scope"></InputForm>
+              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope} attributeType="data" onValidate={emptyValidate} mandatory={true} label="Scope" setCanSave={setCanSave}></InputForm>
             </Typography>
           </Grid>
         </Grid>
@@ -140,7 +142,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.client_id" type="client_id" label="client_id" isEditable={false} onUpdate={logUpdateValue} onValidate={emptyValidate} attributeType="data"  mandatory={true}></InputForm>
+              <InputForm object={providerData} path="metadata.client_id" type="client_id" label="client_id" isEditable={false} onUpdate={logUpdateValue} onValidate={emptyValidate} attributeType="data"  mandatory={true} setCanSave={setCanSave}></InputForm>
            
             </Typography>
           </Grid>
@@ -157,7 +159,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" label="client_secret" isEditable={false} onUpdate={logUpdateValue} attributeType="data" onValidate={emptyValidate} mandatory={true}></InputForm>
+              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" label="client_secret" isEditable={false} onUpdate={logUpdateValue} attributeType="data" onValidate={emptyValidate} mandatory={true} setCanSave={setCanSave}></InputForm>
             </Typography>
           </Grid>
         </Grid>

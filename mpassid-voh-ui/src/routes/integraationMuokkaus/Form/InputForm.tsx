@@ -1,6 +1,6 @@
 import { DataRow } from '@/routes/integraatio/IntegrationTab/DataRow';
 import { Box, TextField } from "@mui/material";
-import { cloneElement, useCallback, useEffect, useRef, useState } from "react";
+import { cloneElement, Dispatch, useCallback, useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get, last, toPath } from "lodash";
 import { Components } from '@/api';
@@ -14,64 +14,47 @@ interface Props {
   mandatory: boolean;
   path: any;
   helperText?: JSX.Element;
+  setCanSave: Dispatch<boolean>;
   onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
   onValidate: (data: any) => boolean;
 }
 
-export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText=<></>, path, onUpdate, onValidate, attributeType, label }: Props) {
+export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText=<></>, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
-  const [isEmpty, setIsEmpty] = useState(!defaultValue);
-  const [isDirty, setIsDirty] = useState(false);
+  
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
-  const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLFormElement>(null);
-
-  const updateFormState = useCallback(
-    function updateFormState() {
-      setIsEmpty(!inputRef.current!);
-      setIsDirty(inputRef.current! !== (defaultValue ?? ""));
-    },
-    [defaultValue]);
-
-  useEffect(() => {
-    updateFormState();
-  }, [updateFormState]);
-
-  useEffect(() => {
-    updateFormState();
-  }, [object]);
-
+  
+  const updateFormValue = () => {
+    
+    if(onValidate(inputRef.current?.value)) {
+      setIsValid(true)
+      if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
+        setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
+        setIsValid(false)
+        setCanSave(false)  
+      } else {
+        setIsValid(true) 
+        if(inputRef.current?.value) {
+          onUpdate(type,inputRef.current.value,attributeType);  
+        } else {
+          onUpdate(type,"",attributeType);
+        }
+        setUsedHelperText(<></>)
+      }
+      
+    } else {
+      setUsedHelperText(helperText)
+      setIsValid(false)  
+      setCanSave(false)
+    }
+  };
+  
   if(isEditable) {
     return (
-      <form 
-        onSubmit={(event) => {
-          event.preventDefault();
-          if(onValidate(inputRef.current?.value)&&isDirty) {
-            setIsValid(true)
-            if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
-              setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
-              setIsValid(false)  
-            } else {
-              if(inputRef.current?.value) {
-                onUpdate(type,inputRef.current.value,attributeType);  
-              } else {
-                onUpdate(type,"",attributeType);
-              }
-              setUsedHelperText(<></>)
-            }
-            
-          } else {
-            setUsedHelperText(helperText)
-            setIsValid(false)  
-          }
-          //if(onUpdate&&inputRef.current?.value) {
-          //  onUpdate(inputRef.current.value,type);
-          //}   
-        }}
-        onChange={updateFormState}
-      >
+     
         <TextField
           sx={{ width: '80%'}}
           variant="standard"
@@ -87,9 +70,9 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
             ref: inputRef,
             autoComplete: "off",
           }}
-          
+          onChange={updateFormValue}
         />
-      </form>
+     
     );
   } else {
     

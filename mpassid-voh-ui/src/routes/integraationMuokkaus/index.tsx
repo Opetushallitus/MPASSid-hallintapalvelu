@@ -1,10 +1,14 @@
 import { updateIntegration, type Components } from "@/api";
+import {
+  useIdentityProviderTypes,
+  useServiceProviderTypes,
+} from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
-import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
-import { useLayoutEffect, useState } from "react";
+import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
+import { useEffect, useLayoutEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSessionStorage } from "usehooks-ts";
@@ -12,11 +16,14 @@ import IntegrationDetails from "./IntegrationDetails";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import { useMe } from "@/api/käyttöoikeus";
 import { openIntegrationsSessionStorageKey, tallentajaOphGroup } from '../../config';
+import RuleIcon from '@mui/icons-material/Rule';
 
 export default function IntegraatioMuokkaus() {
+  const { type } = useParams();
+  const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
   const { id } = useParams();
   const [saveDialogState, setSaveDialogState] = useState(true);
-  const [cannotSave, setCannotSave] = useState(true);
+  const [canSave, setCanSave] = useState(false);
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration|undefined>();
   const { groups } = useMe();
   const navigate = useNavigate();
@@ -26,9 +33,11 @@ export default function IntegraatioMuokkaus() {
     openIntegrationsSessionStorageKey,
     []
   );
-  
+
+  useEffect(() => {
+    console.log("canSave: ",canSave)
     
-  
+  }, [canSave]);
   
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
@@ -51,6 +60,14 @@ export default function IntegraatioMuokkaus() {
   const writeAccess = () => {
     
     if(newIntegration?.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration?.organization?.oid)||groups?.includes(tallentajaOphGroup))) {
+      return true;
+    }
+    return false;
+  }
+
+  const isEntraId = () => {
+    
+    if(type==='azure') {
       return true;
     }
     return false;
@@ -98,7 +115,7 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCannotSave={setCannotSave} setNewIntegration={setNewIntegration}/>
+            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} setNewIntegration={setNewIntegration}/>
           </ErrorBoundary>
           
         </Suspense>
@@ -113,12 +130,21 @@ export default function IntegraatioMuokkaus() {
                   <Typography variant="h6" component="h2" sx={{ my: 2, marginLeft: 'auto', marginRight: 'auto', marginTop: '6%' }}>
                       <FormattedMessage defaultMessage="Tallenna muutokset" />
                   </Typography>
-  
+                  {isEntraId()&&false&&<><IconButton size="large" color="primary" aria-label="rule-icon">
+                      <RuleIcon />
+                  </IconButton><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
+                  
+                  {isEntraId()&&true&&<><Button  variant="text" startIcon={<RuleIcon />}>
+                  <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
+                  </Button></>}
+                  {isEntraId()&&false&&<><Button  size="small" startIcon={<RuleIcon />}>
+                  </Button><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
                   <Box display="flex" justifyContent="center" mt={2}> 
                       {id!=="0"&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
                       {id==="0"&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
-                      {!cannotSave&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {cannotSave&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                     
+                      {!canSave&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {canSave&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
                   </Box>
                   <br></br>
                 </Container>

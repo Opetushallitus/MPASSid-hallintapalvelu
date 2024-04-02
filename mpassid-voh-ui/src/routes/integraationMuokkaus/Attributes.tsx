@@ -16,16 +16,14 @@ interface Props {
   attributeType: Components.Schemas.Attribute["type"];
   type: any;
   newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
-  setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
+  setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
+  setCanSave: Dispatch<boolean>;
 }
 
-export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid,environment }: Props) {
+export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid,environment, setCanSave }: Props) {
   const intl = useIntl();
   const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
-  console.log("environment: ",environment)
-  const logUpdateValue = (value:String) => {  
-    console.log("attributes: ",attributes)
-  }
+  const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
 
   const logValidateValue = (value:String) => {  
     console.log("attributes: ",attributes)
@@ -33,10 +31,8 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   }
 
   const updateAttribute = (name:string, value:string, type:Components.Schemas.Attribute['type'] ) => {  
-    console.log("updateAttribute name: ",name)
-    console.log("updateAttribute value: ",value)
     
-    
+    setCanSave(true) 
     if(attributes.map(a=>a.name).indexOf(name)>-1) {
       attributes.forEach(attribute=>{
         if(attribute.name===name) {
@@ -61,8 +57,9 @@ export default function Attributes({ attributes, role, type, attributeType, newC
       <Grid container >
         {dataConfiguration
           .filter((configuration) => configuration.type === attributeType)
-          .filter((configuration) => configuration.environment===undefined||configuration.environment==environment )
-          .filter((configuration) => (specialConfiguration.includes(configuration.name)&&configuration.oid)||(!specialConfiguration.includes(configuration.name)&&!configuration.oid))
+          //.filter((configuration) => configuration.environment===undefined||configuration.environment==environment )
+          .filter((configuration) => (environmentConfiguration.includes(configuration.name)&&configuration.environment===environment)||(!environmentConfiguration.includes(configuration.name)&&configuration.environment===undefined))
+          .filter((configuration) => (specialConfiguration.includes(configuration.name)&&configuration.oid===oid)||(!specialConfiguration.includes(configuration.name)&&!configuration.oid))
           .map((configuration) => {
             const id = `attribuutti.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;
@@ -91,7 +88,8 @@ export default function Attributes({ attributes, role, type, attributeType, newC
               attribute={attributes.find(a=>a.name===configuration.name)||{ type: attributeType, content: '',name: configuration.name}}
               attributeType={attributeType}
               type={type}
-              role={role} />
+              role={role} 
+              setCanSave={setCanSave}/>
               )
           )}
       </Grid>

@@ -1,11 +1,6 @@
 import type { Components } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import _ from "lodash";
-
-import {
-  useIdentityProviderTypes,
-  useServiceProviderTypes,
-} from "@/api";
 import {
   getRole,
   typeAbbreviations,
@@ -34,15 +29,15 @@ import { inits } from "./Inits";
 interface Props {
   id: number;
   setSaveDialogState: Dispatch<boolean>;
-  setCannotSave: Dispatch<boolean>;
+  setCanSave: Dispatch<boolean>;
   setNewIntegration: Dispatch<Components.Schemas.Integration>;
 }
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCannotSave, setNewIntegration }: Props) {
+export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration }: Props) {
     
+    const [isValid, setIsValid] = useState(true);
     var { role } = useParams();
     const { type } = useParams();
-    const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     var [error, integration] = useIntegrationSafe({id});
     var oid:string = "";
@@ -67,17 +62,24 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             setSaveDialogState(true);
             if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){
               //if(JSON.stringify(newConfigurationEntityData)===JSON.stringify(integration.configurationEntity)){  
-              setCannotSave(false)
+                console.log("newConfigurationEntityData: equal")  
+              setCanSave(false)
+              
             } else {
-              integration.ConfigurationEntity=newConfigurationEntityData
-              setNewIntegration(integration)
-              setCannotSave(true)
+              //integration.configurationEntity=newConfigurationEntityData
+              //setNewIntegration(integration)
+              console.log("newConfigurationEntityData: isValid: ",isValid)
+              if(isValid) {
+                setCanSave(true)
+              } else {
+                setCanSave(false)
+              }
             }
           } else {
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData,integration,setCannotSave,setSaveDialogState]);
+    }, [newConfigurationEntityData,integration,setCanSave,setSaveDialogState,isValid]);
 
     var hasAttributes =
                 role === "idp" &&
@@ -193,7 +195,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             </Grid>
           </>
       )}    
-      <Role integration={integration} oid={oid} environment={environment}/>
+      <Role integration={integration} oid={oid} environment={environment} setCanSave={setIsValid}/>
 
       {newConfigurationEntityData&&<Metadata
         newConfigurationEntityData={newConfigurationEntityData}
@@ -201,6 +203,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
         configurationEntity={integration.configurationEntity!}
         role={role}
         type={type}
+        setCanSave={setIsValid}
       />}
 
       {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
@@ -214,6 +217,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
             type={type}
             role={role}
             oid={oid}
+            setCanSave={setIsValid}
           />
         </ErrorBoundary>
       </Grid>}
@@ -233,6 +237,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCannotSa
               environment={environment}
               type={type}
               oid={oid}
+              setCanSave={setIsValid}
             />
           </ErrorBoundary>
              

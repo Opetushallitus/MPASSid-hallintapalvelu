@@ -17,10 +17,11 @@ interface Props {
     newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
     onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
     onValidate: (data: any) => boolean;
-    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
+    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
+    setCanSave: Dispatch<boolean>
 }
 
-export default function IntegraatioForm({ attribute, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate }: Props) {
+export default function IntegraatioForm({ attribute, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: Props) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -74,7 +75,8 @@ export default function IntegraatioForm({ attribute, role, type, attributeType, 
                                 onValidate={onValidate} 
                                 mandatory={configuration.mandatory}
                                 label={label?intl.formatMessage(label):attribute.name!}
-                                attributeType={attributeType}/>)
+                                attributeType={attributeType}
+                                setCanSave={setCanSave}/>)
                         }
                         
                         
