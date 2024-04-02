@@ -66,10 +66,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setCanSave(false)
               
             } else {
-              //integration.configurationEntity=newConfigurationEntityData
-              //setNewIntegration(integration)
               console.log("newConfigurationEntityData: isValid: ",isValid)
               if(isValid) {
+                integration.configurationEntity=newConfigurationEntityData
+                setNewIntegration(integration)
                 setCanSave(true)
               } else {
                 setCanSave(false)
