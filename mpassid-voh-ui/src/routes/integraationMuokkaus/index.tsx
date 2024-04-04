@@ -17,6 +17,7 @@ import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import { useMe } from "@/api/käyttöoikeus";
 import { openIntegrationsSessionStorageKey, tallentajaOphGroup } from '../../config';
 import RuleIcon from '@mui/icons-material/Rule';
+import AttributeTest from "./AttributeTest";
 
 export default function IntegraatioMuokkaus() {
   const { type } = useParams();
@@ -28,6 +29,7 @@ export default function IntegraatioMuokkaus() {
   const { groups } = useMe();
   const navigate = useNavigate();
   const [openConfirmation, setOpenConfirmation] = useState(false);
+  const [openAttributeTest, setOpenAttributeTest] = useState(false);
   const [isConfirmed, setConfirmed] = useState(false);
   const [tabs, setValue] = useSessionStorage<string[]>(
     openIntegrationsSessionStorageKey,
@@ -120,7 +122,7 @@ export default function IntegraatioMuokkaus() {
           
         </Suspense>
       </TableContainer>
-      <Snackbar
+      {newIntegration&&<Snackbar
             open={saveDialogState}
             anchorOrigin={snackbarLocation}>
             
@@ -134,10 +136,10 @@ export default function IntegraatioMuokkaus() {
                       <RuleIcon />
                   </IconButton><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
                   
-                  {isEntraId()&&true&&<><Button  variant="text" startIcon={<RuleIcon />}>
+                  {isEntraId()&&true&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
                   <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
                   </Button></>}
-                  {isEntraId()&&false&&<><Button  size="small" startIcon={<RuleIcon />}>
+                  {isEntraId()&&false&&<><Button  size="small"  startIcon={<RuleIcon />}>
                   </Button><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
                   <Box display="flex" justifyContent="center" mt={2}> 
                       {id!=="0"&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
@@ -150,7 +152,7 @@ export default function IntegraatioMuokkaus() {
                 </Container>
               </Box>
               
-        </Snackbar>
+        </Snackbar>}
         <Dialog
                 open={openConfirmation}
                 onClose={()=>setOpenConfirmation(false)}
@@ -174,6 +176,7 @@ export default function IntegraatioMuokkaus() {
                   </Button>
                 </DialogActions>
               </Dialog>
+              <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} />
       </>
   );
 }

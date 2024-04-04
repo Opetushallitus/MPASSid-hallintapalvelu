@@ -29,11 +29,16 @@ const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.respo
 };
 
 const searchIntegrations: { value?: Components.Schemas.PageIntegration } = 
-  definition.paths["/api/v2/integration/search"].get.responses["200"].content[
-    "application/json"
-  ].examples.searchIntegrations;
-  
+definition.paths["/api/v2/integration/search"].get.responses["200"].content[
+  "application/json"
+].examples.searchIntegrations;
 
+const attributes = definition.paths["/api/v2/attribute/test"].get.responses[
+  "200"
+].content["application/json"].examples.items as {
+  value?: Array<any>;
+}; 
+  
 allIntegrations = Array(1).fill(allIntegrations).flat();
 
 allIntegrations.push(
@@ -57,6 +62,61 @@ const defaults = {
 };
 
 export default {
+  testAttributes(request) {
+    console.log("testAttributes: ",request.query)
+    let attributeResponse:any={};
+    let selectArray: Array<string> = request?.query?.select as string[] || [];
+    
+    let i=0;
+    
+    selectArray.forEach(element => {
+      
+      switch(element) { 
+        case "opentunti_desku": { 
+          attributeResponse.opentunti_desku={}
+          attributeResponse.opentunti_desku.role="role"
+          attributeResponse.opentunti_desku.class="class"
+          attributeResponse.opentunti_desku.classLevel="classLevel"
+          attributeResponse.opentunti_desku.oid="oid"
+          attributeResponse.opentunti_desku.schoolNumber="school number"
+          attributeResponse.opentunti_desku.materialChargeSchool="material charge school"
+           
+          break; 
+        } 
+        case "onPremisesExtensionAttributes": { 
+          attributeResponse.onPremisesExtensionAttributes={}
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute1=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute2=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute3=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute4=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute5=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute6=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute7=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute8=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute9=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute10=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute11=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute12=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute13=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute14=""
+          attributeResponse.onPremisesExtensionAttributes.extensionAttribute15=""
+          
+          break; 
+        } 
+        default: { 
+          attributeResponse[element]="test_value_"+i;
+          
+          i++
+          break; 
+        } 
+     } 
+      
+    });
+    attributes.value=attributeResponse;
+  },
+  testAttributesAuthorization(request) {
+    console.log("testAttributesAuthorization: ",request.requestBody)
+  },
   updateIntegration(request) {
     const id = Number(request.params.id);
     const index=allIntegrations.map(i=>i.id).indexOf(id);

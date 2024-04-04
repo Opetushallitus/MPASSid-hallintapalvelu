@@ -51,10 +51,11 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
     useEffect(() => {
       if(role !== undefined) {
+        setNewIntegration(integration)
         setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
       }
       
-    }, [role, integration]);
+    }, [role, integration,setNewIntegration]);
 
     useEffect(() => {
           if(newConfigurationEntityData) {
