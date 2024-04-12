@@ -24,6 +24,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const intl = useIntl();
   const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
+  const mandatoryAttributes:string[] = [];
 
   const logValidateValue = (value:String) => {  
     console.log("attributes: ",attributes)
@@ -32,7 +33,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
   const updateAttribute = (name:string, value:string, type:Components.Schemas.Attribute['type'] ) => {  
     
-    setCanSave(true) 
+     
     if(attributes.map(a=>a.name).indexOf(name)>-1) {
       attributes.forEach(attribute=>{
         if(attribute.name===name) {
@@ -42,8 +43,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     } else {
       attributes.push({type: type, name: name,content: value }) 
     }
-
     
+    if(mandatoryAttributes.filter(ma=>!attributes.map(a=>a.name).includes(ma)).length===0) {
+      setCanSave(true)
+    }
   
     if(newConfigurationEntityData?.attributes&&setNewConfigurationEntityData) {
       newConfigurationEntityData.attributes=attributes;
@@ -77,21 +80,26 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   attributePreferredOrder.indexOf(a.name!)) -
               (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
           )
-          .map((configuration) => (
-            <IntegraatioForm 
-              key={configuration.name!}
-              onUpdate={updateAttribute}
-              onValidate={logValidateValue}
-              newConfigurationEntityData={newConfigurationEntityData}
-              setNewConfigurationEntityData={setNewConfigurationEntityData}  
-              uiConfiguration={configuration}
-              attribute={attributes.find(a=>a.name===configuration.name)||{ type: attributeType, content: '',name: configuration.name}}
-              attributeType={attributeType}
-              type={type}
-              role={role} 
-              setCanSave={setCanSave}/>
+          .map((configuration) => {
+                  if(configuration.mandatory) {
+                    mandatoryAttributes.push(configuration.name);
+                  }
+                  return (<IntegraatioForm 
+                    key={configuration.name!}
+                    onUpdate={updateAttribute}
+                    onValidate={logValidateValue}
+                    newConfigurationEntityData={newConfigurationEntityData}
+                    setNewConfigurationEntityData={setNewConfigurationEntityData}  
+                    uiConfiguration={configuration}
+                    attribute={attributes.find(a=>a.name===configuration.name)||{ type: attributeType, content: '',name: configuration.name}}
+                    attributeType={attributeType}
+                    type={type}
+                    role={role} 
+                    setCanSave={setCanSave}/>)
+                }
+            
               )
-          )}
+          }
       </Grid>
     );
   

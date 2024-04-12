@@ -193,7 +193,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'azureApplicationIdUri',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [

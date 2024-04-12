@@ -30,28 +30,31 @@ interface Props {
   id: number;
   setSaveDialogState: Dispatch<boolean>;
   setCanSave: Dispatch<boolean>;
+  newIntegration?: Components.Schemas.Integration;
   setNewIntegration: Dispatch<Components.Schemas.Integration>;
 }
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration }: Props) {
+export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration}: Props) {
     
     const [isValid, setIsValid] = useState(true);
     var { role } = useParams();
     const { type } = useParams();
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
-    var [error, integration] = useIntegrationSafe({id});
+    const [error, integration] = useIntegrationSafe({id});
     var oid:string = "";
     var environment:number = 0
+    
     if(id===0) {
-      integration = inits.idp.wilma
+      console.log("NEW integration: ",integration)
     } else {
       oid = integration.organization.oid
       environment = integration.deploymentPhase
+      
     }
 
     useEffect(() => {
       if(role !== undefined) {
-        setNewIntegration(integration)
+        setNewIntegration(_.cloneDeep(integration))
         setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
       }
       
@@ -59,18 +62,17 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
     useEffect(() => {
           if(newConfigurationEntityData) {
-            console.log("newConfigurationEntityData:",newConfigurationEntityData)
             setSaveDialogState(true);
             if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){
-              //if(JSON.stringify(newConfigurationEntityData)===JSON.stringify(integration.configurationEntity)){  
-                console.log("newConfigurationEntityData: equal")  
               setCanSave(false)
               
-            } else {
-              console.log("newConfigurationEntityData: isValid: ",isValid)
+            } else {              
               if(isValid) {
-                integration.configurationEntity=newConfigurationEntityData
-                setNewIntegration(integration)
+                if(newIntegration) {
+                  newIntegration.configurationEntity=newConfigurationEntityData
+                  setNewIntegration(newIntegration)
+                }
+                
                 setCanSave(true)
               } else {
                 setCanSave(false)

@@ -117,7 +117,7 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} setNewIntegration={setNewIntegration}/>
+            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration}/>
           </ErrorBoundary>
           
         </Suspense>
