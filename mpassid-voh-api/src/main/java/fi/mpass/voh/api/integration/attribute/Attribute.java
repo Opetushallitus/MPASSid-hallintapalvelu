@@ -7,12 +7,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
+import org.hibernate.envers.Audited;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@Audited
 @Entity
 public class Attribute {
 
