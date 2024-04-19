@@ -32,6 +32,8 @@ import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.loading.LoadingService;
+import fi.mpass.voh.api.organization.OrganizationService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +49,14 @@ public class IntegrationService {
   private Long defaultTestServiceIntegrationId;
 
   private final IntegrationRepository integrationRepository;
+  private final OrganizationService organizationService;
+  private final LoadingService loadingService;
 
-  public IntegrationService(IntegrationRepository integrationRepository) {
+  public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
+      LoadingService loadingService) {
     this.integrationRepository = integrationRepository;
+    this.organizationService = organizationService;
+    this.loadingService = loadingService;
   }
 
   public List<Integration> getIntegrations() {
@@ -219,7 +226,7 @@ public class IntegrationService {
     Iterator<Sort.Order> iter = sort.iterator();
     while (iter.hasNext()) {
       Sort.Order order = iter.next();
-      logger.debug("Sorting result list by " + order.getProperty() + " in " + order.getDirection() + " order");
+      logger.debug("Sorting result list by {} in {} order", order.getProperty(), order.getDirection());
       if (order.getProperty().equals("id")) {
         integrations.sort((i1, i2) -> i1.getId().compareTo(i2.getId()));
       }
@@ -318,8 +325,9 @@ public class IntegrationService {
               existingIntegrations.removeAll(permittedIntegrations);
               integrations.addAll(permittedIntegrations);
               integrations.addAll(existingIntegrations);
-              logger.debug("After removing and adding permitted integrations to the beginning of the response. Size: "
-                  + permissions.size());
+              logger.debug(
+                  "After removing and adding permitted integrations to the beginning of the response. Size: {}",
+                  permissions.size());
             }
           }
         }
@@ -442,6 +450,9 @@ public class IntegrationService {
   /**
    * The method updates integration given an id and integration.
    * Requires authentication and organizational authorization.
+   *
+   * The loading service updates the integration if differences are detected.
+   * It is also responsible of setting the last update time of the integration.
    * 
    * @param id          the id of the Integration
    * @param integration the input integration
@@ -453,20 +464,16 @@ public class IntegrationService {
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
       try {
-        logger.debug("Saving changes for integration #" + existingIntegration.getId());
-        if (integration.getServiceContactAddress() != null) {
-          existingIntegration.setServiceContactAddress(integration.getServiceContactAddress());
+        // TODO check that integration.getId() and id matches
+        Integration updatedIntegration = loadingService.loadOne(integration);
+        if (updatedIntegration != null) {
+          existingIntegration = updatedIntegration;
         }
-        // updates institution types
-        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null
-            && integration.getConfigurationEntity().getIdp().getInstitutionTypes() != null) {
-          existingIntegration.getConfigurationEntity().getIdp()
-              .setInstitutionTypes(integration.getConfigurationEntity().getIdp().getInstitutionTypes());
-        }
+
         // updates integration permissions
         if (integration.getPermissions() != null) {
           logger.debug(
-              "Permitted integrations count : " + integration.getPermissions().size());
+              "Permitted integrations count : {}", integration.getPermissions().size());
           existingIntegration.removePermissions();
           for (IntegrationPermission permission : integration.getPermissions()) {
             // permission updates to the configurable default test service are skipped
@@ -476,8 +483,8 @@ public class IntegrationService {
             // permission to integration set
             Integration integrationSet = getIntegrationSetById(permission.getTo().getId()).get();
             existingIntegration.addPermissionTo(integrationSet);
-            logger.debug(
-                "Updated #" + existingIntegration.getId() + ": Permitted integration #" + permission.getTo().getId());
+            logger.debug("Updated #{}: Permitted integration #{}", existingIntegration.getId(),
+                permission.getTo().getId());
           }
         }
         integration = integrationRepository.saveAndFlush(existingIntegration);
@@ -494,8 +501,7 @@ public class IntegrationService {
     List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfter(timestamp);
     for (Integration integration : integrations) {
       List<Revision<Integer, Integration>> revisions = findRevisionsSince(integration.getId(), timestamp);
-      logger.debug(
-          "Integration: " + integration.getId() + " Number of revisions: " + revisions.size() + " since " + timestamp);
+      logger.debug("Integration #{}: {} revisions since {}", integration.getId(), revisions.size(), timestamp);
     }
     return integrations;
   }
@@ -505,8 +511,7 @@ public class IntegrationService {
         deploymentPhase);
     for (Integration integration : integrations) {
       List<Revision<Integer, Integration>> revisions = findRevisionsSince(integration.getId(), timestamp);
-      logger.debug(
-          "Integration: " + integration.getId() + " Number of revisions: " + revisions.size() + " since " + timestamp);
+      logger.debug("Integration #{}: {} revisions since {}", integration.getId(), revisions.size(), timestamp);
     }
     return integrations;
   }
@@ -562,5 +567,9 @@ public class IntegrationService {
 
   public List<Integration> getServiceProviderSets() {
     return getIntegrationsBy("set", "sp");
+  }
+
+  public Optional<Integration> getIntegration(Long integrationId) {
+    return integrationRepository.findById(integrationId);
   }
 }

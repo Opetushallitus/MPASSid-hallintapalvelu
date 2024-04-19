@@ -1,6 +1,7 @@
 package fi.mpass.voh.api.loading;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.attribute.Attribute;
+import fi.mpass.voh.api.integration.idp.Azure;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
 
@@ -88,6 +90,7 @@ public class Loader {
                     integration = updateSetAssociations(loading, arrayNode, integration);
                     integration = updateExistingIntegration(loading, integration);
                     integration = updateIntegrationOrganization(loading, integration, precheck, false);
+                    integration = updateIntegrationTypeSpecificInformation(loading, integration);
                     if (integration != null) {
                         try {
                             if (!precheck) {
@@ -114,6 +117,28 @@ public class Loader {
         HashMap<Integer, List<Long>> map = new HashMap<>();
         map.put(deploymentPhase, processedIntegrationIds);
         return map;
+    }
+
+    protected Integration updateIntegrationTypeSpecificInformation(Loading loading, Integration integration) {
+        // set EntraId identity provider tenantId according to the tenantId attribute
+        if (integration != null && integration.getConfigurationEntity() != null
+                && integration.getConfigurationEntity().getAttributes() != null) {
+            if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+                Azure idp = (Azure) integration.getConfigurationEntity().getIdp();
+                Set<Attribute> attributes = idp.getConfigurationEntity().getAttributes();
+                for (Iterator<Attribute> it = attributes.iterator(); it.hasNext();) {
+                    Attribute attribute = it.next();
+                    if (attribute.getName().equals("tenantId")) {
+                        logger.debug("Integration #{} EntraId tenantId: {}", integration.getId(),
+                                attribute.getContent());
+                        idp.setTenantId(attribute.getContent());
+                        integration.getConfigurationEntity().setIdp(idp);
+                        break;
+                    }
+                }
+            }
+        }
+        return integration;
     }
 
     protected void inactivateIntegrations(Loading loading, List<Long> removedIds) {
@@ -260,7 +285,7 @@ public class Loader {
         return existingIntegration;
     }
 
-    protected Integration updateExistingIntegration(Loading loading, Integration integration) {
+    public Integration updateExistingIntegration(Loading loading, Integration integration) {
         Optional<Integration> existingIntegration = this.integrationRepository
                 .findByIdAll(integration.getId());
         // an existing integration (active or inactive)
@@ -269,6 +294,7 @@ public class Loader {
                 logger.info("Reloading inactive integration #{}. Reactivating.",
                         existingIntegration.get().getId());
                 existingIntegration.get().setStatus(0);
+                existingIntegration.get().setLastUpdatedOn(LocalDateTime.now());
             }
 
             existingIntegration = applyUpdate(loading, integration, existingIntegration);

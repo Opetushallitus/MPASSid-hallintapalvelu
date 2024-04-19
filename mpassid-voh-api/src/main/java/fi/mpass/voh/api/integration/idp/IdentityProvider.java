@@ -68,6 +68,7 @@ public abstract class IdentityProvider {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "identity_provider_institution_types", joinColumns = @JoinColumn(name = "configuration_entity_id"))
     @Column(name = "institution_type")
+    // TODO koodisto-api
     // @Schema(ref="https://koski.opintopolku.fi/koski/dokumentaatio/koodisto/oppilaitostyyppi/latest")
     private Set<Integer> institutionTypes = new HashSet<>();
 

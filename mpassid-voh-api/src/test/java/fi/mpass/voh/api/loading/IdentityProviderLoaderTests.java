@@ -118,6 +118,12 @@ class IdentityProviderLoaderTests {
         idpLoader.init(loading);
 
         assertEquals(4, repository.count());
+        
+        // 4000004 tenantId
+        Optional<Integration> tenantIdIntegration = repository.findById(4000004L);
+        assertTrue(tenantIdIntegration.isPresent());
+        Azure idp = (Azure)tenantIdIntegration.get().getConfigurationEntity().getIdp();
+        assertEquals("d64c2a23a", idp.getTenantId());
     }
 
     @Test

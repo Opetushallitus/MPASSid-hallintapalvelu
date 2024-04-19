@@ -24,7 +24,9 @@ import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
+import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
+import fi.mpass.voh.api.organization.OrganizationService;
 
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
@@ -45,6 +47,11 @@ class IntegrationServiceTests {
 
     @Mock
     private IntegrationRepository integrationRepository;
+    @Mock
+    private OrganizationService organizationService;
+    @Mock
+    private LoadingService loadingService;
+
     private IntegrationService underTest;
 
     private Integration integration;
@@ -57,7 +64,7 @@ class IntegrationServiceTests {
 
     @BeforeEach
     void setUp() {
-        underTest = new IntegrationService(integrationRepository);
+        underTest = new IntegrationService(integrationRepository, organizationService, loadingService);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
@@ -70,7 +77,7 @@ class IntegrationServiceTests {
         integrationSets = new ArrayList<Integration>();
         serviceProviders = new ArrayList<Integration>();
         for (int i = 1; i < 10; i++) {
-            
+
             ConfigurationEntity ce = new ConfigurationEntity();
             IntegrationSet set = new IntegrationSet();
             set.setConfigurationEntity(ce);
@@ -80,7 +87,7 @@ class IntegrationServiceTests {
                     0, null, organization, "serviceContactAddress" + i + "@example.net");
             integrationSet.setConfigurationEntity(ce);
             Integration sp1 = createServiceProvider(Long.valueOf(i), organization);
-            Integration sp2 = createServiceProvider(Long.valueOf(i+100), organization);
+            Integration sp2 = createServiceProvider(Long.valueOf(i + 100), organization);
             sp1.addToSet(integrationSet);
             serviceProviders.add(sp1);
             sp2.addToSet(integrationSet);
@@ -124,10 +131,10 @@ class IntegrationServiceTests {
         OidcServiceProvider sp = new OidcServiceProvider();
         sp.setConfigurationEntity(ce);
         ce.setSp(sp);
-        sp.setName("SP " +id);
-        sp.setClientId("clientId-"+id);
+        sp.setName("SP " + id);
+        sp.setClientId("clientId-" + id);
         Integration integration = new Integration(id, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
-                0, null, organization, "serviceContactAddress" + id +"@example.net");
+                0, null, organization, "serviceContactAddress" + id + "@example.net");
         return integration;
     }
 
@@ -167,13 +174,14 @@ class IntegrationServiceTests {
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     void testGetIntegrationsSpecSearchPageableWithReferenceId() {
-        
+
         Pageable pageable = PageRequest.of(0, 20, Sort.by("permissions"));
         given(integrationRepository.findAll(any(Specification.class))).willReturn(integrationSets);
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(referenceIntegration));
 
         // when
-        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L, 0,
+        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L,
+                0,
                 pageable);
 
         // then
@@ -192,11 +200,27 @@ class IntegrationServiceTests {
 
         assertTrue(thrown.getMessage().contains("Not found Integration 5"));
     }
-
+/*
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     void testUpdateIntegration() {
         // given
+        given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
+        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedIntegration);
+
+        // when - action or the behaviour that we are going test
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedIntegration);
+
+        // then - verify the output
+        assertEquals(999, resultIntegration.getId());
+        assertEquals("zyx@domain", resultIntegration.getServiceContactAddress());
+    }
+ */
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testUpdateIntegration() {
+        // given
+        given(loadingService.loadOne(any(Integration.class))).willReturn(updatedIntegration);
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedIntegration);
 
@@ -271,6 +295,7 @@ class IntegrationServiceTests {
         underTest.getIntegrationsByPermissionUpdateTimeSince(LocalDateTime.now(), 0);
 
         // then
-        verify(integrationRepository).findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(any(LocalDateTime.class), any(Integer.class));
+        verify(integrationRepository).findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(
+                any(LocalDateTime.class), any(Integer.class));
     }
 }

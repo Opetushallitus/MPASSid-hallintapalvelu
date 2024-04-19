@@ -70,4 +70,12 @@ public class Azure extends IdentityProvider {
     public LocalDate getEncryptionCertificateValidUntil() {
         return this.encryptionCertificateValidUntil;
     }
+
+    public String getTenantId() {
+        return this.tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
 }
