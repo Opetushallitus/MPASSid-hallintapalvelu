@@ -6,7 +6,7 @@
     "version": "0"
   },
   "servers": [
-    { "url": "https://virkailija.testiopintopolku.fi/koodisto-service" }
+    { "url": "https://virkailija.opintopolku.fi/koodisto-service" }
   ],
   "paths": {
     "/rest/codesgroup": {
@@ -670,7 +670,7 @@
                     "value": [
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_12",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_12",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_12",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -725,7 +725,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_11",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_11",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_11",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -780,7 +780,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_19",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_19",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_19",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -835,7 +835,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_15",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_15",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_15",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -890,7 +890,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_22",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_22",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_22",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -945,7 +945,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_21",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_21",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_21",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -1000,7 +1000,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_63",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_63",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_63",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -1055,7 +1055,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_61",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_61",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_61",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
@@ -1110,7 +1110,7 @@
                       },
                       {
                         "koodiUri": "mpassidnsallimatoppilaitostyypit_64",
-                        "resourceUri": "https://virkailija.testiopintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_64",
+                        "resourceUri": "https://virkailija.opintopolku.fi/koodisto-service/rest/codeelement/mpassidnsallimatoppilaitostyypit_64",
                         "version": 0,
                         "versio": 1,
                         "koodisto": {
