@@ -52,7 +52,7 @@ export const defaultDataConfiguration:UiConfiguration = {
       {
           name: 'azure',
           editable: false,
-          visible: true,
+          visible: false,
       },
       {
           name: 'adfs',
@@ -221,7 +221,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'nickname',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       validation: [],
       integrationType: [
           {
@@ -293,14 +293,14 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'username',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
           {
               name: 'azure',
               editable: true,
-              visible: true,
+              visible: false,
           }
       ]
   },

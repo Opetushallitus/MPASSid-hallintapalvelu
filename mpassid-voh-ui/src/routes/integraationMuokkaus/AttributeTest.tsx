@@ -26,8 +26,14 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
     useEffect(() => {
         if(!open){
             setAttributeResult({})
-        }
+        } 
       }, [open]);
+
+      useEffect(() => {
+        if(open){
+            console.log("attributes for test: ",attributes)
+        } 
+      }, [open,attributes]);  
 
     const onlyUnique = (value: string, index: number, array: string[]) => {
         //function onlyUnique(value:string, index:number, array:Array<string>) {
@@ -225,7 +231,8 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                                                             </TableRow>
                                                         </TableHead>
                                                         <TableBody>
-                                                        {attributes.filter(attrib=>attrib.content!).map((attrib) => {
+                                                        {attributes.filter(attrib=>attrib.content!)
+                                                        .map((attrib) => {
                                                             var value="";
                                                             var key=attrib.content?.split(".",1)[0]||attrib.content||""
                                                             if(attrib.content?.includes(".")) {                      
@@ -246,9 +253,13 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                                                             }
                                                             
                                                             if(attrib) {
+                                                                const id = `attribuutti.${attrib.content}`;
+                                                                const label = id in intl.messages ? { id } : undefined;
+                                                                
+                                                                
                                                                 return (<TableRow key={attrib.content}>
                                                                             <TableCell component="th" scope="row">
-                                                                                {attrib.content}
+                                                                            <span>{label ? <FormattedMessage {...label} /> : attrib.content}</span>
                                                                             </TableCell>
                                                                             <TableCell style={{ width: 160 }} align="right">
                                                                                 {value}
