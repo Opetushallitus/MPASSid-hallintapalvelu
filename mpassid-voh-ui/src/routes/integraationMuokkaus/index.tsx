@@ -8,7 +8,7 @@ import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSessionStorage } from "usehooks-ts";
@@ -36,16 +36,6 @@ export default function IntegraatioMuokkaus() {
     []
   );
 
-  useEffect(() => {
-    console.log("canSave: ",canSave)
-    
-  }, [canSave]);
-
-  useEffect(() => {
-    console.log("**** newIntegration: ",newIntegration)
-    
-  }, [openAttributeTest]);
-  
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
     horizontal: 'left' | 'center' | 'right';
@@ -55,9 +45,8 @@ export default function IntegraatioMuokkaus() {
   }
 
   const removeTab = (id:any) => {
-    
     if(writeAccess()) {
-      if (tabs.includes(id)) {
+      if (tabs.includes(id.toString())) { 
         const index = tabs.indexOf(id);
         setValue([...tabs.splice(index,1)]);
       }
@@ -80,9 +69,8 @@ export default function IntegraatioMuokkaus() {
     return false;
   }
   
-  const saveIntegration = async () => {
+  const saveIntegration = async (event:any) => {
     if(writeAccess()) {
-      console.log("SAVE: ",newIntegration)
       if(newIntegration!==undefined) {
         if(!isConfirmed&&!openConfirmation) {
           setOpenConfirmation(true);
@@ -91,18 +79,14 @@ export default function IntegraatioMuokkaus() {
           newIntegration.permissions?.forEach((permission)=>{
             delete permission.lastUpdatedOn;
           })
-          const updateResponse = await updateIntegration({ id },newIntegration);
+          await updateIntegration({ id },newIntegration);
           removeTab(id);
           setOpenConfirmation(false);
         }
       } 
-    } else {
-      console.log("SAVE: Not write access!",newIntegration)
-    }
+    } 
 
-    
-    setSaveDialogState(false)
-  
+    setSaveDialogState(false)  
     navigate(`/integraatio/${id}`)
   }
 
