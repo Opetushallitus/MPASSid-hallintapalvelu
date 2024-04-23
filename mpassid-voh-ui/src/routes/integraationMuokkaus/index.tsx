@@ -40,6 +40,11 @@ export default function IntegraatioMuokkaus() {
     console.log("canSave: ",canSave)
     
   }, [canSave]);
+
+  useEffect(() => {
+    console.log("**** newIntegration: ",newIntegration)
+    
+  }, [openAttributeTest]);
   
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
