@@ -1,8 +1,8 @@
 import { Components, testAttributes, testAttributesAuthorization } from '@/api';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import { Dispatch, useEffect, useRef, useState } from 'react';
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { ChangeEventHandler, Dispatch, useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface Props {
     id: string;
@@ -16,29 +16,61 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
     const intl = useIntl();
     const [isValid, setIsValid] = useState(true);
     const [sessionAuthenticated, setSessionAuthenticated] = useState(false);
-    const [defaultValue, setDefaultValue] = useState("");
-    const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
+    const [authenticationAlert, setAuthenticationAlert ] = useState(false);
+    const [usedHelperTextPrincipal, setUsedHelperTextPrincipal] = useState<JSX.Element>(<></>);
+    const [usedHelperTextClientId, setUsedHelperTextClientId] = useState<JSX.Element>(<></>);
+    const [usedHelperTextClientSecret, setUsedHelperTextClientSecret] = useState<JSX.Element>(<></>);
     const [attributeResult, setAttributeResult] = useState<any>({});
-    const pricipalRef = useRef<HTMLFormElement>(null);
-    const clientIdRef = useRef<HTMLFormElement>(null);
-    const clientSecretRef = useRef<HTMLFormElement>(null);
+    const [showClientSecret, setShowClientSecret] = useState(false);
+    const [principal, setPrincipal] = useState<string>();
+    const [clientId, setClientId] = useState<string>();
+    const [clientSecret, setClientSecret] = useState<string>();
+    
     
     useEffect(() => {
         if(!open){
             setAttributeResult({})
+            setAuthenticationAlert(false)
         } 
       }, [open]);
 
       useEffect(() => {
-        if(open){
-            console.log("attributes for test: ",attributes)
-        } 
-      }, [open,attributes]);  
+        if((principal==="")) {
+            setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
+            setIsValid(false)
+        } else {
+            setIsValid(true)               
+            setUsedHelperTextPrincipal(<></>)
+        }
+      }, [principal]);  
+
+      useEffect(() => {
+        if((clientId==="")) {
+            setUsedHelperTextClientId(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
+            setIsValid(false)
+        } else {
+            setIsValid(true)               
+            setUsedHelperTextClientId(<></>)
+        }
+      }, [clientId]);  
+
+      useEffect(() => {
+        if((clientSecret==="")) {
+            setUsedHelperTextClientSecret(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
+            setIsValid(false)
+        } else {
+            setIsValid(true)               
+            setUsedHelperTextClientSecret(<></>)
+        }
+      }, [clientSecret]);  
 
     const onlyUnique = (value: string, index: number, array: string[]) => {
-        //function onlyUnique(value:string, index:number, array:Array<string>) {
         return array.indexOf(value) === index;
     }
+
+    const handleClickShowClientSecret = () => {
+        setShowClientSecret(!showClientSecret);
+    };
 
     const getAttributeList = () => {
 
@@ -59,90 +91,45 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
       
     const onUpdate = () => {
         var attributeList:string[] = [];
+        setAuthenticationAlert(false)
         if(!sessionAuthenticated) {
-            if(pricipalRef?.current?.value&&clientIdRef?.current?.value&&clientSecretRef?.current?.value) {
+            if(principal&&clientId&&clientSecret) {
                 attributeList=getAttributeList()||[];
-                const principal=pricipalRef.current.value||"";
                 if(!sessionAuthenticated){
                     const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
                     authRequest.id=parseInt(id);
-                    authRequest.clientId=clientIdRef.current.value;
-                    authRequest.clientSecret=clientSecretRef.current.value;
+                    authRequest.clientId=clientId;
+                    authRequest.clientSecret=clientSecret;
                     
                     testAttributesAuthorization({},authRequest).then(result=>{ 
+                        setSessionAuthenticated(true)
                         testAttributes({ principal: principal, select: attributeList}).then(result=>{
-                            setAttributeResult(result)
-                            setSessionAuthenticated(true)
+                            setAttributeResult(result)                            
                         }).catch(error=>{
-                            setAttributeResult({})
-                            setSessionAuthenticated(true)
+                            setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
                         })
                     }).catch(error=>{
                         setSessionAuthenticated(false)
-                        alert("Auth failed!!!")
+                        setAuthenticationAlert(true)
                     })
                 }
                 
-            } else {
-                setIsValid(false)
-                setUsedHelperText(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            }
+            } 
         } else {
-            if(pricipalRef?.current?.value) {
+            if(principal) {
                 attributeList=getAttributeList();                
-                const principal=pricipalRef.current.value||"";
+                setSessionAuthenticated(true)
                 testAttributes({ principal: principal, select: attributeList}).then(result=>{
-                    setAttributeResult(result)
-                    setSessionAuthenticated(true)
+                    setAttributeResult(result)                            
                 }).catch(error=>{
-                    setAttributeResult({})
-                    setSessionAuthenticated(true)
+                    setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
                 })
-                //Jos failaa, niin alertti ja setSessionAuthenticated(false)
-            } else {
-                setIsValid(false)
-                setUsedHelperText(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            }
+                
+            } 
         }
         
 
     }
-    const updatePrincipalFormValue = () => {
-        
-        if((!pricipalRef.current?.value||pricipalRef.current.value==="")) {
-            setUsedHelperText(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValid(false)
-        } else {
-            setIsValid(true)               
-            setUsedHelperText(<></>)
-        }
-          
-      };
-    
-      const updateClientIdFormValue = () => {
-        
-        if((!clientIdRef.current?.value||clientIdRef.current.value==="")) {
-            setUsedHelperText(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValid(false)
-        } else {
-            setIsValid(true)               
-            setUsedHelperText(<></>)
-        }
-          
-      };
-
-      const updateClientSecretFormValue = () => {
-        
-        if((!clientSecretRef.current?.value||clientSecretRef.current.value==="")) {
-            setUsedHelperText(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValid(false)
-        } else {
-            setIsValid(true)               
-            setUsedHelperText(<></>)
-        }
-          
-        
-      };
 
     return(<Dialog
         open={open}
@@ -156,6 +143,7 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
+                {authenticationAlert&&<Alert severity="error">This is an error Alert.</Alert>}
                 {!sessionAuthenticated&&(<>
                     <TextField
                     sx={{ width: '100%'}}
@@ -168,19 +156,20 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                         defaultMessage: "Client ID"},
                         {} 
                     )}
-                    defaultValue={defaultValue}
+                    value={clientId}
+                    onChange={(e) => setClientId(e.target.value)}
                     fullWidth
+                    required={true}
                     error={!isValid}
-                    helperText={usedHelperText}
+                    helperText={usedHelperTextClientId}
                     inputProps={{
-                        ref: clientIdRef,
                         autoComplete: "off",
                     }}
-                    onChange={updateClientIdFormValue}
                 />
-                <TextField
+                <TextField 
                     sx={{ width: '100%'}}
                     variant="standard"
+                    type={showClientSecret ? 'text' : 'password'}
                     label={intl.formatMessage({
                         defaultMessage: "Client Key"},
                         {} 
@@ -189,16 +178,27 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                         defaultMessage: "Client Key"},
                         {} 
                     )}
-                    defaultValue={defaultValue}
-                    fullWidth
-                    error={!isValid}
-                    helperText={usedHelperText}
-                    inputProps={{
-                        ref: clientSecretRef,
+                    value={clientSecret}
+                    onChange={(e) => setClientSecret(e.target.value)}
+                    required={true}
+                    helperText={usedHelperTextClientSecret}
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                            <IconButton
+                                aria-label="toggle clientSecret visibility"
+                                onClick={handleClickShowClientSecret}
+                                edge="end"
+                            >
+                                {showClientSecret ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                            </InputAdornment>
+                        ),
                         autoComplete: "off",
                     }}
-                    onChange={updateClientSecretFormValue}
-                />
+                    error={!isValid}
+                    fullWidth />
+                
                 </>)}
                 {Object.keys(attributeResult).length===0&&<TextField
                     sx={{ width: '100%'}}
@@ -211,15 +211,15 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                         defaultMessage: "Tarkistettava käyttäjä"},
                         {} 
                     )}
-                    defaultValue={defaultValue}
+                    value={principal}
+                    onChange={(e) => setPrincipal(e.target.value)}
                     fullWidth
                     error={!isValid}
-                    helperText={usedHelperText}
+                    helperText={usedHelperTextPrincipal}
+                    required={true}
                     inputProps={{
-                        ref: pricipalRef,
                         autoComplete: "off",
                     }}
-                    onChange={updatePrincipalFormValue}
                 />}
                 
                 {Object.keys(attributeResult).length>0&&<TableContainer component={Paper}>
