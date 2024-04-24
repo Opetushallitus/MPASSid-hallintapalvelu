@@ -1,8 +1,9 @@
 import { Components, testAttributes, testAttributesAuthorization } from '@/api';
-import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import { ChangeEventHandler, Dispatch, useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { attributePreferredOrder } from '@/config';
 
 interface Props {
     id: string;
@@ -14,7 +15,10 @@ interface Props {
 
 export default function AttributeTest({ id,attributes, open, setOpen }: Props){
     const intl = useIntl();
-    const [isValid, setIsValid] = useState(true);
+    const [isValidPrincipal, setIsValidPrincipal] = useState(true);
+    const [isKnown, setIsKnown] = useState(true);
+    const [isValidClientId, setIsValidClientId] = useState(true);
+    const [isValidClientSecret, setIsValidClientSecret] = useState(true);
     const [sessionAuthenticated, setSessionAuthenticated] = useState(false);
     const [authenticationAlert, setAuthenticationAlert ] = useState(false);
     const [usedHelperTextPrincipal, setUsedHelperTextPrincipal] = useState<JSX.Element>(<></>);
@@ -25,21 +29,23 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
     const [principal, setPrincipal] = useState<string>();
     const [clientId, setClientId] = useState<string>();
     const [clientSecret, setClientSecret] = useState<string>();
+    const [loading, setLoading] = useState<boolean>(false);
     
     
     useEffect(() => {
         if(!open){
             setAttributeResult({})
             setAuthenticationAlert(false)
+            setLoading(false)
         } 
       }, [open]);
 
       useEffect(() => {
         if((principal==="")) {
             setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValid(false)
+            setIsValidPrincipal(false)
         } else {
-            setIsValid(true)               
+            setIsValidPrincipal(true)               
             setUsedHelperTextPrincipal(<></>)
         }
       }, [principal]);  
@@ -47,9 +53,9 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
       useEffect(() => {
         if((clientId==="")) {
             setUsedHelperTextClientId(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValid(false)
+            setIsValidClientId(false)
         } else {
-            setIsValid(true)               
+            setIsValidClientId(true)               
             setUsedHelperTextClientId(<></>)
         }
       }, [clientId]);  
@@ -57,15 +63,36 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
       useEffect(() => {
         if((clientSecret==="")) {
             setUsedHelperTextClientSecret(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValid(false)
+            setIsValidClientSecret(false)
         } else {
-            setIsValid(true)               
+            setIsValidClientSecret(true)               
             setUsedHelperTextClientSecret(<></>)
         }
       }, [clientSecret]);  
 
     const onlyUnique = (value: string, index: number, array: string[]) => {
         return array.indexOf(value) === index;
+    }
+
+    const readyToTest = () => {
+        if(sessionAuthenticated) {
+            if(!principal) {
+                return false;
+            }
+            if(isValidPrincipal) {
+                return true;
+            }
+        } else {
+            if(!principal||!clientId||!clientSecret) {
+                return false;
+            }
+            if(isValidPrincipal&&isValidClientId&&isValidClientSecret) {
+                return true;
+            }
+        }
+        
+        
+        return false;
     }
 
     const handleClickShowClientSecret = () => {
@@ -92,6 +119,8 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
     const onUpdate = () => {
         var attributeList:string[] = [];
         setAuthenticationAlert(false)
+        setLoading(true);
+        setIsKnown(true);
         if(!sessionAuthenticated) {
             if(principal&&clientId&&clientSecret) {
                 attributeList=getAttributeList()||[];
@@ -105,12 +134,16 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                         setSessionAuthenticated(true)
                         testAttributes({ principal: principal, select: attributeList}).then(result=>{
                             setAttributeResult(result)                            
+                            setLoading(false);
                         }).catch(error=>{
                             setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
+                            setLoading(false);
+                            setIsKnown(false);
                         })
                     }).catch(error=>{
                         setSessionAuthenticated(false)
                         setAuthenticationAlert(true)
+                        setLoading(false);
                     })
                 }
                 
@@ -121,8 +154,11 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                 setSessionAuthenticated(true)
                 testAttributes({ principal: principal, select: attributeList}).then(result=>{
                     setAttributeResult(result)                            
+                    setLoading(false);
                 }).catch(error=>{
                     setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
+                    setLoading(false);
+                    setIsKnown(false);
                 })
                 
             } 
@@ -143,7 +179,9 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-                {authenticationAlert&&<Alert severity="error">This is an error Alert.</Alert>}
+                {authenticationAlert&&<Alert severity="error">
+                                            <FormattedMessage defaultMessage="Tilin authentikointi epäonnistui!" />
+                                      </Alert>}
                 {!sessionAuthenticated&&(<>
                     <TextField
                     sx={{ width: '100%'}}
@@ -160,7 +198,7 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                     onChange={(e) => setClientId(e.target.value)}
                     fullWidth
                     required={true}
-                    error={!isValid}
+                    error={!isValidClientId}
                     helperText={usedHelperTextClientId}
                     inputProps={{
                         autoComplete: "off",
@@ -196,7 +234,7 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                         ),
                         autoComplete: "off",
                     }}
-                    error={!isValid}
+                    error={!isValidClientSecret}
                     fullWidth />
                 
                 </>)}
@@ -214,7 +252,7 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                     value={principal}
                     onChange={(e) => setPrincipal(e.target.value)}
                     fullWidth
-                    error={!isValid}
+                    error={!isValidPrincipal||!isKnown}
                     helperText={usedHelperTextPrincipal}
                     required={true}
                     inputProps={{
@@ -223,71 +261,88 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                 />}
                 
                 {Object.keys(attributeResult).length>0&&<TableContainer component={Paper}>
-                                                    <Table sx={{ minWidth: 500 }} aria-label="attribute table">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell><FormattedMessage defaultMessage="Attribute name" /></TableCell>
-                                                                <TableCell align="right"><FormattedMessage defaultMessage="Attribute value" /></TableCell>        
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableBody>
-                                                        {attributes.filter(attrib=>attrib.content!)
-                                                        .map((attrib) => {
-                                                            var value="";
-                                                            var key=attrib.content?.split(".",1)[0]||attrib.content||""
-                                                            if(attrib.content?.includes(".")) {                      
+                <Table sx={{ minWidth: 500 }} aria-label="attribute table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell><FormattedMessage defaultMessage="Attribute name" /></TableCell>
+                            <TableCell align="right"><FormattedMessage defaultMessage="Attribute value" /></TableCell>        
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                    {attributes.filter(attrib=>attrib.content!)
+                    .map((attributes) => {
+                        const id = `attribuutti.${attributes.name}`;
+                        const label = id in intl.messages ? { id } : undefined;
+            
+                        return {
+                          ...attributes,
+                          label: label && intl.formatMessage(label),
+                        };
+                      })
+                    .sort(
+                        (a, b) =>
+                          2 *
+                            (attributePreferredOrder.indexOf(b.name!) -
+                              attributePreferredOrder.indexOf(a.name!)) -
+                          (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
+                      )
+                    .map((attrib) => {
+                        var value="";
+                        var key=attrib.content?.split(".",1)[0]||attrib.content||""
+                        if(attrib.content?.includes(".")) {                      
+                            
+                            if(attrib.content?.split(".",2)[1]) {
+                                var key2=attrib.content?.split(".",2)[1]
+                                if(attributeResult[key]&&key2) {
+                                    value=(attributeResult[key])[key2]
+                                } 
+                            }
                                                                 
-                                                                if(attrib.content?.split(".",2)[1]) {
-                                                                    var key2=attrib.content?.split(".",2)[1]
-                                                                    if(attributeResult[key]&&key2) {
-                                                                        value=(attributeResult[key])[key2]
-                                                                    } 
-                                                                }
-                                                                                                 
-                                                                
-                                                            } else {
-                                                                if(attrib.content&&attributeResult[attrib.content]) {
-                                                                    value=attributeResult[attrib.content];
-                                                                }
-                                                                
-                                                            }
-                                                            
-                                                            if(attrib) {
-                                                                const id = `attribuutti.${attrib.content}`;
-                                                                const label = id in intl.messages ? { id } : undefined;
-                                                                
-                                                                
-                                                                return (<TableRow key={attrib.content}>
-                                                                            <TableCell component="th" scope="row">
-                                                                            <span>{label ? <FormattedMessage {...label} /> : attrib.content}</span>
-                                                                            </TableCell>
-                                                                            <TableCell style={{ width: 160 }} align="right">
-                                                                                {value}
-                                                                            </TableCell>
-                                                                            
-                                                                            </TableRow>)
-                                                            } else {
-                                                                return (<></>)
-                                                            }
-                                                        })}
-                                                        
-                                                        </TableBody>
-                                                        
-                                                    </Table>
-                                                    </TableContainer>}
-          </DialogContentText>
+                            
+                        } else {
+                            if(attrib.content&&attributeResult[attrib.content]) {
+                                value=attributeResult[attrib.content];
+                            }
+                            
+                        }
+                        
+                        if(attrib) {
+                            const id = `attribuutti.${attrib.content}`;
+                            const label = id in intl.messages ? { id } : undefined;
+                            
+                            
+                            return (<TableRow key={attrib.content}>
+                                        <TableCell component="th" scope="row">
+                                        <span>{label ? <FormattedMessage {...label} /> : attrib.content}</span>
+                                        </TableCell>
+                                        <TableCell style={{ width: 160 }} align="right">
+                                            {value}
+                                        </TableCell>
+                                        
+                                        </TableRow>)
+                        } else {
+                            return (<></>)
+                        }
+                    })}
+                    
+                    </TableBody>
+                    
+                </Table>
+                </TableContainer>}
+            </DialogContentText>
         </DialogContent>
         {Object.keys(attributeResult).length===0&&<DialogActions>
           <Button onClick={()=>setOpen(false)} autoFocus>
-            PERUUTA
+          <FormattedMessage defaultMessage="PERUUTA" />
           </Button>
-          <Button onClick={()=>onUpdate()} autoFocus>
-            TESTAA
+          <Button onClick={()=>onUpdate()} autoFocus disabled={loading||!readyToTest()}>
+            {!loading&&<FormattedMessage defaultMessage="TESTAA" />}
+            {loading&&<CircularProgress />}
           </Button>
         </DialogActions>}
         {Object.keys(attributeResult).length>0&&<DialogActions>
           <Button onClick={()=>setOpen(false)} autoFocus>
-            OK
+          <FormattedMessage defaultMessage="OK" />
           </Button>
         </DialogActions>}
       </Dialog>)
