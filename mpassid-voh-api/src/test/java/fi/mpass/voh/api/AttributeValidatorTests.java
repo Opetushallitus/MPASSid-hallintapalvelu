@@ -7,7 +7,6 @@ import org.springframework.core.io.ClassPathResource;
 import fi.mpass.voh.api.integration.attribute.AttributeValidator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.mockito.ArgumentMatchers.any;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,7 +16,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-// import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpStatusCode;
 import org.mockserver.model.MediaType;
