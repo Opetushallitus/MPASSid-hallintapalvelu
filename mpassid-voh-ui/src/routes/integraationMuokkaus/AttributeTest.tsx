@@ -3,17 +3,19 @@ import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, 
 import { ChangeEventHandler, Dispatch, useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { attributePreferredOrder } from '@/config';
+import { attributePreferredOrder, dataConfiguration, UiConfiguration } from '@/config';
 
 interface Props {
     id: string;
     attributes: Components.Schemas.Attribute[];
     open: boolean;
+    oid: string;
+    environment: number;
     setOpen: Dispatch<boolean>;
   }
 
 
-export default function AttributeTest({ id,attributes, open, setOpen }: Props){
+export default function AttributeTest({ id,attributes, open, setOpen, oid, environment }: Props){
     const intl = useIntl();
     const [isValidPrincipal, setIsValidPrincipal] = useState(true);
     const [isKnown, setIsKnown] = useState(true);
@@ -30,6 +32,29 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
     const [clientId, setClientId] = useState<string>();
     const [clientSecret, setClientSecret] = useState<string>();
     const [loading, setLoading] = useState<boolean>(false);
+    const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
+    const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
+    const configurations:UiConfiguration[] = dataConfiguration
+    .filter((configuration) => configuration.type === "user")
+    .filter((configuration) => (environmentConfiguration.includes(configuration.name)&&configuration.environment===environment)||(!environmentConfiguration.includes(configuration.name)&&configuration.environment===undefined))
+    .filter((configuration) => (specialConfiguration.includes(configuration.name)&&configuration.oid===oid)||(!specialConfiguration.includes(configuration.name)&&!configuration.oid))
+    .map((configuration) => {
+      const id = `attribuutti.${configuration.name}`;
+      const label = id in intl.messages ? { id } : undefined;
+
+      return {
+        ...configuration,
+        label: label && intl.formatMessage(label),
+      };
+    })
+    .filter(({ name }) => name)
+    .sort(
+      (a, b) =>
+        2 *
+          (attributePreferredOrder.indexOf(b.name!) -
+            attributePreferredOrder.indexOf(a.name!)) -
+        (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
+    )
     
     
     useEffect(() => {
@@ -269,51 +294,33 @@ export default function AttributeTest({ id,attributes, open, setOpen }: Props){
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                    {attributes.filter(attrib=>attrib.content!)
-                    .map((attributes) => {
-                        const id = `attribuutti.${attributes.name}`;
-                        const label = id in intl.messages ? { id } : undefined;
-            
-                        return {
-                          ...attributes,
-                          label: label && intl.formatMessage(label),
-                        };
-                      })
-                    .sort(
-                        (a, b) =>
-                          2 *
-                            (attributePreferredOrder.indexOf(b.name!) -
-                              attributePreferredOrder.indexOf(a.name!)) -
-                          (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
-                      )
-                    .map((attrib) => {
+                    {configurations
+                    .map((configuration) => {
                         var value="";
-                        var key=attrib.content?.split(".",1)[0]||attrib.content||""
-                        if(attrib.content?.includes(".")) {                      
-                            
-                            if(attrib.content?.split(".",2)[1]) {
-                                var key2=attrib.content?.split(".",2)[1]
-                                if(attributeResult[key]&&key2) {
-                                    value=(attributeResult[key])[key2]
-                                } 
-                            }
-                                                                
-                            
-                        } else {
-                            if(attrib.content&&attributeResult[attrib.content]) {
-                                value=attributeResult[attrib.content];
-                            }
-                            
-                        }
                         
-                        if(attrib) {
-                            const id = `attribuutti.${attrib.content}`;
-                            const label = id in intl.messages ? { id } : undefined;
-                            
-                            
-                            return (<TableRow key={attrib.content}>
+                        
+                        const visible = (configuration.integrationType.filter(type=>type.name==="azure"||type.name==="default").length>0&&configuration.integrationType.filter(type=>type.name==="azure"||type.name==="default")[0].visible);
+                        if(visible&&attributes.filter(attribute=>attribute.name===configuration.name).length>0) {
+                            const attrib=attributes.filter(attribute=>attribute.name===configuration.name)[0];
+                            const key=attrib.content||"";
+                            if(key.includes(".")) {                                                      
+                                if(attrib.content?.split(".",2)[1]) {
+                                    const key1=attrib.content?.split(".",2)[0]
+                                    const key2=attrib.content?.split(".",2)[1]
+                                    if(attributeResult[key1]&&key2) {
+                                        value=(attributeResult[key1])[key2]
+                                    } 
+                                }                                                                    
+                            } else {
+                                if(attrib.content&&attributeResult[attrib.content]) {
+                                    value=attributeResult[attrib.content];
+                                }
+                                
+                            }
+
+                            return (<TableRow key={key}>
                                         <TableCell component="th" scope="row">
-                                        <span>{label ? <FormattedMessage {...label} /> : attrib.content}</span>
+                                        <span>{configuration.label ? configuration.label : configuration.name}</span>
                                         </TableCell>
                                         <TableCell style={{ width: 160 }} align="right">
                                             {value}
