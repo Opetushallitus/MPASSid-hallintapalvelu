@@ -71,7 +71,8 @@ public class Integration implements Persistable<Long> {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIgnoreProperties("integrationSets")
-    // @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.EAGER)
+    // @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE,
+    // CascadeType.PERSIST }, fetch = FetchType.EAGER)
     @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.PERSIST }, fetch = FetchType.EAGER)
     @Audited
     @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
@@ -277,6 +278,19 @@ public class Integration implements Persistable<Long> {
         }
     }
 
+    public void removePermissionTo(Long integrationId) {
+        for (Iterator<IntegrationPermission> iterator = permissions.iterator(); iterator.hasNext();) {
+            IntegrationPermission permission = iterator.next();
+
+            if (permission.getFrom().equals(this) && permission.getTo().getId() != null
+                    && permission.getTo().getId().equals(integrationId)) {
+                iterator.remove();
+                permission.setFrom(null);
+                permission.setTo(null);
+            }
+        }
+    }
+
     public void removePermissions() {
         for (Iterator<IntegrationPermission> iterator = permissions.iterator(); iterator.hasNext();) {
             IntegrationPermission permission = iterator.next();
@@ -351,6 +365,6 @@ public class Integration implements Persistable<Long> {
     }
 
     public void sortPermissionsByLastUpdatedOn() {
-        Collections.sort(permissions, Comparator.comparing(p -> p.getLastUpdatedOn()));   
+        Collections.sort(permissions, Comparator.comparing(p -> p.getLastUpdatedOn()));
     }
 }

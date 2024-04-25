@@ -56,6 +56,7 @@ class IntegrationServiceTests {
 
     private Integration integration;
     private Integration updatedIntegration;
+    private Integration existingUpdatedAllowingIntegration;
     private Integration updatedAllowingIntegration;
     private Integration referenceIntegration;
     private List<Integration> updatedIntegrations;
@@ -103,6 +104,11 @@ class IntegrationServiceTests {
                 0, discoveryInformation, organization,
                 "foo@bar");
 
+        existingUpdatedAllowingIntegration = new Integration(999L, LocalDate.now(), configurationEntity,
+                LocalDate.of(2023, 6, 30),
+                0, discoveryInformation, organization,
+                "zoo@bar");
+
         updatedAllowingIntegration = new Integration(999L, LocalDate.now(), configurationEntity,
                 LocalDate.of(2023, 6, 30),
                 0, discoveryInformation, organization,
@@ -119,9 +125,12 @@ class IntegrationServiceTests {
         updatedIntegrations.add(updatedAllowingIntegration);
 
         for (Integration set : integrationSets) {
+            existingUpdatedAllowingIntegration.addPermissionTo(set);
             updatedAllowingIntegration.addPermissionTo(set);
             referenceIntegration.addPermissionTo(set);
         }
+        existingUpdatedAllowingIntegration.removePermissionTo(integrationSets.get(6));
+        existingUpdatedAllowingIntegration.removePermissionTo(integrationSets.get(8));
         referenceIntegration.removePermissionTo(integrationSets.get(5));
         referenceIntegration.removePermissionTo(integrationSets.get(2));
     }
@@ -200,22 +209,7 @@ class IntegrationServiceTests {
 
         assertTrue(thrown.getMessage().contains("Not found Integration 5"));
     }
-/*
-    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
-    @Test
-    void testUpdateIntegration() {
-        // given
-        given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
-        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedIntegration);
 
-        // when - action or the behaviour that we are going test
-        Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedIntegration);
-
-        // then - verify the output
-        assertEquals(999, resultIntegration.getId());
-        assertEquals("zyx@domain", resultIntegration.getServiceContactAddress());
-    }
- */
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     void testUpdateIntegration() {
@@ -236,15 +230,50 @@ class IntegrationServiceTests {
     @Test
     void testUpdateIntegrationPermissions() {
         // given
+        // existing integration without any existing permissions
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
 
-        // when - action or the behaviour that we are going test
+        // when updating with 9 permissions
         Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
 
         // then - verify the output
         assertEquals(999, resultIntegration.getId());
         assertEquals(9, resultIntegration.getPermissions().size());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testAddIntegrationPermissions() {
+        // given
+        // existing integration with 7 existing permissions
+        given(integrationRepository.findOne(any(Specification.class)))
+                .willReturn(Optional.of(existingUpdatedAllowingIntegration));
+        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
+
+        // when adding 2 permissions
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
+
+        // then - verify the output
+        assertEquals(999, resultIntegration.getId());
+        assertEquals(9, resultIntegration.getPermissions().size());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testRemoveIntegrationPermissions() {
+        // given
+        // existing integration with 9 existing permissions
+        given(integrationRepository.findOne(any(Specification.class)))
+                .willReturn(Optional.of(updatedAllowingIntegration));
+        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(existingUpdatedAllowingIntegration);
+
+        // when removing 2 permissions
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(), existingUpdatedAllowingIntegration);
+
+        // then - verify the output
+        assertEquals(999, resultIntegration.getId());
+        assertEquals(7, resultIntegration.getPermissions().size());
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })

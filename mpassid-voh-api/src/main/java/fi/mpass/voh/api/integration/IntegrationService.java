@@ -470,23 +470,8 @@ public class IntegrationService {
           existingIntegration = updatedIntegration;
         }
 
-        // updates integration permissions
-        if (integration.getPermissions() != null) {
-          logger.debug(
-              "Permitted integrations count : {}", integration.getPermissions().size());
-          existingIntegration.removePermissions();
-          for (IntegrationPermission permission : integration.getPermissions()) {
-            // permission updates to the configurable default test service are skipped
-            if (permission.getTo().getId().equals(defaultTestServiceIntegrationId)) {
-              continue;
-            }
-            // permission to integration set
-            Integration integrationSet = getIntegrationSetById(permission.getTo().getId()).get();
-            existingIntegration.addPermissionTo(integrationSet);
-            logger.debug("Updated #{}: Permitted integration #{}", existingIntegration.getId(),
-                permission.getTo().getId());
-          }
-        }
+        updatePermissions(integration, existingIntegration);
+
         integration = integrationRepository.saveAndFlush(existingIntegration);
       } catch (OptimisticLockException ole) {
         throw new EntityUpdateException(
@@ -495,6 +480,53 @@ public class IntegrationService {
       return extendPermissions(Optional.of(integration)).get();
     }
     return existingIntegration;
+  }
+
+  /**
+   * The method updates integration permissions while maintaining permission
+   * update times.
+   *
+   * @param integration         the input integration
+   * @param existingIntegration the existing integration
+   */
+  private void updatePermissions(Integration integration, Integration existingIntegration) {
+    
+    if (integration.getPermissions() != null) {
+      logger.debug(
+          "Permit integrations count : {}", integration.getPermissions().size());
+      List<Long> existingPermittedIntegrations = new ArrayList<>();
+      for (IntegrationPermission existingPermission : existingIntegration.getPermissions()) {
+        existingPermittedIntegrations.add(existingPermission.getTo().getId());
+      }
+      logger.debug("Integration #{}: Existing permitted integration identifiers #{}", existingIntegration.getId(),
+          existingPermittedIntegrations);
+
+      for (IntegrationPermission permission : integration.getPermissions()) {
+        // permission updates to the configurable default test service are skipped
+        if (permission.getTo().getId() != null && permission.getTo().getId().equals(defaultTestServiceIntegrationId)) {
+          continue;
+        }
+        // permission to integration set
+        if (!existingPermittedIntegrations.contains(permission.getTo().getId())) {
+          Integration integrationSet = getIntegrationSetById(permission.getTo().getId()).get();
+          existingIntegration.addPermissionTo(integrationSet);
+          logger.debug("Updated #{}: Permitted integration #{}", existingIntegration.getId(),
+              permission.getTo().getId());
+        }
+        existingPermittedIntegrations.remove(permission.getTo().getId());
+      }
+      // a permission was removed
+      if (!existingPermittedIntegrations.isEmpty()) {
+        for (Long permittedIntegrationId : existingPermittedIntegrations) {
+          if (permittedIntegrationId.equals(defaultTestServiceIntegrationId)) {
+            continue;
+          }
+          logger.debug("Updated #{}: Removed permitted integration #{}", existingIntegration.getId(),
+              permittedIntegrationId);
+          existingIntegration.removePermissionTo(permittedIntegrationId);
+        }
+      }
+    }
   }
 
   public List<Integration> getIntegrationsSince(LocalDateTime timestamp) {
