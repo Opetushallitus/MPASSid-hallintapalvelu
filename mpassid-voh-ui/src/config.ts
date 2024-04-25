@@ -32,6 +32,7 @@ export interface UiConfiguration {
   mandatory: boolean;
   multivalue?: boolean;
   environment?: number;
+  label?: string;
   validation: string[];
   integrationType: IntegrationType[];
 }

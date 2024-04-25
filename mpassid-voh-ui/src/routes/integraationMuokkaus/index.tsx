@@ -35,6 +35,8 @@ export default function IntegraatioMuokkaus() {
     openIntegrationsSessionStorageKey,
     []
   );
+  var oid:string = newIntegration?.organization?.oid || "";
+  var environment:number = newIntegration?.deploymentPhase || 0;
 
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
@@ -165,7 +167,7 @@ export default function IntegraatioMuokkaus() {
                   </Button>
                 </DialogActions>
               </Dialog>
-              <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} />
+              <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
       </>
   );
 }
