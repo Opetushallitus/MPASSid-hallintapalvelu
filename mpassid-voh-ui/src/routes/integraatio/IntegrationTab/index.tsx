@@ -1,4 +1,4 @@
-import { useIntegrationSafe } from "@/api";
+import { getIntegration, useIntegrationSafe } from "@/api";
 import { mpassIdUserAttributeTestService } from "@/config";
 import {
   getRole,
@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import IntegrationSelection from "./IntegrationSelection";
 import type { Components } from "@/api";
@@ -66,12 +66,20 @@ export default function IntegrationTab({ id }: Props) {
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration | undefined>(undefined);
   const [integration, setIntegration] = useState<Components.Schemas.Integration| undefined>(undefined);
   const [activateAllServices, setActivateAllServices] = useState(false);
+  const { state } = useLocation();
 
   const role = getRole(origInteg);
-  
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+
+  useEffect(() => {
+    if(state=='reload') {
+      getIntegration({ id }).then(result=>setIntegration(result))
+      
+    }
+  }, [state,id]);
 
   useEffect(() => {
     if(origInteg!==undefined) {
