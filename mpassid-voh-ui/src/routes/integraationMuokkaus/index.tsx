@@ -46,15 +46,6 @@ export default function IntegraatioMuokkaus() {
     horizontal: 'right',
   }
 
-  const removeTab = (id:any) => {
-    if(writeAccess()) {
-      if (tabs.includes(id.toString())) { 
-        const index = tabs.indexOf(id);
-        setValue([...tabs.splice(index,1)]);
-      }
-    }
-  }
-
   const writeAccess = () => {
     
     if(newIntegration?.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration?.organization?.oid)||groups?.includes(tallentajaOphGroup))) {
@@ -82,14 +73,13 @@ export default function IntegraatioMuokkaus() {
             delete permission.lastUpdatedOn;
           })
           await updateIntegration({ id },newIntegration);
-          removeTab(id);
           setOpenConfirmation(false);
         }
       } 
     } 
 
     setSaveDialogState(false)  
-    navigate(`/integraatio/${id}`)
+    navigate(`/integraatio/${id}`, { state: 'reload' })
   }
 
   return (
