@@ -1,9 +1,8 @@
-import { getIntegration, useIntegrationSafe } from "@/api";
+import { useIntegrationSafe } from "@/api";
 import { mpassIdUserAttributeTestService } from "@/config";
 import {
   getRole,
 } from "@/routes/home/IntegrationsTable";
-import UniqueId from "../IntegrationTab/IntegrationDetails/UniqueId"
 import {
   Alert,
   AlertTitle,
@@ -75,17 +74,16 @@ export default function IntegrationTab({ id }: Props) {
   };
 
   useEffect(() => {
-    if(state=='reload') {
-      getIntegration({ id }).then(result=>setIntegration(result))
-      
+    if(state?.id===id) {
+      setIntegration(state)
     }
   }, [state,id]);
 
   useEffect(() => {
-    if(origInteg!==undefined) {
+    if(origInteg!==undefined&&state?.id!==origInteg?.id) {
       setIntegration(origInteg)
     }
-  }, [origInteg]);
+  }, [origInteg,state]);
 
   useEffect(() => {
     if(integration?.permissions === undefined || integration?.permissions?.length===0 || (integration?.permissions?.length===1&&integration.permissions.map(i=>i.to?.id).indexOf(mpassIdUserAttributeTestService)>=0 )) {
@@ -141,7 +139,7 @@ export default function IntegrationTab({ id }: Props) {
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <IntegrationDetails id={Number(integration.id)} />
+          <IntegrationDetails integration={integration}  />
         </TabPanel>
         <TabPanel value={value} index={1}>
           <IntegrationSelection 

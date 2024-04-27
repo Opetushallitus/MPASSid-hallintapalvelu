@@ -63,6 +63,7 @@ export default function IntegraatioMuokkaus() {
   }
   
   const saveIntegration = async (event:any) => {
+    var result: Components.Schemas.Integration = {};
     if(writeAccess()) {
       if(newIntegration!==undefined) {
         if(!isConfirmed&&!openConfirmation) {
@@ -72,14 +73,14 @@ export default function IntegraatioMuokkaus() {
           newIntegration.permissions?.forEach((permission)=>{
             delete permission.lastUpdatedOn;
           })
-          await updateIntegration({ id },newIntegration);
+          result = await updateIntegration({ id },newIntegration);
           setOpenConfirmation(false);
         }
       } 
     } 
 
     setSaveDialogState(false)  
-    navigate(`/integraatio/${id}`, { state: 'reload' })
+    navigate(`/integraatio/${id}`, { state: result })
   }
 
   return (
