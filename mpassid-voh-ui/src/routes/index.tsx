@@ -16,7 +16,7 @@ import IntegraatioMuokkaus from "./integraationMuokkaus";
 
 export default function Routes() {
   const defaultMessages = useDefaultMessagesWithAvailableAttributeKeys();
-
+ const { groups } = useMe();
   return (
     <ReactRouterRoutes>
       <Route element={<Basic />}>
@@ -25,7 +25,7 @@ export default function Routes() {
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
         <Route path="uusi/:role/:type/:id" element={<IntegraatioMuokkaus />} />
         <Route path="muokkaa/:role/:type/:id" element={<IntegraatioMuokkaus />} />
-        {(useMe().groups?.includes(tallentajaOphGroup) || useMe().groups?.includes(katselijaOphGroup)) && (
+        {(groups?.includes(tallentajaOphGroup) || groups?.includes(katselijaOphGroup)) && (
           <>
             <Route
               path="lokalisointi"

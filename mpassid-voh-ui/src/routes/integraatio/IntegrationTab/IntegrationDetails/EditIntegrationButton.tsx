@@ -1,26 +1,27 @@
-import React from "react";
 import { Box, Fab } from "@mui/material";
 import { Link } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
+import type { Components } from "@/api";
 
 interface Props {
-  integration: any;
+  integration: Components.Schemas.Integration;
 }
 
 function EditIntegrationButton(props:Props) {
 
-  const integration = props.integration.id || "new"
+  const integration = props.integration
+  const id = props.integration.id || "new"
   const type = props.integration.configurationEntity!.idp?.type || props.integration.configurationEntity!.sp?.type || props.integration.configurationEntity!.set?.type || "unknown"
   const editor: boolean = true;
   var to = ""
-  if(props.integration!.configurationEntity!.idp!) {
-    to = "/muokkaa/idp/"+type+"/"+integration
+  if(integration?.configurationEntity?.idp) {
+    to = "/muokkaa/idp/"+type+"/"+id
   }
-  if(props.integration!.configurationEntity!.sp!) {
-    to = "/muokkaa/sp/"+type+"/"+integration
+  if(integration?.configurationEntity?.sp) {
+    to = "/muokkaa/sp/"+type+"/"+id
   }
-  if(props.integration!.configurationEntity!.set!) {
-    to = "/muokkaa/set/"+type+"/"+integration
+  if(integration?.configurationEntity?.set) {
+    to = "/muokkaa/set/"+type+"/"+id
   }
   
   if(editor) {
@@ -30,6 +31,7 @@ function EditIntegrationButton(props:Props) {
           color="primary"
           component={Link} 
           to={to}
+          state={props.integration}
           aria-label="add"
           size="large"
           sx={{

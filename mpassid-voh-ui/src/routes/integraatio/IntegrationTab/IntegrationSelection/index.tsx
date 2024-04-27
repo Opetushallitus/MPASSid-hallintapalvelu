@@ -30,7 +30,8 @@ import {
 } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useSearchParams } from "react-router-dom";
-import { ChangeEvent, useEffect, useState, Dispatch } from "react";
+import type { ChangeEvent, Dispatch } from "react";
+import { useEffect, useState } from "react";
 import RowsPerPage from "@/utils/components/RowsPerPage";
 import SearchForm from "./../../../home/SearchForm";
 import { usePaginationPage } from "@/utils/components/pagination";
@@ -76,7 +77,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   }, [integration, setNewIntegration]);
   
   useEffect(() => {
-    if((integration !== undefined)&&(newIntegration?.id !== integration?.id)) {
+    if((newIntegration===undefined||(integration !== undefined)&&(newIntegration?.id !== integration?.id))) {
       setNewIntegration(integration);
       setSaveDialogState(false);
     }
@@ -148,8 +149,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     return false;
   }
 
-  const copyFormDataToURLSearchParams =
-  (formData: FormData) => (searchParams: URLSearchParams) => {
+  const copyFormDataToURLSearchParams = (formData: FormData) => (searchParams: URLSearchParams) => {
     (formData as URLSearchParams).forEach((value, key) => {
       if (value) {
         searchParams.set(key, value);
@@ -219,9 +219,9 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const handleSwitchChange = (row: Components.Schemas.Integration) => {
       
-    if(writeAccess()) {
+    if(writeAccess()&&newIntegration) {
       const copy = structuredClone(newIntegration)
-
+      
       if(copy.permissions === undefined) {
         copy.permissions = [];
       }
