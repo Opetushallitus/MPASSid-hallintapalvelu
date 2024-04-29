@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMe } from "@/api/käyttöoikeus";
 import {
   katselijaOphGroup,
@@ -48,11 +48,18 @@ export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [addIntegration, setAddIntegration] = useState(false); 
   const intl = useIntl();
-  const me=useMe();
+  const me = useMe();
+  const [groups, setGroups] = useState<string[]>([]);
+
+  useEffect(() => {
+    if(me?.groups) {
+      setGroups(me.groups)
+    }
+  }, [me]);
 
   const writeAccess = () => {
     
-    if((me?.groups?.includes("APP_MPASSID_TALLENTAJA_")||me?.groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_")||me?.groups?.includes(tallentajaOphGroup))) {
+    if((groups?.includes("APP_MPASSID_TALLENTAJA_")||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_")||groups?.includes(tallentajaOphGroup))) {
       //Kun attribuutit konfiguroitu ja testattu, niin muuta true:ksi;
       return false;
     }
@@ -82,7 +89,7 @@ export default function Home() {
               </Suspense>
             </Secondary>
           </PageHeader>
-           {((me.groups?.includes(tallentajaOphGroup))||(me.groups?.includes(katselijaOphGroup)))&&
+           {((groups?.includes(tallentajaOphGroup))||(groups?.includes(katselijaOphGroup)))&&
               <FormControlLabel
                 control={
                   <Switch

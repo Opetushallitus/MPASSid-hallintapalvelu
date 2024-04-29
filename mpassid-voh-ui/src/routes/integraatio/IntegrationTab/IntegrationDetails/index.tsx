@@ -19,12 +19,20 @@ import Role from "./Role";
 import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
 import { tallentajaOphGroup } from '../../../../config';
+import { useEffect, useState } from "react";
 interface Props {
   integration: Components.Schemas.Integration;
 }
 
 export default function IntegrationDetails({ integration }: Props) {
-  const { groups } = useMe();
+  const me = useMe();
+  const [groups, setGroups] = useState<string[]>([]);
+
+  useEffect(() => {
+    if(me?.groups) {
+      setGroups(me.groups)
+    }
+  }, [me]);
   
   const writeAccess = () => {
     
