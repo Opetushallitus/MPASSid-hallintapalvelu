@@ -36,18 +36,24 @@ import fi.mpass.voh.api.organization.OrganizationService;
 public class Loader {
     private static final Logger logger = LoggerFactory.getLogger(Loader.class);
 
+    private static final String CLIENTID = "clientId";
+    private static final String CLIENTKEY = "clientKey";
+
     @Value("${application.integration.input.max.removal.number}")
     protected Integer maxRemovalNumber;
 
     IntegrationRepository integrationRepository;
     OrganizationService organizationService;
+    CredentialService credentialService;
     ResourceLoader resourceLoader;
     InputStream inputStream;
 
     public Loader(IntegrationRepository repository, OrganizationService organizationService,
+            CredentialService credentialService,
             ResourceLoader loader) {
         this.integrationRepository = repository;
         this.organizationService = organizationService;
+        this.credentialService = credentialService;
         this.resourceLoader = loader;
 
         if (this.maxRemovalNumber == null) {
@@ -309,6 +315,16 @@ public class Loader {
         return Optional.empty();
     }
 
+    /**
+     * 
+     * Adds, updates, removes an attribute of the existing integration.
+     * 
+     * If the attribute name is clientId or clientKey, start credentials management.
+     * 
+     * @param d                   an attribute difference
+     * @param existingIntegration existing integration
+     * @return the existing integration with the updated attribute
+     */
     protected Integration updateAttribute(Diff<?> d, Integration existingIntegration) {
         String[] diffElements = d.getFieldName().split("\\.");
         // configurationEntity.attributes.<name>
@@ -351,6 +367,12 @@ public class Loader {
                         .getAttributes().iterator(); attrIterator.hasNext();) {
                     Attribute attr = attrIterator.next();
                     if (attr.getName().equals(diffElements[2])) {
+                        if (attr.getName().equals(CLIENTID)) {
+                            credentialService.updateClientId(existingIntegration, d.getRight());
+                        }
+                        if (attr.getName().equals(CLIENTKEY)) {
+                            credentialService.updateClientKey(existingIntegration, d.getRight());
+                        }
                         if (diffElements[3].equals("type")) {
                             attr.setType((String) d.getRight());
                         }

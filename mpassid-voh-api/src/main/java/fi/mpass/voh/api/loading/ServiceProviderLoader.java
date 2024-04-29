@@ -47,8 +47,9 @@ public class ServiceProviderLoader extends Loader {
     private List<String> serviceProvidersInput;
 
     public ServiceProviderLoader(IntegrationRepository repository, OrganizationService organizationService,
+            CredentialService credentialService,
             ResourceLoader loader) {
-        super(repository, organizationService, loader);
+        super(repository, organizationService, credentialService, loader);
         if (this.serviceProvidersInput == null) {
             this.serviceProvidersInput = Arrays.asList("services.json");
         }
@@ -176,6 +177,7 @@ public class ServiceProviderLoader extends Loader {
                         d.getFieldName(), d.getLeft(), d.getRight());
                 try {
                     if (d.getFieldName().contains("configurationEntity.attributes.")) {
+                        credentialService.start(existingIntegration.get());
                         existingIntegration = Optional
                                 .of(updateAttribute(d, existingIntegration.get()));
                     } else {
@@ -233,6 +235,7 @@ public class ServiceProviderLoader extends Loader {
                 }
                 existingIntegration.get().setLastUpdatedOn(LocalDateTime.now());
             }
+            credentialService.finish(existingIntegration.get());
         } else {
             logger.debug("Comparison failed. Check input data structure and values.");
             loading.addError(integration, "Comparison failed");

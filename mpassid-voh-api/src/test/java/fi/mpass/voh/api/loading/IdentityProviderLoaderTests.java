@@ -38,6 +38,9 @@ class IdentityProviderLoaderTests {
     OrganizationService organizationService;
 
     @Autowired
+    CredentialService credentialService;
+
+    @Autowired
     ResourceLoader loader;
 
     @BeforeEach
@@ -61,7 +64,7 @@ class IdentityProviderLoaderTests {
         String oidcLocation = "oidc_services.json";
         // 2
         String samlLocation = "saml_services.json";
-        ServiceProviderLoader spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        ServiceProviderLoader spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(oidcLocation);
         Loading spLoading = new Loading();
         spLoader.init(spLoading);
@@ -72,7 +75,7 @@ class IdentityProviderLoaderTests {
 
         // 2, one with integration permissions
         String location = "gsuite_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -85,7 +88,7 @@ class IdentityProviderLoaderTests {
     void testGsuiteLoaderWithChangedOrganization() throws Exception {
         // 2, one with integration permissions
         String location = "gsuite_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -95,7 +98,7 @@ class IdentityProviderLoaderTests {
 
         // 2, one with integration permissions
         location = "gsuite_home_organizations_mods_organization.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading reloading = new Loading();
         idpLoader.init(reloading);
@@ -112,7 +115,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testAzureLoader() throws Exception {
         String location = "azure_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -129,7 +132,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testWilmaLoader() throws Exception {
         String location = "wilma_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         loading = idpLoader.init(loading);
@@ -147,7 +150,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testWilmaWithDuplicates() throws Exception {
         String location = "wilma_home_organizations_duplicates.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         loading = idpLoader.init(loading);
@@ -161,7 +164,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testWilmaLoaderWithoutOrganization() throws Exception {
         String location = "wilma_home_organizations_without_organization.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         loading = idpLoader.init(loading);
@@ -178,7 +181,7 @@ class IdentityProviderLoaderTests {
     @Transactional
     void testOpinsysLoader() throws Exception {
         String location = "opinsys_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -198,7 +201,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testWilmaLoaderWithoutPreassignedId() throws Exception {
         String location = "wilma_home_organizations_without_id.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -212,7 +215,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testAzureReloadModifications() throws Exception {
         String location = "azure_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -220,7 +223,7 @@ class IdentityProviderLoaderTests {
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_mods.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(idpLocation);
         loading = new Loading();
         idpLoader.init(loading);
@@ -265,7 +268,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testAzureReloadAdditions() throws Exception {
         String location = "azure_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -273,7 +276,7 @@ class IdentityProviderLoaderTests {
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_adds.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(idpLocation);
         loading = new Loading();
         idpLoader.init(loading);
@@ -319,7 +322,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testAzureReloadDeletions() throws Exception {
         String location = "azure_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -327,7 +330,7 @@ class IdentityProviderLoaderTests {
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_dels.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(idpLocation);
         loading = new Loading();
         idpLoader.init(loading);
@@ -373,7 +376,7 @@ class IdentityProviderLoaderTests {
     @Test
     void testAzureReloadDeletionsRestore() throws Exception {
         String location = "azure_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(location);
         Loading loading = new Loading();
         idpLoader.init(loading);
@@ -381,7 +384,7 @@ class IdentityProviderLoaderTests {
         assertEquals(4, repository.count());
 
         String idpLocation = "azure_home_organizations_dels.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(idpLocation);
         loading = new Loading();
         idpLoader.init(loading);
@@ -395,7 +398,7 @@ class IdentityProviderLoaderTests {
         assertFalse(inactivatedIntegration.get().isActive());
 
         String restoreLocation = "azure_home_organizations.json";
-        idpLoader = new IdentityProviderLoader(repository, organizationService, loader);
+        idpLoader = new IdentityProviderLoader(repository, organizationService, credentialService, loader);
         idpLoader.setInput(restoreLocation);
         loading = new Loading();
         idpLoader.init(loading);

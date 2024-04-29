@@ -36,6 +36,9 @@ class ServiceProviderLoaderTests {
     OrganizationService organizationService;
 
     @Autowired
+    CredentialService credentialService;
+
+    @Autowired
     ResourceLoader loader;
 
     @BeforeEach
@@ -56,7 +59,7 @@ class ServiceProviderLoaderTests {
         assertEquals(64, repository.count());
 
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -75,14 +78,14 @@ class ServiceProviderLoaderTests {
         assertEquals(64, repository.count());
 
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
         assertEquals(68, repository.count());
 
         location = "oidc_services_json_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         loading = new Loading();
         spLoader.init(loading);
@@ -103,7 +106,7 @@ class ServiceProviderLoaderTests {
         assertEquals(64, repository.count());
 
         String location = "saml_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -121,7 +124,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -152,7 +155,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services_duplicates.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -176,7 +179,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -184,7 +187,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         location = "oidc_services_duplicates.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         Loading reloading = new Loading();
         spLoader.setInput(location);
         spLoader.init(reloading);
@@ -216,7 +219,7 @@ class ServiceProviderLoaderTests {
         // one integration with ununique identifier
         // thus all input integrations are skipped in order to fail fast
         String spLocation = "oidc_services_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         spLoader.init(loading);
 
@@ -238,7 +241,7 @@ class ServiceProviderLoaderTests {
 
         // 2, with unexisting sets
         String spLocation = "oidc_services_set_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         spLoader.init(loading);
 
@@ -257,7 +260,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -265,7 +268,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_mods.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -309,7 +312,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -317,7 +320,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_mods_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -348,7 +351,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -356,7 +359,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_mods.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -387,7 +390,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -395,7 +398,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_organization_mods.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -422,7 +425,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -430,7 +433,7 @@ class ServiceProviderLoaderTests {
 
         // 5
         String spLocation = "oidc_services_adds.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -486,7 +489,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -494,7 +497,7 @@ class ServiceProviderLoaderTests {
 
         // 3
         String spLocation = "oidc_services_dels.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -560,7 +563,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -568,7 +571,7 @@ class ServiceProviderLoaderTests {
 
         // 3
         String spLocation = "oidc_services_dels.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -583,7 +586,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String restoreLocation = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(restoreLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -607,7 +610,7 @@ class ServiceProviderLoaderTests {
 
         // 2
         String location = "saml_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -615,7 +618,7 @@ class ServiceProviderLoaderTests {
 
         // 2
         String spLocation = "saml_services_mods_organization.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);

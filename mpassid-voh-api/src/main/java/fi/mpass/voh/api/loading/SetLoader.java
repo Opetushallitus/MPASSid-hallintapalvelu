@@ -43,8 +43,9 @@ public class SetLoader extends Loader {
     private List<String> integrationSetInput;
 
     public SetLoader(IntegrationRepository repository, OrganizationService organizationService,
+            CredentialService credentialService,
             ResourceLoader loader) {
-        super(repository, organizationService, loader);
+        super(repository, organizationService, credentialService, loader);
         if (this.integrationSetInput == null) {
             this.integrationSetInput = Arrays.asList("set/integration_sets.json");
         }
@@ -183,7 +184,9 @@ public class SetLoader extends Loader {
                         }
                         if (d.getFieldName().contains("organization.oid")) {
                             if (existingIntegration.get().getOrganization() != null) {
-                                /* existingIntegration.get().getOrganization().setOid(d.getRight().toString()); */
+                                /*
+                                 * existingIntegration.get().getOrganization().setOid(d.getRight().toString());
+                                 */
                                 updateIntegrationOrganization(loading, existingIntegration.get(), (String) d.getRight(),
                                         false, true);
                             } else {
