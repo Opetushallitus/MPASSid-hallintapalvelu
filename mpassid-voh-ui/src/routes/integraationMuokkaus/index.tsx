@@ -31,7 +31,7 @@ export default function IntegraatioMuokkaus() {
   const [openAttributeTest, setOpenAttributeTest] = useState(false);
   const [isConfirmed, setConfirmed] = useState(false);
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>([]);
+  const [groups, setGroups] = useState<string[]>();
 
   useEffect(() => {
     if(me?.groups) {

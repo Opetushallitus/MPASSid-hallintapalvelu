@@ -17,7 +17,7 @@ import IntegraatioMuokkaus from "./integraationMuokkaus";
 export default function Routes() {
   const defaultMessages = useDefaultMessagesWithAvailableAttributeKeys();
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>([]);
+  const [groups, setGroups] = useState<string[]>();
 
   useEffect(() => {
     if(me?.groups) {
