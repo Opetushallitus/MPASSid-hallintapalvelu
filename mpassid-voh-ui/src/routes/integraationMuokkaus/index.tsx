@@ -26,15 +26,18 @@ export default function IntegraatioMuokkaus() {
   const [saveDialogState, setSaveDialogState] = useState(true);
   const [canSave, setCanSave] = useState(false);
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration|undefined>();
-  const { groups } = useMe();
   const navigate = useNavigate();
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [openAttributeTest, setOpenAttributeTest] = useState(false);
   const [isConfirmed, setConfirmed] = useState(false);
-  const [tabs, setValue] = useSessionStorage<string[]>(
-    openIntegrationsSessionStorageKey,
-    []
-  );
+  const me = useMe();
+  const [groups, setGroups] = useState<string[]>([]);
+
+  useEffect(() => {
+    if(me?.groups) {
+      setGroups(me.groups)
+    }
+  }, [me]);
   var oid:string = newIntegration?.organization?.oid || "";
   var environment:number = newIntegration?.deploymentPhase || 0;
 

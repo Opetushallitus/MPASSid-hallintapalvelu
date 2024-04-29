@@ -6,7 +6,7 @@ import Basic from "@/layouts/Basic";
 import Localisations from "@/utils/components/Localisations";
 import Suspense from "@/utils/components/Suspense";
 import ThemeShowcase from "@/utils/mui-theme/Showcase";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { MessageDescriptor } from "react-intl";
 import { Navigate, Route, Routes as ReactRouterRoutes } from "react-router-dom";
 import defaultMessages from "../../lang/fi-FI.json";
@@ -16,7 +16,15 @@ import IntegraatioMuokkaus from "./integraationMuokkaus";
 
 export default function Routes() {
   const defaultMessages = useDefaultMessagesWithAvailableAttributeKeys();
- const { groups } = useMe();
+  const me = useMe();
+  const [groups, setGroups] = useState<string[]>([]);
+
+  useEffect(() => {
+    if(me?.groups) {
+      setGroups(me.groups)
+    }
+  }, [me]);
+ 
   return (
     <ReactRouterRoutes>
       <Route element={<Basic />}>

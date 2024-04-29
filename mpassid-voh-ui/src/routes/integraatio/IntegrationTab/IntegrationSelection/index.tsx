@@ -60,7 +60,14 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const [openNotice, setOpenNotice] = useState(false);
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [saveDialogState, setSaveDialogState] = useState(false);
-  const { groups } = useMe();
+  const me = useMe();
+  const [groups, setGroups] = useState<string[]>([]);
+
+  useEffect(() => {
+    if(me?.groups) {
+      setGroups(me.groups)
+    }
+  }, [me]);
 
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
