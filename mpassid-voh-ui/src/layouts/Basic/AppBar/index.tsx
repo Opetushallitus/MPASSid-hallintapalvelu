@@ -12,7 +12,7 @@ import Toolbar from "@mui/material/Toolbar";
 import { useIntl } from "react-intl";
 import { useSessionStorage } from "usehooks-ts";
 import InterfaceTab from "./InterfaceTab";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AppBar() {
   const intl = useIntl();
@@ -25,8 +25,13 @@ export default function AppBar() {
     []
   );
     
+  useEffect(() => {
+    if(me?.oid) {
+      setOid(me.oid)
+    }
+  }, [me]);
+
   if(me.oid!=undefined&&oid!=me.oid) {
-    setOid(me.oid)
     sessionStorage.removeItem(openIntegrationsSessionStorageKey);
   }
   

@@ -26,7 +26,7 @@ interface Props {
 
 export default function IntegrationDetails({ integration }: Props) {
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>([]);
+  const [groups, setGroups] = useState<string[]>();
 
   useEffect(() => {
     if(me?.groups) {

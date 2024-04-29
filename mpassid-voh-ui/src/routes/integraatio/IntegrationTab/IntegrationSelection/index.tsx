@@ -61,7 +61,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [saveDialogState, setSaveDialogState] = useState(false);
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>([]);
+  const [groups, setGroups] = useState<string[]>();
 
   useEffect(() => {
     if(me?.groups) {
