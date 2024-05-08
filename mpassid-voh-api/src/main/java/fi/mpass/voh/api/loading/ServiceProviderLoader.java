@@ -247,6 +247,7 @@ public class ServiceProviderLoader extends Loader {
         String[] diffElements = d.getFieldName().split("\\.");
         if (d.getLeft().equals("") && !d.getRight().equals("")) {
             logger.debug("Metadata add diff: {}", d.getFieldName());
+            // the fourth element is the key, e.g. configurationEntity.sp.metadata.key1, see IntegrationDiffBuilder
             if (diffElements[3].length() > 0) {
                 Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
                 metadata.put(diffElements[3], d.getRight());

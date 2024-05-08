@@ -51,7 +51,7 @@ class ServiceProviderLoaderTests {
     void testOidcLoader() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -70,7 +70,7 @@ class ServiceProviderLoaderTests {
     void testOidcReloadWithJsonSyntaxErrors() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -98,7 +98,7 @@ class ServiceProviderLoaderTests {
     void testSamlLoader() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -117,7 +117,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetLoader() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -148,7 +148,7 @@ class ServiceProviderLoaderTests {
     void testOidcWithDuplicates() throws Exception {
         // 63, all with an attribute, one with organization
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -172,7 +172,7 @@ class ServiceProviderLoaderTests {
     void testOidcWithReloadDuplicates() throws Exception {
         // 64, all with an attribute, one with organization
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -207,7 +207,7 @@ class ServiceProviderLoaderTests {
     void testOidcWithNoIntegrationIdOrClientid() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -231,7 +231,7 @@ class ServiceProviderLoaderTests {
     void testOidcWithUnexistentingSets() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -253,7 +253,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -305,7 +305,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadIncorrectModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -342,7 +342,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadAttributeModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -381,7 +381,7 @@ class ServiceProviderLoaderTests {
     void testOidcReloadOrganizationModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -416,7 +416,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadAdditions() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -480,7 +480,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadDeletions() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -554,7 +554,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadDeletionsRestore() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -603,7 +603,7 @@ class ServiceProviderLoaderTests {
     void testSamlReloadModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);

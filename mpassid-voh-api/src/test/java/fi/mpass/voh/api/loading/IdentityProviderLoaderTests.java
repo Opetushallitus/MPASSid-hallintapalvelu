@@ -53,7 +53,7 @@ class IdentityProviderLoaderTests {
     void testGsuiteLoader() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading setLoading = new Loading();
         setLoader.init(setLoading);
