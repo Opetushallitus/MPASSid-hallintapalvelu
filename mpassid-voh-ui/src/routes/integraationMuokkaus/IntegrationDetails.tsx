@@ -68,13 +68,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){
               setCanSave(false)
               
-            } else {              
-              if(isValid) {
-                if(newIntegration) {
-                  newIntegration.configurationEntity=newConfigurationEntityData
-                  setNewIntegration(newIntegration)
-                }
-                
+            } else {                              
+              if(newIntegration) {
+                newIntegration.configurationEntity=newConfigurationEntityData
+                setNewIntegration(newIntegration)
+              }
+              if(isValid) {                
                 setCanSave(true)
               } else {
                 setCanSave(false)
