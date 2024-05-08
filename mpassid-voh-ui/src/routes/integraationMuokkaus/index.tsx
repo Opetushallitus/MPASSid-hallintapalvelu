@@ -32,12 +32,17 @@ export default function IntegraatioMuokkaus() {
   const [isConfirmed, setConfirmed] = useState(false);
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
+  const [openNotice, setOpenNotice] = useState(false);
+  var result: Components.Schemas.Integration = {};
 
   useEffect(() => {
     if(me?.groups) {
       setGroups(me.groups)
     }
   }, [me]);
+
+  
+
   var oid:string = newIntegration?.organization?.oid || "";
   var environment:number = newIntegration?.deploymentPhase || 0;
 
@@ -48,6 +53,13 @@ export default function IntegraatioMuokkaus() {
     vertical: 'bottom',
     horizontal: 'right',
   }
+
+  const closeNotice = () => {
+      setOpenNotice(false)
+      setOpenConfirmation(false);
+      setSaveDialogState(false)  
+      navigate(`/integraatio/${id}`, { state: result })
+  };
 
   const writeAccess = () => {
     
@@ -66,7 +78,7 @@ export default function IntegraatioMuokkaus() {
   }
   
   const saveIntegration = async (event:any) => {
-    var result: Components.Schemas.Integration = {};
+    
     if(writeAccess()) {
       if(newIntegration!==undefined) {
         if(!isConfirmed&&!openConfirmation) {
@@ -78,12 +90,11 @@ export default function IntegraatioMuokkaus() {
           })
           result = await updateIntegration({ id },newIntegration);
           setOpenConfirmation(false);
+          setOpenNotice(true);
         }
       } 
     } 
-
-    setSaveDialogState(false)  
-    navigate(`/integraatio/${id}`, { state: result })
+    
   }
 
   return (
@@ -157,6 +168,26 @@ export default function IntegraatioMuokkaus() {
                     PERUUTA
                   </Button>
                   <Button onClick={saveIntegration} autoFocus>
+                    OK
+                  </Button>
+                </DialogActions>
+              </Dialog>
+              <Dialog
+                open={openNotice}
+                onClose={()=>closeNotice()}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                <DialogTitle id="alert-dialog-title">
+                    <FormattedMessage defaultMessage="Muutokset tallennettu onnistuneesti" />
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText id="alert-dialog-description">
+                  <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={()=>closeNotice()} autoFocus>
                     OK
                   </Button>
                 </DialogActions>
