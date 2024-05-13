@@ -15,7 +15,7 @@ public class ParameterStoreService {
     private static final Region region = Region.EU_NORTH_1;
     private static final String KMS_KEY_ID = "alias/mpassid-poc-key";
     private final SsmClient ssmClient;
-    private String parameterName = "/mpassid/organization";
+    private String parameterName = "/MPASSID/organization";
 
     public ParameterStoreService(SsmClient ssmClient) {
         this.ssmClient = ssmClient;
