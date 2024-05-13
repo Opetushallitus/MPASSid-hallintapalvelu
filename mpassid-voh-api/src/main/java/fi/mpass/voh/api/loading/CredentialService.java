@@ -32,6 +32,10 @@ public class CredentialService {
 
     public void start(Integration integration) {
         logger.debug("Integration #{} Starting credential processing", integration.getId());
+        if (integration != null && integration.getConfigurationEntity() != null
+                && integration.getConfigurationEntity().getSp() != null) {
+
+        }
         credentials.put(integration.getId(), Pair.of("", ""));
     }
 
