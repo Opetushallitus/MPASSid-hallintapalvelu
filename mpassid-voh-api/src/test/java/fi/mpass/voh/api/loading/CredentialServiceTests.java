@@ -16,12 +16,12 @@ class CredentialServiceTests {
     }
 
     @Test
-    void testUpdateClientId() {
+    void testUpdateCredentialName() {
 
     }
 
     @Test
-    void testUpdateClientKey() {
+    void testUpdateCredentialValue() {
 
     }
 }

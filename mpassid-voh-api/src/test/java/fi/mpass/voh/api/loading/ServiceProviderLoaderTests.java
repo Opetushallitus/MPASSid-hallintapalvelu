@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -629,5 +630,41 @@ class ServiceProviderLoaderTests {
         Optional<Integration> modifiedIntegration = repository.findById(5000010L);
         assertTrue(modifiedIntegration.isPresent());
         assertEquals("1.2.246.562.10.65243241471", modifiedIntegration.get().getOrganization().getOid());
+    }
+
+    @Test
+    void testSamlReloadCredentialModifications() throws Exception {
+        // 64, all with an attribute
+        String setLocation = "set/integration_sets.json";
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
+        Loading loading = new Loading();
+        setLoader.setInput(setLocation);
+        setLoader.init(loading);
+
+        assertEquals(64, repository.count());
+
+        // 4
+        String location = "oidc_services.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
+        spLoader.setInput(location);
+        spLoader.init(loading);
+
+        assertEquals(68, repository.count());
+
+        // 4
+        String spLocation = "oidc_services_cred_mods.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
+        spLoader.setInput(spLocation);
+        loading = new Loading();
+        spLoader.init(loading);
+
+        assertEquals(68, repository.count());
+
+        // 5000010, changed organization oid
+        Optional<Integration> modifiedIntegration = repository.findById(5000001L);
+        assertTrue(modifiedIntegration.isPresent());
+        Map<String, Object> metadata = modifiedIntegration.get().getConfigurationEntity().getSp().getMetadata();
+        assertEquals("clientId2modified", metadata.get("client_id"));
+        //assertEquals("1.2.246.562.10.65243241471", modifiedIntegration.get().getOrganization().getOid());
     }
 }
