@@ -171,13 +171,13 @@ public class ServiceProviderLoader extends Loader {
 
         if (diff != null) {
             List<Diff<?>> diffs = diff.getDiffs();
+            credentialService.start(existingIntegration.get());
             for (int i = 0; i < diff.getNumberOfDiffs(); i++) {
                 Diff<?> d = diffs.get(i);
                 logger.debug("Integration #{} {}: {} != {}", existingIntegration.get().getId(),
                         d.getFieldName(), d.getLeft(), d.getRight());
                 try {
                     if (d.getFieldName().contains("configurationEntity.attributes.")) {
-                        credentialService.start(existingIntegration.get());
                         existingIntegration = Optional
                                 .of(updateAttribute(d, existingIntegration.get()));
                     } else {
@@ -258,6 +258,12 @@ public class ServiceProviderLoader extends Loader {
                 && !d.getLeft().equals(d.getRight())) {
             logger.debug("Metadata mod diff: {}", d.getFieldName());
             if (diffElements[3].length() > 0) {
+                if (diffElements[3].equals("client_id")) {
+                    credentialService.updateCredentialName(existingIntegration, d.getRight());
+                }
+                if (diffElements[3].equals("client_secret")) {
+                    credentialService.updateCredentialValue(existingIntegration, d.getRight());
+                }
                 Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
                 metadata.put(diffElements[3], d.getRight());
                 existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
