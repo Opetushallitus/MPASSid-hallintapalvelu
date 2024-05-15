@@ -165,7 +165,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'groups',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -180,7 +180,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'schoolIdStatic',
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -194,7 +194,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'learningMaterialsCharges',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -250,7 +250,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'studentGroupGuid',
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -265,7 +265,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'customTeacherRole',
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -279,7 +279,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'groupLevels',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
