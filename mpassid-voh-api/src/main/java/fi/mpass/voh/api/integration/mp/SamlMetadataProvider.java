@@ -6,7 +6,8 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -52,6 +53,8 @@ public class SamlMetadataProvider {
     private LocalDate signingCertificateValidUntil;
     private LocalDate encryptionCertificateValidUntil;
 
+    private final RestClient restClient;
+
     public SamlMetadataProvider(String metadataUrl) {
 
         registry = ConfigurationService.get(XMLObjectProviderRegistry.class);
@@ -62,10 +65,15 @@ public class SamlMetadataProvider {
         }
         registry.setParserPool(getParserPool());
 
-        WebClient client = WebClient.create();
+        restClient = RestClient.builder().requestFactory(new HttpComponentsClientHttpRequestFactory()).build();
+
+        // catching an exception here vs. propagating it further to handle the error in,
+        // e.g., an integration loader
         try {
-            WebClient.ResponseSpec response = client.get().uri(metadataUrl).retrieve();
-            metadata = response.bodyToMono(String.class).block();
+            metadata = restClient.get()
+                    .uri(metadataUrl)
+                    .retrieve()
+                    .body(String.class);
         } catch (Exception ex) {
             metadata = null;
         }

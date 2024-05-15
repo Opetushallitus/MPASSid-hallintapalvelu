@@ -60,7 +60,7 @@ class AttributeControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$", hasSize(5)))
+            .andExpect(jsonPath("$", hasSize(15)))
             .andExpect(jsonPath("$").isArray());
     }
 
@@ -92,7 +92,7 @@ class AttributeControllerTest {
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$", hasSize(5)))
+            .andExpect(jsonPath("$", hasSize(15)))
             .andExpect(jsonPath("$").isArray());
     }
 /*

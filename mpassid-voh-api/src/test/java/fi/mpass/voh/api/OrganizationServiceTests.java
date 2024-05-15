@@ -11,6 +11,7 @@ import org.mockito.Mock;
 
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpStatusCode;
+import org.mockserver.model.MediaType;
 import org.mockserver.springtest.MockServerTest;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -26,7 +27,7 @@ import fi.mpass.voh.api.organization.Organization;
 // @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @MockServerTest("server.url=http://localhost:${mockServerPort}")
-public class OrganizationServiceTests {
+class OrganizationServiceTests {
 
     @Value("${server.url}")
     private String serverUrl;
@@ -58,11 +59,12 @@ public class OrganizationServiceTests {
         mockServerClient
                 .when(request().withMethod("GET").withPath(testUrl))
                 .respond(response()
+                        .withContentType(MediaType.APPLICATION_JSON)
                         .withStatusCode(HttpStatusCode.OK_200.code())
                         .withBody(mockedResponse));
         
         Organization organization = underTest.retrieveOrganization("1.2.246.562.10.74484103937");
 
-        assertEquals(organization.getName(), "Lempäälän kunta");
+        assertEquals("Lempäälän kunta", organization.getName());
     }
 }

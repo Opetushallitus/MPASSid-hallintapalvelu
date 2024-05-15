@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpStatusCode;
+import org.mockserver.model.MediaType;
 import org.mockserver.springtest.MockServerTest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +21,7 @@ import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest
 @MockServerTest("server.url=http://localhost:${mockServerPort}")
-public class MetadataProviderTests {
+class MetadataProviderTests {
 
     @Value("${server.url}")
     private String serverUrl;
@@ -45,11 +46,12 @@ public class MetadataProviderTests {
         mockServerClient
                 .when(request().withMethod("GET").withPath(testUrl))
                 .respond(response()
+                        .withContentType(MediaType.APPLICATION_XML_UTF_8)
                         .withStatusCode(HttpStatusCode.OK_200.code())
                         .withBody(mockedResponse));
         
         SamlMetadataProvider mp = new SamlMetadataProvider(serverUrl + testUrl);
 
-        assertEquals(mp.getSigningCertificateValidUntil(), LocalDate.of(2027,10,02));
+        assertEquals(LocalDate.of(2027,10,02), mp.getSigningCertificateValidUntil());
     }
 }

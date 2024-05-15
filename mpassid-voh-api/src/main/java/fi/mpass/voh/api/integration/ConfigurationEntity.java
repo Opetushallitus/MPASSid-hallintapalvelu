@@ -37,9 +37,11 @@ public class ConfigurationEntity {
     @JsonIgnore
     private long id;
 
+    @OneToOne(optional=false, mappedBy="configurationEntity")
+    private Integration integration;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "configurationEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    @NotAudited
     @OrderBy("name")
     private Set<Attribute> attributes = new HashSet<Attribute>();
 
