@@ -15,13 +15,13 @@ function EditIntegrationButton(props:Props) {
   const editor: boolean = true;
   var to = ""
   if(integration?.configurationEntity?.idp) {
-    to = "/muokkaa/idp/"+type+"/"+id
+    to = "/muokkaa/nykyinen/idp/"+type+"/"+id
   }
   if(integration?.configurationEntity?.sp) {
-    to = "/muokkaa/sp/"+type+"/"+id
+    to = "/muokkaa/nykyinen/sp/"+type+"/"+id
   }
   if(integration?.configurationEntity?.set) {
-    to = "/muokkaa/set/"+type+"/"+id
+    to = "/muokkaa/nykyinen/set/"+type+"/"+id
   }
   
   if(editor) {

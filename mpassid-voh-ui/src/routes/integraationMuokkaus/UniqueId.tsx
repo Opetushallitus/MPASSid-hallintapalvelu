@@ -1,7 +1,7 @@
 import type { Components } from "@/api";
 import type { roles } from "@/config";
-import type { UniqueIdValue } from "./IntegrationDetails";
 import { DataRowContainer } from "../integraatio/IntegrationTab/DataRow";
+import type { UniqueIdValue } from "./IntegrationBasicDetails";
 
 export default function UniqueId({
   configurationEntity,

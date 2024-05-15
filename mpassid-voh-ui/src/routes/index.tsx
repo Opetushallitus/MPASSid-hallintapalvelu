@@ -31,8 +31,7 @@ export default function Routes() {
         <Route index element={<Home />} />
         <Route path="index.html" element={<Home />} />
         <Route path="integraatio/:integrationId" element={<Integraatio />} />
-        <Route path="uusi/:role/:type/:id" element={<IntegraatioMuokkaus />} />
-        <Route path="muokkaa/:role/:type/:id" element={<IntegraatioMuokkaus />} />
+        <Route path="muokkaa/:status/:role/:type/:id" element={<IntegraatioMuokkaus />} />
         {(groups?.includes(tallentajaOphGroup) || groups?.includes(katselijaOphGroup)) && (
           <>
             <Route

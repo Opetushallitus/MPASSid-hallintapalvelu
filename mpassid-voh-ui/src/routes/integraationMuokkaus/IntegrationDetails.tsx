@@ -2,10 +2,6 @@ import type { Components } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import _ from "lodash";
 import {
-  typeAbbreviations,
-  typeTooltips,
-} from "@/routes/home/IntegrationsTable";
-import {
   Alert,
   AlertTitle,
   Grid,
@@ -18,11 +14,12 @@ import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from "react-router-dom";
 import Role from "./Role";
 import { DataRow } from "../integraatio/IntegrationTab/DataRow";
-import type { DataRowProps } from "../integraatio/IntegrationTab/DataRow";
 
 import Metadata from "./Metadata";
 import Attributes from "./Attributes";
-import UniqueId from "./UniqueId";
+import IntegrationBasicDetails from "./IntegrationBasicDetails";
+import type { IntegrationType, UiConfiguration } from '../../config';
+import { dataConfiguration, defaultDataConfiguration, defaultIntegrationType } from '../../config';
 
 interface Props {
   id: number;
@@ -36,54 +33,62 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     
     const [isValid, setIsValid] = useState(true);
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
-    var oid:string = "";
-    var environment:number = 0
-
+    const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
+    
     const { state } = useLocation();
     const integration: Components.Schemas.Integration = state;
-    var role  = (integration.configurationEntity?.idp) ? "idp" : "sp"
-    var type = integration.configurationEntity?.idp?.type! || integration.configurationEntity?.sp?.type! || "unknown"
+    const role  = (integration.configurationEntity?.idp) ? "idp" : "sp"
+    const type = integration.configurationEntity?.idp?.type! || integration.configurationEntity?.sp?.type! || "unknown"
+    const oid: string = integration?.organization?.oid || "0"
+    const environment:number = integration?.deploymentPhase || -5
+    const uniqueIdConfiguration:UiConfiguration = dataConfiguration.filter(conf=>conf.name&&conf.name==='uniqueId')[0] || defaultDataConfiguration;
+    const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType; 
     
-  
-    
-    if(id===0) {
-      console.log("NEW integration: ",integration)
-    } else {
-      oid = integration?.organization?.oid || "0"
-      environment = integration?.deploymentPhase || -5
-      
-    }
-
     useEffect(() => {
+     
       if(role !== undefined) {
         setNewIntegration(_.cloneDeep(integration))
         setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
       }
       
     }, [role, integration,setNewIntegration]);
+    
+    useEffect(() => {
+       
+      if(newConfigurationEntityData&&newConfigurationEntityData.idp&&type!=='unknown') {
+        const updatedIdentityProvider: any = newConfigurationEntityData.idp;
+        const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||''; 
+        if(typeConf.attribute){
+          updatedIdentityProvider[typeConf.attribute]=uniqueIdType;
+          newConfigurationEntityData.idp=updatedIdentityProvider;
+          setShowConfigurationEntityData(newConfigurationEntityData);
+        }
+      }
+
+    }, [newConfigurationEntityData, type, typeConf.attribute, uniqueIdConfiguration.integrationType]);
+
 
     useEffect(() => {
           if(newConfigurationEntityData) {
             setSaveDialogState(true);
             if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){
               setCanSave(false)
-              
-            } else {                              
-              if(newIntegration) {
-                newIntegration.configurationEntity=newConfigurationEntityData
-                setNewIntegration(newIntegration)
-              }
+            } else {    
               if(isValid) {                
                 setCanSave(true)
               } else {
                 setCanSave(false)
+              }
+              if(newIntegration) {
+                newIntegration.configurationEntity=newConfigurationEntityData
+                setNewIntegration(newIntegration)
               }
             }
           } else {
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData,integration,setCanSave,setSaveDialogState,isValid]);
+    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, newIntegration, setNewIntegration]);
 
     var hasAttributes =
                 role === "idp" &&
@@ -144,41 +149,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           </>
         )}
 
-        {(role === "idp" || role === "sp" ) && (
-          <>
-              <Typography variant="h2" gutterBottom>
-                <FormattedMessage defaultMessage="Integraation perustiedot" />
-              </Typography>
-
-              <Grid container spacing={2} mb={3}>
-                <DataRow object={integration} path="id" />
-                <Grid item xs={4}>
-                  <FormattedMessage defaultMessage="Jäsentyyppi" />
-                </Grid>
-                <Grid item xs={8}>
-                  <FormattedMessage {...typeAbbreviations[role]} /> (
-                  <FormattedMessage {...typeTooltips[role]} />)
-                </Grid>
-                <Grid item xs={4}>
-                  <FormattedMessage defaultMessage="Yksilöllinen tunniste" />
-                </Grid>
-                <Grid item xs={8}>
-                  <UniqueId
-                    configurationEntity={integration.configurationEntity!}
-                    role={role}
-                    ValueComponent={UniqueIdValue}
-                  />
-                </Grid>
-                    
-                  {role === "sp" && (
-                      <DataRow
-                      object={integration}
-                      path="integrationGroups"
-                      type="service-list"
-                    />
-                  )}
-              </Grid>
-            </>
+        {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData && (
+          <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} />
         )}    
         <Role integration={integration} oid={oid} environment={environment} setCanSave={setIsValid}/>
 
@@ -248,13 +220,4 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         </Alert>
       );
     }
-}
-
-export function UniqueIdValue({ name, label, children }: DataRowProps) {
-  return (
-    <>
-      {(children as JSX.Element)?.props?.value ? children : "–"} (
-      <span>{label ? <FormattedMessage {...label} /> : name}</span>)
-    </>
-  );
 }

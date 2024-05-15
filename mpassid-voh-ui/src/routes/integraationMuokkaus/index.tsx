@@ -1,8 +1,4 @@
-import { updateIntegration, type Components } from "@/api";
-import {
-  useIdentityProviderTypes,
-  useServiceProviderTypes,
-} from "@/api";
+import { updateIntegration, inactivateIntegration, type Components } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
@@ -11,17 +7,17 @@ import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Di
 import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useSessionStorage } from "usehooks-ts";
 import IntegrationDetails from "./IntegrationDetails";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import { useMe } from "@/api/käyttöoikeus";
-import { openIntegrationsSessionStorageKey, tallentajaOphGroup } from '../../config';
+import { tallentajaOphGroup } from '../../config';
 import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function IntegraatioMuokkaus() {
+  const { status } = useParams();
   const { type } = useParams();
-  const types = [...useIdentityProviderTypes(), ...useServiceProviderTypes()];
   const { id } = useParams();
   const [saveDialogState, setSaveDialogState] = useState(true);
   const [canSave, setCanSave] = useState(false);
@@ -30,6 +26,7 @@ export default function IntegraatioMuokkaus() {
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [openAttributeTest, setOpenAttributeTest] = useState(false);
   const [isConfirmed, setConfirmed] = useState(false);
+  const [isDisabled, setDisabled] = useState(false);
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
   const [openNotice, setOpenNotice] = useState(false);
@@ -40,8 +37,6 @@ export default function IntegraatioMuokkaus() {
       setGroups(me.groups)
     }
   }, [me]);
-
-  
 
   var oid:string = newIntegration?.organization?.oid || "";
   var environment:number = newIntegration?.deploymentPhase || 0;
@@ -58,7 +53,13 @@ export default function IntegraatioMuokkaus() {
       setOpenNotice(false)
       setOpenConfirmation(false);
       setSaveDialogState(false)  
-      navigate(`/integraatio/${id}`, { state: result })
+      if(isDisabled) {
+        setDisabled(false)
+        navigate("/", { state: id })
+      } else {
+        navigate(`/integraatio/${id}`, { state: result })
+      }
+      
   };
 
   const writeAccess = () => {
@@ -85,16 +86,21 @@ export default function IntegraatioMuokkaus() {
           setOpenConfirmation(true);
         } else {
           const id = newIntegration.id!;
-          newIntegration.permissions?.forEach((permission)=>{
-            delete permission.lastUpdatedOn;
-          })
-          result = await updateIntegration({ id },newIntegration);
+          if(isDisabled) {
+            result = await inactivateIntegration({ id });
+          } else {            
+            newIntegration.permissions?.forEach((permission)=>{
+              delete permission.lastUpdatedOn;
+            })
+            result = await updateIntegration({ id },newIntegration);  
+          }
+          
           setOpenConfirmation(false);
           setOpenNotice(true);
         }
       } 
     } 
-    
+
   }
 
   return (
@@ -105,8 +111,7 @@ export default function IntegraatioMuokkaus() {
             icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}
           >
-            {id==="0"&&<FormattedMessage defaultMessage="Uusi jäsen" />}
-            {id!=="0"&&<FormattedMessage defaultMessage="Jäsenen {id} muokkaus" values={{id: Number(id)}} />}
+            <FormattedMessage defaultMessage="Jäsenen {id} muokkaus" values={{id: Number(id)}} />
           </PageHeader>
           <HelpLinkButton />
         </Box>
@@ -117,6 +122,13 @@ export default function IntegraatioMuokkaus() {
           </ErrorBoundary>
           
         </Suspense>
+        {newIntegration&&status!=='uusi'&&<Box >                            
+                                          <IconButton aria-label="delete" onClick={()=>setDisabled(!isDisabled)}>
+                                              <DeleteIcon />
+                                          </IconButton>   
+                                          <FormattedMessage defaultMessage="Poista jäsen" />
+                                        </Box>}
+        
       </TableContainer>
       {newIntegration&&<Snackbar
             open={saveDialogState}
@@ -138,11 +150,13 @@ export default function IntegraatioMuokkaus() {
                   {isEntraId()&&false&&<><Button  size="small"  startIcon={<RuleIcon />}>
                   </Button><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
                   <Box display="flex" justifyContent="center" mt={2}> 
-                      {id!=="0"&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
-                      {id==="0"&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
+                      {status!=="uusi"&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
+                      {status==="uusi"&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
-                      {!canSave&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {canSave&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {(!canSave&&!isDisabled)&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {(canSave&&!isDisabled)&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {(isDisabled)&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Poista" /></Button>}
+                      
                   </Box>
                   <br></br>
                 </Container>
@@ -156,11 +170,14 @@ export default function IntegraatioMuokkaus() {
                 aria-describedby="alert-dialog-description"
               >
                 <DialogTitle id="alert-dialog-title">
-                    <FormattedMessage defaultMessage="Olet muuttamassa integraation tietoja" />
+                    {!isDisabled&&<FormattedMessage defaultMessage="Olet muuttamassa integraation tietoja" />}
+                    {isDisabled&&<FormattedMessage defaultMessage="Olet poistamassa integraation tietoja" />}
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
-                  <FormattedMessage defaultMessage="Haluatko varmasti tallentaa?" />
+                  {!isDisabled&&<FormattedMessage defaultMessage="Haluatko varmasti tallentaa?" />}
+                    {isDisabled&&<FormattedMessage defaultMessage="Haluatko varmasti poistaa?" />}
+                  
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>

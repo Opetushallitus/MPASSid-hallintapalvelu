@@ -3,7 +3,7 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response.json";
+import exampleData from "../../schemas/response_1706792827801.json";
 
 
 export { definition };
@@ -22,7 +22,19 @@ const integration = definition.paths["/api/v2/integration/{id}"].get.responses[
   value?: Components.Schemas.Integration;
 };
 
+const blankIntegration = definition.paths["/api/v2/integration"].get.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
 const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
+const inactiveIntegration = definition.paths["/api/v2/integration/{id}"].delete.responses[
   "200"
 ].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
@@ -62,6 +74,12 @@ const defaults = {
 };
 
 export default {
+  getBlankIntegration(request) {
+    console.log("getBlankIntegration: ",request.query)
+    const id = 9999999;
+    blankIntegration.value = allIntegrations.find((row) => row.id === id);
+    console.log("blankIntegration.value: ",blankIntegration.value)
+  },
   testAttributes(request) {
     console.log("testAttributes: ",request.query)
     let attributeResponse:any={};

@@ -3,20 +3,15 @@ import type { Components } from "@/api";
 import { useParams } from "react-router-dom";
 import _ from "lodash";
 import { FormattedMessage } from 'react-intl';
-import { DataRow, DataRowProps } from "@/routes/integraatio/IntegrationTab/DataRow";
+import type { DataRowProps } from "@/routes/integraatio/IntegrationTab/DataRow";
+import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Role from "@/routes/integraationMuokkaus/Role";
 import Metadata from "@/routes/integraatio/IntegrationTab/IntegrationDetails/Metadata";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Attributes from "@/routes/integraationMuokkaus/Attributes";
-import {
-    getRole,
-    typeAbbreviations,
-    typeTooltips,
-  } from "@/routes/home/IntegrationsTable";
 import UniqueId from "@/routes/integraationMuokkaus/UniqueId";
-import { useIntegrationSafe } from "@/api/client";
-import { Dispatch, useEffect, useState } from "react";
-import { environments } from "@/config";
+import type { Dispatch} from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;
