@@ -14,8 +14,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler {
-     /**
-     * Handles EntityNotFoundException. Complements javax.persistence.EntityNotFoundException.
+    /**
+     * Handles EntityNotFoundException. Complements
+     * javax.persistence.EntityNotFoundException.
      *
      * @param ex the EntityNotFoundException
      * @return the IntegrationError object
@@ -23,6 +24,32 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
         IntegrationError integrationError = new IntegrationError(HttpStatus.NOT_FOUND);
+        integrationError.setMessage(ex.getMessage());
+        return buildResponseEntity(integrationError);
+    }
+
+    /**
+     * Handles EntityInactivationException.
+     * 
+     * @param ex the EntityInactivationException
+     * @return the IntegrationError object
+     */
+    @ExceptionHandler(EntityInactivationException.class)
+    protected ResponseEntity<Object> handleEntityInactivation(EntityInactivationException ex) {
+        IntegrationError integrationError = new IntegrationError(HttpStatus.CONFLICT);
+        integrationError.setMessage(ex.getMessage());
+        return buildResponseEntity(integrationError);
+    }
+
+    /**
+     * Handles EntityCreationException.
+     * 
+     * @param ex the EntityCreationException
+     * @return the IntegrationError object
+     */
+    @ExceptionHandler(EntityCreationException.class)
+    protected ResponseEntity<Object> handleEntityCreation(EntityCreationException ex) {
+        IntegrationError integrationError = new IntegrationError(HttpStatus.CONFLICT);
         integrationError.setMessage(ex.getMessage());
         return buildResponseEntity(integrationError);
     }
@@ -53,7 +80,7 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
         return buildResponseEntity(integrationError);
     }
 
-     /**
+    /**
      * Handles MethodArgumentTypeMismatchException.
      *
      * @param ex the MethodArgumentTypeMismatchException
