@@ -51,7 +51,7 @@ export default function IntegraatioMuokkaus() {
   const closeNotice = () => {
       setOpenNotice(false)
       setOpenConfirmation(false);
-      setSaveDialogState(false)  
+      setSaveDialogState(false);  
       console.log("**** result: ",result.current)
       console.log("**** id: ",id)
       if(isDisabled) {
@@ -99,7 +99,6 @@ export default function IntegraatioMuokkaus() {
             } else {
               result.current = await updateIntegration({ id },newIntegration);  
             }
-            
           }
           
           setOpenConfirmation(false);
@@ -162,8 +161,8 @@ export default function IntegraatioMuokkaus() {
                       {id==='0'&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
                       {(!canSave&&!isDisabled)&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {(canSave&&!isDisabled)&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {(isDisabled)&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Poista" /></Button>}
+                      {(canSave&&!isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {(isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Poista" /></Button>}
                       
                   </Box>
                   <br></br>
@@ -189,7 +188,7 @@ export default function IntegraatioMuokkaus() {
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={()=>setOpenConfirmation(false)} autoFocus>
+                  <Button onClick={()=>{setOpenConfirmation(false);setSaveDialogState(true);}} autoFocus>
                     PERUUTA
                   </Button>
                   <Button onClick={saveIntegration} autoFocus>
