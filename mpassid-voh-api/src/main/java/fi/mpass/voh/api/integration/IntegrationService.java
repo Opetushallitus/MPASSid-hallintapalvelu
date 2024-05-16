@@ -1,5 +1,6 @@
 package fi.mpass.voh.api.integration;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -28,11 +30,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import fi.mpass.voh.api.exception.EntityCreationException;
+import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.idp.Wilma;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
+import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
+import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
 
 import org.slf4j.Logger;
@@ -490,7 +500,7 @@ public class IntegrationService {
    * @param existingIntegration the existing integration
    */
   private void updatePermissions(Integration integration, Integration existingIntegration) {
-    
+
     if (integration.getPermissions() != null) {
       logger.debug(
           "Permit integrations count : {}", integration.getPermissions().size());
@@ -603,5 +613,65 @@ public class IntegrationService {
 
   public Optional<Integration> getIntegration(Long integrationId) {
     return integrationRepository.findById(integrationId);
+  }
+
+  public Integration createBlankIntegration(String role, String type, String oid, Long integrationSetId) {
+
+    if (role != null && type != null && oid != null) {
+      Organization organization = organizationService.getById(oid);
+      if (organization == null) {
+        try {
+          organization = organizationService.retrieveOrganization(oid);
+        } catch (JsonProcessingException e) {
+          throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
+        }
+        if (organization == null)
+          throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
+      }
+      if (role.equals("idp")) {
+        if (type.equals("wilma")) {
+          DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+          ConfigurationEntity configurationEntity = new ConfigurationEntity();
+          Wilma wilma = new Wilma();
+          configurationEntity.setIdp(wilma);
+          return new Integration(0L, null, configurationEntity, null, 0,
+              discoveryInformation, organization, "");
+        }
+      }
+    }
+    return new Integration();
+  }
+
+  public Integration inactivateIntegration(Long id) {
+    Optional<Integration> integration = this.getIntegration(id);
+
+    if (integration.isPresent()) {
+      integration.get().setStatus(1);
+      return integrationRepository.save(integration.get());
+    } else {
+      logger.error("Integration #{} not found.", id);
+      throw new EntityInactivationException("Integration inactivation failed. Integration not found.");
+    }
+  }
+
+  public Integration createIntegration(@Valid Integration integration) {
+    if (integration != null) {
+      List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
+      if (availableId != null && !availableId.isEmpty()) {
+        integration.setId(availableId.get(0));
+        // set identity provider type specific flowname
+        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null
+            && integration.getConfigurationEntity().getIdp() instanceof Wilma) {
+          integration.getConfigurationEntity().getIdp().setFlowName("wilma_" + availableId.get(0));
+          integration.getConfigurationEntity().getIdp().setIdpId("wilma_" + availableId.get(0));
+        }
+        return integrationRepository.save(integration);
+      } else {
+        logger.error("Failed to find an available integration identifier");
+      }
+    } else {
+      logger.debug("Integration creation failed.");
+    }
+    return integration;
   }
 }
