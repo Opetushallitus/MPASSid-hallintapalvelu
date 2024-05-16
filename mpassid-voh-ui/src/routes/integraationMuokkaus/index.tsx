@@ -16,7 +16,6 @@ import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function IntegraatioMuokkaus() {
-  const { status } = useParams();
   const { type } = useParams();
   const { id } = useParams();
   const [saveDialogState, setSaveDialogState] = useState(true);
@@ -131,7 +130,7 @@ export default function IntegraatioMuokkaus() {
           </ErrorBoundary>
           
         </Suspense>
-        {newIntegration&&status!=='uusi'&&<Box >                            
+        {newIntegration&&id!=='0'&&<Box >                            
                                           <IconButton aria-label="delete" onClick={()=>setDisabled(!isDisabled)}>
                                               <DeleteIcon />
                                           </IconButton>   
@@ -159,8 +158,8 @@ export default function IntegraatioMuokkaus() {
                   {isEntraId()&&false&&<><Button  size="small"  startIcon={<RuleIcon />}>
                   </Button><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
                   <Box display="flex" justifyContent="center" mt={2}> 
-                      {status!=="uusi"&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
-                      {status==="uusi"&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
+                      {id!=='0'&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
+                      {id==='0'&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
                       {(!canSave&&!isDisabled)&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
                       {(canSave&&!isDisabled)&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}

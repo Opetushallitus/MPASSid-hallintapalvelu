@@ -47,7 +47,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         getBlankIntegration({role: integration, type: type, organization: organization})
             .then(result=>{
                 result.id=0;
-                navigate(`/muokkaa/uusi/`+integration+`/`+type+`/`+result.id, { state: result });
+                navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
             })       
       };
     
