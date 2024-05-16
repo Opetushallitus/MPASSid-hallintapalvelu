@@ -142,7 +142,7 @@ export default function IntegraatioMuokkaus() {
                       {id==="0"&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
                       {!canSave&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {canSave&&<Button onClick={()=>setOpenConfirmation(true)} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {canSave&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
                   </Box>
                   <br></br>
                 </Container>
@@ -164,7 +164,7 @@ export default function IntegraatioMuokkaus() {
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={()=>setOpenConfirmation(false)} autoFocus>
+                  <Button onClick={()=>{setOpenConfirmation(false);setSaveDialogState(true);}} autoFocus>
                     PERUUTA
                   </Button>
                   <Button onClick={saveIntegration} autoFocus>
