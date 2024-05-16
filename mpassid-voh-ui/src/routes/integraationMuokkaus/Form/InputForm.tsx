@@ -31,8 +31,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
-      setIsValid(false)
-      console.log("InputForm  setCanSave false 1: ",label)
+      setIsValid(false)      
       setCanSave(false)  
     }
     

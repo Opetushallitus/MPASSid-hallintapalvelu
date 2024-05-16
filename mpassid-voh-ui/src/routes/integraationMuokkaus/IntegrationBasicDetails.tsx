@@ -26,7 +26,7 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
               </Typography>
 
               <Grid container spacing={2} mb={3}>
-                <DataRow object={integration} path="id" />
+                {integration.id!==0&&<DataRow object={integration} path="id" />}
                 <Grid item xs={4}>
                   <FormattedMessage defaultMessage="Jäsentyyppi" />
                 </Grid>

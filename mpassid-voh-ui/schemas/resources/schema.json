@@ -6,7 +6,7 @@
         "name": "EUPL Version 1.1",
         "url": "http://www.osor.eu/eupl/"
       },
-      "version": "2.1.1"
+      "version": "2.3"
     },
     "servers": [
       {
@@ -78,6 +78,51 @@
               }
             }
           ],
+          "responses": {
+            "200": {
+              "description": "Integration creation successful",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Integration"
+                  },
+                  "examples": {
+                    "integration": {
+                      "description": "integration",
+                      "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
+                    }
+                  }
+                }
+              }
+            },
+            "405": {
+              "description": "Integration creation error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/IntegrationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "integration-controller"
+          ],
+          "summary": "Create an integration",
+          "operationId": "createIntegration",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Integration"
+                }
+              }
+            },
+            "required": true
+          },
           "responses": {
             "200": {
               "description": "Integration creation successful",
@@ -200,7 +245,7 @@
               }
             }
           }
-        },
+        }, 
         "put": {
           "tags": [
             "integration-controller"

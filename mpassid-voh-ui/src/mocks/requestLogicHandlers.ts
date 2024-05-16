@@ -28,6 +28,12 @@ const blankIntegration = definition.paths["/api/v2/integration"].get.responses[
   value?: Components.Schemas.Integration;
 };
 
+const createIntegration = definition.paths["/api/v2/integration"].post.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
 const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.responses[
   "200"
 ].content["application/json"].examples.integration as {
@@ -75,13 +81,10 @@ const defaults = {
 
 export default {
   getBlankIntegration(request) {
-    console.log("getBlankIntegration: ",request.query)
     const id = 9999999;
     blankIntegration.value = allIntegrations.find((row) => row.id === id);
-    console.log("blankIntegration.value: ",blankIntegration.value)
   },
   testAttributes(request) {
-    console.log("testAttributes: ",request.query)
     let attributeResponse:any={};
     let selectArray: Array<string> = request?.query?.select as string[] || [];
     
@@ -145,6 +148,20 @@ export default {
       p.lastUpdatedOn = new Date().toISOString();
     })
     updateIntegration.value = request.requestBody
+  },
+  createIntegration(request) {
+    const id = 999995;
+    request.requestBody.id=id;
+    const index=allIntegrations.map(i=>i.id).indexOf(id);
+    if (index !== -1) {
+      allIntegrations[index] = request.requestBody;
+    } else {
+      allIntegrations.push(request.requestBody)
+    }
+    request.requestBody?.permissions?.forEach((p: Components.Schemas.IntegrationPermission)=>{
+      p.lastUpdatedOn = new Date().toISOString();
+    })
+    createIntegration.value = request.requestBody
   },
   getIntegration(request) {
     const id = Number(request.params.id);

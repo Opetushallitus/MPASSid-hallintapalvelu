@@ -20,6 +20,7 @@ import Attributes from "./Attributes";
 import IntegrationBasicDetails from "./IntegrationBasicDetails";
 import type { IntegrationType, UiConfiguration } from '../../config';
 import { dataConfiguration, defaultDataConfiguration, defaultIntegrationType } from '../../config';
+import SchoolSelection from "./SchoolSelection";
 
 interface Props {
   id: number;
@@ -43,6 +44,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const environment:number = integration?.deploymentPhase || -5
     const uniqueIdConfiguration:UiConfiguration = dataConfiguration.filter(conf=>conf.name&&conf.name==='uniqueId')[0] || defaultDataConfiguration;
     const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType; 
+
+    const testing=true
     
     useEffect(() => {
      
@@ -115,8 +118,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             />
           )}
         </Grid>
-
-        {role === "idp" && (
+        {role === "idp" && testing && (<SchoolSelection integration={integration} configurationEntity={integration.configurationEntity} discoveryInformation={integration.discoveryInformation}></SchoolSelection>)}
+        {role === "idp" && testing && (
           <>
             <Typography variant="h2" gutterBottom>
               <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />

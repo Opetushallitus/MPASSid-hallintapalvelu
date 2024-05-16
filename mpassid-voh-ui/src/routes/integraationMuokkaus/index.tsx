@@ -1,10 +1,10 @@
-import { updateIntegration, inactivateIntegration, type Components } from "@/api";
+import { updateIntegration, inactivateIntegration, createIntegration, type Components } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
@@ -30,7 +30,7 @@ export default function IntegraatioMuokkaus() {
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
   const [openNotice, setOpenNotice] = useState(false);
-  var result: Components.Schemas.Integration = {};
+  const result = useRef<Components.Schemas.Integration>({});
 
   useEffect(() => {
     if(me?.groups) {
@@ -53,11 +53,13 @@ export default function IntegraatioMuokkaus() {
       setOpenNotice(false)
       setOpenConfirmation(false);
       setSaveDialogState(false)  
+      console.log("**** result: ",result.current)
+      console.log("**** id: ",id)
       if(isDisabled) {
         setDisabled(false)
         navigate("/", { state: id })
       } else {
-        navigate(`/integraatio/${id}`, { state: result })
+        navigate(`/integraatio/${result.current.id}`, { state: result.current })
       }
       
   };
@@ -87,12 +89,18 @@ export default function IntegraatioMuokkaus() {
         } else {
           const id = newIntegration.id!;
           if(isDisabled) {
-            result = await inactivateIntegration({ id });
+            result.current = await inactivateIntegration({ id });
           } else {            
             newIntegration.permissions?.forEach((permission)=>{
               delete permission.lastUpdatedOn;
             })
-            result = await updateIntegration({ id },newIntegration);  
+            if(id===0) {
+              result.current = await createIntegration({},newIntegration);  
+              console.log("**** create response: ",result.current)
+            } else {
+              result.current = await updateIntegration({ id },newIntegration);  
+            }
+            
           }
           
           setOpenConfirmation(false);
@@ -111,7 +119,8 @@ export default function IntegraatioMuokkaus() {
             icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}
           >
-            <FormattedMessage defaultMessage="Jäsenen {id} muokkaus" values={{id: Number(id)}} />
+            {id==='0'&&<FormattedMessage defaultMessage="Uusi jäsen" values={{id: Number(id)}} />}
+            {id!=='0'&&<FormattedMessage defaultMessage="Jäsenen {id} muokkaus" values={{id: Number(id)}} />}
           </PageHeader>
           <HelpLinkButton />
         </Box>
