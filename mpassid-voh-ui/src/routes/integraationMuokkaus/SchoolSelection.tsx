@@ -1,3 +1,4 @@
+import type { Dispatch} from "react";
 import { useEffect, useState } from "react";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -9,23 +10,34 @@ import toLanguage from "@/utils/toLanguage";
 import type { oneEnum } from "./Form/MultiSelectForm";
 import MultiSelectForm from "./Form/MultiSelectForm";
 import { helperText, validate } from "@/utils/Validators";
-import AttributeForm from "./Form";
-import type { UiConfiguration } from "@/config";
+import _ from "lodash";
 
 interface Props {
+    isEditable: boolean; 
     integration: Components.Schemas.Integration;
     configurationEntity: Components.Schemas.ConfigurationEntity;
     discoveryInformation: Components.Schemas.DiscoveryInformation;
+    setCanSave: Dispatch<boolean>;
+    setConfigurationEntity: Dispatch<Components.Schemas.ConfigurationEntity>;
 }
 
-export default function SchoolSelection({ integration, configurationEntity, discoveryInformation }: Props){
+export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, discoveryInformation,setCanSave }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
+    const [showSchools, setShowSchools] = useState(true);
     const institutionTypes = useKoodisByKoodisto(
         "mpassidnsallimatoppilaitostyypit"
       );
     const language = toLanguage(useIntl().locale).toUpperCase();
     const identityProvider = integration.configurationEntity!.idp!;
+
+    const updateInstitutionTypes = (values:string[]) => {
+        if(configurationEntity&&configurationEntity.idp) {
+          configurationEntity.idp.institutionTypes=values.map(value=>Number(value))
+        }
+        setConfigurationEntity(_.clone(configurationEntity))
+        setCanSave(true)
+    }
 
     const validator = (value:string) => {
         //return validate(configuration.validation,value);
@@ -54,51 +66,73 @@ export default function SchoolSelection({ integration, configurationEntity, disc
         
       }, [language,institutionTypes ]);
       
-      const configuration:UiConfiguration = {
-        name: 'customDisplayName',
-        type: 'data',
-        mandatory: false,
-        multivalue: false,
-        environment: 1,
-        validation: [  ],
-        integrationType: [
-            {
-                name: 'wilma',
-                editable: false,
-                visible: true
-            }
-        ]
-    }
-    return(<>
+    if(isEditable) {
+      return(<>
         <Typography variant="h2" gutterBottom>
-          *<FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />*
+          ***<FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />***
         </Typography>
-        <AttributeForm 
-                key={configuration.name!}
-                onValidate={validator}
-                uiConfiguration={configuration}
-                type={'wilma'}
-                role={'idp'}
-                helperText={helpGeneratorText}
-                onUpdate={function (name: string, value: string, type: "data" | "user"): void {
-                    throw new Error("Function not implemented.");
-                } }
-                setCanSave={function (value: boolean): void {
-                    throw new Error("Function not implemented.");
-                } }
-                attribute={{name: 'customDisplayName'}}
-                attributeType={"data"} 
-                newConfigurationEntityData={undefined} 
-                setNewConfigurationEntityData={function (value: Components.Schemas.ConfigurationEntity): void {
-                    throw new Error("Function not implemented.");
-                } }/>
+        <Grid container spacing={2} mb={3}>
+          <DataRow
+            object={integration}
+            path="discoveryInformation.showSchools"
+            type="boolean"
+          />
+          <DataRow
+            object={integration}
+            path="discoveryInformation.schools"
+            type="text-list"
+          />
+          <DataRow
+            object={integration}
+            path="discoveryInformation.excludedSchools"
+            type="text-list"
+          />
+          <DataRow
+            object={integration}
+            path="discoveryInformation.title"
+          />
+          <DataRow
+            object={integration}
+            path="discoveryInformation.customDisplayName"
+          />                      
+          <Grid item xs={4}>
+            <FormattedMessage defaultMessage="Oppilaitostyypit" />
+          </Grid>
+          <Grid item xs={8}>
+            {enums&&<MultiSelectForm 
+                      values={configurationEntity?.idp?.institutionTypes.map(it=>it.toString())||[]}
+                      label={"Oppilaitostyypit"}
+                      attributeType={"data"}
+                      isEditable={true}
+                      mandatory={false}                    
+                      helperText={helpGeneratorText}
+                      enums={enums}
+                      onValidate={validator} 
+                      setCanSave={function (value: boolean): void {
+                          throw new Error("Function not implemented.");
+                      } } 
+                      onUpdate={updateInstitutionTypes}>
+
+                      </MultiSelectForm>}
+          </Grid>
+          <DataRow
+                object={integration}
+                path="configurationEntity.idp.logoUrl"
+                type="image"
+            />
+        </Grid>
+      </>)
+      
+    } else {
+      return(<>
+        <Typography variant="h2" gutterBottom>
+          <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />
+        </Typography>
         <Grid container spacing={2} mb={3}>
           <DataRow
             object={integration}
             path="discoveryInformation.customDisplayName"
           />
-          
-                
           <DataRow
             object={integration}
             path="discoveryInformation.showSchools"
@@ -138,40 +172,14 @@ export default function SchoolSelection({ integration, configurationEntity, disc
                     }
                 />
             </Grid>
-            <Grid item xs={4}>
-            <FormattedMessage defaultMessage="Oppilaitostyypit" />
-        </Grid>
-        <Grid item xs={8}>
-        {enums&&<MultiSelectForm 
-                    object={undefined}
-                    type={""}
-                    label={"Oppilaitostyypit"}
-                    attributeType={"data"}
-                    isEditable={true}
-                    mandatory={false}
-                    path={undefined}
-                    helperText={helpGeneratorText}
-                    enums={enums}
-                    onValidate={validator} 
-                    setCanSave={function (value: boolean): void {
-                        throw new Error("Function not implemented.");
-                    } } 
-                    onUpdate={(name: string, value: string, type: "data" | "user" | undefined) => {
-                        throw new Error("Function not implemented.");
-                    } }>
-
-                    </MultiSelectForm>}
-        </Grid>
+            
         <DataRow
               object={integration}
               path="configurationEntity.idp.logoUrl"
               type="image"
           />
-        </Grid>
-        
-                
-                
-        
-        
+        </Grid>        
       </>)
+    }
+    
 }

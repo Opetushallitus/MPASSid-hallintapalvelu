@@ -72,15 +72,15 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
           if(newConfigurationEntityData) {
             setSaveDialogState(true);
-            if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){
+            if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){              
               setCanSave(false)
-            } else {    
+            } else {                  
               if(isValid) {                
                 setCanSave(true)
               } else {
                 setCanSave(false)
               }
-              if(newIntegration) {
+              if(newIntegration) {            
                 newIntegration.configurationEntity=newConfigurationEntityData
                 setNewIntegration(newIntegration)
               }
@@ -108,47 +108,26 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.name" />
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
-          {role === "idp" && (
-            <DataRow
-              object={integration}
-              path="configurationEntity.idp.logoUrl"
-              type="image"
-            />
-          )}
         </Grid>
-        {role === "idp" && !ENV.PROD && integration.configurationEntity && integration.discoveryInformation &&(<SchoolSelection integration={integration} configurationEntity={integration.configurationEntity} discoveryInformation={integration.discoveryInformation}></SchoolSelection>)}
-        {role === "idp" && ENV.PROD && (
-          <>
-            <Typography variant="h2" gutterBottom>
-              <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />
-            </Typography>
-            <Grid container spacing={2} mb={3}>
-              <DataRow
-                object={integration}
-                path="discoveryInformation.customDisplayName"
-              />
-              <DataRow
-                object={integration}
-                path="discoveryInformation.showSchools"
-                type="boolean"
-              />
-              <DataRow
-                object={integration}
-                path="discoveryInformation.schools"
-                type="text-list"
-              />
-              <DataRow
-                object={integration}
-                path="discoveryInformation.excludedSchools"
-                type="text-list"
-              />
-              <DataRow
-                object={integration}
-                path="discoveryInformation.title"
-              />
-            </Grid>
-          </>
-        )}
+        {role === "idp" && type === "wilma" && integration.configurationEntity && integration.discoveryInformation &&
+            (<SchoolSelection 
+                integration={integration} 
+                setConfigurationEntity={setNewConfigurationEntityData} 
+                configurationEntity={newConfigurationEntityData} 
+                discoveryInformation={integration.discoveryInformation} 
+                setCanSave={setIsValid}
+                isEditable={true}></SchoolSelection>)
+          }
+        {role === "idp" && type !== "wilma" &&
+            (<SchoolSelection 
+                integration={integration} 
+                setConfigurationEntity={setNewConfigurationEntityData} 
+                configurationEntity={integration.configurationEntity} 
+                discoveryInformation={integration.discoveryInformation} 
+                setCanSave={setIsValid}
+                isEditable={false}>
+            </SchoolSelection>)
+          }
 
         {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData && (
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} />

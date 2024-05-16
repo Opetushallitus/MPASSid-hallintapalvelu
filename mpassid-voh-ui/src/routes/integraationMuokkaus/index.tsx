@@ -52,8 +52,7 @@ export default function IntegraatioMuokkaus() {
       setOpenNotice(false)
       setOpenConfirmation(false);
       setSaveDialogState(false);  
-      console.log("**** result: ",result.current)
-      console.log("**** id: ",id)
+
       if(isDisabled) {
         setDisabled(false)
         navigate("/", { state: id })
@@ -94,8 +93,7 @@ export default function IntegraatioMuokkaus() {
               delete permission.lastUpdatedOn;
             })
             if(id===0) {
-              result.current = await createIntegration({},newIntegration);  
-              console.log("**** create response: ",result.current)
+              result.current = await createIntegration({},newIntegration);                
             } else {
               result.current = await updateIntegration({ id },newIntegration);  
             }

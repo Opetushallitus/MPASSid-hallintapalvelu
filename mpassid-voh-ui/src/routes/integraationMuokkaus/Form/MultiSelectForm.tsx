@@ -62,23 +62,22 @@ const enumss = [
 	
 
 interface Props {
-  object: any;
-  type: string;
+  
   label: string;
   attributeType: Components.Schemas.Attribute["type"];
   isEditable: boolean;
   mandatory: boolean;
-  path: any;
   enums: oneEnum[];
+  values: string[];
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
-  onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
+  onUpdate: (values: string[]) => void;
   onValidate: (data:string) => boolean;
 }
 
-export default function MultiSelectForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
+export default function MultiSelectForm({ values, isEditable=false, mandatory=false, helperText, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
   const intl = useIntl();
-  const defaultValue = get(object, path);
+
   
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
@@ -86,14 +85,24 @@ export default function MultiSelectForm({ object, type, isEditable=false, mandat
 
   const [selection, setSelection] = useState<string[]>([]);
 
+  useEffect(() => {
+    if(values.length>0) {
+      setSelection(values)
+    }
+    
+  },[ values ])
+
   const handleChange = (event: SelectChangeEvent<typeof selection>) => {
+    
     const {
       target: { value },
     } = event;
+    
     setSelection(
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value,
     );
+    onUpdate(typeof value === 'string' ? value.split(',') : value);
   };
 
 
@@ -105,7 +114,7 @@ export default function MultiSelectForm({ object, type, isEditable=false, mandat
     }
     
   }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
-  
+  /*
   const updateFormValue = () => {
     if(onValidate(inputRef.current?.value)) {
       setIsValid(true)
@@ -131,7 +140,7 @@ export default function MultiSelectForm({ object, type, isEditable=false, mandat
       onUpdate(type,"",attributeType);
     }
   };
-  
+  */
   if(isEditable) {
     return (
      
@@ -147,7 +156,7 @@ export default function MultiSelectForm({ object, type, isEditable=false, mandat
                 onChange={handleChange}
                 input={<Input id="select-multiple-chip"  />}
                 renderValue={(selected) => {
-                    const renderValues=[];
+                    const renderValues:string[]=[];
                     enums.filter(e=>selection.indexOf(e.value) > -1).forEach(e=>renderValues.push(e.label))
 
 
@@ -193,7 +202,7 @@ export default function MultiSelectForm({ object, type, isEditable=false, mandat
         ...theme.typography.body1
         
       })}
-    >{defaultValue}</Box>)
+    >--</Box>)
   }
   
 }
