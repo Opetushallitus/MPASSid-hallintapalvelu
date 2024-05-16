@@ -23,7 +23,7 @@ interface Props {
     setCanSave: Dispatch<boolean>
 }
 
-export default function IntegraatioForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: Props) {
+export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: Props) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           

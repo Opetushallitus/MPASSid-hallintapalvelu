@@ -1,5 +1,5 @@
 
-import { Box, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from "@mui/material";
+import { Box, Checkbox, Chip, FormControl, Input, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from "@mui/material";
 import type { Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
@@ -21,7 +21,7 @@ export interface oneEnum {
     label: string;
     value: string;
 }
-const enums = [
+const enumss = [
     { 
         label: 'Ammatilliset erityisoppilaitokset',
         value: '22'
@@ -69,13 +69,14 @@ interface Props {
   isEditable: boolean;
   mandatory: boolean;
   path: any;
-  helperText?: (data:string) => JSX.Element;
-  setCanSave?: Dispatch<boolean>;
-  onUpdate?: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
-  onValidate?: (data:string) => boolean;
+  enums: oneEnum[];
+  helperText: (data:string) => JSX.Element;
+  setCanSave: Dispatch<boolean>;
+  onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
+  onValidate: (data:string) => boolean;
 }
 
-export default function MultiSelectForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
+export default function MultiSelectForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
   
@@ -135,16 +136,28 @@ export default function MultiSelectForm({ object, type, isEditable=false, mandat
     return (
      
         <div>
-            <FormControl sx={{ m: 1, width: 300 }}>
+            <FormControl sx={{ m: 1, width: '80%' }}>
                 
                 <Select
                 labelId="multiselectForm"
                 id="multiselectForm-checkbox"
                 multiple
+                multiline
                 value={selection}
                 onChange={handleChange}
-                input={<OutlinedInput  />}
-                renderValue={(selected) => selected.join(', ')}
+                input={<Input id="select-multiple-chip"  />}
+                renderValue={(selected) => {
+                    const renderValues=[];
+                    enums.filter(e=>selection.indexOf(e.value) > -1).forEach(e=>renderValues.push(e.label))
+
+
+                    return ( 
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {renderValues.map((value) => (
+                            <Chip key={value} label={value} />
+                        ))}
+                    </Box>)
+                    }}
                 MenuProps={MenuProps}
                 >
                 {enums.map((name) => (
@@ -159,7 +172,22 @@ export default function MultiSelectForm({ object, type, isEditable=false, mandat
      
     );
   } else {
-    
+    /*
+    <TextList
+            value={
+            identityProvider.institutionTypes?.length
+                ? identityProvider.institutionTypes.map(
+                    (institutionType) =>
+                    `${getKoodistoValue(
+                        institutionTypes,
+                        String(institutionType),
+                        language
+                    )} (${institutionType})`
+                )
+                : []
+            }
+        />
+    */
     return( <Box
       sx={(theme) => ({
         ...theme.typography.body1

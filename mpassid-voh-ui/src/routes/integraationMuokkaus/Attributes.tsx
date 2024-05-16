@@ -3,7 +3,7 @@ import { attributePreferredOrder } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
 import type { Dispatch} from "react";
-import IntegraatioForm from "./Form";
+import AttributeForm from "./Form";
 import { dataConfiguration } from '../../config';
 import { helperText, validate } from "@/utils/Validators";
 
@@ -83,7 +83,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   const helpGeneratorText = (value:string) => {
                     return helperText(configuration.validation,value);
                   }
-                  return (<IntegraatioForm 
+                  return (<AttributeForm 
                     key={configuration.name!}
                     onUpdate={updateAttribute}
                     onValidate={validator}
