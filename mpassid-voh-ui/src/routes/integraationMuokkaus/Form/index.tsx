@@ -9,7 +9,7 @@ import type { Dispatch } from 'react';
 import type { IntegrationType, UiConfiguration } from "../../../config";
 import { defaultIntegrationType } from "../../../config"
 
-interface Props {
+interface AttributeProps {
     uiConfiguration: UiConfiguration;
     role?: any;
     type?: any;
@@ -23,7 +23,7 @@ interface Props {
     setCanSave: Dispatch<boolean>
 }
 
-export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: Props) {
+export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: AttributeProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -78,6 +78,91 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 mandatory={configuration.mandatory}
                                 label={label?intl.formatMessage(label):attribute.name!}
                                 attributeType={attributeType}
+                                helperText={helperText}
+                                setCanSave={setCanSave}/>)
+                        }
+                        
+                        
+                        </Typography>
+                    </Grid>
+                    </Grid>
+                
+            
+            </Grid>)
+        } else {
+            return(<></>)
+        }
+ }
+
+ interface SchoolProps {
+    isVisible: boolean;
+    isEditable: boolean;
+    isMandatory: boolean;
+    name: string;
+    value: string;
+    newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
+    helperText: (data:string) => JSX.Element;
+    onUpdate: Dispatch<string>;
+    onValidate: (data:string) => boolean;
+    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
+    setCanSave: Dispatch<boolean>
+ }
+
+ export function SchoolForm({ name, value, isVisible, isEditable, isMandatory, helperText, newConfigurationEntityData, setNewConfigurationEntityData,onUpdate,onValidate,setCanSave }: SchoolProps) {
+
+    const intl = useIntl();
+    const id = `attribuutti.${name}`;
+    const label = id in intl.messages ? { id } : undefined;           
+    const tooltipId = `työkaluvihje.${name}`;
+    const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
+    const attribute = { type: "data" ,name: name, content: value }
+    const onUpdateData = (name: string,value: string,type: Components.Schemas.Attribute["type"]) => {
+        onUpdate(value);
+    }
+
+
+    if(isVisible) {
+        return (
+            <Grid container >
+                
+                    <Grid key={attribute.name} container spacing={2} mb={3} >
+                    <Grid item xs={4}>
+                    <Tooltip
+                        title={
+                            <>
+                            {tooltip && (
+                                <Box mb={1}>
+                                <FormattedMessage {...tooltip} />
+                                </Box>
+                            )}
+                            <code>{attribute.name}</code>
+                            </>
+                        }
+                        >
+                        <span>{label ? <FormattedMessage {...label} /> : attribute.name}</span>
+                        </Tooltip>
+                        
+                        
+                    </Grid>
+                    <Grid item xs={8} sx={{}}>
+                        <Typography
+                        sx={{
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-all",
+                        }}
+                        variant="caption"
+                        >
+                        {true&&
+                            (<InputForm key={attribute.name} 
+                                object={attribute} 
+                                path="content" 
+                                type={"boolean"} 
+                                isEditable={isEditable} 
+                                onUpdate={onUpdateData} 
+                                onValidate={onValidate} 
+                                mandatory={isMandatory}
+                                label={label?intl.formatMessage(label):attribute.name!}
+                                attributeType={"data"}
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }

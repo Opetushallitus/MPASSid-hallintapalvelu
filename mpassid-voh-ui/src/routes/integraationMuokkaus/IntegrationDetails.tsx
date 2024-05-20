@@ -34,6 +34,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     
     const [isValid, setIsValid] = useState(true);
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
+    const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
     const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     
     const { state } = useLocation();
@@ -50,6 +51,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
       if(role !== undefined) {
         setNewIntegration(_.cloneDeep(integration))
         setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
+        if(integration?.discoveryInformation){
+          setNewDiscoveryInformation(_.cloneDeep(integration.discoveryInformation))
+        }
+        
       }
       
     }, [role, integration,setNewIntegration]);
@@ -91,6 +96,28 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         
     }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, newIntegration, setNewIntegration]);
 
+    useEffect(() => {
+      if(newDiscoveryInformation) {
+        setSaveDialogState(true);
+        if(_.isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
+          setCanSave(false)
+        } else {                  
+          if(isValid) {                
+            setCanSave(true)
+          } else {
+            setCanSave(false)
+          }
+          if(newIntegration) {            
+            newIntegration.discoveryInformation=newDiscoveryInformation
+            setNewIntegration(newIntegration)
+          }
+        }
+      } else {
+          setSaveDialogState(false);  
+      }
+    
+}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValid, newIntegration, setNewIntegration]);
+
     var hasAttributes =
                 role === "idp" &&
                 !["opinsys", "wilma"].includes(
@@ -109,24 +136,27 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
         </Grid>
-        {role === "idp" && type === "wilma" && integration.configurationEntity && integration.discoveryInformation &&
+        {role === "idp" && type === "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
                 configurationEntity={newConfigurationEntityData} 
-                discoveryInformation={integration.discoveryInformation} 
+                discoveryInformation={newDiscoveryInformation} 
+                setDiscoveryInformation={setNewDiscoveryInformation} 
                 setCanSave={setIsValid}
-                isEditable={true}></SchoolSelection>)
+                isEditable={true}/>
+              )
           }
-        {role === "idp" && type !== "wilma" &&
+        {role === "idp" && type !== "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
-                configurationEntity={integration.configurationEntity} 
-                discoveryInformation={integration.discoveryInformation} 
+                configurationEntity={newConfigurationEntityData} 
+                discoveryInformation={newDiscoveryInformation} 
+                setDiscoveryInformation={setNewDiscoveryInformation}
                 setCanSave={setIsValid}
-                isEditable={false}>
-            </SchoolSelection>)
+                isEditable={false}/>
+            )
           }
 
         {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData && (
