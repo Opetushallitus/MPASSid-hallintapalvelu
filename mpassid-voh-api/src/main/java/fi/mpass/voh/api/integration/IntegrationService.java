@@ -37,10 +37,15 @@ import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
+import fi.mpass.voh.api.integration.idp.Adfs;
+import fi.mpass.voh.api.integration.idp.Azure;
+import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
+import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -616,12 +621,24 @@ public class IntegrationService {
   }
 
   public Integration createBlankIntegration(String role, String type, String oid, Long integrationSetId) {
-
+    // TODO if no setId given, create new, otherwise link to it
     if (role != null && type != null && oid != null) {
-      Organization organization = organizationService.getById(oid);
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      Organization organization = null;
+      // check corresponding
+      if (auth != null) {
+        List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+        if (userOrganizationOids.contains(oid)) {
+          organization = organizationService.getById(oid);
+        } else
+          throw new EntityCreationException("Not authorized to create integration for the given organization.");
+      } else
+        throw new EntityCreationException("Not authorized to create integration for the given organization.");
       if (organization == null) {
         try {
+          // TODO handle errors
           organization = organizationService.retrieveOrganization(oid);
+          organizationService.saveOrganization(organization);
         } catch (JsonProcessingException e) {
           throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
         }
@@ -629,14 +646,44 @@ public class IntegrationService {
           throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
       }
       if (role.equals("idp")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
         if (type.equals("wilma")) {
-          DiscoveryInformation discoveryInformation = new DiscoveryInformation();
-          ConfigurationEntity configurationEntity = new ConfigurationEntity();
           Wilma wilma = new Wilma();
           configurationEntity.setIdp(wilma);
-          return new Integration(0L, null, configurationEntity, null, 0,
-              discoveryInformation, organization, "");
         }
+        if (type.equals("gsuite")) {
+          Gsuite gsuite = new Gsuite();
+          configurationEntity.setIdp(gsuite);
+        }
+        if (type.equals("opinsys")) {
+          Opinsys opinsys = new Opinsys();
+          configurationEntity.setIdp(opinsys);
+        }
+        if (type.equals("adfs")) {
+          Adfs adfs = new Adfs();
+          configurationEntity.setIdp(adfs);
+        }
+        if (type.equals("adfs")) {
+          Azure azure = new Azure();
+          configurationEntity.setIdp(azure);
+        }
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
+      }
+      if (role.equals("sp")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
+        if (type.equals("oidc")) {
+          OidcServiceProvider oidc = new OidcServiceProvider();
+          configurationEntity.setSp(oidc);
+        }
+        if (type.equals("saml")) {
+          SamlServiceProvider saml = new SamlServiceProvider();
+          configurationEntity.setSp(saml);
+        }
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
       }
     }
     return new Integration();
@@ -659,7 +706,7 @@ public class IntegrationService {
       List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
       if (availableId != null && !availableId.isEmpty()) {
         integration.setId(availableId.get(0));
-        // set identity provider type specific flowname
+        // set identity provider type specific information, e.g. flowname
         if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null
             && integration.getConfigurationEntity().getIdp() instanceof Wilma) {
           integration.getConfigurationEntity().getIdp().setFlowName("wilma_" + availableId.get(0));
@@ -667,7 +714,9 @@ public class IntegrationService {
         }
         return integrationRepository.save(integration);
       } else {
+        // TODO the case of the first integration without preloaded integrations
         logger.error("Failed to find an available integration identifier");
+        throw new EntityCreationException("Integration creation failed");
       }
     } else {
       logger.debug("Integration creation failed.");
