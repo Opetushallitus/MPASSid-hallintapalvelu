@@ -136,7 +136,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
         </Grid>
-        {role === "idp" && type === "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {!ENV.PROD &&role === "idp" && type === "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
@@ -147,7 +147,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 isEditable={true}/>
               )
           }
-        {role === "idp" && type !== "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {!ENV.PROD &&role === "idp" && type !== "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
@@ -158,6 +158,18 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 isEditable={false}/>
             )
           }
+
+          {ENV.PROD && role === "idp" &&  newConfigurationEntityData && newDiscoveryInformation &&
+            (<SchoolSelection 
+                integration={integration} 
+                setConfigurationEntity={setNewConfigurationEntityData} 
+                configurationEntity={newConfigurationEntityData} 
+                discoveryInformation={newDiscoveryInformation} 
+                setDiscoveryInformation={setNewDiscoveryInformation}
+                setCanSave={setIsValid}
+                isEditable={false}/>
+            )
+          }  
 
         {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData && (
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} />
