@@ -3,7 +3,7 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response_1706792827801.json";
+import exampleData from "../../schemas/response.json";
 
 
 export { definition };
@@ -40,7 +40,7 @@ const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.respo
   value?: Components.Schemas.Integration;
 };
 
-const inactiveIntegration = definition.paths["/api/v2/integration/{id}"].delete.responses[
+const inactiveIntegration = definition.paths["/api/v2/integration/{id}/inactive"].delete.responses[
   "200"
 ].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
