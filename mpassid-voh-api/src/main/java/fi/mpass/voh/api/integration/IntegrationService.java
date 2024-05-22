@@ -1,6 +1,5 @@
 package fi.mpass.voh.api.integration;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -706,11 +705,12 @@ public class IntegrationService {
       List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
       if (availableId != null && !availableId.isEmpty()) {
         integration.setId(availableId.get(0));
-        // set identity provider type specific information, e.g. flowname
-        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null
-            && integration.getConfigurationEntity().getIdp() instanceof Wilma) {
-          integration.getConfigurationEntity().getIdp().setFlowName("wilma_" + availableId.get(0));
-          integration.getConfigurationEntity().getIdp().setIdpId("wilma_" + availableId.get(0));
+        // set identity provider specific information, e.g. flowname
+        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+          integration.getConfigurationEntity().getIdp()
+              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableId.get(0));
+          integration.getConfigurationEntity().getIdp()
+              .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableId.get(0));
         }
         return integrationRepository.save(integration);
       } else {

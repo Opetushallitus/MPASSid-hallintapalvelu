@@ -373,6 +373,8 @@ class IntegrationServiceTests {
         assertEquals(1000339L, resultIntegration.getId());
         assertNotNull(resultIntegration.getConfigurationEntity().getIdp());
         assertInstanceOf(Opinsys.class, resultIntegration.getConfigurationEntity().getIdp());
+        assertEquals("opinsys1000339", resultIntegration.getConfigurationEntity().getIdp().getFlowName());
+        assertEquals("opinsys_1000339", resultIntegration.getConfigurationEntity().getIdp().getIdpId());
         assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
     }
 
