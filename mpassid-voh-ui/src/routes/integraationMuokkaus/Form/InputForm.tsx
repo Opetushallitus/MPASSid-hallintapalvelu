@@ -1,9 +1,10 @@
-import { DataRow } from '@/routes/integraatio/IntegrationTab/DataRow';
+
 import { Box, TextField } from "@mui/material";
-import { cloneElement, Dispatch, useCallback, useEffect, useRef, useState } from "react";
+import type { Dispatch} from "react";
+import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
-import { get, last, toPath } from "lodash";
-import { Components } from '@/api';
+import { get } from "lodash";
+import type { Components } from '@/api';
 
 interface Props {
   object: any;
@@ -13,13 +14,13 @@ interface Props {
   isEditable: boolean;
   mandatory: boolean;
   path: any;
-  helperText?: JSX.Element;
+  helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
   onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
-  onValidate: (data: any) => boolean;
+  onValidate: (data:string) => boolean;
 }
 
-export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText=<></>, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
+export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
   
@@ -30,22 +31,22 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
-      setIsValid(false)
+      setIsValid(false)      
       setCanSave(false)  
     }
     
   }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
   
   const updateFormValue = () => {
-    
     if(onValidate(inputRef.current?.value)) {
       setIsValid(true)
       if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
         setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
         setIsValid(false)
         setCanSave(false)  
+        onUpdate(type,"",attributeType);
       } else {
-        setIsValid(true) 
+        setCanSave(true) 
         if(inputRef.current?.value) {
           onUpdate(type,inputRef.current.value,attributeType);  
         } else {
@@ -55,9 +56,10 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
       }
       
     } else {
-      setUsedHelperText(helperText)
+      setUsedHelperText(helperText(inputRef.current?.value))
       setIsValid(false)  
       setCanSave(false)
+      onUpdate(type,"",attributeType);
     }
   };
   

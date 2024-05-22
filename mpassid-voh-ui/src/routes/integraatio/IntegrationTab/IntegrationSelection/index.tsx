@@ -65,7 +65,10 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   useEffect(() => {
     if(me?.groups) {
+      console.log("me?.groups: ",me?.groups)
       setGroups(me.groups)
+    } else {
+      console.log("me?.groups: false")
     }
   }, [me]);
 

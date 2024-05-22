@@ -43,25 +43,7 @@ export default function Koulutustoimija({ integration }: Props) {
         
               <Grid container spacing={2} mb={2}>
                 <DataRow object={identityProvider} path="type" type={Type} />
-                <Grid item xs={4}>
-                  <FormattedMessage defaultMessage="Oppilaitostyypit" />
-                </Grid>
-                <Grid item xs={8}>
-                  <TextList
-                    value={
-                      identityProvider.institutionTypes?.length
-                        ? identityProvider.institutionTypes.map(
-                            (institutionType) =>
-                              `${getKoodistoValue(
-                                institutionTypes,
-                                String(institutionType),
-                                language
-                              )} (${institutionType})`
-                          )
-                        : []
-                    }
-                  />
-                </Grid>
+                
                 {["adfs", "azure", "gsuite"].includes(identityProvider.type!) && (
                   <>
                     <DataRow
