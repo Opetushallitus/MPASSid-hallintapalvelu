@@ -62,12 +62,17 @@ public class Organization {
     public List<SubOrganization> getChildren() {
         return children;
     }
-
+    
+    public void setChildren(List<SubOrganization> children) {
+        this.children = children;
+    }
+    
     @Override
     public String toString() {
         return "{" +
                 " name='" + getName() + "'" +
                 ", oid='" + getOid() + "'" +
+                ", children: " + getChildren() +
                 "}";
     }
 }
