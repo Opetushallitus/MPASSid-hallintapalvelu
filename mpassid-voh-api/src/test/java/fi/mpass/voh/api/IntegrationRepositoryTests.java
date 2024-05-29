@@ -25,7 +25,7 @@ import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationRepository;
 
 @DataJpaTest
-public class IntegrationRepositoryTests {
+class IntegrationRepositoryTests {
 
     @Autowired
     private IntegrationRepository underTest;
@@ -34,7 +34,7 @@ public class IntegrationRepositoryTests {
     private OrganizationRepository organizationRepository;
 
     @Test
-    public void testSaveIntegration() {
+    void testSaveIntegration() {
         // given
         Set<Integer> institutionTypes = Stream.of(1, 2, 11).collect(Collectors.toCollection(HashSet::new));
         Azure azure = new Azure("azure_seutu", "https://m/images/buttons/btn.png",
@@ -58,7 +58,7 @@ public class IntegrationRepositoryTests {
     }
 
     @Test
-    public void testFindAllByPermissionsLastUpdatedOnAfterAndDeploymentPhase() {
+    void testFindAllByPermissionsLastUpdatedOnAfterAndDeploymentPhase() {
         // given
         Organization organization = new Organization("Organization abc", "1.2.246.562.10.895479029510");
         organizationRepository.save(organization);
@@ -81,7 +81,6 @@ public class IntegrationRepositoryTests {
 
         // 4 integrations, from
         for (int i = 1; i < 5; i++) {
-            System.out.println("Integration " + i);
             Set<Integer> institutionTypes = Stream.of(1, 2, 11).collect(Collectors.toCollection(HashSet::new));
             Azure azure = new Azure("azure_s" + i, "https://m/images/buttons/btn.png", "ShA" + i);
             azure.setEntityId("https://net/d8ed/" + i);
@@ -125,9 +124,46 @@ public class IntegrationRepositoryTests {
 
         // when
         List<Integration> changedIntegrations = underTest
-                .findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(lastUpdatedOnTimes.get(1).plusNanos(1000), 0);
+                .findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(
+                        lastUpdatedOnTimes.get(1).plusNanos(1000), 0);
 
         // then
         assertEquals(1, changedIntegrations.size());
+    }
+
+    @Test
+    void testGetAvailableIntegrationIdentifier() {
+        // given
+        Organization organization = new Organization("Organization abc", "1.2.246.562.10.895479029510");
+        organizationRepository.save(organization);
+
+        // starting from 1000000, identifier intervals of 3
+        // the first available 1000001, next 1000004, etc.
+        for (int i = 0; i < 15; i = i + 3) {
+            Azure azure = new Azure("azure_s" + i, "https://m/images/buttons/btn.png", "ShA" + i);
+            azure.setEntityId("https://net/d8ed/" + i);
+            ConfigurationEntity ce = new ConfigurationEntity();
+            azure.setConfigurationEntity(ce);
+            ce.setIdp(azure);
+            DiscoveryInformation discoveryInformation = new DiscoveryInformation("customDisplayName" + i, "title" + i,
+                    true);
+
+            Integration integration = new Integration(100000L + Long.valueOf(i), LocalDate.now(), ce,
+                    LocalDate.of(2023, 7, 30),
+                    0, discoveryInformation, organization, "serviceContactAddress" + i + "@example.net");
+
+            Integration savedIntegration = underTest.save(integration);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        // when
+        List<Long> availableIdentifiers = underTest.getAvailableIntegrationIdentifier();
+
+        // then
+        assertEquals(100001, availableIdentifiers.get(0));
+        assertEquals(100007, availableIdentifiers.get(2));
     }
 }

@@ -1,11 +1,10 @@
 import type { Components } from "@/api";
-import type { roles } from "@/config";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import InputForm from "./Form/InputForm";
 import ListForm from "./Form/ListForm";
-import React, { Dispatch, useEffect } from "react";
+import type { Dispatch } from "react";
 
 export default function Metadata({
   newConfigurationEntityData,
@@ -55,7 +54,8 @@ export default function Metadata({
 	    return !!urlPattern.test(value);
 
     }
-    const helperTextForRedirectUri=<FormattedMessage defaultMessage="Uri ei ole FQDN muodossa!" />
+    const helperTextForRedirectUri= (data:string)=><FormattedMessage defaultMessage="Uri ei ole FQDN muodossa!" />
+    const emptyHelperText= (data:string)=> <></>
 
     const updateRedirectUri = (value:String) => {
       console.log("updateRedirectUri value: ",value)
@@ -94,7 +94,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <ListForm object={providerData.metadata.grant_types} type="grant_type" onUpdate={logUpdateValue} onValidate={emptyValidate}></ListForm>
+              <ListForm object={providerData.metadata.grant_types} type="grant_type" onUpdate={logUpdateValue} onValidate={emptyValidate} helperText={emptyHelperText}></ListForm>
             </Typography>
           </Grid>
         </Grid>
@@ -110,7 +110,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope} attributeType="data" onValidate={emptyValidate} mandatory={true} label="Scope" setCanSave={setCanSave}></InputForm>
+              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope} attributeType="data" onValidate={emptyValidate} mandatory={true} label="Scope" setCanSave={setCanSave} helperText={emptyHelperText}></InputForm>
             </Typography>
           </Grid>
         </Grid>
@@ -142,7 +142,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.client_id" type="client_id" label="client_id" isEditable={false} onUpdate={logUpdateValue} onValidate={emptyValidate} attributeType="data"  mandatory={true} setCanSave={setCanSave}></InputForm>
+              <InputForm object={providerData} path="metadata.client_id" type="client_id" label="client_id" isEditable={false} onUpdate={logUpdateValue} onValidate={emptyValidate} helperText={emptyHelperText} attributeType="data"  mandatory={true} setCanSave={setCanSave}></InputForm>
            
             </Typography>
           </Grid>
@@ -159,7 +159,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" label="client_secret" isEditable={false} onUpdate={logUpdateValue} attributeType="data" onValidate={emptyValidate} mandatory={true} setCanSave={setCanSave}></InputForm>
+              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" label="client_secret" isEditable={false} onUpdate={logUpdateValue} attributeType="data" onValidate={emptyValidate} helperText={emptyHelperText} mandatory={true} setCanSave={setCanSave}></InputForm>
             </Typography>
           </Grid>
         </Grid>
@@ -175,7 +175,7 @@ export default function Metadata({
               }}
               variant="caption"
             >
-              <ListForm object={providerData.metadata.response_types} type="response_type" onUpdate={logUpdateValue} onValidate={emptyValidate}></ListForm>
+              <ListForm object={providerData.metadata.response_types} type="response_type" onUpdate={logUpdateValue} onValidate={emptyValidate} helperText={emptyHelperText}></ListForm>
             </Typography>
           </Grid>
         </Grid>

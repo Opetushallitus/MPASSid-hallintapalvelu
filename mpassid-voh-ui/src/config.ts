@@ -24,6 +24,7 @@ export interface IntegrationType {
     name: string;
     editable: boolean;
     visible: boolean;
+    attribute?: string; 
 }
 export interface UiConfiguration {
   name: string;
@@ -40,13 +41,14 @@ export interface UiConfiguration {
 export const defaultIntegrationType:IntegrationType = {
   name: 'default',
   editable: false,
-  visible: true,
+  visible: false,
+  attribute: ''
 }
 
 export const defaultDataConfiguration:UiConfiguration = {
   name: 'default',
   type: 'user',
-  mandatory: true,
+  mandatory: false,
   
   validation: [],
   integrationType: [
@@ -91,10 +93,16 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'clientId',
       type: 'data',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
-      integrationType: []
+      integrationType: [
+        {
+            name: 'azure',
+            editable: false,
+            visible: true,
+        }
+      ]
   },
   {
       name: 'clientKey',
@@ -102,7 +110,13 @@ export const dataConfiguration:UiConfiguration[] = [
       mandatory: true,
       
       validation: [],
-      integrationType: []
+      integrationType: [
+        {
+            name: 'azure',
+            editable: false,
+            visible: true,
+        }
+      ]
   },
   {
     name: 'datasource',
@@ -151,7 +165,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'groups',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -166,7 +180,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'schoolIdStatic',
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -180,7 +194,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'learningMaterialsCharges',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -236,7 +250,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'studentGroupGuid',
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -251,7 +265,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'customTeacherRole',
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -265,7 +279,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'groupLevels',
       type: 'user',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
@@ -346,6 +360,49 @@ export const dataConfiguration:UiConfiguration[] = [
               editable: true,
               visible: true,
           }
+      ]
+  },
+  {
+      name: 'hostname',
+      type: 'data',
+      mandatory: true,
+      multivalue: true,
+      environment: 1,
+      validation: [ 'hostname' ],
+      integrationType: [
+          {
+              name: 'wilma',
+              editable: true,
+              visible: true,              
+          }
+      ]
+  },
+  {
+      name: 'uniqueId',
+      type: 'data',
+      mandatory: false,
+      multivalue: true,
+      environment: 1,
+      validation: [  ],
+      integrationType: [
+          {
+              name: 'wilma',
+              editable: false,
+              visible: false,
+              attribute: 'hostname'
+          },
+          {
+            name: 'opinsys',
+            editable: false,
+            visible: false,
+            attribute: 'tenantId'
+        },
+        {
+            name: 'azure',
+            editable: false,
+            visible: false,
+            attribute: 'entityId'
+        }
       ]
   }
 

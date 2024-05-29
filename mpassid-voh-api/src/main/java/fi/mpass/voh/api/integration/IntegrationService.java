@@ -3,14 +3,17 @@ package fi.mpass.voh.api.integration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -28,11 +31,23 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import fi.mpass.voh.api.exception.EntityCreationException;
+import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
+import fi.mpass.voh.api.integration.idp.Adfs;
+import fi.mpass.voh.api.integration.idp.Azure;
+import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.idp.Opinsys;
+import fi.mpass.voh.api.integration.idp.Wilma;
+import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
+import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
+import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
 
 import org.slf4j.Logger;
@@ -348,10 +363,10 @@ public class IntegrationService {
   }
 
   /**
-   * The method creates a specification based on the given id and queries a
-   * repository through the specification.
+   * The method creates a specification based on the given identifier and queries
+   * the integration repository through the specification.
    * 
-   * @param id the id of the Integration
+   * @param id Integration identifier
    * @return Integration
    * @throws EntityNotFoundException
    */
@@ -374,8 +389,22 @@ public class IntegrationService {
       Specification<Integration> spec = builder.build();
 
       Optional<Integration> integration = integrationRepository.findOne(spec);
+
       if (!integration.isPresent()) {
         throw new EntityNotFoundException("Not found Integration " + id);
+      }
+
+      // try to retrieve a transient, extended (organisation with suborganizations)
+      // organization
+      Organization organization = null;
+      try {
+        organization = organizationService.retrieveSubOrganizations(integration.get().getOrganization().getOid());
+      } catch (JsonProcessingException e) {
+        logger.debug("Failed to retrieve extended organization.");
+      }
+      if (organization != null) {
+        organizationService.saveOrganization(organization);
+        integration.get().setOrganization(organization);
       }
       return extendPermissions(integration);
     } else {
@@ -490,7 +519,7 @@ public class IntegrationService {
    * @param existingIntegration the existing integration
    */
   private void updatePermissions(Integration integration, Integration existingIntegration) {
-    
+
     if (integration.getPermissions() != null) {
       logger.debug(
           "Permit integrations count : {}", integration.getPermissions().size());
@@ -603,5 +632,176 @@ public class IntegrationService {
 
   public Optional<Integration> getIntegration(Long integrationId) {
     return integrationRepository.findById(integrationId);
+  }
+
+  public Integration createBlankIntegration(String role, String type, String oid, Long integrationSetId) {
+    // TODO if no integration set identifier is given, create a new one, otherwise find by it and associate to it
+    if (role != null && type != null && oid != null) {
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      Organization organization = null;
+      if (auth != null) {
+        List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+        if (userOrganizationOids.contains(oid)) {
+          try {
+            organization = organizationService.retrieveSubOrganizations(oid);
+            organizationService.saveOrganization(organization);
+          } catch (JsonProcessingException e) {
+            throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
+          }
+          if (organization == null)
+            throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
+        }
+      }
+      if (role.equals("idp")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
+        if (type.equals("wilma")) {
+          Wilma wilma = new Wilma();
+          configurationEntity.setIdp(wilma);
+        }
+        if (type.equals("gsuite")) {
+          Gsuite gsuite = new Gsuite();
+          configurationEntity.setIdp(gsuite);
+        }
+        if (type.equals("opinsys")) {
+          Opinsys opinsys = new Opinsys();
+          configurationEntity.setIdp(opinsys);
+        }
+        if (type.equals("adfs")) {
+          Adfs adfs = new Adfs();
+          configurationEntity.setIdp(adfs);
+        }
+        if (type.equals("adfs")) {
+          Azure azure = new Azure();
+          configurationEntity.setIdp(azure);
+        }
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
+      }
+      if (role.equals("sp")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
+        if (type.equals("oidc")) {
+          OidcServiceProvider oidc = new OidcServiceProvider();
+          configurationEntity.setSp(oidc);
+        }
+        if (type.equals("saml")) {
+          SamlServiceProvider saml = new SamlServiceProvider();
+          configurationEntity.setSp(saml);
+        }
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
+      }
+    }
+    return new Integration();
+  }
+
+  public Integration inactivateIntegration(Long id) {
+    // TODO check authz
+    Optional<Integration> integration = this.getIntegration(id);
+
+    if (integration.isPresent()) {
+      integration.get().setStatus(1);
+      return integrationRepository.save(integration.get());
+    } else {
+      logger.error("Integration #{} not found.", id);
+      throw new EntityInactivationException("Integration inactivation failed. Integration not found.");
+    }
+  }
+
+  public Integration createIntegration(@Valid Integration integration) {
+    if (integration != null) {
+      List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
+      if (availableId != null && !availableId.isEmpty()) {
+        integration.setId(availableId.get(0));
+        // set identity provider specific information, e.g. flowname
+        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+          integration.getConfigurationEntity().getIdp()
+              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableId.get(0));
+          integration.getConfigurationEntity().getIdp()
+              .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableId.get(0));
+        }
+        return integrationRepository.save(integration);
+      } else {
+        // TODO the case of the first integration without preloaded integrations
+        logger.error("Failed to find an available integration identifier");
+        throw new EntityCreationException("Integration creation failed");
+      }
+    } else {
+      logger.debug("Integration creation failed.");
+    }
+    return integration;
+  }
+
+  /**
+   * Returns a data transfer object containing two arrays:
+   * existingExcluded: given organization's integrations (identifiers) of
+   * which discovery information contains excluded schools (filtered by given
+   * institution types)
+   * existingIncluded: institution (school) codes of the given organization's
+   * integrations' discovery information (filtered by given institution types)
+   * 
+   * @param organizationOid one of the organizations' oids of the authenticated
+   *                        user
+   * @param types           the institution (school) types used to match with the
+   *                        existing integrations' institution types
+   * @return DiscoveryInformationDTO
+   */
+  public DiscoveryInformationDTO getDiscoveryInformation(String organizationOid, List<Integer> institutionTypes) {
+    DiscoveryInformationDTO di = new DiscoveryInformationDTO();
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null) {
+      List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+      if (!organizationOid.isEmpty() && userOrganizationOids.contains(organizationOid) && institutionTypes != null) {
+        // find all integrations of the given organization
+        List<Integration> integrations = integrationRepository
+            .findAllByOrganizationOid(organizationOid);
+
+        Set<String> allExcluded = new HashSet<>();
+        Set<String> allIncluded = new HashSet<>();
+        for (Integration i : integrations) {
+          if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
+            if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
+              allExcluded.add(Long.toString(i.getId()));
+            }
+            for (String school : i.getDiscoveryInformation().getSchools()) {
+              allIncluded.add(school);
+            }
+          }
+        }
+
+        if (!allExcluded.isEmpty()) {
+          di.setExistingExcluded(allExcluded);
+        }
+        if (!allIncluded.isEmpty()) {
+          di.setExistingIncluded(allIncluded);
+        }
+      }
+    } else {
+      throw new EntityNotFoundException("Authentication not successful");
+    }
+    return di;
+  }
+
+  /**
+   * Matches given institution types with existing organization's integrations'
+   * institution types (includes at least one)
+   * 
+   * @param institutionTypes given institution types
+   * @param i                Integration
+   */
+  private boolean matchInstitutionTypes(List<Integer> institutionTypes, Integration i) {
+    if (i.getConfigurationEntity() != null && i.getConfigurationEntity().getIdp() != null) {
+      for (Integer parameterType : institutionTypes) {
+        for (Integer integrationType : i.getConfigurationEntity().getIdp().getInstitutionTypes()) {
+          if (parameterType.equals(integrationType)) {
+            logger.debug("Integration #{} matches with parameter institution types : {}, param: {}", i.getId(),
+                i.getConfigurationEntity().getIdp().getInstitutionTypes(), institutionTypes);
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 }

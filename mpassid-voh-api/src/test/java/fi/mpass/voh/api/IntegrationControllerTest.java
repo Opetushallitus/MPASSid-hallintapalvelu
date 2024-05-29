@@ -49,238 +49,318 @@ import fi.mpass.voh.api.organization.Organization;
 @AutoConfigureMockMvc
 class IntegrationControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+	@Autowired
+	private MockMvc mockMvc;
 
-    @MockBean
-    private IntegrationService integrationService;
+	@MockBean
+	private IntegrationService integrationService;
 
-    @MockBean
-    private OPHPermissionEvaluator permissionEvaluator;
+	@MockBean
+	private OPHPermissionEvaluator permissionEvaluator;
 
-    private Integration integration;
-    private List<Integration> integrationSets;
+	private Integration integration;
+	private Integration blankIntegration;
+	private List<Integration> integrationSets;
 
-    @BeforeEach
-    public void setup() {
-        DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
-                "Custom Title", true);
-        Organization organization = new Organization("Organization zyx", "1.2.3.4.5.6.7.8");
-        ConfigurationEntity configurationEntity = new ConfigurationEntity();
-        Wilma wilma = new Wilma("wilmaHostname");
-        wilma.setFlowName("wilmaFlowname");
-        configurationEntity.setIdp(wilma);
+	@BeforeEach
+	public void setup() {
+		DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
+				"Custom Title", true);
+		Organization organization = new Organization("Organization zyx", "1.2.3.4.5.6.7.8");
+		ConfigurationEntity configurationEntity = new ConfigurationEntity();
+		Wilma wilma = new Wilma("wilmaHostname");
+		wilma.setFlowName("wilmaFlowname");
+		configurationEntity.setIdp(wilma);
 
-        // Integration sets
-        integrationSets = new ArrayList<Integration>();
-        for (int i = 1; i < 10; i++) {
-            ConfigurationEntity ce = new ConfigurationEntity();
-            IntegrationSet set = new IntegrationSet();
-            set.setConfigurationEntity(ce);
-            ce.setSet(set);
-            set.setName("Integration set " + i);
-            Integration integrationSet = new Integration(1000L + i, LocalDate.now(), ce,
-                    LocalDate.of(2023, 7, 30),
-                    0, null, organization, "serviceContactAddress" + i + "@example.net");
-            integrationSet.setConfigurationEntity(ce);
-            integrationSets.add(integrationSet);
-        }
+		// Integration sets
+		integrationSets = new ArrayList<Integration>();
+		for (int i = 1; i < 10; i++) {
+			ConfigurationEntity ce = new ConfigurationEntity();
+			IntegrationSet set = new IntegrationSet();
+			set.setConfigurationEntity(ce);
+			ce.setSet(set);
+			set.setName("Integration set " + i);
+			Integration integrationSet = new Integration(1000L + i, LocalDate.now(), ce,
+					LocalDate.of(2023, 7, 30),
+					0, null, organization, "serviceContactAddress" + i + "@example.net");
+			integrationSet.setConfigurationEntity(ce);
+			integrationSets.add(integrationSet);
+		}
 
-        integration = new Integration(99L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
-                0, discoveryInformation, organization,
-                "serviceContactAddress@example.net");
+		integration = new Integration(99L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
+				0, discoveryInformation, organization,
+				"serviceContactAddress@example.net");
 
-        for (Integration set : integrationSets) {
-            integration.addPermissionTo(set);
-        }
-    }
+		blankIntegration = new Integration(0L, null, configurationEntity, null, 0,
+				discoveryInformation, organization, "");
 
-    @WithMockUser(value = "testuser", roles={"APP_MPASSID_KATSELIJA"})
-    @Test
-    void testAuthorizedGetIntegration() throws Exception {
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
-        when(integrationService.getSpecIntegrationById(any(Long.class))).thenReturn(Optional.of(integration));
-        mockMvc.perform(get("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
+		for (Integration set : integrationSets) {
+			integration.addPermissionTo(set);
+		}
+	}
 
-    @WithMockUser(value = "testuser", roles={"APP_MPASSID_KATSELIJA"})
-    @Test
-    void testLeastAuthorizedGetIntegrationList() throws Exception {
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
-        when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$").isArray());
-    }
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_KATSELIJA" })
+	@Test
+	void testAuthorizedGetIntegration() throws Exception {
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("KATSELIJA"))).thenReturn(true);
+		when(integrationService.getSpecIntegrationById(any(Long.class))).thenReturn(Optional.of(integration));
+		mockMvc.perform(get("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
+	}
 
-    @WithMockUser(value = "testuser", roles={"APP_MPASSID_TALLENTAJA", "APP_MPASSID_KATSELIJA"})
-    @Test
-    void testAuthorizedGetIntegrationList() throws Exception {
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
-        when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$").isArray());
-    }
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_KATSELIJA" })
+	@Test
+	void testLeastAuthorizedGetIntegrationList() throws Exception {
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("KATSELIJA"))).thenReturn(true);
+		when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
+		mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$").isArray());
+	}
 
-    @WithMockUser(value = "testuser")
-    @Test
-    void testUnauthorizedGetIntegrationList() throws Exception {
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("KATSELIJA"))).thenReturn(false);
-        when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$").doesNotExist());
-    }
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA", "APP_MPASSID_KATSELIJA" })
+	@Test
+	void testAuthorizedGetIntegrationList() throws Exception {
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("KATSELIJA"))).thenReturn(true);
+		when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
+		mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$").isArray());
+	}
 
-    @WithMockUser(value = "testuser", roles={"APP_MPASSID"})
-    @Test
-    void testPartiallyUnauthorizedGetIntegrationList() throws Exception {
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("TALLENTAJA"))).thenReturn(false);
-        when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$").doesNotExist());
-    }
+	@WithMockUser(value = "testuser")
+	@Test
+	void testUnauthorizedGetIntegrationList() throws Exception {
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("KATSELIJA"))).thenReturn(false);
+		when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
+		mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$").doesNotExist());
+	}
 
-    @WithMockUser(value = "testuser", roles={"APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA"})
-    @Test
-    void testOrganizationalAuthorizedGetIntegrationList() throws Exception {
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("KATSELIJA"))).thenReturn(true);
-        when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
-        mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$", hasSize(1)))
-            .andExpect(jsonPath("$").isArray());
-    }
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID" })
+	@Test
+	void testPartiallyUnauthorizedGetIntegrationList() throws Exception {
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("TALLENTAJA"))).thenReturn(false);
+		when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
+		mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$").doesNotExist());
+	}
 
-    @WithMockUser(value = "testuser", roles = {"APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA"})
-    @Test
-    void testOrganizationalAuthorizedSearchIntegrationsPaged() throws Exception {
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA" })
+	@Test
+	void testOrganizationalAuthorizedGetIntegrationList() throws Exception {
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("KATSELIJA"))).thenReturn(true);
+		when(integrationService.getIntegrations()).thenReturn(Collections.singletonList(integration));
+		mockMvc.perform(get("/api/v2/integration/list").contentType(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$", hasSize(1)))
+				.andExpect(jsonPath("$").isArray());
+	}
 
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class), eq("TALLENTAJA"))).thenReturn(true);
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA" })
+	@Test
+	void testOrganizationalAuthorizedSearchIntegrationsPaged() throws Exception {
 
-        mockMvc.perform(get("/api/v2/integration/search")
-                .param("role", "set")
-                .param("search", "test")
-                .param("type", "oidc")
-                .param("deploymentPhase", "1")
-                .param("referenceIntegration", "12345")
-                .param("status", "0")
-                .param("page", "5")
-                .param("size", "10")
-                .param("sort", "id,desc") // <-- no space after comma!
-                .param("sort", "name,asc")) // <-- no space after comma!
-                .andExpect(status().isOk());
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("TALLENTAJA"))).thenReturn(true);
 
-        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(integrationService).getIntegrationsSpecSearchPageable(any(String.class), any(String.class),
-                any(String.class), any(String.class), any(Long.class), any(Integer.class), pageableCaptor.capture());
+		mockMvc.perform(get("/api/v2/integration/search")
+				.param("role", "set")
+				.param("search", "test")
+				.param("type", "oidc")
+				.param("deploymentPhase", "1")
+				.param("referenceIntegration", "12345")
+				.param("status", "0")
+				.param("page", "5")
+				.param("size", "10")
+				.param("sort", "id,desc") // <-- no space after comma!
+				.param("sort", "name,asc")) // <-- no space after comma!
+				.andExpect(status().isOk());
 
-        PageRequest pageable = (PageRequest) pageableCaptor.getValue();
+		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+		verify(integrationService).getIntegrationsSpecSearchPageable(any(String.class), any(String.class),
+				any(String.class), any(String.class), any(Long.class), any(Integer.class),
+				pageableCaptor.capture());
 
-        assertEquals(5, pageable.getPageNumber());
-        assertEquals(10, pageable.getPageSize());
-        Sort sort = pageable.getSort();
-        assertEquals("name", sort.getOrderFor("name").getProperty());
-        assertEquals(Sort.Direction.ASC, sort.getOrderFor("name").getDirection());
-    }
+		PageRequest pageable = (PageRequest) pageableCaptor.getValue();
 
-    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
-            "APP_MPASSID_TALLENTAJA" })
-    @Test
-    void testAuthorizedUpdateIntegration() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		assertEquals(5, pageable.getPageNumber());
+		assertEquals(10, pageable.getPageSize());
+		Sort sort = pageable.getSort();
+		assertEquals("name", sort.getOrderFor("name").getProperty());
+		assertEquals(Sort.Direction.ASC, sort.getOrderFor("name").getDirection());
+	}
 
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), eq(99L), eq("TALLENTAJA")))
-                .thenReturn(true);
-        when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
-        mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
-                // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
-                .content(objectMapper.writeValueAsString(integration)).with(csrf()))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(99L))
-                .andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
-    }
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+			"APP_MPASSID_TALLENTAJA" })
+	@Test
+	void testAuthorizedUpdateIntegration() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.9",
-            "APP_MPASSID_TALLENTAJA" })
-    @Test
-    void testUnauthorizedUpdateIntegration() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), eq(99L),
+				eq("TALLENTAJA")))
+				.thenReturn(true);
+		when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+		mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
+				// https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
+				.content(objectMapper.writeValueAsString(integration)).with(csrf()))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(99L))
+				.andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
+	}
 
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), eq(99L), eq("TALLENTAJA")))
-                .thenReturn(false);
-        when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
-        mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
-                // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
-                .content(objectMapper.writeValueAsString(integration)).with(csrf()))
-                .andDo(print())
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$").doesNotExist());
-    }
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.9",
+			"APP_MPASSID_TALLENTAJA" })
+	@Test
+	void testUnauthorizedUpdateIntegration() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    @WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
-            "APP_MPASSID_TALLENTAJA" })
-    @Test
-    void testAuthorizedUpdateIntegrationWithJson() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), eq(99L),
+				eq("TALLENTAJA")))
+				.thenReturn(false);
+		when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+		mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
+				// https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
+				.content(objectMapper.writeValueAsString(integration)).with(csrf()))
+				.andDo(print())
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$").doesNotExist());
+	}
 
-        String json = "{" +
-                "\"id\": 99," +
-                "\"permissions\": [" +
-                "{" +
-                "\"to\": {" +
-                "\"id\": 3000046" +
-                "}" +
-                "}," +
-                "{ " +
-                "\"to\": {" +
-                "\"id\": 3000012" +
-                "}" +
-                "}," +
-                "{ " +
-                "\"to\": {" +
-                "\"id\": 3000022" +
-                "}" +
-                "}" +
-                "]," +
-                "\"serviceContactAddress\": \"zoo@bar\"" +
-                "}";
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+			"APP_MPASSID_TALLENTAJA" })
+	@Test
+	void testAuthorizedUpdateIntegrationWithJson() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), eq(99L), eq("TALLENTAJA")))
-                .thenReturn(true);
-        when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
-        mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
-                // https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
-                .content(json).with(csrf()))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(99L))
-                .andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
-    }
+		String json = "{" +
+				"\"id\": 99," +
+				"\"permissions\": [" +
+				"{" +
+				"\"to\": {" +
+				"\"id\": 3000046" +
+				"}" +
+				"}," +
+				"{ " +
+				"\"to\": {" +
+				"\"id\": 3000012" +
+				"}" +
+				"}," +
+				"{ " +
+				"\"to\": {" +
+				"\"id\": 3000022" +
+				"}" +
+				"}" +
+				"]," +
+				"\"serviceContactAddress\": \"zoo@bar\"" +
+				"}";
 
-    // TODO negative test for invalid search deploymentPhase parameter, e.g. "0,2"
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), eq(99L),
+				eq("TALLENTAJA")))
+				.thenReturn(true);
+		when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+		mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
+				// https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
+				.content(json).with(csrf()))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(99L))
+				.andExpect(jsonPath("$.configurationEntity.idp.flowName").value("wilmaFlowname"));
+	}
+
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+			"APP_MPASSID_TALLENTAJA" })
+	@Test
+	void testUnauthorizedGetBlankIntegration() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("TALLENTAJA")))
+				.thenReturn(false);
+		when(integrationService.createBlankIntegration(any(String.class), any(String.class), any(String.class),
+				any(Long.class))).thenReturn(integration);
+		mockMvc.perform(get("/api/v2/integration")
+				.param("role", "idp")
+				.param("type", "wilma")
+				.param("organization", "1.2.3.4.5.6.7.9"))
+				.andDo(print())
+				.andExpect(status().isForbidden())
+				.andExpect(jsonPath("$").doesNotExist());
+	}
+
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+			"APP_MPASSID_TALLENTAJA" })
+	@Test
+	void testAuthorizedGetBlankIntegration() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("TALLENTAJA")))
+				.thenReturn(true);
+		when(integrationService.createBlankIntegration(any(String.class), any(String.class), any(String.class),
+				any())).thenReturn(blankIntegration);
+		mockMvc.perform(get("/api/v2/integration")
+				.param("role", "idp")
+				.param("type", "wilma")
+				.param("organization", "1.2.3.4.5.6.7.8"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(0L));
+	}
+
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+			"APP_MPASSID_TALLENTAJA" })
+	@Test
+	void testAuthorizedCreateIntegration() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("TALLENTAJA")))
+				.thenReturn(true);
+		when(integrationService.createIntegration(any(Integration.class))).thenReturn(integration);
+		mockMvc.perform(post("/api/v2/integration").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(integration)).with(csrf()))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(99L));
+	}
+
+	// TODO negative test for invalid search deploymentPhase parameter, e.g. "0,2"
 }
