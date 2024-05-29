@@ -1,4 +1,5 @@
-import { useIntegrationSafe } from "@/api";
+import type { Components } from "@/api";
+import { useMe } from "@/api/käyttöoikeus";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import {
   getRole,
@@ -6,44 +7,40 @@ import {
   typeTooltips,
 } from "@/routes/home/IntegrationsTable";
 import {
-  Alert,
-  AlertTitle,
   Grid,
-  Link as MuiLink,
   Typography,
 } from "@mui/material";
 import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
 import Attributes from "./Attributes";
 import type { DataRowProps } from "../DataRow";
 import { DataRow } from "../DataRow";
 import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";
+import EditIntegrationButton from "./EditIntegrationButton";
+import { tallentajaOphGroup } from '../../../../config';
+import { useEffect, useState } from "react";
 interface Props {
-  id: number;
+  integration: Components.Schemas.Integration;
 }
 
-export default function IntegrationDetails({ id }: Props) {
-  const [error, integration] = useIntegrationSafe({ id });
+export default function IntegrationDetails({ integration }: Props) {
+  const me = useMe();
+  const [groups, setGroups] = useState<string[]>();
 
-  if (error?.response?.status === 404) {
-    return (
-      <Alert severity="error">
-        <FormattedMessage
-          defaultMessage="<title>Integraatiota {id} ei löydy</title>Siirry <link>etusivulle</link>."
-          values={{
-            id,
-            title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
-            link: (chunks) => (
-              <MuiLink color="error" component={Link} to="/">
-                {chunks}
-              </MuiLink>
-            ),
-          }}
-        />
-      </Alert>
-    );
+  useEffect(() => {
+    if(me?.groups) {
+      setGroups(me.groups)
+    }
+  }, [me]);
+  
+  const writeAccess = () => {
+    
+    //Tuki ainoastaan azure palveluille 
+    if(integration?.configurationEntity?.idp?.type === "azure" && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+      return true;
+    }
+    return false;
   }
 
   const role = getRole(integration);
@@ -169,9 +166,10 @@ export default function IntegrationDetails({ id }: Props) {
               type="user"
             />
           </ErrorBoundary>
+            
         </>
       )}
-      
+      {writeAccess()&&<EditIntegrationButton integration={integration}></EditIntegrationButton>}
     </>
   );
 }

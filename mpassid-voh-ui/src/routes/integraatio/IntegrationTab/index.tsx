@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import IntegrationSelection from "./IntegrationSelection";
 import type { Components } from "@/api";
@@ -65,18 +65,25 @@ export default function IntegrationTab({ id }: Props) {
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration | undefined>(undefined);
   const [integration, setIntegration] = useState<Components.Schemas.Integration| undefined>(undefined);
   const [activateAllServices, setActivateAllServices] = useState(false);
+  const { state } = useLocation();
 
   const role = getRole(origInteg);
-  
+
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
   useEffect(() => {
-    if(origInteg!==undefined) {
+    if(state?.id===id) {
+      setIntegration(state)
+    }
+  }, [state,id]);
+
+  useEffect(() => {
+    if(origInteg!==undefined&&state?.id!==origInteg?.id) {
       setIntegration(origInteg)
     }
-  }, [origInteg]);
+  }, [origInteg,state]);
 
   useEffect(() => {
     if(integration?.permissions === undefined || integration?.permissions?.length===0 || (integration?.permissions?.length===1&&integration.permissions.map(i=>i.to?.id).indexOf(mpassIdUserAttributeTestService)>=0 )) {
@@ -132,7 +139,7 @@ export default function IntegrationTab({ id }: Props) {
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <IntegrationDetails id={Number(integration.id)} />
+          <IntegrationDetails integration={integration}  />
         </TabPanel>
         <TabPanel value={value} index={1}>
           <IntegrationSelection 

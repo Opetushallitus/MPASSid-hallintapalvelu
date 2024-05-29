@@ -6,7 +6,7 @@
     "version": "0"
   },
   "servers": [
-    { "url": "https://virkailija.testiopintopolku.fi/kayttooikeus-service" }
+    { "url": "https://virkailija.opintopolku.fi/kayttooikeus-service" }
   ],
   "paths": {
     "/cas/me": {

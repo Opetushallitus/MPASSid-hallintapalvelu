@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -320,6 +321,7 @@ public class IdentityProviderLoader extends Loader {
                             "Error in updating integration #{}: {}", existingIntegration.get().getId(), e.toString());
                     loading.addError(existingIntegration.get(), "Update failed");
                 }
+                existingIntegration.get().setLastUpdatedOn(LocalDateTime.now());
             }
         } else {
             logger.error("Comparison failed. Check input data structure and values.");

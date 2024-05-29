@@ -19,3 +19,391 @@ export const katselijaOphGroup =
   "APP_MPASSID_KATSELIJA_1.2.246.562.10.00000000001";  
 
 export const mpassIdUserAttributeTestService = 3000001
+
+export interface IntegrationType {
+    name: string;
+    editable: boolean;
+    visible: boolean;
+    attribute?: string; 
+}
+export interface UiConfiguration {
+  name: string;
+  type: string;
+  oid?: string;
+  mandatory: boolean;
+  multivalue?: boolean;
+  environment?: number;
+  label?: string;
+  validation: string[];
+  integrationType: IntegrationType[];
+}
+
+export const defaultIntegrationType:IntegrationType = {
+  name: 'default',
+  editable: false,
+  visible: false,
+  attribute: ''
+}
+
+export const defaultDataConfiguration:UiConfiguration = {
+  name: 'default',
+  type: 'user',
+  mandatory: false,
+  
+  validation: [],
+  integrationType: [
+      {
+          name: 'azure',
+          editable: false,
+          visible: false,
+      },
+      {
+          name: 'adfs',
+          editable: false,
+          visible: false,
+      },
+      {
+        name: 'wilma',
+        editable: false,
+        visible: true,
+    },
+    {
+        name: 'gsuite',
+        editable: false,
+        visible: false,
+    },  
+    {
+        name: 'opinsys',
+        editable: false,
+        visible: false,
+    },  
+    {
+        name: 'oidc',
+        editable: false,
+        visible: false,
+    },  
+    {
+        name: 'saml',
+        editable: false,
+        visible: false,
+    }
+  ]
+}
+export const dataConfiguration:UiConfiguration[] = [
+  {
+      name: 'clientId',
+      type: 'data',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+        {
+            name: 'azure',
+            editable: false,
+            visible: true,
+        }
+      ]
+  },
+  {
+      name: 'clientKey',
+      type: 'data',
+      mandatory: true,
+      
+      validation: [],
+      integrationType: [
+        {
+            name: 'azure',
+            editable: false,
+            visible: true,
+        }
+      ]
+  },
+  {
+    name: 'datasource',
+    type: 'data',
+    mandatory: true,
+    
+    validation: [],
+    integrationType: []
+  },
+  {
+    name: 'tenantId',
+    type: 'data',
+    mandatory: true,
+    
+    validation: [],
+    integrationType: []
+  },
+  {
+      name: 'firstName',
+      type: 'user',
+      mandatory: true,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'surname',
+      type: 'user',
+      mandatory: true,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'groups',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'schoolIdStatic',
+      oid: '1.2.246.562.10.21199106507',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: false,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'learningMaterialsCharges',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'azureApplicationIdUri',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: false,
+              visible: false,
+          }
+      ]
+  },
+  {
+      name: 'schoolIds',
+      type: 'user',
+      mandatory: true,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'nickname',
+      type: 'user',
+      mandatory: false,
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'studentGroupGuid',
+      oid: '1.2.246.562.10.21199106507',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'customTeacherRole',
+      oid: '1.2.246.562.10.21199106507',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: false,
+          }
+      ]
+  },
+  {
+      name: 'groupLevels',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'customStudentRole',
+      oid: '1.2.246.562.10.21199106507',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'username',
+      type: 'user',
+      mandatory: false,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: false,
+          }
+      ]
+  },
+  {
+      name: 'learnerId',
+      type: 'user',
+      mandatory: true,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'roles',
+      type: 'user',
+      mandatory: true,
+      
+      validation: [],
+      integrationType: [
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'redirect_uris',
+      type: 'metadata',
+      mandatory: true,
+      multivalue: true,
+      environment: 1,
+      validation: [ 'fqdn', 'nohash', 'https' ],
+      integrationType: [
+          {
+              name: 'oidcrp',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  {
+      name: 'hostname',
+      type: 'data',
+      mandatory: true,
+      multivalue: true,
+      environment: 1,
+      validation: [ 'hostname' ],
+      integrationType: [
+          {
+              name: 'wilma',
+              editable: true,
+              visible: true,              
+          }
+      ]
+  },
+  {
+      name: 'uniqueId',
+      type: 'data',
+      mandatory: false,
+      multivalue: true,
+      environment: 1,
+      validation: [  ],
+      integrationType: [
+          {
+              name: 'wilma',
+              editable: false,
+              visible: false,
+              attribute: 'hostname'
+          },
+          {
+            name: 'opinsys',
+            editable: false,
+            visible: false,
+            attribute: 'tenantId'
+        },
+        {
+            name: 'azure',
+            editable: false,
+            visible: false,
+            attribute: 'entityId'
+        }
+      ]
+  }
+
+]

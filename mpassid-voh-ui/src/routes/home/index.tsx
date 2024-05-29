@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMe } from "@/api/käyttöoikeus";
 import {
   katselijaOphGroup,
@@ -27,6 +27,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { useSearchParams } from "react-router-dom";
 import IntegrationsTable from "./IntegrationsTable";
 import SearchForm from "./SearchForm";
+import AddIntegrationButton from "./AddIntegrationButton"
+import NewIntegrationSelection from "./NewIntegrationSelection";
 
 const copyFormDataToURLSearchParams =
   (formData: FormData) => (searchParams: URLSearchParams) => {
@@ -44,9 +46,25 @@ const copyFormDataToURLSearchParams =
 export default function Home() {
   const [, , { resetPage }] = usePaginationPage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [showPassive, setShowPassive] = useState(false); 
+  const [addIntegration, setAddIntegration] = useState(false); 
   const intl = useIntl();
-  const me=useMe();
+  const me = useMe();
+  const [groups, setGroups] = useState<string[]>();
+
+  useEffect(() => {
+    if(me?.groups) {
+      setGroups(me.groups)
+    }
+  }, [me]);
+
+  const writeAccess = () => {
+    
+    if((groups?.includes("APP_MPASSID_TALLENTAJA_")||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_")||groups?.includes(tallentajaOphGroup))) {
+      //Kun attribuutit konfiguroitu ja testattu, niin muuta true:ksi;
+      return false;
+    }
+    return false;
+  }
 
   function handleSearch(formData: FormData) {
     const copy = copyFormDataToURLSearchParams(formData);
@@ -71,7 +89,7 @@ export default function Home() {
               </Suspense>
             </Secondary>
           </PageHeader>
-           {((me.groups?.includes(tallentajaOphGroup))||(me.groups?.includes(katselijaOphGroup)))&&
+           {((groups?.includes(tallentajaOphGroup))||(groups?.includes(katselijaOphGroup)))&&
               <FormControlLabel
                 control={
                   <Switch
@@ -108,6 +126,8 @@ export default function Home() {
           </ErrorBoundary>
         </Suspense>
       </TableContainer>
+      {writeAccess()&&<AddIntegrationButton setOpen={setAddIntegration}></AddIntegrationButton>}
+      {writeAccess()&&<NewIntegrationSelection open={addIntegration} setOpen={setAddIntegration} />} 
     </>
   );
 }

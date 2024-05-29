@@ -6,7 +6,7 @@
     "version": "0"
   },
   "servers": [
-    { "url": "https://virkailija.testiopintopolku.fi/lokalisointi/cxf/rest" }
+    { "url": "https://virkailija.opintopolku.fi/lokalisointi/cxf/rest" }
   ],
   "paths": {
     "/v1/localisation": {
@@ -59,13 +59,6 @@
                         "id": 789,
                         "locale": "fi",
                         "value": "Foo"
-                      },
-                      {
-                        "category": "mpassid",
-                        "key": "attribuutti.baz",
-                        "id": 789,
-                        "locale": "fi",
-                        "value": "Baz"
                       }
                     ]
                   }
