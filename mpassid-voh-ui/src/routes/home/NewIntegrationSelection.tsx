@@ -1,11 +1,13 @@
 import { getBlankIntegration } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
+import { getOrganisaatioNimet } from "@/api/organisaatio";
 import type { SelectChangeEvent} from "@mui/material";
 import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
 import type { Dispatch} from "react";
 import { useEffect, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from "react-router-dom";
+import toLanguage from "@/utils/toLanguage";
 
 export const defaults = {
     integration: "idp",
@@ -31,17 +33,54 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const [types, setTypes] = useState(defaults.typesOKJ);
     const me = useMe();
     const [organizations, setOrganizations] = useState<string[]>();
+    const [possibleOrganizationNames, setPossibleOrganizationNames] = useState<string[]>();
     const navigate = useNavigate();
+    const language = toLanguage(useIntl().locale).toLowerCase();
 
     useEffect(() => {
+        
+        
         if(me?.groups) {
-            const possibleOrganizations = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
-            setOrganizations(possibleOrganizations);
-            if(possibleOrganizations.length>0) {
-                setOrganization(possibleOrganizations[0]);
-            }
+            const names: string[] = [];
+            const possibleOrganizationsOids = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
+            
+            possibleOrganizationsOids.forEach(oid=>{
+                getOrganisaatioNimet(oid).then(response=>{
+                    var found=false;
+                    response.forEach(organisation=>{
+                        if(organisation?.oid===oid&&organisation?.nimi) {
+                            if(organisation?.nimi[language]) {
+                                names.push(organisation?.nimi[language])
+                            } else {
+                                names.push(oid)
+                            }
+                            
+                            found=true;
+                        }
+                    })
+                    if(!found) {
+                        names.push(oid)
+                    }
+                    if(possibleOrganizationsOids.length===names.length) {
+                        setOrganizations(names)
+                        setOrganization(names[0])
+                    }
+                })
+                .catch(error=>{
+                    names.push(oid)
+                    if(possibleOrganizationsOids.length===names.length) {
+                        setOrganizations(names)
+                        setOrganization(names[0])
+                    }
+                })
+                
+            })
+        
+            
+            
+            
         }
-    }, [me]);    
+    }, [language, me]);    
 
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type, organization: organization})

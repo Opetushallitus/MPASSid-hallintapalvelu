@@ -145,8 +145,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
     return (
      
         <div>
-            <FormControl sx={{ m: 1, width: '80%' }}>
-                
+            <FormControl sx={{ width: '80%' }}>
                 <Select
                 labelId="multiselectForm"
                 id="multiselectForm-checkbox"

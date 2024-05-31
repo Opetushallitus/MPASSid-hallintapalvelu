@@ -32,6 +32,7 @@ interface Props {
 
 export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration}: Props) {
     
+    const [isValidSchoolSelection, setIsValidSchoolSelection] = useState(true);
     const [isValid, setIsValid] = useState(true);
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
@@ -80,7 +81,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){              
               setCanSave(false)
             } else {                  
-              if(isValid) {                
+              if(isValid&&isValidSchoolSelection) {                
                 setCanSave(true)
               } else {
                 setCanSave(false)
@@ -94,7 +95,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, newIntegration, setNewIntegration]);
+    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration]);
 
     useEffect(() => {
       if(newDiscoveryInformation) {
@@ -102,7 +103,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         if(_.isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
           setCanSave(false)
         } else {                  
-          if(isValid) {                
+          if(isValid&&isValidSchoolSelection) {                
             setCanSave(true)
           } else {
             setCanSave(false)
@@ -116,7 +117,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           setSaveDialogState(false);  
       }
     
-}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValid, newIntegration, setNewIntegration]);
+}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration]);
 
     var hasAttributes =
                 role === "idp" &&
@@ -136,40 +137,28 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
         </Grid>
-        {!ENV.PROD &&role === "idp" && type === "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && type === "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
                 configurationEntity={newConfigurationEntityData} 
                 discoveryInformation={newDiscoveryInformation} 
                 setDiscoveryInformation={setNewDiscoveryInformation} 
-                setCanSave={setIsValid}
+                setCanSave={setIsValidSchoolSelection}
                 isEditable={true}/>
               )
           }
-        {!ENV.PROD &&role === "idp" && type !== "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && type !== "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
                 configurationEntity={newConfigurationEntityData} 
                 discoveryInformation={newDiscoveryInformation} 
                 setDiscoveryInformation={setNewDiscoveryInformation}
-                setCanSave={setIsValid}
+                setCanSave={setIsValidSchoolSelection}
                 isEditable={false}/>
             )
           }
-
-          {ENV.PROD && role === "idp" &&  newConfigurationEntityData && newDiscoveryInformation &&
-            (<SchoolSelection 
-                integration={integration} 
-                setConfigurationEntity={setNewConfigurationEntityData} 
-                configurationEntity={newConfigurationEntityData} 
-                discoveryInformation={newDiscoveryInformation} 
-                setDiscoveryInformation={setNewDiscoveryInformation}
-                setCanSave={setIsValid}
-                isEditable={false}/>
-            )
-          }  
 
         {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData && (
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} />

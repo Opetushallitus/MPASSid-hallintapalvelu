@@ -123,10 +123,8 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
 
     if(isVisible) {
         return (
-            <Grid container >
-                
-                    <Grid key={attribute.name} container spacing={2} mb={3} >
-                    <Grid item xs={4}>
+            <>
+                <Grid item xs={4}>
                     <Tooltip
                         title={
                             <>
@@ -140,40 +138,33 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                         }
                         >
                         <span>{label ? <FormattedMessage {...label} /> : attribute.name}</span>
-                        </Tooltip>
-                        
-                        
-                    </Grid>
-                    <Grid item xs={8} sx={{}}>
-                        <Typography
+                    </Tooltip>
+                </Grid>
+                <Grid item xs={8}>
+                    <Typography
                         sx={{
                             whiteSpace: "pre-wrap",
                             wordBreak: "break-all",
                         }}
                         variant="caption"
-                        >
-                        {true&&
-                            (<InputForm key={attribute.name} 
-                                object={attribute} 
-                                path="content" 
-                                type={"boolean"} 
-                                isEditable={isEditable} 
-                                onUpdate={onUpdateData} 
-                                onValidate={onValidate} 
-                                mandatory={isMandatory}
-                                label={label?intl.formatMessage(label):attribute.name!}
-                                attributeType={"data"}
-                                helperText={helperText}
-                                setCanSave={setCanSave}/>)
-                        }
-                        
-                        
-                        </Typography>
-                    </Grid>
-                    </Grid>
-                
-            
-            </Grid>)
+                    >
+                    {true&&
+                        (<InputForm key={attribute.name} 
+                            object={attribute} 
+                            path="content" 
+                            type={"boolean"} 
+                            isEditable={isEditable} 
+                            onUpdate={onUpdateData} 
+                            onValidate={onValidate} 
+                            mandatory={isMandatory}
+                            label={label?intl.formatMessage(label):attribute.name!}
+                            attributeType={"data"}
+                            helperText={helperText}
+                            setCanSave={setCanSave}/>)
+                    }
+                    </Typography>
+                </Grid>
+            </>)
         } else {
             return(<></>)
         }
