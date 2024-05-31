@@ -1,6 +1,6 @@
-import type { ChangeEvent, Dispatch} from "react";
+import type { ChangeEvent, Dispatch, FormEvent} from "react";
 import { useEffect, useState } from "react";
-import {  Box, Grid, Switch, Tooltip, Typography } from "@mui/material";
+import {  Box, Button, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import { DataRow, TextList } from "../integraatio/IntegrationTab/DataRow";
 import { getIntegrationDiscoveryInformation, type Components } from "@/api";
@@ -12,6 +12,7 @@ import MultiSelectForm from "./Form/MultiSelectForm";
 import { helperText, validate } from "@/utils/Validators";
 import { SchoolForm } from "./Form";
 import { clone, last, toPath } from "lodash";
+import { PhotoCamera } from "@mui/icons-material";
 
 interface Props {
     isEditable: boolean; 
@@ -66,6 +67,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const [alreadyExcludeSchools, setAlreadyExcludeSchools] = useState<boolean>(false);
     const [exampleSchool, setExampleSchool] = useState<string>('');
     const [schoolData, setSchoolData] = useState<SchoolData>(kouluData);
+    const [logo, setLogo] = useState<File>();
+    const intl = useIntl();
 
     const convertSchoolCode = (value?:string) => {
       if(value === undefined || value === null || value === '' ) {
@@ -155,6 +158,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       setCanSave(true)
       
     };
+
     /*
     Näytetäänkö koulut (KYLLÄ/EI)
       JOS näytetään koulut KYLLÄ 
@@ -214,7 +218,26 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         //return helperText(configuration.validation,value);
         return helperText([],value);
       }
-    
+      
+      
+      
+      const loadFile = (event:ChangeEvent<HTMLInputElement>) => {
+          
+          var reader = new FileReader();
+          reader.onload = function(){
+            const output:HTMLImageElement = document.getElementById('integratio-logo-preview') as HTMLImageElement;
+            if(event&&event.target&&event.target.files&&event.target.files.length>0) {
+              output.src = URL.createObjectURL(event.target.files[0]);
+            }
+          };
+          if(event&&event.target&&event.target.files&&event.target.files.length>0) {
+            reader.readAsDataURL(event.target.files[0]);
+            setLogo(event.target.files[0])
+          }
+          
+        };
+      
+
     useEffect(() => {
      
         const newEnums:oneEnum[] = [];
@@ -375,13 +398,51 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           <DataRowTitle></DataRowTitle>
           <DataRowValue><FormattedMessage defaultMessage="Esim. Mansikkalan koulu" values={{title: title}} /></DataRowValue>            
           </>}
+           
           
-                     
-          <DataRow
-                object={integration}
-                path="configurationEntity.idp.logoUrl"
-                type="image"
-            />
+            <DataRowTitle path="logoUrl"></DataRowTitle>
+            <DataRowValue>
+              <form >
+                <input
+                  accept="image/*"
+                  hidden
+                  id="contained-button-file"
+                  multiple
+                  type="file"
+                  onChange={e=>loadFile(e)}
+                />
+                <label htmlFor="contained-button-file">
+                <IconButton color="primary" component="span">
+                  <PhotoCamera />
+                </IconButton>
+                  
+                </label>   
+              </form>
+              
+            </DataRowValue>               
+            {logo&&<>
+              <DataRowTitle></DataRowTitle>
+              <DataRowValue><img id="integratio-logo-preview" alt={"logo"} style={{maxHeight:125,maxWidth:36}}/></DataRowValue>
+              </>}
+            {integration?.configurationEntity?.idp?.logoUrl&&integration.configurationEntity.idp.logoUrl!==''&&!logo&&
+            <>
+            <DataRowTitle></DataRowTitle>
+            <DataRowValue>
+              <Paper variant="outlined" sx={{ display: "inline-flex" }}>
+                <img
+                  src={integration.configurationEntity.idp.logoUrl}
+                  alt={intl.formatMessage({
+                    defaultMessage: "organisaation logo",
+                    description: "saavutettavuus",
+                  })}
+                />
+            </Paper>
+            </DataRowValue>
+            
+            </>}
+            
+            
+
         </Grid>
         
         {!showSchools&&customDisplayName&&configurationEntity&&
@@ -501,11 +562,10 @@ function DataRowTitle({path}:DataRowProps) {
 
 function DataRowValue({children}:DataRowProps) {
 
-  
-
   return (
       <Grid item xs={8}>
         {children}
       </Grid>
   );
 }
+

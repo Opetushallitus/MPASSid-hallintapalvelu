@@ -33,7 +33,6 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const [types, setTypes] = useState(defaults.typesOKJ);
     const me = useMe();
     const [organizations, setOrganizations] = useState<string[]>();
-    const [possibleOrganizationNames, setPossibleOrganizationNames] = useState<string[]>();
     const navigate = useNavigate();
     const language = toLanguage(useIntl().locale).toLowerCase();
 

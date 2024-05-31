@@ -59,7 +59,6 @@ export default function Home() {
     []
   );
   
-  
   useLayoutEffect(() => {
     if (tabs.includes(state!)) {
       setValue([ ...tabs.splice(state,1)]);
@@ -73,10 +72,15 @@ export default function Home() {
   }, [me]);
 
   const writeAccess = () => {
-    if((groups?.some(group => group.includes("APP_MPASSID_TALLENTAJA_"))||groups?.some(group => group.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_"))||groups?.includes(tallentajaOphGroup))) {
+    
+    if((groups?.includes("APP_MPASSID_TALLENTAJA"))||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ")) {
+      console.log("Groups (true): ",groups)
       return true;
+    } else {
+      console.log("Groups (false): ",groups)
+      return false;
     }
-    return false;
+    
   }
 
   function handleSearch(formData: FormData) {
