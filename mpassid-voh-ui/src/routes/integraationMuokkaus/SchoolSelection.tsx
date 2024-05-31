@@ -24,11 +24,27 @@ interface Props {
     setDiscoveryInformation: Dispatch<Components.Schemas.DiscoveryInformation>;
 }
 
+const kouluData = {
+  organisaatio: '',
+  koulut: [ 
+    { nimi: '',
+      oppilaitostyyppi:'',
+      koulukoodi: 111
+    },
+    { nimi: '',
+      oppilaitostyyppi:'',
+      koulukoodi: 112
+    }
+  ],
+  existingIncludes: [],
+  existingExcludes: []
+}
+
 export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
     const [showSchools, setShowSchools] = useState<boolean>(discoveryInformation?.showSchools||false);
-    const [title, setTitle] = useState<string>(discoveryInformation?.title||'');
+    const [title, setTitle] = useState<string>(discoveryInformation?.title||integration?.organization?.name||'');
     //const [earlyEducationProvides, setEarlyEducationProvides] = useState<boolean>(discoveryInformation?.earlyEducationProvides||false);
     const [customDisplayName, setCustomDisplayName] = useState<string>(discoveryInformation?.customDisplayName||integration?.organization?.name||'');
     const institutionTypes = useKoodisByKoodisto(
@@ -207,12 +223,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           
           
               </>}
-          {showSchools&&<DataRow
+          {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&<DataRow
             object={integration}
             path="discoveryInformation.schools"
             type="text-list"
           />}
-          {showSchools&&<DataRow
+          {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&<DataRow
             object={integration}
             path="discoveryInformation.excludedSchools"
             type="text-list"
