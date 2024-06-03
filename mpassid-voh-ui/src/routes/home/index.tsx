@@ -74,10 +74,8 @@ export default function Home() {
   const writeAccess = () => {
     
     if((groups?.includes("APP_MPASSID_TALLENTAJA"))||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ")) {
-      console.log("Groups (true): ",groups)
       return true;
     } else {
-      console.log("Groups (false): ",groups)
       return false;
     }
     

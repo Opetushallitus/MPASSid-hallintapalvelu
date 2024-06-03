@@ -25,6 +25,11 @@ export const defaults = {
     setOpen: Dispatch<boolean>;
   }
 
+  interface Organization {
+    oid: string;
+    name: string;
+  }
+
 function NewIntegrationSelection({ open, setOpen}: Props) {
 
     const [organization, setOrganization] = useState('');
@@ -32,7 +37,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const [type, setType] = useState(defaults.typeOKJ);
     const [types, setTypes] = useState(defaults.typesOKJ);
     const me = useMe();
-    const [organizations, setOrganizations] = useState<string[]>();
+    const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
     const language = toLanguage(useIntl().locale).toLowerCase();
 
@@ -40,36 +45,38 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         
         
         if(me?.groups) {
-            const names: string[] = [];
+            const organizationNames: Organization[] = [];
             const possibleOrganizationsOids = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
             
             possibleOrganizationsOids.forEach(oid=>{
+                const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
                     var found=false;
                     response.forEach(organisation=>{
                         if(organisation?.oid===oid&&organisation?.nimi) {
                             if(organisation?.nimi[language]) {
-                                names.push(organisation?.nimi[language])
+                                newOrganizationName.name=organisation?.nimi[language];
                             } else {
-                                names.push(oid)
+                                newOrganizationName.name=oid;
                             }
-                            
                             found=true;
                         }
                     })
                     if(!found) {
-                        names.push(oid)
+                        newOrganizationName.name=oid;
                     }
-                    if(possibleOrganizationsOids.length===names.length) {
-                        setOrganizations(names)
-                        setOrganization(names[0])
+                    organizationNames.push(newOrganizationName);
+                    if(possibleOrganizationsOids.length===organizationNames.length) {
+                        setOrganizations(organizationNames)
+                        setOrganization(organizationNames[0].oid)
                     }
                 })
                 .catch(error=>{
-                    names.push(oid)
-                    if(possibleOrganizationsOids.length===names.length) {
-                        setOrganizations(names)
-                        setOrganization(names[0])
+                    const newOrganizationName = { oid: oid, name: oid }
+                    organizationNames.push(newOrganizationName)
+                    if(possibleOrganizationsOids.length===organizationNames.length) {
+                        setOrganizations(organizationNames)
+                        setOrganization(organizationNames[0].oid)
                     }
                 })
                 
@@ -139,8 +146,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         sx={{ mr: 1,alignContent: "flex-end"}}
                     >
                         {organizations&&organizations.map((option) => (
-                        <MenuItem key={option} value={option}>
-                            {option}
+                        <MenuItem key={option.name} value={option.oid}>
+                            {option.name}
                         </MenuItem>
                         ))}
                     </Select>
