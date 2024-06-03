@@ -414,7 +414,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 <label htmlFor="contained-button-file">
                 <IconButton color="primary" component="span">
                   <PhotoCamera />
-                </IconButton>
+                </IconButton><FormattedMessage defaultMessage="Valitse" values={{title: title}} />
                   
                 </label>   
               </form>
@@ -422,7 +422,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             </DataRowValue>               
             {logo&&<>
               <DataRowTitle></DataRowTitle>
-              <DataRowValue><img id="integratio-logo-preview" alt={"logo"} style={{maxHeight:125,maxWidth:36}}/></DataRowValue>
+              <DataRowValue><img id="integratio-logo-preview" alt={"logo"} style={{maxHeight:"125 px",maxWidth:"36 px"}}/></DataRowValue>
               </>}
             {integration?.configurationEntity?.idp?.logoUrl&&integration.configurationEntity.idp.logoUrl!==''&&!logo&&
             <>
