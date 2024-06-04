@@ -89,7 +89,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     }, [language, me]);    
 
     const createIntegration = async () => {
-        getBlankIntegration({role: integration, type: type, organization: organization})
+        getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
                 result.id=0;
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
