@@ -15,9 +15,9 @@ export const defaults = {
     integrations: [ { "label": "Koulutustoimija", "role": "idp" } ],
     typePI: "SAML",
     typesPI: [ "SAML", "OIDC" ],
-    typeOKJ: "Wilma",
+    typeOKJ: "wilma",
     //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
-    typesOKJ: [ "Wilma" ]
+    typesOKJ: [ "wilma" ]
   };
 
   interface Props {
