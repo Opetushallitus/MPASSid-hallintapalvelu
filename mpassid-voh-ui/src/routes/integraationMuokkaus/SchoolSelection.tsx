@@ -1,6 +1,6 @@
-import type { ChangeEvent, Dispatch, FormEvent} from "react";
+import type { ChangeEvent, Dispatch} from "react";
 import { useEffect, useState } from "react";
-import {  Box, Button, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
+import {  Box, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import { DataRow, TextList } from "../integraatio/IntegrationTab/DataRow";
 import { getIntegrationDiscoveryInformation, type Components } from "@/api";
@@ -193,7 +193,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const updateExcludeSchools = (values:string[]) => {
       if(discoveryInformation) {
         discoveryInformation.excludedSchools=values.map(value=>value)
-        setDiscoveryInformation(discoveryInformation)
+        setDiscoveryInformation(clone(discoveryInformation))
         
       }
       setExcludeSchools(values.map(value=>value))
@@ -203,7 +203,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
   const updateSchools = (values:string[]) => {
     if(discoveryInformation) {
       discoveryInformation.schools=values.map(value=>value)
-      setDiscoveryInformation(discoveryInformation)
+      setDiscoveryInformation(clone(discoveryInformation))
       
     }
     setSchools(values.map(value=>value))
@@ -225,13 +225,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           
           var reader = new FileReader();
           reader.onload = function(){
-            const output:HTMLImageElement = document.getElementById('integratio-logo-preview') as HTMLImageElement;
+            const img:HTMLImageElement = document.getElementById('integratio-logo-preview') as HTMLImageElement;
             if(event&&event.target&&event.target.files&&event.target.files.length>0) {
-              output.src = URL.createObjectURL(event.target.files[0]);
+              img.src = URL.createObjectURL(event.target.files[0]);
             }
           };
           if(event&&event.target&&event.target.files&&event.target.files.length>0) {
             reader.readAsDataURL(event.target.files[0]);
+            
             setLogo(event.target.files[0])
           }
           
@@ -255,30 +256,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setEnums(newEnums);    
         
       }, [language,institutionTypes ]);
-      /*
-      <SchoolForm 
-              isVisible={true} 
-              isEditable={true} 
-              isMandatory={false} 
-              name="showSchools"
-              value={showSchools.toString()} 
-              newConfigurationEntityData={undefined} 
-              helperText={function (data: string): JSX.Element {
-                throw new Error("Function not implemented.");
-              } } 
-              onUpdate={function (value: string): void {
-                throw new Error("Function not implemented.");
-              } } 
-              onValidate={function (data: string): boolean {
-                throw new Error("Function not implemented.");
-              } } 
-              setNewConfigurationEntityData={function (value: Components.Schemas.ConfigurationEntity): void {
-                throw new Error("Function not implemented.");
-              } } 
-              setCanSave={function (value: boolean): void {
-                throw new Error("Function not implemented.");
-              } }/>
-      */
+     
     if(isEditable) {
       return(<>
         <Typography variant="h2" gutterBottom>
