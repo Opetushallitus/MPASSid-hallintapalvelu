@@ -113,7 +113,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         if(integration.organization&&integration.organization.oid) {
           getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList})
             .then(response=>{
-              if(response.existingExcluded&&response.existingExcluded.length!==1&&integration.organization&&response.existingExcluded[0]!==integration.organization.oid) {
+              if(response.existingExcluded&&response.existingExcluded.length!==1&&response.existingExcluded[0]!==String(integration.id)) {
                 setAlreadyExcludeSchools(true)
               } else {
                 setAlreadyExcludeSchools(false)
