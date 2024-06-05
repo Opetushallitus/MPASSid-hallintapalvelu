@@ -10,9 +10,6 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 
 export const defaults = {
-    integration: "idp",
-    //integrations: [ { "label": "Koulutustoimija", "role": "idp" }, { "label": "Palveluintegraatio", "role": "sp" } ],
-    integrations: [ { "label": "Koulutustoimija", "role": "idp" } ],
     typePI: "SAML",
     typesPI: [ "SAML", "OIDC" ],
     typeOKJ: "wilma",
@@ -33,13 +30,15 @@ export const defaults = {
 function NewIntegrationSelection({ open, setOpen}: Props) {
 
     const [organization, setOrganization] = useState('');
-    const [integration, setIntegration] = useState(defaults.integration);
+    const [integration, setIntegration] = useState('idp');
     const [type, setType] = useState(defaults.typeOKJ);
     const [types, setTypes] = useState(defaults.typesOKJ);
     const me = useMe();
     const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
     const language = toLanguage(useIntl().locale).toLowerCase();
+
+    const intl = useIntl();
 
     useEffect(() => {
         
@@ -166,11 +165,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         variant="standard"
                         sx={{ marginRight: "auto"}}
                     >
-                        {defaults.integrations.map((option) => (
-                        <MenuItem key={option.label} value={option.role}>
-                            {option.label}
+                        <MenuItem key={'koulutustoimija'} value={'idp'}>
+                            <FormattedMessage defaultMessage='Koulutustoimija'/>
                         </MenuItem>
-                        ))}
+                        {false&&<MenuItem key={'Palveluintegraatio'} value={'sp'}>
+                            <FormattedMessage defaultMessage='Palveluintegraatio' />
+                        </MenuItem>}
                     </Select>
                 </Grid>
                 <Grid item xs={4}>
@@ -187,11 +187,14 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         variant="standard"
                         sx={{ marginRight: "auto"}}
                     >
-                        {types.map((option) => (
-                        <MenuItem key={option} value={option}>
-                            {option}
-                        </MenuItem>
-                        ))}
+                        {types.map((option) => {        
+                            const id = `tyyppi.${option}`;
+                            const label = id in intl.messages ? { id } : undefined;    
+                            return(<MenuItem key={option} value={option}>
+                                    {label ? <FormattedMessage {...label} /> : option}
+                                </MenuItem>)
+                        })}
+                        
                     </Select>
                 </Grid>
             </Grid>

@@ -48,7 +48,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     
   }
   
-  
     return (
       <Grid container >
         {dataConfiguration
@@ -59,7 +58,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
           .map((configuration) => {
             const id = `attribuutti.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;
-
             return {
               ...configuration,
               label: label && intl.formatMessage(label),
@@ -83,6 +81,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   const helpGeneratorText = (value:string) => {
                     return helperText(configuration.validation,value);
                   }
+                  
                   return (<AttributeForm 
                     key={configuration.name!}
                     onUpdate={updateAttribute}
