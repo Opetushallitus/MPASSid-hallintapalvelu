@@ -75,7 +75,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         return 0;
       }
       return Number(value.substring(17).split("#")[0])
-    }
+    } 
 
     useEffect(() => {
       if(integration.organization?.children) {
@@ -113,10 +113,13 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         if(integration.organization&&integration.organization.oid) {
           getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList})
             .then(response=>{
-              if(response.existingExcluded&&response.existingExcluded.length!==1&&response.existingExcluded[0]!==String(integration.id)) {
+              if(response.existingExcluded&&response.existingExcluded.length===1&&response.existingExcluded[0]!==String(integration.id)) {
                 setAlreadyExcludeSchools(true)
               } else {
                 setAlreadyExcludeSchools(false)
+              }
+              if(response.existingIncluded&&response.existingIncluded.length>0) {
+                setPossibleSchools(schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) })));
               }
             })
         }
@@ -309,6 +312,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                       throw new Error("Function not implemented.");
                     } } 
                     setCanSave={setCanSave}/>}
+
                   <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
                   <Grid item xs={8}>
                     <Switch checked={extraSchoolsConfiguration}
