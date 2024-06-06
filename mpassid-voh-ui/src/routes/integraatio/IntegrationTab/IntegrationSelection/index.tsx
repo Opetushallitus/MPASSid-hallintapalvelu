@@ -38,6 +38,7 @@ import { usePaginationPage } from "@/utils/components/pagination";
 import DialogTitle from "@mui/material/DialogTitle";
 import ServiceLinkButton from "@/utils/components/ServiceLinkButton";
 import Suspense from "@/utils/components/Suspense";
+
 interface Props {
   integration: Components.Schemas.Integration;
   newIntegration?: Components.Schemas.Integration;
@@ -62,6 +63,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const [saveDialogState, setSaveDialogState] = useState(false);
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
+  const intl = useIntl();
 
   useEffect(() => {
     if(me?.groups) {
@@ -274,7 +276,9 @@ export default function IntegrationSelection({ integration, newIntegration, setN
             <Box display="flex" justifyContent="center" mt={3}> 
             
             <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label={<FormattedMessage defaultMessage="Salli kaikki palvelut" />} />
-                  <Button aria-label="delete" 
+                  <Button aria-label={intl.formatMessage({
+                            defaultMessage: "poista",
+                          })}
                           sx={{ marginLeft: "auto" }}
                           variant="text"
                           startIcon={<DeleteIcon />} 

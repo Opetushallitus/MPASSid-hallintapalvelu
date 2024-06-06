@@ -5,7 +5,7 @@ import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
 import { useEffect, useRef, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useNavigate, useParams } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
@@ -30,6 +30,7 @@ export default function IntegraatioMuokkaus() {
   const [groups, setGroups] = useState<string[]>();
   const [openNotice, setOpenNotice] = useState(false);
   const result = useRef<Components.Schemas.Integration>({});
+  const intl = useIntl();
 
   useEffect(() => {
     if(me?.groups) {
@@ -128,7 +129,11 @@ export default function IntegraatioMuokkaus() {
           
         </Suspense>
         {newIntegration&&id!=='0'&&<Box >                            
-                                          <IconButton aria-label="delete" onClick={()=>setDisabled(!isDisabled)}>
+                                          <IconButton 
+                                              aria-label={intl.formatMessage({
+                                                defaultMessage: "poista",
+                                              })}
+                                              onClick={()=>setDisabled(!isDisabled)}>
                                               <DeleteIcon />
                                           </IconButton>   
                                           <FormattedMessage defaultMessage="Poista jäsen" />
