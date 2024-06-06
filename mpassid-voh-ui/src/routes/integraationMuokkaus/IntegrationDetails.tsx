@@ -28,9 +28,10 @@ interface Props {
   setCanSave: Dispatch<boolean>;
   newIntegration?: Components.Schemas.Integration;
   setNewIntegration: Dispatch<Components.Schemas.Integration>;
+  setLogo: Dispatch<FileList>;
 }
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration}: Props) {
+export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo }: Props) {
     
     const [isValidSchoolSelection, setIsValidSchoolSelection] = useState(true);
     const [isValid, setIsValid] = useState(true);
@@ -145,6 +146,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 discoveryInformation={newDiscoveryInformation} 
                 setDiscoveryInformation={setNewDiscoveryInformation} 
                 setCanSave={setIsValidSchoolSelection}
+                setLogo={setLogo}
                 isEditable={true}/>
               )
           }
@@ -156,6 +158,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 discoveryInformation={newDiscoveryInformation} 
                 setDiscoveryInformation={setNewDiscoveryInformation}
                 setCanSave={setIsValidSchoolSelection}
+                setLogo={setLogo}
                 isEditable={false}/>
             )
           }

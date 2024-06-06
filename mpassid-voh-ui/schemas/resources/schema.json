@@ -153,6 +153,66 @@
           }
         }
       },
+      "/api/v2/integration/{id}/discoveryinformation/logo": {
+        "post": {
+          "tags": [
+            "integration-controller"
+          ],
+          "summary": "Update discovery information logo",
+          "operationId": "uploadLogo",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "file"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Integration discovery information update successful",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "405": {
+              "description": "Integration discovery information update error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/IntegrationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "/api/v2/integration/discoveryinformation": {
         "get": {
           "tags": [
