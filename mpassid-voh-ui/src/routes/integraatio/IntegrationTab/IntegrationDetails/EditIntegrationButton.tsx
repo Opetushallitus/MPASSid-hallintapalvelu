@@ -2,6 +2,7 @@ import { Box, Fab } from "@mui/material";
 import { Link } from "react-router-dom";
 import EditIcon from '@mui/icons-material/Edit';
 import type { Components } from "@/api";
+import { useIntl } from "react-intl";
 
 interface Props {
   integration: Components.Schemas.Integration;
@@ -9,6 +10,7 @@ interface Props {
 
 function EditIntegrationButton(props:Props) {
 
+  const intl = useIntl();
   const integration = props.integration
   const id = props.integration.id || "new"
   const type = props.integration.configurationEntity!.idp?.type || props.integration.configurationEntity!.sp?.type || props.integration.configurationEntity!.set?.type || "unknown"
@@ -32,7 +34,9 @@ function EditIntegrationButton(props:Props) {
           component={Link} 
           to={to}
           state={props.integration}
-          aria-label="add"
+          aria-label={intl.formatMessage({
+            defaultMessage: "lisää",
+          })}
           size="large"
           sx={{
             position: "fixed",

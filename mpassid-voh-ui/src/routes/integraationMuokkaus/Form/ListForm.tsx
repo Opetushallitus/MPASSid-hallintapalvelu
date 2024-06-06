@@ -81,7 +81,9 @@ export default function ListForm({ object, type, isEditable=false, helperText, o
               disableGutters
               secondaryAction={
                 <IconButton 
-                  aria-label="comment"
+                  aria-label={intl.formatMessage({
+                    defaultMessage: "kommentti",
+                  })}
                   value={value}
                   onClick={(e)=>{onUpdate(e.currentTarget.value); setUsedHelperText(<></>)}}>
                   <ClearIcon />
