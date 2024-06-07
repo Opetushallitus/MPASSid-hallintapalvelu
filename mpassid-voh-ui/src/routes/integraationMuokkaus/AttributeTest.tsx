@@ -249,7 +249,9 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                         endAdornment: (
                             <InputAdornment position="end">
                             <IconButton
-                                aria-label="toggle clientSecret visibility"
+                                aria-label={intl.formatMessage({
+                                    defaultMessage: "näytä",
+                                  })}
                                 onClick={handleClickShowClientSecret}
                                 edge="end"
                             >

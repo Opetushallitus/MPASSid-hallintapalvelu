@@ -3,7 +3,7 @@ import { getRole } from "../../home/IntegrationsTable";
 import IdentityProvider from "./IdentityProvider";
 import ServiceProvider from "./ServiceProvider";
 import SetProvider from "./SetProvider";
-import { Dispatch } from "react";
+import type { Dispatch } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;

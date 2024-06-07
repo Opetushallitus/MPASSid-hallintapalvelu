@@ -1,0 +1,1317 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Organisaatio API",
+        "description": "Organisaation tarjoamat rajapinnat",
+        "version": "0"
+    },
+    "servers": [
+        { "url": "@organisaatio.url@" }
+    ],
+    "paths": {       
+        "/api/{oid}/nimet": {
+            "get": {
+                "tags": [
+                    "organisaatio-api-impl"
+                ],
+                "operationId": "getOrganisaatioNimet",
+                "parameters": [
+                    {
+                        "name": "oid",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrganisaatioNimiDTO"
+                                    }
+                                },
+                                "examples": {
+                                    "nimet": {
+                                      "value": [
+                                        {
+                                            "oid": "1.2.246.562.10.00000000001",
+                                            "nimi": {
+                                              "fi": "Opetushallitus",
+                                              "sv": "Utbildningsstyrelsen",
+                                              "en": "Finnish National Agency for Education"
+                                            },
+                                            "alkuPvm": "1970-01-01",
+                                            "version": 0
+                                          }
+                                        ]
+                                    }
+                                  }
+                                
+                            }
+                        }
+                    },
+                    "302": {
+                        "description": "Autentikaatio puuttuu (Redirect CAS login sivulle)"
+                    },
+                    "401": {
+                        "description": "Sessio on vanhentunut tai käyttöoikeudet ei riitä"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "OrganisaatioMetaDataRDTO": {
+                "required": [
+                    "data",
+                    "hakutoimistoEctsEmail",
+                    "hakutoimistoEctsNimi",
+                    "hakutoimistoEctsPuhelin",
+                    "hakutoimistoEctsTehtavanimike",
+                    "hakutoimistonNimi",
+                    "koodi",
+                    "kuvaEncoded",
+                    "luontiPvm",
+                    "muokkausPvm",
+                    "nimi",
+                    "yhteystiedot"
+                ],
+                "type": "object",
+                "properties": {
+                    "kuvaEncoded": {
+                        "type": "string",
+                        "description": "Enkoodattu kuva"
+                    },
+                    "data": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string",
+                                "description": "Data"
+                            },
+                            "description": "Data"
+                        },
+                        "description": "Data"
+                    },
+                    "hakutoimistoEctsTehtavanimike": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Hakutoimiston ECTS tehtävänimike"
+                        },
+                        "description": "Hakutoimiston ECTS tehtävänimike"
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Nimi"
+                        },
+                        "description": "Nimi"
+                    },
+                    "hakutoimistoEctsEmail": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Hakutoimiston ECTS sähköpostiosoite"
+                        },
+                        "description": "Hakutoimiston ECTS sähköpostiosoite"
+                    },
+                    "yhteystiedot": {
+                        "type": "array",
+                        "description": "Yhteystiedot",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string",
+                                "description": "Yhteystiedot"
+                            },
+                            "description": "Yhteystiedot"
+                        }
+                    },
+                    "koodi": {
+                        "type": "string",
+                        "description": "Koodi"
+                    },
+                    "luontiPvm": {
+                        "type": "string",
+                        "description": "Luontipäivämäärä",
+                        "format": "date-time"
+                    },
+                    "muokkausPvm": {
+                        "type": "string",
+                        "description": "Muokkauspäivämäärä",
+                        "format": "date-time"
+                    },
+                    "hakutoimistoEctsNimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Hakutoimiston ECTS nimi"
+                        },
+                        "description": "Hakutoimiston ECTS nimi"
+                    },
+                    "hakutoimistoEctsPuhelin": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Hakutoimiston ECTS puhelinnumero"
+                        },
+                        "description": "Hakutoimiston ECTS puhelinnumero"
+                    },
+                    "hakutoimistonNimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Hakutoimiston nimi"
+                        },
+                        "description": "Hakutoimiston nimi"
+                    }
+                },
+                "description": "Organisaation metatiedot"
+            },
+            "OrganisaatioNimiRDTO": {
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string"
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "paivittaja": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                },
+                "description": "Organisaation nimihistoria"
+            },
+            "OrganisaatioRDTOV4": {
+                "required": [
+                    "alkuPvm",
+                    "domainNimi",
+                    "emailOsoite",
+                    "kayntiosoite",
+                    "kayttoryhmat",
+                    "kieletUris",
+                    "kotipaikkaUri",
+                    "kuvaus",
+                    "kuvaus2",
+                    "lakkautusPvm",
+                    "lisatiedot",
+                    "maaUri",
+                    "metadata",
+                    "muutKotipaikatUris",
+                    "muutOppilaitosTyyppiUris",
+                    "nimet",
+                    "nimi",
+                    "oid",
+                    "oppilaitosKoodi",
+                    "oppilaitosTyyppiUri",
+                    "parentOid",
+                    "parentOidPath",
+                    "postiosoite",
+                    "puhelinnumero",
+                    "ryhmatyypit",
+                    "toimipistekoodi",
+                    "tyypit",
+                    "varhaiskasvatuksenToimipaikkaTiedot",
+                    "version",
+                    "vuosiluokat",
+                    "wwwOsoite",
+                    "yhteishaunKoulukoodi",
+                    "yhteystietoArvos",
+                    "yritysmuoto",
+                    "ytjkieli",
+                    "ytjpaivitysPvm",
+                    "ytunnus"
+                ],
+                "type": "object",
+                "properties": {
+                    "yhteishaunKoulukoodi": {
+                        "type": "string",
+                        "description": "Yhteishaun koulukoodi",
+                        "deprecated": true
+                    },
+                    "maskingActive": {
+                        "type": "boolean"
+                    },
+                    "emailOsoite": {
+                        "type": "string",
+                        "description": "Sähköpostiosoite",
+                        "deprecated": true
+                    },
+                    "kuvaus": {
+                        "type": "string",
+                        "description": "Kuvaus"
+                    },
+                    "lyhytNimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "LyhytNimi"
+                        },
+                        "description": "LyhytNimi"
+                    },
+                    "varhaiskasvatuksenToimipaikkaTiedot": {
+                        "$ref": "#/components/schemas/VarhaiskasvatuksenToimipaikkaTiedotDto"
+                    },
+                    "puhelinnumero": {
+                        "type": "string",
+                        "description": "Puhelinnumero",
+                        "deprecated": true
+                    },
+                    "wwwOsoite": {
+                        "type": "string",
+                        "description": "WWW-osoite",
+                        "deprecated": true
+                    },
+                    "tyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Tyypit koodiarvoina. Kts. organisaatiotyypit koodisto",
+                        "items": {
+                            "type": "string",
+                            "description": "Tyypit koodiarvoina. Kts. organisaatiotyypit koodisto"
+                        }
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Nimi"
+                        },
+                        "description": "Nimi"
+                    },
+                    "nimet": {
+                        "type": "array",
+                        "description": "Organisaation nimihistoria",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioNimiRDTO"
+                        }
+                    },
+                    "oid": {
+                        "type": "string",
+                        "description": "Organisaation oid"
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "description": "Alkamispäivämäärä",
+                        "format": "date-time"
+                    },
+                    "kuvaus2": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Toinen kuvaus"
+                        },
+                        "description": "Toinen kuvaus"
+                    },
+                    "maaUri": {
+                        "type": "string",
+                        "description": "Maan URI"
+                    },
+                    "metadata": {
+                        "$ref": "#/components/schemas/OrganisaatioMetaDataRDTO"
+                    },
+                    "ytjkieli": {
+                        "type": "string",
+                        "description": "Kieli, jolla YTJ:stä haetut tiedot on päivitetty"
+                    },
+                    "ytunnus": {
+                        "type": "string",
+                        "description": "Y-tunnus"
+                    },
+                    "oppilaitosTyyppiUri": {
+                        "type": "string",
+                        "description": "Oppilaitoksen tyypin URI"
+                    },
+                    "opetuspisteenJarjNro": {
+                        "type": "string"
+                    },
+                    "domainNimi": {
+                        "type": "string",
+                        "description": "Domain"
+                    },
+                    "kieletUris": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Kielten URIt",
+                        "items": {
+                            "type": "string",
+                            "description": "Kielten URIt"
+                        }
+                    },
+                    "kotipaikkaUri": {
+                        "type": "string",
+                        "description": "Kotipaikan URI"
+                    },
+                    "lakkautusPvm": {
+                        "type": "string",
+                        "description": "Lakkautuspäivämäärä",
+                        "format": "date-time"
+                    },
+                    "oppilaitosKoodi": {
+                        "type": "string",
+                        "description": "Oppilaitoksen koodi"
+                    },
+                    "parentOid": {
+                        "type": "string",
+                        "description": "Yläorganisaation oid"
+                    },
+                    "parentOidPath": {
+                        "type": "string",
+                        "description": "Yläorganisaation oid-polku"
+                    },
+                    "toimipistekoodi": {
+                        "type": "string",
+                        "description": "Toimipisteen koodi"
+                    },
+                    "vuosiluokat": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Vuosiluokat",
+                        "items": {
+                            "type": "string",
+                            "description": "Vuosiluokat"
+                        }
+                    },
+                    "ryhmatyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Ryhmatyypit",
+                        "items": {
+                            "type": "string",
+                            "description": "Ryhmatyypit"
+                        }
+                    },
+                    "kayttoryhmat": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Kayttoryhmat",
+                        "items": {
+                            "type": "string",
+                            "description": "Kayttoryhmat"
+                        }
+                    },
+                    "yritysmuoto": {
+                        "type": "string",
+                        "description": "Yritysmuoto"
+                    },
+                    "ytjpaivitysPvm": {
+                        "type": "string",
+                        "description": "YTJ:n päivityspäivämäärä",
+                        "format": "date-time"
+                    },
+                    "virastoTunnus": {
+                        "type": "string"
+                    },
+                    "tarkastusPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "yhteystietoArvos": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Yhteystiedot",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string",
+                                "description": "Yhteystiedot"
+                            },
+                            "description": "Yhteystiedot"
+                        }
+                    },
+                    "kayntiosoite": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Käyntiosoite"
+                        },
+                        "description": "Käyntiosoite"
+                    },
+                    "postiosoite": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Postiosoite"
+                        },
+                        "description": "Postiosoite"
+                    },
+                    "yhteystiedot": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "muutKotipaikatUris": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaation muiden kotipaikkojen URIt",
+                        "items": {
+                            "type": "string",
+                            "description": "Organisaation muiden kotipaikkojen URIt"
+                        }
+                    },
+                    "muutOppilaitosTyyppiUris": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Oppilaitoksen muut tyypit",
+                        "items": {
+                            "type": "string",
+                            "description": "Oppilaitoksen muut tyypit"
+                        }
+                    },
+                    "piilotettu": {
+                        "type": "boolean"
+                    },
+                    "lisatiedot": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Lisatiedot",
+                        "items": {
+                            "type": "string",
+                            "description": "Lisatiedot"
+                        }
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "description": "Versio",
+                        "format": "int32"
+                    }
+                },
+                "description": "Organisaation tiedot"
+            },
+            "VarhaiskasvatuksenKielipainotusDto": {
+                "type": "object",
+                "properties": {
+                    "kielipainotus": {
+                        "type": "string"
+                    },
+                    "alkupvm": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "loppupvm": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                }
+            },
+            "VarhaiskasvatuksenToiminnallinepainotusDto": {
+                "type": "object",
+                "properties": {
+                    "toiminnallinenpainotus": {
+                        "type": "string"
+                    },
+                    "alkupvm": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "loppupvm": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                }
+            },
+            "VarhaiskasvatuksenToimipaikkaTiedotDto": {
+                "type": "object",
+                "properties": {
+                    "toimintamuoto": {
+                        "type": "string"
+                    },
+                    "kasvatusopillinenJarjestelma": {
+                        "type": "string"
+                    },
+                    "varhaiskasvatuksenJarjestamismuodot": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "paikkojenLukumaara": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "varhaiskasvatuksenKielipainotukset": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/VarhaiskasvatuksenKielipainotusDto"
+                        }
+                    },
+                    "varhaiskasvatuksenToiminnallinenpainotukset": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/VarhaiskasvatuksenToiminnallinepainotusDto"
+                        }
+                    }
+                },
+                "description": "Lisatiedot"
+            },
+            "ResultRDTOV4": {
+                "type": "object",
+                "properties": {
+                    "info": {
+                        "type": "string"
+                    },
+                    "organisaatio": {
+                        "$ref": "#/components/schemas/OrganisaatioRDTOV4"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "OK",
+                            "INFO",
+                            "WARNING",
+                            "VALIDATION",
+                            "ERROR"
+                        ]
+                    }
+                }
+            },
+            "OrganisaatioNimiDTO": {
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string"
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "paivittaja": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "OrganisaatioNimiUpdateDTO": {
+                "type": "object",
+                "properties": {
+                    "currentNimi": {
+                        "$ref": "#/components/schemas/OrganisaatioNimiDTO"
+                    },
+                    "updatedNimi": {
+                        "$ref": "#/components/schemas/OrganisaatioNimiDTO"
+                    }
+                }
+            },
+            "Kayttaja": {
+                "required": [
+                    "asiointikieli",
+                    "etunimi",
+                    "sahkoposti",
+                    "sukunimi"
+                ],
+                "type": "object",
+                "properties": {
+                    "etunimi": {
+                        "type": "string",
+                        "description": "Pääkäyttäjän etunimi"
+                    },
+                    "sukunimi": {
+                        "type": "string",
+                        "description": "Pääkäyttäjän sukunimi"
+                    },
+                    "sahkoposti": {
+                        "type": "string",
+                        "description": "Pääkäyttäjän sähköpostiosoite"
+                    },
+                    "asiointikieli": {
+                        "type": "string",
+                        "description": "Pääkäyttäjän asiointikieli",
+                        "enum": [
+                            "fi",
+                            "sv",
+                            "en"
+                        ]
+                    }
+                },
+                "description": "Pääkäyttäjän tiedot"
+            },
+            "VardaRekisterointi": {
+                "required": [
+                    "paakayttaja",
+                    "ytunnus"
+                ],
+                "type": "object",
+                "properties": {
+                    "ytunnus": {
+                        "type": "string",
+                        "description": "Y-tunnus"
+                    },
+                    "paakayttaja": {
+                        "$ref": "#/components/schemas/Kayttaja"
+                    }
+                },
+                "description": "Varda-organisaation rekisteröinti"
+            },
+            "ApiErrorDTO": {
+                "type": "object",
+                "properties": {
+                    "parameters": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "errorMessage": {
+                        "type": "string"
+                    },
+                    "errorKey": {
+                        "type": "string"
+                    }
+                }
+            },
+            "OrganisaatioPaivittajaDTO": {
+                "type": "object",
+                "properties": {
+                    "paivitysPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "paivittaja": {
+                        "type": "string"
+                    },
+                    "etuNimet": {
+                        "type": "string"
+                    },
+                    "sukuNimi": {
+                        "type": "string"
+                    }
+                }
+            },
+            "OrganisaatioHakutulosV4": {
+                "required": [
+                    "numHits",
+                    "organisaatiot"
+                ],
+                "type": "object",
+                "properties": {
+                    "numHits": {
+                        "type": "integer",
+                        "description": "Tulosjoukon koko",
+                        "format": "int32"
+                    },
+                    "organisaatiot": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaatiot",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioPerustietoV4"
+                        }
+                    }
+                },
+                "description": "Organisaation hakutulos v4"
+            },
+            "OrganisaatioPerustietoV4": {
+                "required": [
+                    "aliOrganisaatioMaara",
+                    "alkuPvm",
+                    "children",
+                    "kieletUris",
+                    "kotipaikkaUri",
+                    "lakkautusPvm",
+                    "match",
+                    "nimi",
+                    "oid",
+                    "oppilaitosKoodi",
+                    "oppilaitostyyppi",
+                    "organisaatiotyypit",
+                    "parentOid",
+                    "parentOidPath",
+                    "subRows",
+                    "tarkastusPvm",
+                    "toimipistekoodi",
+                    "virastoTunnus",
+                    "ytunnus"
+                ],
+                "type": "object",
+                "properties": {
+                    "aliOrganisaatioMaara": {
+                        "type": "integer",
+                        "description": "Aliorganisaatioiden määrä",
+                        "format": "int32"
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "description": "Aloituspäivämäärä",
+                        "format": "date-time"
+                    },
+                    "children": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaation alaorganisaatiot",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioPerustietoV4"
+                        }
+                    },
+                    "kieletUris": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Kielten URIt",
+                        "items": {
+                            "type": "string",
+                            "description": "Kielten URIt"
+                        }
+                    },
+                    "kotipaikkaUri": {
+                        "type": "string",
+                        "description": "Kotipaikan URI"
+                    },
+                    "lakkautusPvm": {
+                        "type": "string",
+                        "description": "Lakkautuspäivämäärä",
+                        "format": "date-time"
+                    },
+                    "lyhytNimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "match": {
+                        "type": "boolean",
+                        "description": "Osuiko hakutuloksiin"
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Organisaation nimi"
+                        },
+                        "description": "Organisaation nimi"
+                    },
+                    "oid": {
+                        "type": "string",
+                        "description": "Organisaation oid"
+                    },
+                    "oppilaitosKoodi": {
+                        "type": "string",
+                        "description": "Oppilaitoksen koodi"
+                    },
+                    "oppilaitostyyppi": {
+                        "type": "string",
+                        "description": "Oppilaitoksen tyyppi"
+                    },
+                    "organisaatiotyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaation tyypit koodiarvoina",
+                        "items": {
+                            "type": "string",
+                            "description": "Organisaation tyypit koodiarvoina"
+                        }
+                    },
+                    "parentOid": {
+                        "type": "string",
+                        "description": "Yläorganisaation oid"
+                    },
+                    "parentOidPath": {
+                        "type": "string",
+                        "description": "Yläorganisaation oid-polku"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "AKTIIVINEN",
+                            "SUUNNITELTU",
+                            "PASSIIVINEN",
+                            "POISTETTU"
+                        ]
+                    },
+                    "subRows": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaation alaorganisaatiot react tableen",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioPerustietoV4"
+                        }
+                    },
+                    "tarkastusPvm": {
+                        "type": "string",
+                        "description": "TarkastusPäivämäärä",
+                        "format": "date-time"
+                    },
+                    "toimipistekoodi": {
+                        "type": "string",
+                        "description": "Toimipisteen koodi"
+                    },
+                    "tyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "virastoTunnus": {
+                        "type": "string",
+                        "description": "Virastotunnus"
+                    },
+                    "ytunnus": {
+                        "type": "string",
+                        "description": "Y-tunnus"
+                    }
+                },
+                "description": "Organisaation perustiedot v4"
+            },
+            "OrganisaatioCoreInfoDTOV4": {
+                "required": [
+                    "nimi",
+                    "oid",
+                    "status",
+                    "tyypit"
+                ],
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string",
+                        "description": "Organisaation oid"
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Organisaation nimi"
+                        },
+                        "description": "Organisaation nimi"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Organisaation tila"
+                    },
+                    "tyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaation tyypit",
+                        "items": {
+                            "type": "string",
+                            "description": "Organisaation tyypit"
+                        }
+                    }
+                },
+                "description": "Organisaation ydintiedot"
+            },
+            "OrganisaatioHistoriaRDTOV4": {
+                "type": "object",
+                "properties": {
+                    "childSuhteet": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioSuhdeDTOV4"
+                        }
+                    },
+                    "parentSuhteet": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioSuhdeDTOV4"
+                        }
+                    },
+                    "liitokset": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioLiitosDTOV4"
+                        }
+                    },
+                    "liittymiset": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrganisaatioLiitosDTOV4"
+                        }
+                    }
+                }
+            },
+            "OrganisaatioLiitosDTOV4": {
+                "type": "object",
+                "properties": {
+                    "organisaatio": {
+                        "$ref": "#/components/schemas/OrganisaatioCoreInfoDTOV4"
+                    },
+                    "kohde": {
+                        "$ref": "#/components/schemas/OrganisaatioCoreInfoDTOV4"
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "OrganisaatioSuhdeDTOV4": {
+                "type": "object",
+                "properties": {
+                    "child": {
+                        "$ref": "#/components/schemas/OrganisaatioCoreInfoDTOV4"
+                    },
+                    "parent": {
+                        "$ref": "#/components/schemas/OrganisaatioCoreInfoDTOV4"
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "loppuPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "suhdeTyyppi": {
+                        "type": "string"
+                    }
+                }
+            },
+            "HakutoimistoDTO": {
+                "type": "object",
+                "properties": {
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "yhteystiedot": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/HakutoimistonYhteystiedotDTO"
+                        }
+                    }
+                }
+            },
+            "HakutoimistonYhteystiedotDTO": {
+                "type": "object",
+                "properties": {
+                    "kaynti": {
+                        "$ref": "#/components/schemas/OsoiteDTO"
+                    },
+                    "posti": {
+                        "$ref": "#/components/schemas/OsoiteDTO"
+                    },
+                    "www": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "puhelin": {
+                        "type": "string"
+                    }
+                }
+            },
+            "OsoiteDTO": {
+                "type": "object",
+                "properties": {
+                    "yhteystietoOid": {
+                        "type": "string"
+                    },
+                    "katuosoite": {
+                        "type": "string"
+                    },
+                    "postinumero": {
+                        "type": "string"
+                    },
+                    "postitoimipaikka": {
+                        "type": "string"
+                    }
+                }
+            },
+            "RyhmaCriteriaDtoV2": {
+                "type": "object",
+                "properties": {
+                    "q": {
+                        "type": "string"
+                    },
+                    "aktiivinen": {
+                        "type": "boolean"
+                    },
+                    "lakkautusPvm": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "ryhmatyyppi": {
+                        "type": "string"
+                    },
+                    "kayttoryhma": {
+                        "type": "string"
+                    }
+                }
+            },
+            "OrganisaatioGroupDTOV3": {
+                "required": [
+                    "alkuPvm",
+                    "kayttoryhmat",
+                    "kuvaus",
+                    "lakkautusPvm",
+                    "nimi",
+                    "oid",
+                    "parentOid",
+                    "parentOidPath",
+                    "ryhmatyypit",
+                    "status",
+                    "tyypit",
+                    "version"
+                ],
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string",
+                        "description": "Organisaation oid"
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Organisaation nimi"
+                        },
+                        "description": "Organisaation nimi"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Organisaation tila"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "description": "Versio",
+                        "format": "int32"
+                    },
+                    "parentOid": {
+                        "type": "string",
+                        "description": "Parent oid"
+                    },
+                    "parentOidPath": {
+                        "type": "string",
+                        "description": "Parent oid polkuna"
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "description": "Ryhmän voimassaolon alkupäivämäärä",
+                        "format": "date-time"
+                    },
+                    "lakkautusPvm": {
+                        "type": "string",
+                        "description": "Ryhmän lakkautuspäivämäärä",
+                        "format": "date-time"
+                    },
+                    "kuvaus": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Ryhmän kuvaus"
+                        },
+                        "description": "Ryhmän kuvaus"
+                    },
+                    "ryhmatyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Ryhmätyypit",
+                        "items": {
+                            "type": "string",
+                            "description": "Ryhmätyypit"
+                        }
+                    },
+                    "kayttoryhmat": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Ryhmän käyttöryhmät",
+                        "items": {
+                            "type": "string",
+                            "description": "Ryhmän käyttöryhmät"
+                        }
+                    },
+                    "tyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaation tyypit",
+                        "items": {
+                            "type": "string",
+                            "description": "Organisaation tyypit"
+                        }
+                    }
+                },
+                "description": "Ryhmän tiedot"
+            },
+            "OrganisaatioCoreInfoDTOV2": {
+                "required": [
+                    "nimi",
+                    "oid",
+                    "status",
+                    "tyypit"
+                ],
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string",
+                        "description": "Organisaation oid"
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string",
+                            "description": "Organisaation nimi"
+                        },
+                        "description": "Organisaation nimi"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Organisaation tila"
+                    },
+                    "tyypit": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "description": "Organisaation tyypit",
+                        "items": {
+                            "type": "string",
+                            "description": "Organisaation tyypit"
+                        }
+                    }
+                },
+                "description": "Organisaation ydintiedot"
+            },
+            "OrganisaatioGroupDTOV2": {
+                "required": [
+                    "alkuPvm",
+                    "kayttoryhmat",
+                    "kuvaus",
+                    "lakkautusPvm",
+                    "nimi",
+                    "oid",
+                    "parentOid",
+                    "parentOidPath",
+                    "ryhmatyypit",
+                    "status",
+                    "tyypit",
+                    "version"
+                ],
+                "type": "object",
+                "description": "Ryhmän tiedot",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/OrganisaatioCoreInfoDTOV2"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "version": {
+                                "type": "integer",
+                                "description": "Versio",
+                                "format": "int32"
+                            },
+                            "parentOid": {
+                                "type": "string",
+                                "description": "Parent oid"
+                            },
+                            "parentOidPath": {
+                                "type": "string",
+                                "description": "Parent oid polkuna"
+                            },
+                            "alkuPvm": {
+                                "type": "string",
+                                "description": "Ryhmän voimassaolon alkupäivämäärä",
+                                "format": "date-time"
+                            },
+                            "lakkautusPvm": {
+                                "type": "string",
+                                "description": "Ryhmän lakkautuspäivämäärä",
+                                "format": "date-time"
+                            },
+                            "kuvaus": {
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "string",
+                                    "description": "Ryhmän kuvaus"
+                                },
+                                "description": "Ryhmän kuvaus"
+                            },
+                            "ryhmatyypit": {
+                                "uniqueItems": true,
+                                "type": "array",
+                                "description": "Ryhmätyypit",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Ryhmätyypit"
+                                }
+                            },
+                            "kayttoryhmat": {
+                                "uniqueItems": true,
+                                "type": "array",
+                                "description": "Ryhmän käyttöryhmät",
+                                "items": {
+                                    "type": "string",
+                                    "description": "Ryhmän käyttöryhmät"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "OrganisaatioLiitosDTOV2": {
+                "type": "object",
+                "properties": {
+                    "organisaatio": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/OrganisaatioCoreInfoDTOV2"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OrganisaatioGroupDTOV2"
+                            }
+                        ]
+                    },
+                    "kohde": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/OrganisaatioCoreInfoDTOV2"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OrganisaatioGroupDTOV2"
+                            }
+                        ]
+                    },
+                    "alkuPvm": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}

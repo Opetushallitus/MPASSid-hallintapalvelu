@@ -2,11 +2,10 @@ import type { Components } from "@/api";
 import { attributePreferredOrder } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
-import { DataRow } from "../integraatio/IntegrationTab/DataRow";
-import { Dispatch, useEffect, useRef, useState } from "react";
-import IntegraatioForm from "./Form";
+import type { Dispatch} from "react";
+import AttributeForm from "./Form";
 import { dataConfiguration } from '../../config';
-
+import { helperText, validate } from "@/utils/Validators";
 
 interface Props {
   role?: any;
@@ -26,13 +25,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
 
-  const logValidateValue = (value:String) => {  
-    console.log("attributes: ",attributes)
-    return true;
-  }
-
   const updateAttribute = (name:string, value:string, type:Components.Schemas.Attribute['type'] ) => {  
-    
      
     if(attributes.map(a=>a.name).indexOf(name)>-1) {
       attributes.forEach(attribute=>{
@@ -47,14 +40,13 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     if(mandatoryAttributes.filter(ma=>!attributes.map(a=>a.name).includes(ma)).length===0) {
       setCanSave(true)
     }
-  
+    
     if(newConfigurationEntityData?.attributes&&setNewConfigurationEntityData) {
       newConfigurationEntityData.attributes=attributes;
       setNewConfigurationEntityData({ ...newConfigurationEntityData })
     }
     
   }
-  
   
     return (
       <Grid container >
@@ -66,7 +58,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
           .map((configuration) => {
             const id = `attribuutti.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;
-
             return {
               ...configuration,
               label: label && intl.formatMessage(label),
@@ -84,10 +75,17 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
                   }
-                  return (<IntegraatioForm 
+                  const validator = (value:string) => {
+                    return validate(configuration.validation,value);
+                  }
+                  const helpGeneratorText = (value:string) => {
+                    return helperText(configuration.validation,value);
+                  }
+                  
+                  return (<AttributeForm 
                     key={configuration.name!}
                     onUpdate={updateAttribute}
-                    onValidate={logValidateValue}
+                    onValidate={validator}
                     newConfigurationEntityData={newConfigurationEntityData}
                     setNewConfigurationEntityData={setNewConfigurationEntityData}  
                     uiConfiguration={configuration}
@@ -95,6 +93,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     attributeType={attributeType}
                     type={type}
                     role={role} 
+                    helperText={helpGeneratorText}
                     setCanSave={setCanSave}/>)
                 }
             

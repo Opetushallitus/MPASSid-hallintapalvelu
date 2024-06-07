@@ -3,17 +3,13 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response.json";
-
+import exampleData from "../../schemas/response_1706792827801.json";
+import blankData from "../../schemas/blankIdpIntegration.json"
 
 export { definition };
 
-/*
-let allIntegrations = definition.paths["/api/v1/integration/list"].get
-  .responses["200"].content["application/json"].examples.integrations
-  .value as Components.Schemas.Integration[];
-*/
 let allIntegrations = exampleData as unknown as Components.Schemas.Integration[];
+const blankIntegrations = blankData as unknown as Components.Schemas.Integration[];
 
 
 const integration = definition.paths["/api/v2/integration/{id}"].get.responses[
@@ -22,7 +18,25 @@ const integration = definition.paths["/api/v2/integration/{id}"].get.responses[
   value?: Components.Schemas.Integration;
 };
 
+const blankIntegration = definition.paths["/api/v2/integration"].get.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
+const createIntegration = definition.paths["/api/v2/integration"].post.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
 const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
+const inactivateIntegration = definition.paths["/api/v2/integration/{id}/inactive"].delete.responses[
   "200"
 ].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
@@ -38,7 +52,13 @@ const attributes = definition.paths["/api/v2/attribute/test"].get.responses[
 ].content["application/json"].examples.items as {
   value?: Array<any>;
 }; 
-  
+
+const discoveryInformation = definition.paths["/api/v2/integration/discoveryinformation"].get.responses[
+  "200"
+].content["application/json"].examples as {
+  value?: Components.Schemas.DiscoveryInformationDTO
+}
+
 allIntegrations = Array(1).fill(allIntegrations).flat();
 
 allIntegrations.push(
@@ -62,8 +82,27 @@ const defaults = {
 };
 
 export default {
+  inactivateIntegration(request) {
+    console.log("inactivateIntegration: ",request.path)
+  },
+  getIntegrationDiscoveryInformation(request) {
+    console.log("getIntegrationDiscoveryInformation: ",request);
+    if(discoveryInformation.value) {
+      discoveryInformation.value.existingExcluded = [
+        "1.2.246.562.10.93864526376"
+      ]
+    }
+    console.log("getIntegrationDiscoveryInformation (discoveryInformation): ",discoveryInformation);
+  },
+  getBlankIntegration(request) {
+    if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type).length>0) {
+      blankIntegration.value = blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type)[0]
+    }
+    if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.sp?.type === request.query.type).length>0) {
+      blankIntegration.value = blankIntegrations.filter(b=>b?.configurationEntity?.sp?.type === request.query.type)[0]
+    }
+  },
   testAttributes(request) {
-    console.log("testAttributes: ",request.query)
     let attributeResponse:any={};
     let selectArray: Array<string> = request?.query?.select as string[] || [];
     
@@ -127,6 +166,20 @@ export default {
       p.lastUpdatedOn = new Date().toISOString();
     })
     updateIntegration.value = request.requestBody
+  },
+  createIntegration(request) {
+    const id = 999995;
+    request.requestBody.id=id;
+    const index=allIntegrations.map(i=>i.id).indexOf(id);
+    if (index !== -1) {
+      allIntegrations[index] = request.requestBody;
+    } else {
+      allIntegrations.push(request.requestBody)
+    }
+    request.requestBody?.permissions?.forEach((p: Components.Schemas.IntegrationPermission)=>{
+      p.lastUpdatedOn = new Date().toISOString();
+    })
+    createIntegration.value = request.requestBody
   },
   getIntegration(request) {
     const id = Number(request.params.id);
