@@ -37,14 +37,14 @@ public class Loader {
     private static final Logger logger = LoggerFactory.getLogger(Loader.class);
 
     @Value("${application.attribute.credential.name.field:clientId}")
-    private String credentialAttributeNameField = "clientId";
+    protected String credentialAttributeNameField = "clientId";
     @Value("${application.attribute.credential.value.field:clientKey}")
-    private String credentialAttributeValueField = "clientKey";
+    protected String credentialAttributeValueField = "clientKey";
 
     @Value("${application.metadata.credential.name.field:client_id}")
-    private String credentialMetadataNameField = "client_id";
+    protected String credentialMetadataNameField = "client_id";
     @Value("${application.metadata.credential.value.field:client_secret}")
-    private String credentialMetadataValueField = "client_secret";
+    protected String credentialMetadataValueField = "client_secret";
 
     @Value("${application.integration.input.max.removal.number}")
     protected Integer maxRemovalNumber;
