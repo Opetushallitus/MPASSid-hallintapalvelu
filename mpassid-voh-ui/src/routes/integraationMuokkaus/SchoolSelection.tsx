@@ -22,6 +22,7 @@ interface Props {
     setCanSave: Dispatch<React.SetStateAction<boolean>>;
     setConfigurationEntity: Dispatch<Components.Schemas.ConfigurationEntity>;
     setDiscoveryInformation: Dispatch<Components.Schemas.DiscoveryInformation>;
+    setLogo: Dispatch<FileList>;
 }
 
 interface SchoolType {
@@ -44,7 +45,7 @@ const kouluData:SchoolData = {
   existingExcludes: []
 }
 
-export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave }: Props){
+export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
     const [showSchools, setShowSchools] = useState<boolean>(discoveryInformation?.showSchools||true);
@@ -67,7 +68,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const [alreadyExcludeSchools, setAlreadyExcludeSchools] = useState<boolean>(false);
     const [exampleSchool, setExampleSchool] = useState<string>('');
     const [schoolData, setSchoolData] = useState<SchoolData>(kouluData);
-    const [logo, setLogo] = useState<File>();
+    const [showLogo, setShowLogo] = useState<boolean>(false);
     const intl = useIntl();
 
     const convertSchoolCode = (value?:string) => {
@@ -236,7 +237,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           if(event&&event.target&&event.target.files&&event.target.files.length>0) {
             reader.readAsDataURL(event.target.files[0]);
             
-            setLogo(event.target.files[0])
+            setLogo(event.target.files)
+            setShowLogo(true)
           }
           
         };
@@ -402,11 +404,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               </form>
               
             </DataRowValue>               
-            {logo&&<>
+            {showLogo&&<>
               <DataRowTitle></DataRowTitle>
               <DataRowValue><img id="integratio-logo-preview" alt={"logo"} style={{maxHeight:"125 px",maxWidth:"36 px"}}/></DataRowValue>
               </>}
-            {integration?.configurationEntity?.idp?.logoUrl&&integration.configurationEntity.idp.logoUrl!==''&&!logo&&
+            {integration?.configurationEntity?.idp?.logoUrl&&integration.configurationEntity.idp.logoUrl!==''&&!showLogo&&
             <>
             <DataRowTitle></DataRowTitle>
             <DataRowValue>
