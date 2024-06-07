@@ -1,6 +1,7 @@
 package fi.mpass.voh.api.loading;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -14,42 +15,32 @@ import fi.mpass.voh.api.integration.Integration;
 public class CredentialService {
     private static final Logger logger = LoggerFactory.getLogger(CredentialService.class);
 
-    // a credential is a Pair of (first) name and (second) value
-    // Integration associates with one credential
-    Map<Long, Pair<String, String>> credentials = new HashMap<>();
+    private ParameterStoreService parameterStoreService;
 
-    public void updateCredentialName(Integration existingIntegration, Object name) {
-        Pair<String, String> credential = credentials.get(existingIntegration.getId());
-        credential = Pair.of((String) name, credential.getSecond());
-        credentials.put(existingIntegration.getId(), credential);
+    public CredentialService(ParameterStoreService parameterStoreService) {
+        this.parameterStoreService = parameterStoreService;
     }
 
-    public void updateCredentialValue(Integration existingIntegration, Object value) {
-        Pair<String, String> credential = credentials.get(existingIntegration.getId());
-        credential = Pair.of(credential.getFirst(), (String) value);
-        credentials.put(existingIntegration.getId(), credential);
-    }
+    // credentials is a list of Pairs of (first) name and (second) value associated
+    // with an identifier
+    // e.g. [ (client_id, 12345), (client_s, 54321) ]
+    Map<Long, List<Pair<String, String>>> credentials = new HashMap<>();
 
-    public void start(Integration integration) {
-        logger.debug("Integration #{} Starting credential processing", integration.getId());
-        if (integration != null && integration.getConfigurationEntity() != null
-                && integration.getConfigurationEntity().getSp() != null) {
-
-        }
-        credentials.put(integration.getId(), Pair.of("", ""));
-    }
-
-    public void finish(Integration integration) {
-        Pair<String, String> credential = credentials.get(integration.getId());
-        String organizationOid = integration.getOrganization().getOid();
-        if (credential != null) {
-            boolean success = ParameterStoreService.build().put(organizationOid, credential.getFirst(),
-                    credential.getSecond());
-            if (success) {
-                logger.debug("Integration #{} Finished credential processing", integration.getId());
-            } else {
-                logger.error("Integration #{} Failed credential processing", integration.getId());
+    public boolean updateCredential(Integration integration, Object name, Object value) {
+        if (integration != null) {
+            String organizationOid = integration.getOrganization().getOid();
+            if (organizationOid != null) {
+                String path = organizationOid + "/" + integration.getId();
+                // TODO check the first and the second not null and size > 1 ?
+                boolean success = parameterStoreService.put(path, (String) name, (String) value);
+                if (success) {
+                    logger.debug("Integration #{} Finished credential processing", integration.getId());
+                } else {
+                    logger.error("Integration #{} Failed credential processing", integration.getId());
+                }
+                return success;
             }
         }
+        return false;
     }
 }
