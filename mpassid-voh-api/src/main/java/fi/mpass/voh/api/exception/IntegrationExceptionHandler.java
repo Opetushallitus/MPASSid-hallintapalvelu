@@ -1,13 +1,19 @@
 package fi.mpass.voh.api.exception;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -22,7 +28,13 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
      * @return the IntegrationError object
      */
     @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex) {
+    protected ResponseEntity<Object> handleEntityNotFound(EntityNotFoundException ex, WebRequest request) {
+        List<String> acceptableMimeTypes = Arrays.asList(request.getHeaderValues(HttpHeaders.ACCEPT));
+        if (acceptableMimeTypes.contains(MediaType.APPLICATION_OCTET_STREAM_VALUE)) {
+            return ResponseEntity.notFound()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                    .build();
+        }
         IntegrationError integrationError = new IntegrationError(HttpStatus.NOT_FOUND);
         integrationError.setMessage(ex.getMessage());
         return buildResponseEntity(integrationError);

@@ -1,5 +1,13 @@
 package fi.mpass.voh.api.integration;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +24,7 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +39,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -62,6 +72,12 @@ public class IntegrationService {
 
   @Value("${application.defaultTestServiceIntegrationId}")
   private Long defaultTestServiceIntegrationId;
+
+  @Value("${application.image.base.url}")
+  private String logoUrlBase;
+
+  @Value("${application.image.base.path}")
+  private String logoPathBase;
 
   private final IntegrationRepository integrationRepository;
   private final OrganizationService organizationService;
@@ -635,7 +651,8 @@ public class IntegrationService {
   }
 
   public Integration createBlankIntegration(String role, String type, String oid, Long integrationSetId) {
-    // TODO if no integration set identifier is given, create a new one, otherwise find by it and associate to it
+    // TODO if no integration set identifier is given, create a new one, otherwise
+    // find by it and associate to it
     if (role != null && type != null && oid != null) {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       Organization organization = null;
@@ -644,20 +661,25 @@ public class IntegrationService {
         if (userOrganizationOids.contains(oid)) {
           try {
             organization = organizationService.retrieveSubOrganizations(oid);
-            organizationService.saveOrganization(organization);
+            if (organization != null) {
+              organizationService.saveOrganization(organization);
+            } else {
+              throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
+            }
           } catch (JsonProcessingException e) {
             throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
           }
-          if (organization == null)
-            throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
         }
       }
+      // TODO assuming here organization is not null
+      // TODO type, role case
       if (role.equals("idp")) {
         DiscoveryInformation discoveryInformation = new DiscoveryInformation();
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         if (type.equals("wilma")) {
           Wilma wilma = new Wilma();
           configurationEntity.setIdp(wilma);
+          wilma.setHostname("");
         }
         if (type.equals("gsuite")) {
           Gsuite gsuite = new Gsuite();
@@ -803,5 +825,55 @@ public class IntegrationService {
       }
     }
     return false;
+  }
+
+  public String saveImage(Long id, MultipartFile file) {
+
+    Optional<Integration> integration = this.getIntegration(id);
+
+    if (integration.isPresent()) {
+      String url = this.logoUrlBase + "/" + Long.toString(id);
+      Path rootLocation = Paths.get(this.logoPathBase);
+      try {
+        if (file.isEmpty()) {
+          logger.error("Empty file {}", file);
+          throw new EntityCreationException("Failed to save image.");
+        }
+
+        Path destinationFile = rootLocation.resolve(Paths.get(Long.toString(id))).normalize().toAbsolutePath();
+        if (!destinationFile.getParent().equals(rootLocation.toAbsolutePath())) {
+          logger.error("Cannot store file outside configured directory: {}", destinationFile);
+          throw new EntityCreationException("Failed to save image.");
+        }
+        try (InputStream inputStream = file.getInputStream()) {
+          Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+          if (integration.get().getConfigurationEntity() != null
+              && integration.get().getConfigurationEntity().getIdp() != null) {
+
+            integration.get().getConfigurationEntity().getIdp().setLogoUrl(url);
+            integrationRepository.save(integration.get());
+          }
+          return url;
+        }
+      } catch (IOException e) {
+        logger.error("Exception in saving image", e);
+        throw new EntityCreationException("Failed to save image.");
+      }
+    } else {
+      logger.error("Integration #{} not found.", id);
+      throw new EntityUpdateException("Discovery information update failed.");
+    }
+  }
+
+  public InputStreamResource getDiscoveryInformationLogo(Long id) {
+    Path rootLocation = Paths.get(logoPathBase);
+    Path sourceFile = rootLocation.resolve(Paths.get(Long.toString(id))).normalize().toAbsolutePath();
+
+    try {
+      return new InputStreamResource(new FileInputStream(sourceFile.toString()));
+    } catch (FileNotFoundException e) {
+      logger.error("Logo not found: {}", sourceFile);
+      throw new EntityNotFoundException("Logo not found.");
+    }
   }
 }
