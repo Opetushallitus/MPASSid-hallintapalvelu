@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import fi.mpass.voh.api.exception.LoadingException;
+import fi.mpass.voh.api.integration.Integration;
 
 @Service
 public class LoadingService {
@@ -80,5 +81,36 @@ public class LoadingService {
             mapAsString.append("Integration #" + entry.getKey() + ": " + entry.getValue() + ";");
         }
         return mapAsString.toString();
+    }
+
+    public Integration loadOne(Integration integration) {
+        Loading loading = new Loading();
+        lock.lock();
+        try {
+            if (integration != null) {
+                if (integration.getConfigurationEntity() != null &&
+                        integration.getConfigurationEntity().getIdp() != null) {
+                    logger.info("Started {} loading", integration.getConfigurationEntity().getIdp().getType());
+                    loading.setStatus(LoadingStatus.LOADING);
+                    integration = identityProviderLoader.updateExistingIntegration(loading, integration);
+                    integration = identityProviderLoader.updateIntegrationTypeSpecificInformation(loading, integration);
+                }
+
+                if (integration.getConfigurationEntity() != null &&
+                        integration.getConfigurationEntity().getSp() != null) {
+                    logger.info("Started {} loading", integration.getConfigurationEntity().getSp().getType());
+                    loading.setStatus(LoadingStatus.LOADING);
+                    integration = serviceProviderLoader.updateExistingIntegration(loading, integration);
+                }
+
+                loadingRepository.save(loading);
+                if (loading.getStatus() == LoadingStatus.FAILED) {
+                    throw new LoadingException(mapToString(loading.getErrors()));
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+        return integration;
     }
 }

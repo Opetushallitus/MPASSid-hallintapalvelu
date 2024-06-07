@@ -92,8 +92,8 @@ class IntegrationDiffBuilderTests {
         IdentityProvider idp = new Adfs();
         idp.setConfigurationEntity(ce);
         ce.setIdp(idp);
-        ((Adfs)idp).setMetadataUrl("https://example.org/md"+id);
-        ((Adfs)idp).setEntityId("entityId-" + id);
+        ((Adfs) idp).setMetadataUrl("https://example.org");
+        ((Adfs) idp).setEntityId("entityId-" + id);
         Integration integration = new Integration(id, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
                 0, null, organization, "serviceContactAddress" + id + "@example.net");
         return integration;
@@ -102,7 +102,8 @@ class IntegrationDiffBuilderTests {
     @Test
     void givenTwoIntegrationsDifferentSets_whenComparingWithDiffBuilder_thenDifferencesFound() {
 
-        DiffResult<Integration> diff = IntegrationDiffBuilder.compareSp(serviceProviders.get(0), serviceProviders.get(1));
+        DiffResult<Integration> diff = IntegrationDiffBuilder.compareSp(serviceProviders.get(0),
+                serviceProviders.get(1));
         for (Diff<?> d : diff.getDiffs()) {
             System.out.println(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
         }
@@ -113,7 +114,8 @@ class IntegrationDiffBuilderTests {
     @Test
     void givenSameIntegrationSameSets_whenComparingWithDiffBuilder_thenNoDifferencesFound() {
 
-        DiffResult<Integration> diff = IntegrationDiffBuilder.compareSp(serviceProviders.get(0), serviceProviders.get(0));
+        DiffResult<Integration> diff = IntegrationDiffBuilder.compareSp(serviceProviders.get(0),
+                serviceProviders.get(0));
         for (Diff<?> d : diff.getDiffs()) {
             System.out.println(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
         }
@@ -124,7 +126,8 @@ class IntegrationDiffBuilderTests {
     @Test
     void givenTwoIntegrationSameSets_whenComparingWithDiffBuilder_thenNoSetDifferencesFound() {
 
-        DiffResult<Integration> diff = IntegrationDiffBuilder.compareSp(serviceProviders.get(0), serviceProviders.get(2));
+        DiffResult<Integration> diff = IntegrationDiffBuilder.compareSp(serviceProviders.get(0),
+                serviceProviders.get(2));
         for (Diff<?> d : diff.getDiffs()) {
             System.out.println(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
             assertNotEquals("integrationSets", d.getFieldName());
@@ -134,7 +137,8 @@ class IntegrationDiffBuilderTests {
     @Test
     void givenTwoIdpIntegrationsDifferentFields_whenComparingWithDiffBuilder_thenDifferencesFound() {
 
-        DiffResult<Integration> diff = IntegrationDiffBuilder.compareIdp(identityProviders.get(0), identityProviders.get(1));
+        DiffResult<Integration> diff = IntegrationDiffBuilder.compareIdp(identityProviders.get(0),
+                identityProviders.get(1));
         for (Diff<?> d : diff.getDiffs()) {
             System.out.println(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
         }
@@ -145,7 +149,8 @@ class IntegrationDiffBuilderTests {
     @Test
     void givenSameIdpIntegrationSameFields_whenComparingWithDiffBuilder_thenNoDifferencesFound() {
 
-        DiffResult<Integration> diff = IntegrationDiffBuilder.compareIdp(identityProviders.get(0), identityProviders.get(0));
+        DiffResult<Integration> diff = IntegrationDiffBuilder.compareIdp(identityProviders.get(0),
+                identityProviders.get(0));
         for (Diff<?> d : diff.getDiffs()) {
             System.out.println(d.getFieldName() + ": " + d.getLeft() + " != " + d.getRight());
         }

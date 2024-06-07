@@ -22,7 +22,7 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 @Profile("!default")
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 public class WebSecurityConfig {
     private AuthenticationEntryPoint entryPoint;
     private CasAuthenticationFilter casAuthenticationFilter;

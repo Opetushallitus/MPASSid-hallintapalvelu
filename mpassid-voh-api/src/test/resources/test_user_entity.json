@@ -1,0 +1,9 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#users/$entity",
+    "displayName": "Aku Ankka",
+    "givenName": "Aku",
+    "surname": "Ankka",
+    "onPremisesExtensionAttributes.extensionAttribute14": "Ankkalinna",
+    "userPrincipalName": "principalName1",
+    "id": "6446fd18-bfa8-42fa-b7fe-88b03a27b0a5"
+}

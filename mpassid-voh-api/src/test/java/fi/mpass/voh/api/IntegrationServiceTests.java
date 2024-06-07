@@ -24,7 +24,9 @@ import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
+import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
+import fi.mpass.voh.api.organization.OrganizationService;
 
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
@@ -45,10 +47,16 @@ class IntegrationServiceTests {
 
     @Mock
     private IntegrationRepository integrationRepository;
+    @Mock
+    private OrganizationService organizationService;
+    @Mock
+    private LoadingService loadingService;
+
     private IntegrationService underTest;
 
     private Integration integration;
     private Integration updatedIntegration;
+    private Integration existingUpdatedAllowingIntegration;
     private Integration updatedAllowingIntegration;
     private Integration referenceIntegration;
     private List<Integration> updatedIntegrations;
@@ -57,7 +65,7 @@ class IntegrationServiceTests {
 
     @BeforeEach
     void setUp() {
-        underTest = new IntegrationService(integrationRepository);
+        underTest = new IntegrationService(integrationRepository, organizationService, loadingService);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
@@ -70,7 +78,7 @@ class IntegrationServiceTests {
         integrationSets = new ArrayList<Integration>();
         serviceProviders = new ArrayList<Integration>();
         for (int i = 1; i < 10; i++) {
-            
+
             ConfigurationEntity ce = new ConfigurationEntity();
             IntegrationSet set = new IntegrationSet();
             set.setConfigurationEntity(ce);
@@ -80,7 +88,7 @@ class IntegrationServiceTests {
                     0, null, organization, "serviceContactAddress" + i + "@example.net");
             integrationSet.setConfigurationEntity(ce);
             Integration sp1 = createServiceProvider(Long.valueOf(i), organization);
-            Integration sp2 = createServiceProvider(Long.valueOf(i+100), organization);
+            Integration sp2 = createServiceProvider(Long.valueOf(i + 100), organization);
             sp1.addToSet(integrationSet);
             serviceProviders.add(sp1);
             sp2.addToSet(integrationSet);
@@ -95,6 +103,11 @@ class IntegrationServiceTests {
         updatedIntegration = new Integration(999L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
                 0, discoveryInformation, organization,
                 "foo@bar");
+
+        existingUpdatedAllowingIntegration = new Integration(999L, LocalDate.now(), configurationEntity,
+                LocalDate.of(2023, 6, 30),
+                0, discoveryInformation, organization,
+                "zoo@bar");
 
         updatedAllowingIntegration = new Integration(999L, LocalDate.now(), configurationEntity,
                 LocalDate.of(2023, 6, 30),
@@ -112,9 +125,12 @@ class IntegrationServiceTests {
         updatedIntegrations.add(updatedAllowingIntegration);
 
         for (Integration set : integrationSets) {
+            existingUpdatedAllowingIntegration.addPermissionTo(set);
             updatedAllowingIntegration.addPermissionTo(set);
             referenceIntegration.addPermissionTo(set);
         }
+        existingUpdatedAllowingIntegration.removePermissionTo(integrationSets.get(6));
+        existingUpdatedAllowingIntegration.removePermissionTo(integrationSets.get(8));
         referenceIntegration.removePermissionTo(integrationSets.get(5));
         referenceIntegration.removePermissionTo(integrationSets.get(2));
     }
@@ -124,10 +140,10 @@ class IntegrationServiceTests {
         OidcServiceProvider sp = new OidcServiceProvider();
         sp.setConfigurationEntity(ce);
         ce.setSp(sp);
-        sp.setName("SP " +id);
-        sp.setClientId("clientId-"+id);
+        sp.setName("SP " + id);
+        sp.setClientId("clientId-" + id);
         Integration integration = new Integration(id, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
-                0, null, organization, "serviceContactAddress" + id +"@example.net");
+                0, null, organization, "serviceContactAddress" + id + "@example.net");
         return integration;
     }
 
@@ -167,13 +183,14 @@ class IntegrationServiceTests {
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     void testGetIntegrationsSpecSearchPageableWithReferenceId() {
-        
+
         Pageable pageable = PageRequest.of(0, 20, Sort.by("permissions"));
         given(integrationRepository.findAll(any(Specification.class))).willReturn(integrationSets);
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(referenceIntegration));
 
         // when
-        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L, 0,
+        Page<Integration> pageIntegration = underTest.getIntegrationsSpecSearchPageable("search", "", "set", "0", 1111L,
+                0,
                 pageable);
 
         // then
@@ -197,6 +214,7 @@ class IntegrationServiceTests {
     @Test
     void testUpdateIntegration() {
         // given
+        given(loadingService.loadOne(any(Integration.class))).willReturn(updatedIntegration);
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedIntegration);
 
@@ -212,15 +230,50 @@ class IntegrationServiceTests {
     @Test
     void testUpdateIntegrationPermissions() {
         // given
+        // existing integration without any existing permissions
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
 
-        // when - action or the behaviour that we are going test
+        // when updating with 9 permissions
         Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
 
         // then - verify the output
         assertEquals(999, resultIntegration.getId());
         assertEquals(9, resultIntegration.getPermissions().size());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testAddIntegrationPermissions() {
+        // given
+        // existing integration with 7 existing permissions
+        given(integrationRepository.findOne(any(Specification.class)))
+                .willReturn(Optional.of(existingUpdatedAllowingIntegration));
+        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
+
+        // when adding 2 permissions
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
+
+        // then - verify the output
+        assertEquals(999, resultIntegration.getId());
+        assertEquals(9, resultIntegration.getPermissions().size());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testRemoveIntegrationPermissions() {
+        // given
+        // existing integration with 9 existing permissions
+        given(integrationRepository.findOne(any(Specification.class)))
+                .willReturn(Optional.of(updatedAllowingIntegration));
+        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(existingUpdatedAllowingIntegration);
+
+        // when removing 2 permissions
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(), existingUpdatedAllowingIntegration);
+
+        // then - verify the output
+        assertEquals(999, resultIntegration.getId());
+        assertEquals(7, resultIntegration.getPermissions().size());
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
@@ -271,6 +324,7 @@ class IntegrationServiceTests {
         underTest.getIntegrationsByPermissionUpdateTimeSince(LocalDateTime.now(), 0);
 
         // then
-        verify(integrationRepository).findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(any(LocalDateTime.class), any(Integer.class));
+        verify(integrationRepository).findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(
+                any(LocalDateTime.class), any(Integer.class));
     }
 }
