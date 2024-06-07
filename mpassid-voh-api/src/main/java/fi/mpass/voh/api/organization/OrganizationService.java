@@ -77,20 +77,27 @@ public class OrganizationService {
    */
   public Organization retrieveSubOrganizations(String oid) throws JsonProcessingException {
 
-    String url = externalOrganizationServiceUrl.replaceAll("/$", "") + "/"
-        + "hierarkia/hae?aktiiviset=true&suunnitellut=false&lakkautetut=false&oid=";
+    if (!oid.isEmpty()) {
+      String url = externalOrganizationServiceUrl.replaceAll("/$", "") + "/"
+          + "hierarkia/hae?aktiiviset=true&suunnitellut=false&lakkautetut=false&oid=" + oid;
 
-    logger.debug("Retrieving suborganizations information from {}", url);
+      logger.debug("Retrieving suborganizations information from {}", url);
 
-    String responseBody = restClient.get()
-        .uri(url + oid)
-        .accept(MediaType.APPLICATION_JSON)
-        .retrieve()
-        .body(String.class);
+      String responseBody = restClient.get()
+          .uri(url)
+          .accept(MediaType.APPLICATION_JSON)
+          .retrieve()
+          .body(String.class);
 
-    ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    OrganizationDTO organization = mapper.readValue(responseBody, OrganizationDTO.class);
-    return organization.getOrganizations().get(0);
+      ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      OrganizationDTO organization = mapper.readValue(responseBody, OrganizationDTO.class);
+      if (organization != null && !organization.getOrganizations().isEmpty()) {
+        return organization.getOrganizations().get(0);
+      } else {
+        logger.debug("No organizations found.");
+      }
+    }
+    return null;
   }
 
   /**
