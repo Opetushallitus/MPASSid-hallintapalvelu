@@ -171,7 +171,6 @@ public class ServiceProviderLoader extends Loader {
 
         if (diff != null) {
             List<Diff<?>> diffs = diff.getDiffs();
-            credentialService.start(existingIntegration.get());
             for (int i = 0; i < diff.getNumberOfDiffs(); i++) {
                 Diff<?> d = diffs.get(i);
                 logger.debug("Integration #{} {}: {} != {}", existingIntegration.get().getId(),
@@ -235,7 +234,6 @@ public class ServiceProviderLoader extends Loader {
                 }
                 existingIntegration.get().setLastUpdatedOn(LocalDateTime.now());
             }
-            credentialService.finish(existingIntegration.get());
         } else {
             logger.debug("Comparison failed. Check input data structure and values.");
             loading.addError(integration, "Comparison failed");
@@ -247,7 +245,8 @@ public class ServiceProviderLoader extends Loader {
         String[] diffElements = d.getFieldName().split("\\.");
         if (d.getLeft().equals("") && !d.getRight().equals("")) {
             logger.debug("Metadata add diff: {}", d.getFieldName());
-            // the fourth element is the key, e.g. configurationEntity.sp.metadata.key1, see IntegrationDiffBuilder
+            // the fourth element is the key, e.g. configurationEntity.sp.metadata.key1, see
+            // IntegrationDiffBuilder
             if (diffElements[3].length() > 0) {
                 Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
                 metadata.put(diffElements[3], d.getRight());
@@ -258,15 +257,17 @@ public class ServiceProviderLoader extends Loader {
                 && !d.getLeft().equals(d.getRight())) {
             logger.debug("Metadata mod diff: {}", d.getFieldName());
             if (diffElements[3].length() > 0) {
-                if (diffElements[3].equals("client_id")) {
-                    credentialService.updateCredentialName(existingIntegration, d.getRight());
+                if (diffElements[3].equals(credentialMetadataNameField)) {
+                    credentialService.updateCredential(existingIntegration, diffElements[3], d.getRight());
                 }
-                if (diffElements[3].equals("client_secret")) {
-                    credentialService.updateCredentialValue(existingIntegration, d.getRight());
+                if (diffElements[3].equals(credentialMetadataValueField)) {
+                    credentialService.updateCredential(existingIntegration, diffElements[3], d.getRight());
+                } else {
+                    // in other cases (including credentialMetadataNameField), persist metadata modification
+                    Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
+                    metadata.put(diffElements[3], d.getRight());
+                    existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
                 }
-                Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
-                metadata.put(diffElements[3], d.getRight());
-                existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);
             }
         }
         if (!d.getLeft().equals("") && (d.getRight() == null || (d.getRight() != null && d.getRight().equals("")))) {
