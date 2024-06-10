@@ -1,21 +1,20 @@
 import { getBlankIntegration } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
+import { getOrganisaatioNimet } from "@/api/organisaatio";
 import type { SelectChangeEvent} from "@mui/material";
 import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
 import type { Dispatch} from "react";
 import { useEffect, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from "react-router-dom";
+import toLanguage from "@/utils/toLanguage";
 
 export const defaults = {
-    integration: "idp",
-    //integrations: [ { "label": "Koulutustoimija", "role": "idp" }, { "label": "Palveluintegraatio", "role": "sp" } ],
-    integrations: [ { "label": "Koulutustoimija", "role": "idp" } ],
     typePI: "SAML",
     typesPI: [ "SAML", "OIDC" ],
-    typeOKJ: "Wilma",
+    typeOKJ: "wilma",
     //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
-    typesOKJ: [ "Wilma" ]
+    typesOKJ: [ "wilma" ]
   };
 
   interface Props {
@@ -23,28 +22,73 @@ export const defaults = {
     setOpen: Dispatch<boolean>;
   }
 
+  interface Organization {
+    oid: string;
+    name: string;
+  }
+
 function NewIntegrationSelection({ open, setOpen}: Props) {
 
     const [organization, setOrganization] = useState('');
-    const [integration, setIntegration] = useState(defaults.integration);
+    const [integration, setIntegration] = useState('idp');
     const [type, setType] = useState(defaults.typeOKJ);
     const [types, setTypes] = useState(defaults.typesOKJ);
     const me = useMe();
-    const [organizations, setOrganizations] = useState<string[]>();
+    const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
+    const language = toLanguage(useIntl().locale).toLowerCase();
+
+    const intl = useIntl();
 
     useEffect(() => {
+        
+        
         if(me?.groups) {
-            const possibleOrganizations = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
-            setOrganizations(possibleOrganizations);
-            if(possibleOrganizations.length>0) {
-                setOrganization(possibleOrganizations[0]);
-            }
+            const organizationNames: Organization[] = [];
+            const possibleOrganizationsOids = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
+            
+            possibleOrganizationsOids.forEach(oid=>{
+                const newOrganizationName = { oid: oid, name: '' }
+                getOrganisaatioNimet(oid).then(response=>{
+                    var found=false;
+                    response.forEach(organisation=>{
+                        if(organisation?.oid===oid&&organisation?.nimi) {
+                            if(organisation?.nimi[language]) {
+                                newOrganizationName.name=organisation?.nimi[language];
+                            } else {
+                                newOrganizationName.name=oid;
+                            }
+                            found=true;
+                        }
+                    })
+                    if(!found) {
+                        newOrganizationName.name=oid;
+                    }
+                    organizationNames.push(newOrganizationName);
+                    if(possibleOrganizationsOids.length===organizationNames.length) {
+                        setOrganizations(organizationNames)
+                        setOrganization(organizationNames[0].oid)
+                    }
+                })
+                .catch(error=>{
+                    const newOrganizationName = { oid: oid, name: oid }
+                    organizationNames.push(newOrganizationName)
+                    if(possibleOrganizationsOids.length===organizationNames.length) {
+                        setOrganizations(organizationNames)
+                        setOrganization(organizationNames[0].oid)
+                    }
+                })
+                
+            })
+        
+            
+            
+            
         }
-    }, [me]);    
+    }, [language, me]);    
 
     const createIntegration = async () => {
-        getBlankIntegration({role: integration, type: type, organization: organization})
+        getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
                 result.id=0;
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
@@ -101,8 +145,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         sx={{ mr: 1,alignContent: "flex-end"}}
                     >
                         {organizations&&organizations.map((option) => (
-                        <MenuItem key={option} value={option}>
-                            {option}
+                        <MenuItem key={option.name} value={option.oid}>
+                            {option.name}
                         </MenuItem>
                         ))}
                     </Select>
@@ -121,11 +165,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         variant="standard"
                         sx={{ marginRight: "auto"}}
                     >
-                        {defaults.integrations.map((option) => (
-                        <MenuItem key={option.label} value={option.role}>
-                            {option.label}
+                        <MenuItem key={'koulutustoimija'} value={'idp'}>
+                            <FormattedMessage defaultMessage='Koulutustoimija'/>
                         </MenuItem>
-                        ))}
+                        {false&&<MenuItem key={'Palveluintegraatio'} value={'sp'}>
+                            <FormattedMessage defaultMessage='Palveluintegraatio' />
+                        </MenuItem>}
                     </Select>
                 </Grid>
                 <Grid item xs={4}>
@@ -142,11 +187,14 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         variant="standard"
                         sx={{ marginRight: "auto"}}
                     >
-                        {types.map((option) => (
-                        <MenuItem key={option} value={option}>
-                            {option}
-                        </MenuItem>
-                        ))}
+                        {types.map((option) => {        
+                            const id = `tyyppi.${option}`;
+                            const label = id in intl.messages ? { id } : undefined;    
+                            return(<MenuItem key={option} value={option}>
+                                    {label ? <FormattedMessage {...label} /> : option}
+                                </MenuItem>)
+                        })}
+                        
                     </Select>
                 </Grid>
             </Grid>

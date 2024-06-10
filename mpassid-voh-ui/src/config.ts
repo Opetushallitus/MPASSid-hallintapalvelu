@@ -352,7 +352,6 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'metadata',
       mandatory: true,
       multivalue: true,
-      environment: 1,
       validation: [ 'fqdn', 'nohash', 'https' ],
       integrationType: [
           {
@@ -367,7 +366,6 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'data',
       mandatory: true,
       multivalue: true,
-      environment: 1,
       validation: [ 'hostname' ],
       integrationType: [
           {
@@ -382,7 +380,6 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'data',
       mandatory: false,
       multivalue: true,
-      environment: 1,
       validation: [  ],
       integrationType: [
           {

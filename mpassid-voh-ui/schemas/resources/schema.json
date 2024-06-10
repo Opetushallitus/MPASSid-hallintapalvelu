@@ -42,12 +42,252 @@
                             }
                         }
                     }
-                },
-                "security": [
+                }
+            }
+        },
+        "/api/v2/integration": {
+            "get": {
+                "tags": [
+                    "integration-controller"
+                ],
+                "summary": "Get a blank integration",
+                "operationId": "getBlankIntegration",
+                "parameters": [
                     {
-                        "provisioning": []
+                        "name": "role",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "organization",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
-                ]
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Integration creation successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Integration"
+                                },
+                                "examples": {
+                                    "integration": {
+                                        "description": "integration",
+                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Integration creation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "integration-controller"
+                ],
+                "summary": "Create an integration",
+                "operationId": "createIntegration",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Integration"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Integration creation successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Integration"
+                                },
+                                "examples": {
+                                    "integration": {
+                                        "description": "integration",
+                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Integration creation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/integration/{id}/discoveryinformation/logo": {
+            "post": {
+                "tags": [
+                    "integration-controller"
+                ],
+                "summary": "Update discovery information logo",
+                "operationId": "uploadLogo",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Integration discovery information update successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "Integration discovery information update error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/integration/discoveryinformation": {
+            "get": {
+                "tags": [
+                    "integration-controller"
+                ],
+                "summary": "Get integration discovery information",
+                "operationId": "getIntegrationDiscoveryInformation",
+                "parameters": [
+                    {
+                        "name": "organizationOid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "institutionType",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "format": "int32"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DiscoveryInformationDTO"
+                                },
+                                "examples": {
+                                    "existingExcluded: given organization's integrations (identifiers) of which discovery information contains exluded schools, existingIncluded: given organization's integrations' discovery information containing included schools": {
+                                        "description": "existingExcluded: given organization's integrations (identifiers) of which discovery information contains exluded schools, existingIncluded: given organization's integrations' discovery information containing included schools",
+                                        "value": {
+                                            "existingExcluded": [
+                                                "1000120"
+                                            ],
+                                            "existingIncluded": [
+                                                "00907",
+                                                "05899"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Integration not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/v2/integration/{id}": {
@@ -81,6 +321,16 @@
                                         "description": "integration",
                                         "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
                                     }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
                                 }
                             }
                         }
@@ -125,8 +375,24 @@
                     "required": true
                 },
                 "responses": {
-                    "409": {
-                        "description": "Integration update conflict",
+                    "200": {
+                        "description": "Integration update successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Integration"
+                                },
+                                "examples": {
+                                    "integration": {
+                                        "description": "integration",
+                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -155,55 +421,8 @@
                             }
                         }
                     },
-                    "200": {
-                        "description": "Integration update successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Integration"
-                                },
-                                "examples": {
-                                    "integration": {
-                                        "description": "integration",
-                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v2/loading/start": {
-            "post": {
-                "tags": [
-                    "loading-controller"
-                ],
-                "summary": "Start integration loading",
-                "operationId": "start",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/Loading"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Loading"
-                                }
-                            }
-                        }
-                    },
                     "409": {
-                        "description": "Loading conflict",
+                        "description": "Integration update conflict",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -212,12 +431,7 @@
                             }
                         }
                     }
-                },
-                "security": [
-                    {
-                        "loading": []
-                    }
-                ]
+                }
             }
         },
         "/api/v2/integration": {
@@ -374,6 +588,51 @@
                 }
             }
         },
+        "/api/v2/ui/configuration/default": {
+            "get": {
+                "tags": [
+                    "user-interface-configuration-controller"
+                ],
+                "summary": "Get user interface configuration",
+                "operationId": "getDefaultUserInterfaceConfiguration",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserInterfaceConfiguration"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/ui/configuration/data": {
+            "get": {
+                "tags": [
+                    "user-interface-configuration-controller"
+                ],
+                "summary": "Get user interface configuration",
+                "operationId": "getDataUserInterfaceConfiguration",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v2/sp/{id}": {
             "get": {
                 "tags": [
@@ -498,6 +757,63 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Integration"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "provisioning": []
+                    }
+                ]
+            }
+        },
+        "/api/v2/provisioning/integration/discoveryinformation/logo/{id}": {
+            "get": {
+                "tags": [
+                    "provisioning-controller"
+                ],
+                "summary": "Get integration discovery information logo",
+                "operationId": "getIntegrationDiscoveryInformationLogo",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
                                 }
                             }
                         }
@@ -762,6 +1078,125 @@
                                         "description": "integrations",
                                         "externalValue": "https://mpassid-rr-test.csc.fi/integrations.json"
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/integration/discoveryinformation": {
+            "get": {
+                "tags": [
+                    "integration-controller"
+                ],
+                "summary": "Get integration discovery information",
+                "operationId": "getIntegrationDiscoveryInformation",
+                "parameters": [
+                    {
+                        "name": "organizationOid",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "institutionType",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer",
+                                "format": "int32"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DiscoveryInformationDTO"
+                                },
+                                "examples": {
+                                    "existingExcluded: given organization's integrations (identifiers) of which discovery information contains excluded schools (filtered by given institution types), existingIncluded: institution codes of the given organization's integrations' discovery information (filtered by given institution types)": {
+                                        "description": "existingExcluded: given organization's integrations (identifiers) of which discovery information contains excluded schools (filtered by given institution types), existingIncluded: institution codes of the given organization's integrations' discovery information (filtered by given institution types)",
+                                        "value": {
+                                            "existingExcluded": [
+                                                "1000120"
+                                            ],
+                                            "existingIncluded": [
+                                                "00907",
+                                                "05899"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Integration not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v2/integration/discoveryinformation/logo/{id}": {
+            "get": {
+                "tags": [
+                    "integration-controller"
+                ],
+                "summary": "Get integration discovery information logo",
+                "operationId": "getIntegrationDiscoveryInformationLogo_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
                                 }
                             }
                         }
@@ -1356,6 +1791,12 @@
                     "name": {
                         "type": "string"
                     },
+                    "children": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubOrganization"
+                        }
+                    },
                     "ytunnus": {
                         "type": "string"
                     },
@@ -1406,6 +1847,39 @@
                     "mapping": {
                         "oidc": "#/components/schemas/OidcServiceProvider",
                         "saml": "#/components/schemas/SamlServiceProvider"
+                    }
+                }
+            },
+            "SubOrganization": {
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "ytunnus": {
+                        "type": "string"
+                    },
+                    "oppilaitostyyppi": {
+                        "type": "string"
+                    },
+                    "oppilaitosKoodi": {
+                        "type": "string"
+                    },
+                    "organisaatiotyypit": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "nimi": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "object"
+                        },
+                        "writeOnly": true
                     }
                 }
             },
@@ -1564,6 +2038,42 @@
                     }
                 }
             },
+            "UserInterfaceConfiguration": {
+                "type": "object",
+                "properties": {
+                    "oid": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "mandatory": {
+                        "type": "boolean"
+                    },
+                    "deploymentPhase": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "validation": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "integrationType": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "object"
+                            }
+                        }
+                    }
+                }
+            },
             "ServiceProviders": {
                 "type": "object",
                 "properties": {
@@ -1711,6 +2221,25 @@
                     },
                     "sorted": {
                         "type": "boolean"
+                    }
+                }
+            },
+            "DiscoveryInformationDTO": {
+                "type": "object",
+                "properties": {
+                    "existingExcluded": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "existingIncluded": {
+                        "uniqueItems": true,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     }
                 }
             }

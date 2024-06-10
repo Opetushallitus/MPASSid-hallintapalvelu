@@ -168,4 +168,19 @@ public class IntegrationController {
 	Integration createIntegration(@Valid @RequestBody Integration integration) {
 		return integrationService.createIntegration(integration);
 	}
+
+	@Operation(summary = "Get integration discovery information")
+	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DiscoveryInformationDTO.class), mediaType = "application/json", examples = {
+					@ExampleObject(name = "existingExcluded: given organization's integrations (identifiers) of which discovery information contains excluded schools (filtered by given institution types), existingIncluded: institution codes of the given organization's integrations' discovery information (filtered by given institution types)", value = " { \"existingExcluded\": [\"1000120\"], \"existingIncluded\": [\"00907\", \"05899\"] } ") })),
+			@ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
+	})
+	@GetMapping("/discoveryinformation")
+	// @JsonView(value = IntegrationView.Default.class)
+	public DiscoveryInformationDTO getIntegrationDiscoveryInformation(
+			@RequestParam(required = true, value = "organizationOid") String organizationOid,
+			@RequestParam(required = false, value = "institutionType") List<Integer> types) {
+		return integrationService.getDiscoveryInformation(organizationOid, types);
+	}
 }

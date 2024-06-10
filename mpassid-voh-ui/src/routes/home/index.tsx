@@ -59,7 +59,6 @@ export default function Home() {
     []
   );
   
-  
   useLayoutEffect(() => {
     if (tabs.includes(state!)) {
       setValue([ ...tabs.splice(state,1)]);
@@ -74,10 +73,12 @@ export default function Home() {
 
   const writeAccess = () => {
     
-    if((groups?.includes("APP_MPASSID_TALLENTAJA_")||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_")||groups?.includes(tallentajaOphGroup))) {
+    if((groups?.includes("APP_MPASSID_TALLENTAJA"))||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ")) {
       return true;
+    } else {
+      return false;
     }
-    return false;
+    
   }
 
   function handleSearch(formData: FormData) {

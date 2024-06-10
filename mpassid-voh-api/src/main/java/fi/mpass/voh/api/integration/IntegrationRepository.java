@@ -53,4 +53,6 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
 
     @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id < 2000000")
     List<Long> getAvailableIdpIntegrationIdentifier();
+
+    List<Integration> findAllByOrganizationOid(String oid);
 }

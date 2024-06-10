@@ -1,11 +1,11 @@
-import { updateIntegration, inactivateIntegration, createIntegration, type Components } from "@/api";
+import { updateIntegration, inactivateIntegration, createIntegration, type Components, uploadLogo } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
 import { useEffect, useRef, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useNavigate, useParams } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
@@ -29,7 +29,9 @@ export default function IntegraatioMuokkaus() {
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
   const [openNotice, setOpenNotice] = useState(false);
+  const [logo, setLogo] = useState<FileList>();
   const result = useRef<Components.Schemas.Integration>({});
+  const intl = useIntl();
 
   useEffect(() => {
     if(me?.groups) {
@@ -93,9 +95,16 @@ export default function IntegraatioMuokkaus() {
               delete permission.lastUpdatedOn;
             })
             if(id===0) {
-              result.current = await createIntegration({},newIntegration);                
+              result.current = await createIntegration({},newIntegration);   
             } else {
-              result.current = await updateIntegration({ id },newIntegration);  
+              result.current = await updateIntegration({ id },newIntegration);            
+            }
+            if(logo){
+              const formData = new FormData();
+              formData.append("file", logo[0]);
+              const uploadLogoR = await uploadLogo({ id },formData as any);
+
+              console.log("*** uploadLogo: ",uploadLogoR)
             }
           }
           
@@ -123,12 +132,16 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration}/>
+            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo}/>
           </ErrorBoundary>
           
         </Suspense>
         {newIntegration&&id!=='0'&&<Box >                            
-                                          <IconButton aria-label="delete" onClick={()=>setDisabled(!isDisabled)}>
+                                          <IconButton 
+                                              aria-label={intl.formatMessage({
+                                                defaultMessage: "poista",
+                                              })}
+                                              onClick={()=>setDisabled(!isDisabled)}>
                                               <DeleteIcon />
                                           </IconButton>   
                                           <FormattedMessage defaultMessage="Poista jäsen" />
@@ -158,10 +171,8 @@ export default function IntegraatioMuokkaus() {
                       {id!=='0'&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
                       {id==='0'&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
-                      {(!canSave&&!isDisabled)&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {(canSave&&!isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {(isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Poista" /></Button>}
-                      
+                      {!canSave&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {canSave&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
                   </Box>
                   <br></br>
                 </Container>
