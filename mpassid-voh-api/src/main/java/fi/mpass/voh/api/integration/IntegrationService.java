@@ -20,6 +20,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+
 import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.Valid;
 
@@ -34,6 +38,7 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.Revisions;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -733,6 +738,7 @@ public class IntegrationService {
 
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
+      // TODO authz
       List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
       if (availableId != null && !availableId.isEmpty()) {
         integration.setId(availableId.get(0));
@@ -742,6 +748,9 @@ public class IntegrationService {
               .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableId.get(0));
           integration.getConfigurationEntity().getIdp()
               .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableId.get(0));
+        }
+        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+          logger.debug("Creating SAML Service Provider");
         }
         return integrationRepository.save(integration);
       } else {
@@ -876,4 +885,27 @@ public class IntegrationService {
       throw new EntityNotFoundException("Logo not found.");
     }
   }
+
+  public String getDiscoveryInformationLogoContentType(InputStream inputStream) {
+		ImageInputStream imageStream = null;
+		try {
+			imageStream = ImageIO.createImageInputStream(inputStream);
+		} catch (IOException e) {
+      logger.error("Error in creating image input stream.");
+		}
+
+		if (imageStream != null) {
+			Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
+
+			while (readers.hasNext()) {
+				ImageReader r = readers.next();
+				try {
+          return "image/" + r.getFormatName().toLowerCase();
+				} catch (IOException e) {
+					logger.error("Error in reading input image stream.");
+				}
+			}
+		}
+    return null;
+	}
 }

@@ -122,6 +122,12 @@ public abstract class ServiceProvider {
         if (this.type != null) {
             return this.type;
         }
+        if (this.getClass().getSimpleName().toLowerCase().equals("samlserviceprovider")) {
+            return "saml";
+        }
+        if (this.getClass().getSimpleName().toLowerCase().equals("oidcserviceprovider")) {
+            return "oidc";
+        }
         return this.getClass().getSimpleName().toLowerCase();
     }
 

@@ -1,5 +1,9 @@
 package fi.mpass.voh.api.integration;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +43,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Content;
 import fi.mpass.voh.api.config.IntegrationView;
+import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.IntegrationError;
 
 @RestController
@@ -218,7 +223,23 @@ public class IntegrationController {
 	public ResponseEntity<Resource> getIntegrationDiscoveryInformationLogo(@PathVariable Long id) {
 		InputStreamResource resource = integrationService.getDiscoveryInformationLogo(id);
 
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			resource.getInputStream().transferTo(baos);
+		} catch (IllegalStateException e) {
+			throw new EntityNotFoundException("Logo retrieval failed.");
+		} catch (IOException e) {
+			throw new EntityNotFoundException("Logo retrieval failed.");
+		}
+		InputStream imageHeaderStream = new ByteArrayInputStream(baos.toByteArray());
+		InputStream imageOutputStream = new ByteArrayInputStream(baos.toByteArray());
+		InputStreamResource outputResource = new InputStreamResource(imageOutputStream);
+
 		HttpHeaders headers = new HttpHeaders();
+
+		String logoContentType = integrationService.getDiscoveryInformationLogoContentType(imageHeaderStream);
+
+		headers.add(HttpHeaders.CONTENT_TYPE, logoContentType);
 		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + Long.toString(id));
 		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
 		headers.add("Pragma", "no-cache");
@@ -227,7 +248,6 @@ public class IntegrationController {
 		return ResponseEntity.ok()
 				.headers(headers)
 				// .contentLength()
-				.contentType(MediaType.APPLICATION_OCTET_STREAM)
-				.body(resource);
+				.body(outputResource);
 	}
 }
