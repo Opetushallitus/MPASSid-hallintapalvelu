@@ -1,6 +1,7 @@
 package fi.mpass.voh.api;
 
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -372,11 +373,13 @@ class IntegrationControllerTest {
 	void testGetIntegrationDiscoveryInformationLogo() throws Exception {
 		Path imageFile = Paths.get("src/test/resources/testimage.jpg");
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(imageFile.toString()));
-
+		
 		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
 				eq("TALLENTAJA")))
 				.thenReturn(true);
 		when(integrationService.getDiscoveryInformationLogo(any(Long.class))).thenReturn(resource);
+		when(integrationService.getDiscoveryInformationLogoContentType(any(InputStream.class))).thenReturn("image/jpeg");
+
 		mockMvc.perform(get("/api/v2/integration/discoveryinformation/logo/1"))
 				.andDo(print())
 				.andExpect(status().isOk())

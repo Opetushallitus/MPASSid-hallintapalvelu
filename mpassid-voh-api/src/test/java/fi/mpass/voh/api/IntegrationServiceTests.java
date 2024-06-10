@@ -1,5 +1,9 @@
 package fi.mpass.voh.api;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -10,6 +14,7 @@ import java.util.Set;
 
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -453,5 +458,20 @@ class IntegrationServiceTests {
         assertEquals(2, dto.getExistingExcluded().size());
         assertTrue(dto.getExistingIncluded().contains("00907")); // institution code
         assertTrue(dto.getExistingExcluded().contains("1111")); // integration identifier
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetDiscoveryInformationLogoContentType() throws IllegalStateException, IOException {
+    
+        // given
+        Path imageFile = Paths.get("src/test/resources/testimage.jpg");
+		InputStreamResource resource = new InputStreamResource(new FileInputStream(imageFile.toString()));
+        
+        // when
+        String logoContentType = underTest.getDiscoveryInformationLogoContentType(resource.getInputStream());
+
+        // then
+        assertEquals("image/jpeg", logoContentType);
     }
 }

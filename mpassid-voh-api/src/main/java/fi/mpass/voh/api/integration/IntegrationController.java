@@ -234,11 +234,9 @@ public class IntegrationController {
 		InputStream imageHeaderStream = new ByteArrayInputStream(baos.toByteArray());
 		InputStream imageOutputStream = new ByteArrayInputStream(baos.toByteArray());
 		InputStreamResource outputResource = new InputStreamResource(imageOutputStream);
-
-		HttpHeaders headers = new HttpHeaders();
-
 		String logoContentType = integrationService.getDiscoveryInformationLogoContentType(imageHeaderStream);
 
+		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.CONTENT_TYPE, logoContentType);
 		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + Long.toString(id));
 		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
