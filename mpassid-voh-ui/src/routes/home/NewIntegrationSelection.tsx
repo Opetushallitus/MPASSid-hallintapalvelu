@@ -10,8 +10,9 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 
 export const defaults = {
-    typePI: "SAML",
-    typesPI: [ "SAML", "OIDC" ],
+    typePI: "saml",
+    //typesPI: [ "saml", "oidc" ],
+    typesPI: [ "saml"],
     typeOKJ: "wilma",
     //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
     typesOKJ: [ "wilma" ]
@@ -102,7 +103,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
       
       const handleIntegration = (event: SelectChangeEvent) => {
         const value = String(event.target.value);
-        if(value==="Palveluintegraatio") {
+        
+        if(value==="sp") {
             setType(defaults.typePI)
             setTypes(defaults.typesPI)
         } else {
@@ -168,9 +170,9 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         <MenuItem key={'koulutustoimija'} value={'idp'}>
                             <FormattedMessage defaultMessage='Koulutustoimija'/>
                         </MenuItem>
-                        {false&&<MenuItem key={'Palveluintegraatio'} value={'sp'}>
+                        <MenuItem key={'Palveluintegraatio'} value={'sp'}>
                             <FormattedMessage defaultMessage='Palveluintegraatio' />
-                        </MenuItem>}
+                        </MenuItem>
                     </Select>
                 </Grid>
                 <Grid item xs={4}>
