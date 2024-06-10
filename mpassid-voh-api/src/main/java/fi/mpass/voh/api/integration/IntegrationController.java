@@ -1,5 +1,9 @@
 package fi.mpass.voh.api.integration;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -7,10 +11,15 @@ import java.util.Optional;
 import jakarta.validation.Valid;
 
 import org.apache.http.HttpStatus;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -33,6 +43,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Content;
 import fi.mpass.voh.api.config.IntegrationView;
+import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.IntegrationError;
 
 @RestController
@@ -94,6 +105,7 @@ public class IntegrationController {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
 					@ExampleObject(name = "integration", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
 	})
 	@GetMapping("{id}")
@@ -106,6 +118,7 @@ public class IntegrationController {
 	@PreAuthorize("@authorize.hasPermission(#root, #id, 'TALLENTAJA')")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "405", description = "Integration update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "409", description = "Integration update conflict", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
@@ -149,6 +162,7 @@ public class IntegrationController {
 	@PreAuthorize("@authorize.hasPermission(#root, #id, 'TALLENTAJA')")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Integration inactivation successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "405", description = "Integration inactivation error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
 	})
 	@DeleteMapping("{id}/inactive")
@@ -161,6 +175,7 @@ public class IntegrationController {
 	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Integration creation successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "405", description = "Integration creation error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
 	})
 	@PostMapping
@@ -182,5 +197,57 @@ public class IntegrationController {
 			@RequestParam(required = true, value = "organizationOid") String organizationOid,
 			@RequestParam(required = false, value = "institutionType") List<Integer> types) {
 		return integrationService.getDiscoveryInformation(organizationOid, types);
+	}
+
+	@Operation(summary = "Update discovery information logo")
+	@PreAuthorize("@authorize.hasPermission(#root, #id, 'TALLENTAJA')")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Integration discovery information update successful", content = @Content(schema = @Schema(implementation = String.class), mediaType = "application/json")),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+			@ApiResponse(responseCode = "405", description = "Integration discovery information update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
+	})
+	@PostMapping(path = "{id}/discoveryinformation/logo", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	public String uploadLogo(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+		return integrationService.saveImage(id, file);
+	}
+
+	@Operation(summary = "Get integration discovery information logo")
+	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ResponseEntity.class), mediaType = "application/octet-stream")),
+			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+			@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
+	})
+	@GetMapping("/discoveryinformation/logo/{id}")
+	// @JsonView(value = IntegrationView.Default.class)
+	public ResponseEntity<Resource> getIntegrationDiscoveryInformationLogo(@PathVariable Long id) {
+		InputStreamResource resource = integrationService.getDiscoveryInformationLogo(id);
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			resource.getInputStream().transferTo(baos);
+		} catch (IllegalStateException e) {
+			throw new EntityNotFoundException("Logo retrieval failed.");
+		} catch (IOException e) {
+			throw new EntityNotFoundException("Logo retrieval failed.");
+		}
+		InputStream imageHeaderStream = new ByteArrayInputStream(baos.toByteArray());
+		InputStream imageOutputStream = new ByteArrayInputStream(baos.toByteArray());
+		InputStreamResource outputResource = new InputStreamResource(imageOutputStream);
+
+		HttpHeaders headers = new HttpHeaders();
+
+		String logoContentType = integrationService.getDiscoveryInformationLogoContentType(imageHeaderStream);
+
+		headers.add(HttpHeaders.CONTENT_TYPE, logoContentType);
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + Long.toString(id));
+		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+		headers.add("Pragma", "no-cache");
+		headers.add("Expires", "0");
+
+		return ResponseEntity.ok()
+				.headers(headers)
+				// .contentLength()
+				.body(outputResource);
 	}
 }

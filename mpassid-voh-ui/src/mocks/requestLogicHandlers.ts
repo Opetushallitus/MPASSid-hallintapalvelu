@@ -8,11 +8,6 @@ import blankData from "../../schemas/blankIdpIntegration.json"
 
 export { definition };
 
-/*
-let allIntegrations = definition.paths["/api/v1/integration/list"].get
-  .responses["200"].content["application/json"].examples.integrations
-  .value as Components.Schemas.Integration[];
-*/
 let allIntegrations = exampleData as unknown as Components.Schemas.Integration[];
 const blankIntegrations = blankData as unknown as Components.Schemas.Integration[];
 
@@ -41,7 +36,7 @@ const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.respo
   value?: Components.Schemas.Integration;
 };
 
-const inactiveIntegration = definition.paths["/api/v2/integration/{id}/inactive"].delete.responses[
+const inactivateIntegration = definition.paths["/api/v2/integration/{id}/inactive"].delete.responses[
   "200"
 ].content["application/json"].examples.integration as {
   value?: Components.Schemas.Integration;
@@ -87,6 +82,9 @@ const defaults = {
 };
 
 export default {
+  inactivateIntegration(request) {
+    console.log("inactivateIntegration: ",request.path)
+  },
   getIntegrationDiscoveryInformation(request) {
     console.log("getIntegrationDiscoveryInformation: ",request);
     if(discoveryInformation.value) {
@@ -99,6 +97,9 @@ export default {
   getBlankIntegration(request) {
     if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type).length>0) {
       blankIntegration.value = blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type)[0]
+    }
+    if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.sp?.type === request.query.type).length>0) {
+      blankIntegration.value = blankIntegrations.filter(b=>b?.configurationEntity?.sp?.type === request.query.type)[0]
     }
   },
   testAttributes(request) {

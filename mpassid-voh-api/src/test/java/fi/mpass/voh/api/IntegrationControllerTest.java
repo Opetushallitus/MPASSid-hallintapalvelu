@@ -1,5 +1,8 @@
 package fi.mpass.voh.api;
 
+import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -360,6 +364,23 @@ class IntegrationControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.id").value(99L));
+	}
+
+	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8",
+			"APP_MPASSID_TALLENTAJA" })
+	@Test
+	void testGetIntegrationDiscoveryInformationLogo() throws Exception {
+		Path imageFile = Paths.get("src/test/resources/testimage.jpg");
+		InputStreamResource resource = new InputStreamResource(new FileInputStream(imageFile.toString()));
+
+		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
+				eq("TALLENTAJA")))
+				.thenReturn(true);
+		when(integrationService.getDiscoveryInformationLogo(any(Long.class))).thenReturn(resource);
+		mockMvc.perform(get("/api/v2/integration/discoveryinformation/logo/1"))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.IMAGE_JPEG));
 	}
 
 	// TODO negative test for invalid search deploymentPhase parameter, e.g. "0,2"
