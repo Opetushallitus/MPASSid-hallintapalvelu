@@ -1,4 +1,4 @@
-import React, { Dispatch, useState, useEffect } from "react";
+import type { Dispatch } from "react";
 import { Box, Fab } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 
@@ -12,7 +12,7 @@ function AddIntegrationButton({setOpen}:Props) {
     <Box display="flex" alignItems="center" justifyContent="center">
       <Fab
         color="primary"
-        onClick={()=>{setOpen(true);console.log("painettu")}}
+        onClick={()=>setOpen(true)}
         aria-label="add"
         size="large"
         sx={{

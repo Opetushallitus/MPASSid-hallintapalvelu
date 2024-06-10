@@ -16,12 +16,12 @@ interface Props {
   object?: any;
   type: string;
   isEditable?: boolean;
-  helperText?: JSX.Element;
+  helperText: (data: string) => JSX.Element;
   onUpdate: (data: any) => void;
   onValidate: (data: any) => boolean;
 }
 
-export default function ListForm({ object, type, isEditable=false, helperText=<></>, onValidate, onUpdate }: Props) {
+export default function ListForm({ object, type, isEditable=false, helperText, onValidate, onUpdate }: Props) {
   const intl = useIntl();
   const defaultValue = object;
   const [isEdit, setEdit] = useState(false);
@@ -65,7 +65,7 @@ export default function ListForm({ object, type, isEditable=false, helperText=<>
             }
             
           } else {
-            setUsedHelperText(helperText)
+            setUsedHelperText(helperText(''))
             setIsValid(false)  
           }
           

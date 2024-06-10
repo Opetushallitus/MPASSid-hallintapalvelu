@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useMe } from "@/api/käyttöoikeus";
 import {
   katselijaOphGroup,
@@ -24,11 +24,13 @@ import {
   Typography,
 } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import IntegrationsTable from "./IntegrationsTable";
 import SearchForm from "./SearchForm";
 import AddIntegrationButton from "./AddIntegrationButton"
 import NewIntegrationSelection from "./NewIntegrationSelection";
+import { useSessionStorage } from "usehooks-ts";
+import { openIntegrationsSessionStorageKey } from "@/config";
 
 const copyFormDataToURLSearchParams =
   (formData: FormData) => (searchParams: URLSearchParams) => {
@@ -50,6 +52,19 @@ export default function Home() {
   const intl = useIntl();
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
+  const { state } = useLocation();
+
+  const [tabs, setValue] = useSessionStorage<string[]>(
+    openIntegrationsSessionStorageKey,
+    []
+  );
+  
+  
+  useLayoutEffect(() => {
+    if (tabs.includes(state!)) {
+      setValue([ ...tabs.splice(state,1)]);
+    }
+  }, [state, setValue, tabs]);
 
   useEffect(() => {
     if(me?.groups) {
@@ -60,8 +75,7 @@ export default function Home() {
   const writeAccess = () => {
     
     if((groups?.includes("APP_MPASSID_TALLENTAJA_")||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ_")||groups?.includes(tallentajaOphGroup))) {
-      //Kun attribuutit konfiguroitu ja testattu, niin muuta true:ksi;
-      return false;
+      return true;
     }
     return false;
   }

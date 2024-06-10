@@ -15,6 +15,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
@@ -22,6 +26,7 @@ import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
+import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
@@ -39,6 +44,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -266,10 +273,12 @@ class IntegrationServiceTests {
         // existing integration with 9 existing permissions
         given(integrationRepository.findOne(any(Specification.class)))
                 .willReturn(Optional.of(updatedAllowingIntegration));
-        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(existingUpdatedAllowingIntegration);
+        given(integrationRepository.saveAndFlush(any(Integration.class)))
+                .willReturn(existingUpdatedAllowingIntegration);
 
         // when removing 2 permissions
-        Integration resultIntegration = underTest.updateIntegration(integration.getId(), existingUpdatedAllowingIntegration);
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(),
+                existingUpdatedAllowingIntegration);
 
         // then - verify the output
         assertEquals(999, resultIntegration.getId());
@@ -326,5 +335,66 @@ class IntegrationServiceTests {
         // then
         verify(integrationRepository).findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(
                 any(LocalDateTime.class), any(Integer.class));
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testCreateBlankIntegration() throws JsonMappingException, JsonProcessingException {
+        // given
+        given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
+
+        // when
+        Integration resultIntegration = underTest.createBlankIntegration("idp", "wilma", "1.2.3.4.5.6.7.8", null);
+
+        // then
+        assertEquals(0, resultIntegration.getId());
+        assertNotNull(resultIntegration.getConfigurationEntity().getIdp());
+        assertInstanceOf(Wilma.class, resultIntegration.getConfigurationEntity().getIdp());
+        assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testCreateIntegration() throws JsonMappingException, JsonProcessingException {
+
+        ArrayList<Long> availableIdentifiers = new ArrayList<>();
+        availableIdentifiers.add(1000339L);
+        availableIdentifiers.add(1000439L);
+        availableIdentifiers.add(2000439L);
+        // given
+        given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
+        given(integrationRepository.getAvailableIdpIntegrationIdentifier()).willReturn(availableIdentifiers);
+        given(integrationRepository.save(any(Integration.class))).willReturn(integration);
+
+        // when
+        Integration resultIntegration = underTest.createIntegration(integration);
+
+        // then
+        assertEquals(1000339L, resultIntegration.getId());
+        assertNotNull(resultIntegration.getConfigurationEntity().getIdp());
+        assertInstanceOf(Opinsys.class, resultIntegration.getConfigurationEntity().getIdp());
+        assertEquals("opinsys1000339", resultIntegration.getConfigurationEntity().getIdp().getFlowName());
+        assertEquals("opinsys_1000339", resultIntegration.getConfigurationEntity().getIdp().getIdpId());
+        assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testCreateIntegrationWithNoAvailableIdentifiers() throws JsonMappingException, JsonProcessingException {
+
+        ArrayList<Long> availableIdentifiers = new ArrayList<>();
+
+        // given
+        given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
+        given(integrationRepository.getAvailableIdpIntegrationIdentifier()).willReturn(availableIdentifiers);
+        given(integrationRepository.save(any(Integration.class))).willReturn(integration);
+
+        // when
+        EntityCreationException thrown = assertThrows(EntityCreationException.class, () -> {
+            Integration resultIntegration = underTest.createIntegration(integration);
+        });
+
+        // then
+        assertTrue(thrown.getMessage().contains("Integration creation failed"));
     }
 }

@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -28,11 +29,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import fi.mpass.voh.api.exception.EntityCreationException;
+import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
+import fi.mpass.voh.api.integration.idp.Adfs;
+import fi.mpass.voh.api.integration.idp.Azure;
+import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.idp.Opinsys;
+import fi.mpass.voh.api.integration.idp.Wilma;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
+import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
+import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
+import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
 
 import org.slf4j.Logger;
@@ -490,7 +504,7 @@ public class IntegrationService {
    * @param existingIntegration the existing integration
    */
   private void updatePermissions(Integration integration, Integration existingIntegration) {
-    
+
     if (integration.getPermissions() != null) {
       logger.debug(
           "Permit integrations count : {}", integration.getPermissions().size());
@@ -603,5 +617,110 @@ public class IntegrationService {
 
   public Optional<Integration> getIntegration(Long integrationId) {
     return integrationRepository.findById(integrationId);
+  }
+
+  public Integration createBlankIntegration(String role, String type, String oid, Long integrationSetId) {
+    // TODO if no setId given, create new, otherwise link to it
+    if (role != null && type != null && oid != null) {
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      Organization organization = null;
+      // check corresponding
+      if (auth != null) {
+        List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+        if (userOrganizationOids.contains(oid)) {
+          organization = organizationService.getById(oid);
+        } else
+          throw new EntityCreationException("Not authorized to create integration for the given organization.");
+      } else
+        throw new EntityCreationException("Not authorized to create integration for the given organization.");
+      if (organization == null) {
+        try {
+          // TODO handle errors
+          organization = organizationService.retrieveOrganization(oid);
+          organizationService.saveOrganization(organization);
+        } catch (JsonProcessingException e) {
+          throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
+        }
+        if (organization == null)
+          throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
+      }
+      if (role.equals("idp")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
+        if (type.equals("wilma")) {
+          Wilma wilma = new Wilma();
+          configurationEntity.setIdp(wilma);
+        }
+        if (type.equals("gsuite")) {
+          Gsuite gsuite = new Gsuite();
+          configurationEntity.setIdp(gsuite);
+        }
+        if (type.equals("opinsys")) {
+          Opinsys opinsys = new Opinsys();
+          configurationEntity.setIdp(opinsys);
+        }
+        if (type.equals("adfs")) {
+          Adfs adfs = new Adfs();
+          configurationEntity.setIdp(adfs);
+        }
+        if (type.equals("adfs")) {
+          Azure azure = new Azure();
+          configurationEntity.setIdp(azure);
+        }
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
+      }
+      if (role.equals("sp")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
+        if (type.equals("oidc")) {
+          OidcServiceProvider oidc = new OidcServiceProvider();
+          configurationEntity.setSp(oidc);
+        }
+        if (type.equals("saml")) {
+          SamlServiceProvider saml = new SamlServiceProvider();
+          configurationEntity.setSp(saml);
+        }
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
+      }
+    }
+    return new Integration();
+  }
+
+  public Integration inactivateIntegration(Long id) {
+    Optional<Integration> integration = this.getIntegration(id);
+
+    if (integration.isPresent()) {
+      integration.get().setStatus(1);
+      return integrationRepository.save(integration.get());
+    } else {
+      logger.error("Integration #{} not found.", id);
+      throw new EntityInactivationException("Integration inactivation failed. Integration not found.");
+    }
+  }
+
+  public Integration createIntegration(@Valid Integration integration) {
+    if (integration != null) {
+      List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
+      if (availableId != null && !availableId.isEmpty()) {
+        integration.setId(availableId.get(0));
+        // set identity provider specific information, e.g. flowname
+        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+          integration.getConfigurationEntity().getIdp()
+              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableId.get(0));
+          integration.getConfigurationEntity().getIdp()
+              .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableId.get(0));
+        }
+        return integrationRepository.save(integration);
+      } else {
+        // TODO the case of the first integration without preloaded integrations
+        logger.error("Failed to find an available integration identifier");
+        throw new EntityCreationException("Integration creation failed");
+      }
+    } else {
+      logger.debug("Integration creation failed.");
+    }
+    return integration;
   }
 }

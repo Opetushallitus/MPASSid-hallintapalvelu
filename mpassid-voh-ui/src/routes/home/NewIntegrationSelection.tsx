@@ -1,17 +1,21 @@
-import { Box, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, InputLabel, MenuItem, Select, SelectChangeEvent, Grid } from "@mui/material";
-import { Dispatch, useState } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
-import { Link } from "react-router-dom";
+import { getBlankIntegration } from "@/api";
+import { useMe } from "@/api/käyttöoikeus";
+import type { SelectChangeEvent} from "@mui/material";
+import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
+import type { Dispatch} from "react";
+import { useEffect, useState } from "react";
+import { FormattedMessage } from "react-intl";
+import { useNavigate } from "react-router-dom";
 
 export const defaults = {
-    organization: "1.2.246.562.10.00000000001",
-    organizations: [ "1.2.246.562.10.00000000001", "1.2.246.562.10.00000000002", "1.2.246.562.10.00000000003"],
-    integration: "sp",
-    integrations: [ { "label": "Koulutustoimija", "role": "idp" }, { "label": "Palveluintegraatio", "role": "sp" } ],
+    integration: "idp",
+    //integrations: [ { "label": "Koulutustoimija", "role": "idp" }, { "label": "Palveluintegraatio", "role": "sp" } ],
+    integrations: [ { "label": "Koulutustoimija", "role": "idp" } ],
     typePI: "SAML",
     typesPI: [ "SAML", "OIDC" ],
     typeOKJ: "Wilma",
-    typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
+    //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
+    typesOKJ: [ "Wilma" ]
   };
 
   interface Props {
@@ -21,27 +25,34 @@ export const defaults = {
 
 function NewIntegrationSelection({ open, setOpen}: Props) {
 
-    const [organization, setOrganization] = useState(defaults.organization);
+    const [organization, setOrganization] = useState('');
     const [integration, setIntegration] = useState(defaults.integration);
-    const [type, setType] = useState(defaults.typePI);
-    const [types, setTypes] = useState(defaults.typesPI);
-    
+    const [type, setType] = useState(defaults.typeOKJ);
+    const [types, setTypes] = useState(defaults.typesOKJ);
+    const me = useMe();
+    const [organizations, setOrganizations] = useState<string[]>();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if(me?.groups) {
+            const possibleOrganizations = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
+            setOrganizations(possibleOrganizations);
+            if(possibleOrganizations.length>0) {
+                setOrganization(possibleOrganizations[0]);
+            }
+        }
+    }, [me]);    
 
     const createIntegration = async () => {
-        console.log("TBD!")
+        getBlankIntegration({role: integration, type: type, organization: organization})
+            .then(result=>{
+                result.id=0;
+                navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
+            })       
       };
-
-    const cannotSave = () => {
-    
-        if(true) {
-          return true;
-        }
-        return false;
-      }
     
       const handleOrganization = (event: SelectChangeEvent) => {
           const value = String(event.target.value);
-          console.log("value: ",value);  
           setOrganization(value)
       }; 
       
@@ -59,7 +70,6 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
 
     const handleTypes = (event: SelectChangeEvent) => {
         const value = String(event.target.value);
-        console.log("value: ",value);  
         setType(value)
     }; 
 
@@ -90,7 +100,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         variant="standard"
                         sx={{ mr: 1,alignContent: "flex-end"}}
                     >
-                        {defaults.organizations.map((option) => (
+                        {organizations&&organizations.map((option) => (
                         <MenuItem key={option} value={option}>
                             {option}
                         </MenuItem>
@@ -146,9 +156,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             
                 <Button sx={{ marginRight: "auto" }} onClick={()=>setOpen(false)} >
                     <FormattedMessage defaultMessage="Peruuta" />
-                </Button>
-                {!cannotSave()&&<Button onClick={createIntegration} sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Luo" /></Button>}
-                {cannotSave()&&<Button component={Link} to={"/uusi/"+integration+"/"+type+"/"+0} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Luo" /></Button>}
+                </Button>                              
+                <Button onClick={createIntegration} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Luo" /></Button>
             
         </DialogActions>
     </Dialog>)    
