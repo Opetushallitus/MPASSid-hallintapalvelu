@@ -23,6 +23,7 @@ interface Props {
     setConfigurationEntity: Dispatch<Components.Schemas.ConfigurationEntity>;
     setDiscoveryInformation: Dispatch<Components.Schemas.DiscoveryInformation>;
     setLogo: Dispatch<Blob>;
+    setNewLogo: Dispatch<boolean>;
 }
 
 interface SchoolType {
@@ -45,7 +46,7 @@ const kouluData:SchoolData = {
   existingExcludes: []
 }
 
-export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo }: Props){
+export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
     const [showSchools, setShowSchools] = useState<boolean>(discoveryInformation?.showSchools||true);
@@ -286,6 +287,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 img.src = URL.createObjectURL(result);
                 img.removeAttribute("hidden")             
                 setLogo(result)
+                setNewLogo(true)
                 setCanSave(true)
                 setShowLogo(true)
               })
