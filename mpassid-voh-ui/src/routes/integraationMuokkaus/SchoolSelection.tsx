@@ -22,20 +22,20 @@ interface Props {
     setCanSave: Dispatch<React.SetStateAction<boolean>>;
     setConfigurationEntity: Dispatch<Components.Schemas.ConfigurationEntity>;
     setDiscoveryInformation: Dispatch<Components.Schemas.DiscoveryInformation>;
-    setLogo: Dispatch<FileList>;
+    setLogo: Dispatch<Blob>;
 }
 
 interface SchoolType {
   nimi:string;
   oppilaitostyyppi: number;
-  koulukoodi:number;
+  koulukoodi:string;
 }
 
 interface SchoolData {
   organisaatio:string;
   koulut: SchoolType[];
-  existingIncludes:number[];
-  existingExcludes:number[];
+  existingIncludes:string[];
+  existingExcludes:string[];
 }
 
 const kouluData:SchoolData = {
@@ -86,7 +86,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                             existingIncludes: [],
                                             existingExcludes: [] }
         //Filter out existingIncludes
-        newSchoolData.koulut = integration.organization?.children.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: Number(c.oppilaitosKoodi)}))
+        newSchoolData.koulut = integration.organization?.children.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: c.oppilaitosKoodi||''}))
         
 
         setSchoolData(newSchoolData)
@@ -96,7 +96,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     }, [integration]);  
 
     useEffect(() => {
-      setPossibleSchools(schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) })));
+      setPossibleSchools(schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: k.koulukoodi })));
     }, [institutionTypeList, schoolData]);
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
@@ -224,24 +224,75 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       }
       
       
+      function resizeImage(file:File, maxWidth:number, maxHeight:number):Promise<Blob> {
+        return new Promise((resolve, reject) => {
+            
+              
+              const image = new Image();
+              image.src = URL.createObjectURL(file);
+              image.onload = () => {
+                  const width = image.width;
+                  const height = image.height;
+                  
+                  if (width <= maxWidth && height <= maxHeight) {
+                      resolve(file);
+                  }
+      
+                  let newWidth:number;
+                  let newHeight:number;
+      
+                  if (width > height) {
+                      newHeight = height * (maxWidth / width);
+                      newWidth = maxWidth;
+                  } else {
+                      newWidth = width * (maxHeight / height);
+                      newHeight = maxHeight;
+                  }
+      
+                  const canvas = document.createElement('canvas');
+                  canvas.width = newWidth;
+                  canvas.height = newHeight;
+      
+                  const context = canvas.getContext('2d');
+                  if(context===null) {
+                    image.onerror = reject;
+                  } else {
+                    context.drawImage(image, 0, 0, newWidth, newHeight);
+                    const resolveBlob = (value: Blob|null) => {
+                      if(value!==null) {
+                        resolve(value)
+                      } else {
+                        image.onerror = reject;
+                      }
+                      
+                    }
+                    canvas.toBlob(resolveBlob, file.type);
+                  }
+                  
+              }
+              image.onerror = reject;
+            
+        });
+    }
+    
+      
       
       const loadFile = (event:ChangeEvent<HTMLInputElement>) => {
-          
-          var reader = new FileReader();
-          reader.onload = function(){
-            const img:HTMLImageElement = document.getElementById('integratio-logo-preview') as HTMLImageElement;
-            if(event&&event.target&&event.target.files&&event.target.files.length>0) {
-              img.src = URL.createObjectURL(event.target.files[0]);
-            }
-          };
-          if(event&&event.target&&event.target.files&&event.target.files.length>0) {
-            reader.readAsDataURL(event.target.files[0]);
             
-            setLogo(event.target.files)
-            setShowLogo(true)
+          const img:HTMLImageElement = document.getElementById('integratio-logo-preview') as HTMLImageElement;
+          
+          if(event&&event.target&&event.target.files&&event.target.files.length>0) {
+              resizeImage(event.target.files[0],125,36).then(result=>{
+                img.src = URL.createObjectURL(result);
+                img.removeAttribute("hidden")             
+                setLogo(result)
+                setCanSave(true)
+                setShowLogo(true)
+              })
+           
           }
           
-        };
+        };  
       
 
     useEffect(() => {
@@ -404,10 +455,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               </form>
               
             </DataRowValue>               
-            {showLogo&&<>
-              <DataRowTitle></DataRowTitle>
-              <DataRowValue><img id="integratio-logo-preview" alt={"logo"} style={{maxHeight:"125 px",maxWidth:"36 px"}}/></DataRowValue>
-              </>}
+            
+            <DataRowTitle></DataRowTitle>
+            <Grid item xs={8}><img id="integratio-logo-preview" alt={"logo"} hidden/></Grid>
+            
             {integration?.configurationEntity?.idp?.logoUrl&&integration.configurationEntity.idp.logoUrl!==''&&!showLogo&&
             <>
             <DataRowTitle></DataRowTitle>

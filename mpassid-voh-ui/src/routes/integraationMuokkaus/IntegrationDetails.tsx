@@ -28,7 +28,7 @@ interface Props {
   setCanSave: Dispatch<boolean>;
   newIntegration?: Components.Schemas.Integration;
   setNewIntegration: Dispatch<Components.Schemas.Integration>;
-  setLogo: Dispatch<FileList>;
+  setLogo: Dispatch<Blob>;
 }
 
 export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo }: Props) {
@@ -63,12 +63,19 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     
     useEffect(() => {
        
-      if(newConfigurationEntityData&&newConfigurationEntityData.idp&&type!=='unknown') {
-        const updatedIdentityProvider: any = newConfigurationEntityData.idp;
+      if(newConfigurationEntityData&&type!=='unknown') {
+        
         const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||''; 
-        if(typeConf.attribute){
+        if(typeConf.attribute&&newConfigurationEntityData.idp){
+          const updatedIdentityProvider: any = newConfigurationEntityData.idp;
           updatedIdentityProvider[typeConf.attribute]=uniqueIdType;
           newConfigurationEntityData.idp=updatedIdentityProvider;
+          setShowConfigurationEntityData(newConfigurationEntityData);
+        }
+        if(typeConf.attribute&&newConfigurationEntityData.sp){
+          const updatedServiceProvider: any = newConfigurationEntityData.sp;
+          updatedServiceProvider[typeConf.attribute]=uniqueIdType;
+          newConfigurationEntityData.sp=updatedServiceProvider;
           setShowConfigurationEntityData(newConfigurationEntityData);
         }
       }
@@ -168,15 +175,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )}    
         <Role integration={integration} oid={oid} environment={environment} setCanSave={setIsValid}/>
 
-        {newConfigurationEntityData&&<Metadata
-          newConfigurationEntityData={newConfigurationEntityData}
-          setNewConfigurationEntityData={setNewConfigurationEntityData}
-          configurationEntity={integration.configurationEntity!}
-          role={role}
-          type={type}
-          setCanSave={setIsValid}
-        />}
-
         {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
             <Attributes
@@ -193,6 +191,23 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           </ErrorBoundary>
         </Grid>}
         
+        {newConfigurationEntityData&&role==='sp'&&
+        <>
+        <Typography variant="h2" gutterBottom>
+          <FormattedMessage defaultMessage="Palvelun metadata tiedot" />
+        </Typography>
+        <Metadata
+          newConfigurationEntityData={newConfigurationEntityData}
+          setNewConfigurationEntityData={setNewConfigurationEntityData}
+          configurationEntity={integration.configurationEntity!}
+          role={role}
+          type={type}
+          setCanSave={setIsValid}
+          oid={oid}
+          environment={environment}
+        />
+        </>}
+
         {hasAttributes && newConfigurationEntityData &&(
           <>
             <Typography variant="h2" gutterBottom>

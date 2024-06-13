@@ -10,13 +10,13 @@ interface Props {
   object: any;
   type: string;
   label: string;
-  attributeType: Components.Schemas.Attribute["type"];
+  attributeType: string;
   isEditable: boolean;
   mandatory: boolean;
   path: any;
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
-  onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
+  onUpdate: (name: string,value: string,type: string) => void;
   onValidate: (data:string) => boolean;
 }
 
@@ -28,6 +28,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 
+  console.log("********* InputForm(object): ",object)
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)

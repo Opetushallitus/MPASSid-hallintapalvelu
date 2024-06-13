@@ -8,16 +8,21 @@ import InputForm from "./InputForm";
 import type { Dispatch } from 'react';
 import type { IntegrationType, UiConfiguration } from "../../../config";
 import { defaultIntegrationType } from "../../../config"
+import ListForm from "./ListForm";
+import SwitchForm from "./SwitchForm";
+import ObjectForm from "./ObjectForm";
+import { IconButton } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
 interface AttributeProps {
     uiConfiguration: UiConfiguration;
     role?: any;
     type?: any;
     attribute: Components.Schemas.Attribute;
-    attributeType: Components.Schemas.Attribute["type"];
+    attributeType: string;
     newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
     helperText: (data:string) => JSX.Element;
-    onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
+    onUpdate: (name: string,value: string,type: string) => void;
     onValidate: (data:string) => boolean;
     setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
@@ -94,6 +99,146 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         }
  }
 
+ interface MetadataProps {
+    uiConfiguration: UiConfiguration;
+    role?: any;
+    type?: any;
+    attribute: any;
+    newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
+    helperText: (data:string) => JSX.Element;
+    onUpdate: (name: string,value: string) => void;
+    onValidate: (data:string) => boolean;
+    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
+    setCanSave: Dispatch<boolean>
+}
+
+export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: MetadataProps) {
+    const intl = useIntl();
+    const id = `attribuutti.${attribute.name}`;
+    const label = id in intl.messages ? { id } : undefined;           
+    const tooltipId = `työkaluvihje.${attribute.name}`;
+    const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
+    var addObject=false;
+
+
+    /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
+                        dataConfiguration.find((c:UiConfiguration) => !c.oid && c.type===attribute.type&&c.name===attribute.name) || 
+                        defaultDataConfiguration;
+                        */
+    const configuration=uiConfiguration;
+    const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
+    
+    if(roleConfiguration.visible) {
+        return (
+            <Grid container >
+                
+                    <Grid key={attribute.name} container spacing={2} mb={3} >
+                    <Grid item xs={4}>
+                    <Tooltip
+                        title={
+                            <>
+                            {tooltip && (
+                                <Box mb={1}>
+                                <FormattedMessage {...tooltip} />
+                                </Box>
+                            )}
+                            <code>{attribute.name}</code>
+                            </>
+                        }
+                        >
+                        <span>{label ? <FormattedMessage {...label} /> : attribute.name}</span>
+                        </Tooltip>
+                        
+                        
+                    </Grid>
+                    <Grid item xs={8} sx={{}}>
+                        <Typography
+                        sx={{
+                            whiteSpace: "pre-wrap",
+                            wordBreak: "break-all",
+                        }}
+                        variant="caption"
+                        >
+                            {configuration&&roleConfiguration&&configuration.object&&
+                            (<ObjectForm key={attribute.name+"_"+configuration.name} 
+                                object={attribute} 
+                                path="content" 
+                                type={attribute.name!} 
+                                isEditable={roleConfiguration.editable} 
+                                onUpdate={onUpdate} 
+                                onValidate={onValidate} 
+                                mandatory={configuration.mandatory}
+                                label={label?intl.formatMessage(label):attribute.name!}
+                                attributeType={"metadata"}
+                                helperText={helperText}
+                                setCanSave={setCanSave}/>)
+                            }
+                            {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
+                                (<SwitchForm key={attribute.name} 
+                                    object={attribute} 
+                                    path="content" 
+                                    type={attribute.name!} 
+                                    values={configuration.enum}
+                                    isEditable={roleConfiguration.editable} 
+                                    onUpdate={onUpdate} 
+                                    onValidate={onValidate} 
+                                    mandatory={configuration.mandatory}
+                                    label={label?intl.formatMessage(label):attribute.name!}
+                                    attributeType={"metadata"}
+                                    helperText={helperText}
+                                    setCanSave={setCanSave}/>)
+                            }
+                            {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
+                                (<InputForm key={attribute.name} 
+                                    object={attribute} 
+                                    path="content" 
+                                    type={attribute.name!} 
+                                    isEditable={roleConfiguration.editable} 
+                                    onUpdate={onUpdate} 
+                                    onValidate={onValidate} 
+                                    mandatory={configuration.mandatory}
+                                    label={label?intl.formatMessage(label):attribute.name!}
+                                    attributeType={"metadata"}
+                                    helperText={helperText}
+                                    setCanSave={setCanSave}/>)
+                            }
+                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&configuration.object&&
+                            (<Grid container spacing={2} >
+                                <Grid item xs={10}></Grid>
+                                <Grid item xs={2}>
+                                    <IconButton 
+                                        aria-label={intl.formatMessage({
+                                        defaultMessage: "lisää",
+                                        })}
+                                        onClick={(e)=>addObject=true} >
+                                        <AddIcon />
+                                    </IconButton>
+                                </Grid>
+                            </Grid>)
+                            }
+                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
+                                (<ListForm key={attribute.name}
+                                object={attribute}
+                                type={attribute.name!}
+                                isEditable={roleConfiguration.editable}
+                                mandatory={configuration.mandatory}
+                                label={label ? intl.formatMessage(label) : attribute.name!}
+                                attributeType={"metadata"}
+                                onValidate={onValidate}
+                                helperText={helperText}
+                                onUpdate={onUpdate} 
+                                setCanSave={setCanSave}/>)}        
+                        </Typography>
+                    </Grid>
+                    </Grid>
+                
+            
+            </Grid>)
+        } else {
+            return(<></>)
+        }
+ }
+
  interface SchoolProps {
     isVisible: boolean;
     isEditable: boolean;
@@ -116,7 +261,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     const tooltipId = `työkaluvihje.${name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
     const attribute = { type: "data" ,name: name, content: value }
-    const onUpdateData = (name: string,value: string,type: Components.Schemas.Attribute["type"]) => {
+    const onUpdateData = (name: string,value: string,type: string) => {
         onUpdate(value);
     }
 

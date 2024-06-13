@@ -25,7 +25,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
 
-  const updateAttribute = (name:string, value:string, type:Components.Schemas.Attribute['type'] ) => {  
+  const updateAttribute = (name:string, value:string, type:string ) => {  
      
     if(attributes.map(a=>a.name).indexOf(name)>-1) {
       attributes.forEach(attribute=>{
@@ -34,7 +34,9 @@ export default function Attributes({ attributes, role, type, attributeType, newC
         }
       })
     } else {
-      attributes.push({type: type, name: name,content: value }) 
+      if(type==='data'||type==='user') {
+        attributes.push({type: type, name: name,content: value }) 
+      }
     }
     
     if(mandatoryAttributes.filter(ma=>!attributes.map(a=>a.name).includes(ma)).length===0) {
@@ -90,7 +92,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     setNewConfigurationEntityData={setNewConfigurationEntityData}  
                     uiConfiguration={configuration}
                     attribute={attributes.find(a=>a.name===configuration.name)||{ type: attributeType, content: '',name: configuration.name}}
-                    attributeType={attributeType}
+                    attributeType={attributeType!}
                     type={type}
                     role={role} 
                     helperText={helpGeneratorText}

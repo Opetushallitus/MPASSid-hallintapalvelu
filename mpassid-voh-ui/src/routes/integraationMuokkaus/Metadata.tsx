@@ -4,7 +4,12 @@ import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import InputForm from "./Form/InputForm";
 import ListForm from "./Form/ListForm";
-import type { Dispatch } from "react";
+import { useState, type Dispatch } from "react";
+import { dataConfiguration } from '../../config';
+import { useIntl } from 'react-intl';
+import { helperText, validate } from "@/utils/Validators";
+import { MetadataForm } from "./Form";
+
 
 export default function Metadata({
   newConfigurationEntityData,
@@ -13,6 +18,8 @@ export default function Metadata({
   role,
   type,
   setCanSave,
+  oid,
+  environment,
 }: {
   newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
@@ -20,16 +27,59 @@ export default function Metadata({
   role: string;
   type: string; 
   setCanSave: Dispatch<boolean>;
+  oid: string;
+  environment: number;
 }) {
   
+  const intl = useIntl();
+  const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
+  const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
+  const mandatoryAttributes:string[] = [];
+  const [metadata, setMetadata] = useState<any>(newConfigurationEntityData?.sp?.metadata||{});
+  
+  //console.log("*** metadata (metadata): ",metadata)
 
+  const updateMetadata = (multivalue: boolean,name:string, value:any ) => {  
+    console.log("*** updateMetadata: ",multivalue,name,value)
+    if(multivalue) {
+      updateMultivalueMetadata(name,value);
+    } else {
+      metadata[name]=value
+    }
+    setMetadata({...metadata})
+    //console.log("*** metadata: ",metadata)
+    if(newConfigurationEntityData?.sp){
+      if(newConfigurationEntityData?.sp?.metadata === undefined){
+        newConfigurationEntityData.sp.metadata={}
+      }    
+      newConfigurationEntityData.sp.metadata=metadata
+    }
+    
+    setNewConfigurationEntityData({...newConfigurationEntityData})
+    
+  }
+
+  const updateMultivalueMetadata = (name:string, value:String) => {
+
+    if(metadata[name]) {
+        const index = metadata[name].indexOf(value)
+        if(index>=0) {
+          metadata[name].splice(index, 1);
+        } else {
+          metadata[name].push(value)
+        }
+    } else {
+      metadata[name]=[]
+      metadata[name].push(value)
+    }
+  
+  }
   
   
-
   if(role=="sp") {
 
     const providerData:Components.Schemas.ServiceProvider = configurationEntity[role]!;
-    
+  
     const logUpdateValue = (value:String) => {  
       console.log("newConfigurationEntityData: ",newConfigurationEntityData)
     }
@@ -37,7 +87,7 @@ export default function Metadata({
       return true;
     }
 
-    const updateScope = (name: string, value:String, type: Components.Schemas.Attribute["type"]) => {
+    const updateScope = (name: string, value:String, type: Components.Schemas.Attribute["type"]|'metadata') => {
       console.log("value: ",value)
         console.log("newConfigurationEntityData: ",newConfigurationEntityData)
 
@@ -57,134 +107,97 @@ export default function Metadata({
     const helperTextForRedirectUri= (data:string)=><FormattedMessage defaultMessage="Uri ei ole FQDN muodossa!" />
     const emptyHelperText= (data:string)=> <></>
 
-    const updateRedirectUri = (value:String) => {
-      console.log("updateRedirectUri value: ",value)
-      //var newUris:Array<String> = [];
-
-      if(role&&providerData?.metadata?.redirect_uris) {
-          const index = providerData.metadata.redirect_uris.indexOf(value)
-          if(index>=0) {
-            providerData.metadata.redirect_uris.splice(index, 1);
-          } else {
-            providerData.metadata.redirect_uris.push(value)
-          }
-      } 
-      
-      
-      if(newConfigurationEntityData) {
-        setNewConfigurationEntityData({ ...newConfigurationEntityData})
-      }
-      
-    }
+   
     if (role&&providerData !== undefined&&providerData.metadata && providerData.metadata !== undefined) {  
       const value = providerData.metadata.encoding && providerData.metadata.content !== undefined
         ? atob(providerData.metadata.content as unknown as string)
         : JSON.stringify(providerData.metadata, null, 2);
-      if(type==="oidc") {
-        return (<>
-          <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
-            <FormattedMessage defaultMessage="grant_types" />
-          </Grid>
-          <Grid item xs={8} sx={{}}>
-          <Typography
-              sx={{
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-              }}
-              variant="caption"
-            >
-              <ListForm object={providerData.metadata.grant_types} type="grant_type" onUpdate={logUpdateValue} onValidate={emptyValidate} helperText={emptyHelperText}></ListForm>
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
-            <FormattedMessage defaultMessage="scope" />
-          </Grid>
-          <Grid item xs={8} sx={{}}>
-            <Typography
-              sx={{
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-              }}
-              variant="caption"
-            >
-              <InputForm object={providerData} path="metadata.scope" type="scope" isEditable={false} onUpdate={updateScope} attributeType="data" onValidate={emptyValidate} mandatory={true} label="Scope" setCanSave={setCanSave} helperText={emptyHelperText}></InputForm>
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
-            <FormattedMessage defaultMessage="redirect_uris" />
-          </Grid>
-          <Grid item xs={8} sx={{}}>
-          <Typography
-              sx={{
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-              }}
-              variant="caption"
-            >
-              <ListForm object={providerData.metadata.redirect_uris} type="redirect_uri" isEditable={true} onUpdate={updateRedirectUri} onValidate={validateRedirectUri} helperText={helperTextForRedirectUri}></ListForm>
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
-            <FormattedMessage defaultMessage="client_id" />
-          </Grid>
-          <Grid item xs={8} sx={{}}>
-          <Typography
-              sx={{
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-              }}
-              variant="caption"
-            >
-              <InputForm object={providerData} path="metadata.client_id" type="client_id" label="client_id" isEditable={false} onUpdate={logUpdateValue} onValidate={emptyValidate} helperText={emptyHelperText} attributeType="data"  mandatory={true} setCanSave={setCanSave}></InputForm>
-           
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
-            <FormattedMessage defaultMessage="client_secret" />
-          </Grid>
-          <Grid item xs={8} sx={{}}>
-          <Typography
-              sx={{
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-              }}
-              variant="caption"
-            >
-              <InputForm object={providerData} path="metadata.client_secret" type="client_secret" label="client_secret" isEditable={false} onUpdate={logUpdateValue} attributeType="data" onValidate={emptyValidate} helperText={emptyHelperText} mandatory={true} setCanSave={setCanSave}></InputForm>
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
-            <FormattedMessage defaultMessage="response_types" />
-          </Grid>
-          <Grid item xs={8} sx={{}}>
-          <Typography
-              sx={{
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-all",
-              }}
-              variant="caption"
-            >
-              <ListForm object={providerData.metadata.response_types} type="response_type" onUpdate={logUpdateValue} onValidate={emptyValidate} helperText={emptyHelperText}></ListForm>
-            </Typography>
-          </Grid>
-        </Grid>
-  
-          
-        </>
-        );
-      }
 
+        if(type==="saml"||type==="oidc") {
+          return (<Grid container >
+            {dataConfiguration
+              .filter((configuration) => configuration.type === 'metadata')
+              //.filter((configuration) => configuration.environment===undefined||configuration.environment==environment )
+              .filter((configuration) => (environmentConfiguration.includes(configuration.name)&&configuration.environment===environment)||(!environmentConfiguration.includes(configuration.name)&&configuration.environment===undefined))
+              .filter((configuration) => (specialConfiguration.includes(configuration.name)&&configuration.oid===oid)||(!specialConfiguration.includes(configuration.name)&&!configuration.oid))
+              .map((configuration) => {
+                const id = `attribuutti.${configuration.name}`;
+                const label = id in intl.messages ? { id } : undefined;
+                return {
+                  ...configuration,
+                  label: label && intl.formatMessage(label),
+                };
+              })
+              .filter(({ name }) => name)
+              .sort(
+                (a, b) =>
+                  2 *
+                  (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
+              )
+              .map((configuration) => {
+                      if(configuration.mandatory) {
+                        mandatoryAttributes.push(configuration.name);
+                      }
+                      const validator = (value:string) => {
+                        return validate(configuration.validation,value);
+                      }
+                      const helpGeneratorText = (value:string) => {
+                        return helperText(configuration.validation,value);
+                      }
+                      //console.log("*** metadata (configuration.name): ",configuration.name);
+                      //console.log("*** metadata (content): ",metadata[configuration.name]);
+                      const attribute = { type: 'metadata', 
+                                          content: metadata[configuration.name],
+                                          name: configuration.name}
+                      
+                      if(metadata[configuration.name] === undefined) {
+
+                        if(configuration.multivalue) {
+                          attribute.content=[];
+                        }
+                        if(!configuration.multivalue) {
+                          attribute.content='';
+                        }
+                        if(configuration?.enum?.length===2) {
+                          attribute.content=configuration.enum[0];
+                        }
+                          
+                      }
+                      //console.log("*** metadata (attribute): ",attribute);
+                      const onUpdate = (name:string,value:string) => {
+                        
+                        if(configuration?.enum&&configuration.enum.length>0) {
+                          return updateMetadata(false,name,value);
+                        } else {
+                          if(configuration?.multivalue) {
+                            return updateMetadata(configuration.multivalue,name,value);
+                          } else {
+                            return updateMetadata(false,name,value);
+                          }
+                          
+                        }
+                        
+                      }
+                      
+                      return (<MetadataForm 
+                        key={configuration.name!}
+                        onUpdate={onUpdate}
+                        onValidate={validator}
+                        newConfigurationEntityData={newConfigurationEntityData}
+                        setNewConfigurationEntityData={setNewConfigurationEntityData}  
+                        uiConfiguration={configuration}
+                        attribute={attribute}
+                        type={type}
+                        role={role} 
+                        helperText={helpGeneratorText}
+                        setCanSave={setCanSave}/>)
+                    }
+                
+                  )
+              }
+          </Grid>)
+        }  
+      
       return (<>
         
         <Grid container spacing={2} mb={3}>

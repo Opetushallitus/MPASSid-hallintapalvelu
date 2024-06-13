@@ -11,8 +11,8 @@ import toLanguage from "@/utils/toLanguage";
 
 export const defaults = {
     typePI: "saml",
-    //typesPI: [ "saml", "oidc" ],
-    typesPI: [ "saml"],
+    typesPI: [ "saml", "oidc" ],
+    //typesPI: [ "saml"],
     typeOKJ: "wilma",
     //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
     typesOKJ: [ "wilma" ]
@@ -170,7 +170,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         <MenuItem key={'koulutustoimija'} value={'idp'}>
                             <FormattedMessage defaultMessage='Koulutustoimija'/>
                         </MenuItem>
-                        <MenuItem key={'Palveluintegraatio'} value={'sp'}>
+                        <MenuItem key={'palveluintegraatio'} value={'sp'}>
                             <FormattedMessage defaultMessage='Palveluintegraatio' />
                         </MenuItem>
                     </Select>
