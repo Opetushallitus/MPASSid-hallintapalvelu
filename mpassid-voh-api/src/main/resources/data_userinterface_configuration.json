@@ -1,0 +1,247 @@
+    [
+        {
+            "name": "clientId",
+            "type": "data",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": []
+        },
+        {
+            "name": "clientKey",
+            "type": "data",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": []
+        },
+        {
+            "name": "datasource",
+            "type": "data",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": []
+        },
+        {
+            "name": "tenantId",
+            "type": "data",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": []
+        },
+        {
+            "name": "firstName",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "surname",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "groups",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "schoolIdStatic",
+            "oid": "1.2.246.562.10.21199106507",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": false,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "learningMaterialsCharges",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "azureApplicationIdUri",
+            "type": "user",
+            "mandatory": false,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": false,
+                    "visible": false
+                }
+            ]
+        },
+        {
+            "name": "schoolIds",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "nickname",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "studentGroupGuid",
+            "oid": "1.2.246.562.10.21199106507",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "customTeacherRole",
+            "oid": "1.2.246.562.10.21199106507",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": false
+                }
+            ]
+        },
+        {
+            "name": "groupLevels",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "customStudentRole",
+            "oid": "1.2.246.562.10.21199106507",
+            "type": "user",
+            "mandatory": false,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "username",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "learnerId",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "roles",
+            "type": "user",
+            "mandatory": true,
+            "validation": [],
+            "integrationType": [
+                {
+                    "name": "azure",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        },
+        {
+            "name": "redirect_uris",
+            "type": "metadata",
+            "mandatory": true,
+            "deploymentPhase": 1,
+            "validation": [
+                "fqdn",
+                "nohash",
+                "https"
+            ],
+            "integrationType": [
+                {
+                    "name": "oidcrp",
+                    "editable": true,
+                    "visible": true
+                }
+            ]
+        }
+    ]

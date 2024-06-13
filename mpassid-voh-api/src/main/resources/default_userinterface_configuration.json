@@ -1,0 +1,44 @@
+{
+    "name": "default",
+    "type": "user",
+    "mandatory": true,
+    
+    "validation": [],
+    "integrationType": [
+        {
+            "name": "azure",
+            "editable": false,
+            "visible": true
+        },
+        {
+            "name": "adfs",
+            "editable": false,
+            "visible": false
+        },
+        {
+          "name": "wilma",
+          "editable": false,
+          "visible": true
+      },
+      {
+          "name": "gsuite",
+          "editable": false,
+          "visible": false
+      },  
+      {
+          "name": "opinsys",
+          "editable": false,
+          "visible": false
+      },  
+      {
+          "name": "oidc",
+          "editable": false,
+          "visible": false
+      },
+      {
+          "name": "saml",
+          "editable": false,
+          "visible": false
+      }
+    ]
+  }
