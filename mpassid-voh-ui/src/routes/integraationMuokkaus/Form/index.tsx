@@ -5,7 +5,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useIntl, FormattedMessage } from 'react-intl';
 import InputForm from "./InputForm";
-import type { Dispatch } from 'react';
+import { useRef, type Dispatch } from 'react';
 import type { IntegrationType, UiConfiguration } from "../../../config";
 import { defaultIntegrationType } from "../../../config"
 import ListForm from "./ListForm";
@@ -133,7 +133,13 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const label = id in intl.messages ? { id } : undefined;           
     const tooltipId = `työkaluvihje.${attribute.name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
-    var addObject=false;
+    const currentObject= useRef<any>({});
+    
+    const updateObject = () => {
+        console.log("*** currentObject.current: ",currentObject.current)
+        onUpdate(attribute.name,currentObject.current)
+        currentObject.current={}
+    }
 
 
     /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
@@ -186,7 +192,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 label={label?intl.formatMessage(label):attribute.name!}
                                 attributeType={"metadata"}
                                 helperText={helperText}
-                                setCanSave={setCanSave}/>)
+                                setCanSave={setCanSave}
+                                currentObject={currentObject}/>)
                             }
                             {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
                                 (<SwitchForm key={attribute.name} 
@@ -225,7 +232,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                         aria-label={intl.formatMessage({
                                         defaultMessage: "lisää",
                                         })}
-                                        onClick={(e)=>addObject=true} >
+                                        onClick={updateObject} >
                                         <AddIcon />
                                     </IconButton>
                                 </Grid>

@@ -21,13 +21,14 @@ interface Props {
   isEditable: boolean;
   mandatory: boolean;
   path: any;
+  currentObject: any;
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
   onUpdate: (name: string,value: string) => void;
   onValidate: (data:string) => boolean;
 }
 
-export default function ObjectForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType,setCanSave }: Props) {
+export default function ObjectForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType,setCanSave, currentObject }: Props) {
   const intl = useIntl();
   const id = `attribuutti.${object.name}`;
   const tooltipId = `työkaluvihje.${object.name}`;
@@ -43,6 +44,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
+  
 
   console.log("***** ObjectForm (object): ",object)
   
@@ -56,7 +58,16 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
   
   const updateObjectInputFormValue = (name: string,value: string,type: string) => {
-    console.log("********** updateObjectInputFormValue: ",name,value,type)
+    
+    currentObject.current[name]=value;
+    console.log("********** currentObject: ",currentObject.current)
+  }
+
+  const updateObjectSwitchFormValue = (name: string,value: string,type: string) => {
+    
+    console.log("*** updateObjectSwitchFormValue: ",name,value,type)
+    //currentObject.current[name]=value;
+    console.log("********** currentObject: ",currentObject.current)
   }
 
   const updateFormValue = () => {
@@ -93,7 +104,6 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     
     return (<Grid container >
         {object.content.map((content:any,index:number)=>{
-            console.log("******** content: ",content)
             return(<Grid key={object.name+"_"+index} container spacing={2} >
                         <Grid item xs={11}>
                             <span >{JSON.stringify(content, null, 2).replace(/^{/g, '').replace(/}$/g, '\n')}</span>
@@ -125,7 +135,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
             (a, b) => (a.label ?? a.name!).localeCompare(b.label ?? b.name!)
           )
           .map((configuration) => {
-
+                    
             console.log("***** ObjectForm (configuration): ",configuration)
 
                   if(configuration.mandatory) {
@@ -161,7 +171,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                           content: '',
                                           name: configuration.name}
                 
-                  
+                  currentObject.current[configuration.name]=''
                   
                   return (
                     <Grid key={configuration.name} container >
@@ -197,11 +207,11 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         type={object.name!} 
                                         values={configuration.enum}
                                         isEditable={roleConfiguration.editable} 
-                                        onUpdate={onUpdate} 
+                                        onUpdate={updateObjectSwitchFormValue} 
                                         onValidate={onValidate} 
                                         mandatory={configuration.mandatory}
                                         label={label?intl.formatMessage(label):object.name!}
-                                        attributeType={"metadata"}
+                                        attributeType={configuration.type}
                                         helperText={helperText}
                                         setCanSave={setCanSave}/>)
                                     }                                    
@@ -215,7 +225,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         onValidate={onValidate} 
                                         mandatory={configuration.mandatory}
                                         label={label?intl.formatMessage(label):configuration.name!}
-                                        attributeType={"metadata"}
+                                        attributeType={configuration.type}
                                         helperText={helperText}
                                         setCanSave={setCanSave}/>)
                                     }    
@@ -227,7 +237,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                       isEditable={roleConfiguration.editable}
                                       mandatory={configuration.mandatory}
                                       label={label ? intl.formatMessage(label) : object.name!}
-                                      attributeType={"metadata"}
+                                      attributeType={configuration.type}
                                       onValidate={onValidate}
                                       helperText={helperText}
 
