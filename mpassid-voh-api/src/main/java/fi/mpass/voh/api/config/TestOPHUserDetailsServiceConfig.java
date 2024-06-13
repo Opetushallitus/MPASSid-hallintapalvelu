@@ -1,5 +1,7 @@
 package fi.mpass.voh.api.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -14,17 +16,14 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Profile("prod")
+@Profile("test")
 @Configuration
-@PropertySource("classpath:kayttooikeus-prod.properties")
-public class OPHUserDetailsServiceConfig {
-
-    private static final Logger logger = LoggerFactory.getLogger(OPHUserDetailsServiceConfig.class);
+@PropertySource("classpath:kayttooikeus-test.properties")
+public class TestOPHUserDetailsServiceConfig {
+    private static final Logger logger = LoggerFactory.getLogger(TestOPHUserDetailsServiceConfig.class);
 
     private static final SimpleGrantedAuthority[] RESTRICTED_AUTHORITIES = new SimpleGrantedAuthority[] {
             new SimpleGrantedAuthority("ROLE_APP_MPASSID")
@@ -37,7 +36,7 @@ public class OPHUserDetailsServiceConfig {
     private String kayttooikeusClientCallerId;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder testPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -48,7 +47,7 @@ public class OPHUserDetailsServiceConfig {
             userDetails = new OphUserDetailsServiceImpl(kayttooikeusServerPrefix, kayttooikeusClientCallerId);
         } catch (Exception e) {
             logger.error("Exception through OphUserDetailsServiceImpl: " + e);
-            userDetails = new OPHUserDetailsService(passwordEncoder());
+            userDetails = new OPHUserDetailsService(testPasswordEncoder());
         }
         return userDetails;
     }
