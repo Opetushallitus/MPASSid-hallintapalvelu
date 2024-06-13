@@ -136,7 +136,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const currentObject= useRef<any>({});
     
     const updateObject = () => {
-        console.log("*** currentObject.current: ",currentObject.current)
+        //console.log("*** currentObject.current: ",currentObject.current)
         onUpdate(attribute.name,currentObject.current)
         currentObject.current={}
     }

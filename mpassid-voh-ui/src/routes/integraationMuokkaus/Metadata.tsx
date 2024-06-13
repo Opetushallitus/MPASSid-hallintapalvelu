@@ -38,6 +38,7 @@ export default function Metadata({
   const [metadata, setMetadata] = useState<any>(newConfigurationEntityData?.sp?.metadata||{});
   
   //console.log("*** metadata (metadata): ",metadata)
+  //console.log("*** metadata (type): ",type)
 
   const updateMetadata = (multivalue: boolean,name:string, value:any ) => {  
     console.log("*** updateMetadata: ",multivalue,name,value)
@@ -134,6 +135,7 @@ export default function Metadata({
                   2 *
                   (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
               )
+              .filter((configuration) => configuration.integrationType.filter(it=>it.name===type&&it.visible).length>0)
               .map((configuration) => {
                       if(configuration.mandatory) {
                         mandatoryAttributes.push(configuration.name);

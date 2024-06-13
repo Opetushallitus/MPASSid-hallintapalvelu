@@ -356,7 +356,7 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'metadata',
       mandatory: true,
       multivalue: true,
-      validation: [ 'fqdn', 'nohash', 'https' ],
+      validation: [],
       integrationType: [
           {
               name: 'oidc',
@@ -365,12 +365,13 @@ export const dataConfiguration:UiConfiguration[] = [
           }
       ]
   },
+  
   {
     name: 'grant_types',
     type: 'metadata',
     mandatory: true,
     multivalue: true,
-    validation: [ 'fqdn', 'nohash', 'https' ],
+    validation: [ ],
     integrationType: [
         {
             name: 'oidc',
@@ -384,7 +385,8 @@ export const dataConfiguration:UiConfiguration[] = [
         type: 'metadata',
         mandatory: true,
         multivalue: true,
-        validation: [ 'fqdn', 'nohash', 'https' ],
+        //validation: [ 'fqdn', 'nohash', 'https' ],
+        validation: [ ],
         integrationType: [
             {
                 name: 'oidc',
@@ -397,8 +399,8 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'scope',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
-    validation: [ 'fqdn', 'nohash', 'https' ],
+    multivalue: false,
+    validation: [],
     integrationType: [
         {
             name: 'oidc',
@@ -411,8 +413,8 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'client_secret',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
-    validation: [ 'fqdn', 'nohash', 'https' ],
+    multivalue: false,
+    validation: [],
     integrationType: [
         {
             name: 'oidc',
@@ -425,8 +427,8 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'client_id',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
-    validation: [ 'fqdn', 'nohash', 'https' ],
+    multivalue: false,
+    validation: [],
     integrationType: [
         {
             name: 'oidc',
@@ -440,7 +442,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
-    validation: [ 'fqdn', 'nohash', 'https' ],
+    validation: [],
     integrationType: [
         {
             name: 'oidc',
@@ -461,6 +463,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
         }
     ]
   },
@@ -475,6 +482,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: false,
             visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
         }
     ]
   },
@@ -490,6 +502,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
         }
     ]
   },
@@ -505,6 +522,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
         }
     ]
   },
@@ -519,6 +541,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
         }
     ]
   },
@@ -533,6 +560,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
         }
     ]
   },
@@ -547,6 +579,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
         }
     ]
   },
@@ -560,6 +597,11 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
             editable: true,
             visible: true,
         }

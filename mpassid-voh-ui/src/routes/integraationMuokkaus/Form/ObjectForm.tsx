@@ -46,7 +46,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   const inputRef = useRef<HTMLFormElement>(null);
   
 
-  console.log("***** ObjectForm (object): ",object)
+  //console.log("***** ObjectForm (object): ",object)
   
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
@@ -60,14 +60,14 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   const updateObjectInputFormValue = (name: string,value: string,type: string) => {
     
     currentObject.current[name]=value;
-    console.log("********** currentObject: ",currentObject.current)
+    //console.log("********** currentObject: ",currentObject.current)
   }
 
   const updateObjectSwitchFormValue = (name: string,value: string,type: string) => {
     
-    console.log("*** updateObjectSwitchFormValue: ",name,value,type)
-    //currentObject.current[name]=value;
-    console.log("********** currentObject: ",currentObject.current)
+    //console.log("*** updateObjectSwitchFormValue: ",name,value,type)
+    currentObject.current[name]=value;
+    //console.log("********** currentObject: ",currentObject.current)
   }
 
   const updateFormValue = () => {
@@ -98,6 +98,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
 
   const deleteObject = (index:number) => {
     object.content.splice(index, 1)
+    onUpdate(object.type,object);
   };
   
   if(isEditable) {
@@ -136,7 +137,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
           )
           .map((configuration) => {
                     
-            console.log("***** ObjectForm (configuration): ",configuration)
+            //console.log("***** ObjectForm (configuration): ",configuration)
 
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
@@ -164,14 +165,28 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     
                   }
                   
-                  console.log("**** ObjectForm (configuration): ",configuration)
-                  console.log("**** ObjectForm (object): ",object)
+                  //console.log("**** ObjectForm (configuration): ",configuration)
+                  //console.log("**** ObjectForm (object): ",object)
 
                   const attribute = { type: configuration.type, 
                                           content: '',
                                           name: configuration.name}
+
+                    
+
+                    if(configuration.multivalue) {
+                        currentObject.current[configuration.name]=[];
+                    }
+                    if(!configuration.multivalue) {
+                        currentObject.current[configuration.name]='';
+                    }
+                    if(configuration?.enum?.length===2) {
+                        currentObject.current[configuration.name]=configuration.enum[0];
+                    }
+                        
+
                 
-                  currentObject.current[configuration.name]=''
+            
                   
                   return (
                     <Grid key={configuration.name} container >
@@ -204,7 +219,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                     (<SwitchForm key={object.name} 
                                         object={object} 
                                         path="content" 
-                                        type={object.name!} 
+                                        type={configuration.name!} 
                                         values={configuration.enum}
                                         isEditable={roleConfiguration.editable} 
                                         onUpdate={updateObjectSwitchFormValue} 
