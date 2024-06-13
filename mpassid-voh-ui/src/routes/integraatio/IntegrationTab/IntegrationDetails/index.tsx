@@ -40,7 +40,7 @@ export default function IntegrationDetails({ integration }: Props) {
     if((integration?.configurationEntity?.idp?.type === "azure" ||  integration?.configurationEntity?.idp?.type === "wilma") && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
       return true;
     } else {
-      if((integration?.configurationEntity?.sp?.type === "saml" ||  integration?.configurationEntity?.sp?.type === "oidc") && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+      if(!ENV.PROD&&(integration?.configurationEntity?.sp?.type === "saml" ||  integration?.configurationEntity?.sp?.type === "oidc") && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
         return true
       }
     }

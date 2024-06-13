@@ -170,9 +170,9 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         <MenuItem key={'koulutustoimija'} value={'idp'}>
                             <FormattedMessage defaultMessage='Koulutustoimija'/>
                         </MenuItem>
-                        <MenuItem key={'palveluintegraatio'} value={'sp'}>
+                        {!ENV.PROD&&<MenuItem key={'palveluintegraatio'} value={'sp'}>
                             <FormattedMessage defaultMessage='Palveluintegraatio' />
-                        </MenuItem>
+                        </MenuItem>}
                     </Select>
                 </Grid>
                 <Grid item xs={4}>
