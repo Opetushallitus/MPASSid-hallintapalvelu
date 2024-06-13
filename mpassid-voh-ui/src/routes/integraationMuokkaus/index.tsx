@@ -29,7 +29,7 @@ export default function IntegraatioMuokkaus() {
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
   const [openNotice, setOpenNotice] = useState(false);
-  const [logo, setLogo] = useState<FileList>();
+  const [logo, setLogo] = useState<Blob>();
   const result = useRef<Components.Schemas.Integration>({});
   const intl = useIntl();
 
@@ -101,10 +101,10 @@ export default function IntegraatioMuokkaus() {
             }
             if(logo){
               const formData = new FormData();
-              formData.append("file", logo[0]);
+              formData.append("file", logo);
               const uploadLogoR = await uploadLogo({ id },formData as any);
 
-              console.log("*** uploadLogo: ",uploadLogoR)
+              
             }
           }
           

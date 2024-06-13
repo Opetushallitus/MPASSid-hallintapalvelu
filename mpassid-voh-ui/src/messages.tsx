@@ -184,7 +184,11 @@ defineMessage({
   id: "attribuutti.allowtestlearnerid",
   description: "attribuutti",
 });
-
+defineMessage({
+  defaultMessage: "Lisä kouluvalinta säännöt",
+  id: "attribuutti.extraSchoolsConfiguration",
+  description: "attribuutti",
+});
 
 // Attribuuttien työkaluvihjeet
 defineMessage({
@@ -229,7 +233,11 @@ defineMessage({
   id: "työkaluvihje.allowtestlearnerid",
   description: "attribuutin työkaluvihje",
 });
-
+defineMessage({
+  defaultMessage: "Lisä sääntöjä koulusivun valintaan",
+  id: "työkaluvihje.extraSchoolsConfiguration",
+  description: "attribuutin työkaluvihje",
+});
 
 // Tyypit
 defineMessage({

@@ -1,6 +1,6 @@
 import type { Components } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import _ from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import {
   Alert,
   AlertTitle,
@@ -28,13 +28,14 @@ interface Props {
   setCanSave: Dispatch<boolean>;
   newIntegration?: Components.Schemas.Integration;
   setNewIntegration: Dispatch<Components.Schemas.Integration>;
-  setLogo: Dispatch<FileList>;
+  setLogo: Dispatch<Blob>;
 }
 
 export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo }: Props) {
     
     const [isValidSchoolSelection, setIsValidSchoolSelection] = useState(true);
     const [isValid, setIsValid] = useState(true);
+    const [newLogo, setNewLogo] = useState(false);
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
     const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
@@ -51,10 +52,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
      
       if(role !== undefined) {
-        setNewIntegration(_.cloneDeep(integration))
-        setNewConfigurationEntityData(_.cloneDeep(integration.configurationEntity))
+        setNewIntegration(cloneDeep(integration))
+        setNewConfigurationEntityData(cloneDeep(integration.configurationEntity))
         if(integration?.discoveryInformation){
-          setNewDiscoveryInformation(_.cloneDeep(integration.discoveryInformation))
+          setNewDiscoveryInformation(cloneDeep(integration.discoveryInformation))
         }
         
       }
@@ -63,12 +64,19 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     
     useEffect(() => {
        
-      if(newConfigurationEntityData&&newConfigurationEntityData.idp&&type!=='unknown') {
-        const updatedIdentityProvider: any = newConfigurationEntityData.idp;
+      if(newConfigurationEntityData&&type!=='unknown') {
+        
         const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||''; 
-        if(typeConf.attribute){
+        if(typeConf.attribute&&newConfigurationEntityData.idp){
+          const updatedIdentityProvider: any = newConfigurationEntityData.idp;
           updatedIdentityProvider[typeConf.attribute]=uniqueIdType;
           newConfigurationEntityData.idp=updatedIdentityProvider;
+          setShowConfigurationEntityData(newConfigurationEntityData);
+        }
+        if(typeConf.attribute&&newConfigurationEntityData.sp){
+          const updatedServiceProvider: any = newConfigurationEntityData.sp;
+          updatedServiceProvider[typeConf.attribute]=uniqueIdType;
+          newConfigurationEntityData.sp=updatedServiceProvider;
           setShowConfigurationEntityData(newConfigurationEntityData);
         }
       }
@@ -79,7 +87,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
           if(newConfigurationEntityData) {
             setSaveDialogState(true);
-            if(_.isEqual(newConfigurationEntityData,integration.configurationEntity)){              
+            if(isEqual(newConfigurationEntityData,integration.configurationEntity)&&!newLogo){              
               setCanSave(false)
             } else {                  
               if(isValid&&isValidSchoolSelection) {                
@@ -96,12 +104,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration]);
+    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration, newLogo]);
 
     useEffect(() => {
       if(newDiscoveryInformation) {
         setSaveDialogState(true);
-        if(_.isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
+        if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
           setCanSave(false)
         } else {                  
           if(isValid&&isValidSchoolSelection) {                
@@ -147,6 +155,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setDiscoveryInformation={setNewDiscoveryInformation} 
                 setCanSave={setIsValidSchoolSelection}
                 setLogo={setLogo}
+                setNewLogo={setNewLogo}
                 isEditable={true}/>
               )
           }
@@ -159,6 +168,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setDiscoveryInformation={setNewDiscoveryInformation}
                 setCanSave={setIsValidSchoolSelection}
                 setLogo={setLogo}
+                setNewLogo={setNewLogo}
                 isEditable={false}/>
             )
           }
@@ -167,15 +177,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} />
         )}    
         <Role integration={integration} oid={oid} environment={environment} setCanSave={setIsValid}/>
-
-        {newConfigurationEntityData&&<Metadata
-          newConfigurationEntityData={newConfigurationEntityData}
-          setNewConfigurationEntityData={setNewConfigurationEntityData}
-          configurationEntity={integration.configurationEntity!}
-          role={role}
-          type={type}
-          setCanSave={setIsValid}
-        />}
 
         {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
@@ -193,6 +194,23 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           </ErrorBoundary>
         </Grid>}
         
+        {newConfigurationEntityData&&role==='sp'&&
+        <>
+        <Typography variant="h2" gutterBottom>
+          <FormattedMessage defaultMessage="Palvelun metadata tiedot" />
+        </Typography>
+        <Metadata
+          newConfigurationEntityData={newConfigurationEntityData}
+          setNewConfigurationEntityData={setNewConfigurationEntityData}
+          configurationEntity={integration.configurationEntity!}
+          role={role}
+          type={type}
+          setCanSave={setIsValid}
+          oid={oid}
+          environment={environment}
+        />
+        </>}
+
         {hasAttributes && newConfigurationEntityData &&(
           <>
             <Typography variant="h2" gutterBottom>
