@@ -37,7 +37,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
   const updateFormState = useCallback(
     function updateFormState() {
       if(inputRef.current) {
-        setIsEmpty(!inputRef.current!.value);
+        //setIsEmpty(!inputRef.current!.value);
         setIsDirty(inputRef.current!.value !== (defaultValue ?? ""));
       }
       

@@ -72,7 +72,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                         }}
                         variant="caption"
                         >
-                        {configuration&&roleConfiguration&&
+                        {configuration&&roleConfiguration&&configuration?.enum?.length!==2&&
                             (<InputForm key={attribute.name} 
                                 object={attribute} 
                                 path="content" 
@@ -83,6 +83,21 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 mandatory={configuration.mandatory}
                                 label={label?intl.formatMessage(label):attribute.name!}
                                 attributeType={attributeType}
+                                helperText={helperText}
+                                setCanSave={setCanSave}/>)
+                        }
+                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&attributeType==='data'&&
+                            (<SwitchForm key={attribute.name} 
+                                object={attribute} 
+                                path="content" 
+                                type={attribute.name!} 
+                                values={configuration.enum}
+                                isEditable={roleConfiguration.editable} 
+                                onUpdate={onUpdate} 
+                                onValidate={onValidate} 
+                                mandatory={configuration.mandatory}
+                                label={label?intl.formatMessage(label):attribute.name!}
+                                attributeType={"data"}
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }
