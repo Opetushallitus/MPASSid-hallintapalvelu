@@ -10,14 +10,14 @@ interface Props {
   object: any;
   type: string;
   label: string;
-  attributeType: Components.Schemas.Attribute["type"];
+  attributeType: string;
   isEditable: boolean;
   mandatory: boolean;
   path: any;
   values: any[];
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
-  onUpdate: (name: string,value: string,type: Components.Schemas.Attribute["type"]) => void;
+  onUpdate: (name: string,value: string,type: string) => void;
   onValidate: (data:string) => boolean;
 }
 

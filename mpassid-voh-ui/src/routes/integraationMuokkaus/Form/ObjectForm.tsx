@@ -17,7 +17,7 @@ interface Props {
   object: any;
   type: string;
   label: string;
-  attributeType: Components.Schemas.Attribute["type"];
+  attributeType: string;
   isEditable: boolean;
   mandatory: boolean;
   path: any;
