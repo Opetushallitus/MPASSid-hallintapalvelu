@@ -1,6 +1,6 @@
 import type { ChangeEvent, Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
-import {  Box, colors, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
+import {  Box, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import { DataRow, TextList } from "../integraatio/IntegrationTab/DataRow";
 import { getIntegrationDiscoveryInformation, type Components } from "@/api";
@@ -47,6 +47,13 @@ const kouluData:SchoolData = {
   existingExcludes: []
 }
 
+const convertSchoolCode = (value?:string) => {
+  if(value === undefined || value === null || value === '' ) {
+    return 0;
+  }
+  return Number(value.substring(17).split("#")[0])
+} 
+
 export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo, newLogo }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
@@ -64,22 +71,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       );
     const language = toLanguage(useIntl().locale).toUpperCase();
     const identityProvider = integration.configurationEntity!.idp!;
-    //const [possibleSchools, setPossibleSchools] = useState<oneEnum[]>([]);
-    const possibleSchools = useRef<oneEnum[]>([]);
-    const [schools, setSchools] = useState<string[]>(discoveryInformation?.schools||[]);
-    const [excludeSchools, setExcludeSchools] = useState<string[]>(discoveryInformation?.excludedSchools||[]);
+    const possibleSchools = useRef<oneEnum[]>(integration?.organization?.children?.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: c.oppilaitosKoodi||''})).map(k=>({ label: k.nimi, value: k.koulukoodi }))||[]);
+    const [schools, setSchools] = useState<string[]>(integration?.discoveryInformation?.schools||[]);
+    const [excludeSchools, setExcludeSchools] = useState<string[]>(integration?.discoveryInformation?.excludedSchools||[]);
     const [alreadyExcludeSchools, setAlreadyExcludeSchools] = useState<boolean>(false);
-    const [exampleSchool, setExampleSchool] = useState<string>('');
+    const [exampleSchool, setExampleSchool] = useState<string>(possibleSchools.current.filter(p=>excludeSchools.indexOf(p.value)===-1)[0].label||'Mansikkalan koulu');
     const [schoolData, setSchoolData] = useState<SchoolData>(kouluData);
     const [showLogo, setShowLogo] = useState<boolean>(false);
     const intl = useIntl();
-
-    const convertSchoolCode = (value?:string) => {
-      if(value === undefined || value === null || value === '' ) {
-        return 0;
-      }
-      return Number(value.substring(17).split("#")[0])
-    } 
 
     useEffect(() => {
       if(integration.organization?.children) {
@@ -88,19 +87,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                             koulut: [],
                                             existingIncludes: [],
                                             existingExcludes: [] }
-        //Filter out existingIncludes
-        newSchoolData.koulut = integration.organization?.children.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: c.oppilaitosKoodi||''}))
-        
 
+        newSchoolData.koulut = integration.organization?.children.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: c.oppilaitosKoodi||''}))
         setSchoolData(newSchoolData)
       }
       
-     
     }, [integration]);
-
-    useEffect(() => {
-      possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: k.koulukoodi }));
-    }, [institutionTypeList, schoolData, possibleSchools]);
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
       setShowSchools(checked);
@@ -131,6 +123,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               if(schools.length>0) {
                 updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
               }
+              
             })
         }
         
@@ -212,13 +205,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setDiscoveryInformation(clone(discoveryInformation))
         
       }
-      setExcludeSchools(values.map(value=>value))
+      setExampleSchool(possibleSchools.current.filter(p=>values.indexOf(p.value)===-1)[0].label||'Mansikkalan koulu')
+      setExcludeSchools(values)
       setCanSave(true)
   }
 
   const updateSchools = (values:string[]) => {
     if(discoveryInformation) {
-      discoveryInformation.schools=values.map(value=>value)
+      discoveryInformation.schools=values
       setDiscoveryInformation(clone(discoveryInformation))
       
     }
@@ -395,7 +389,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     </Grid>
                     <Grid item xs={8}>
                       <MultiSelectForm 
-                              values={discoveryInformation.schools||[]}
+                              values={schools}
                               label={"schools"}
                               attributeType={"data"}
                               isEditable={true}
@@ -415,7 +409,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     </Grid>
                     <Grid item xs={8}>
                       <MultiSelectForm 
-                              values={discoveryInformation.excludedSchools||[]}
+                              values={excludeSchools}
                               label={"excludeSchools"}
                               attributeType={"data"}
                               isEditable={true}
@@ -441,11 +435,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           />}
           {title&&title!==''&&showSchools&&<>
           <DataRowTitle></DataRowTitle>
-          <DataRowValue><FormattedMessage defaultMessage="Esim. Mansikkalan koulu ({title})" values={{title: title}} /></DataRowValue>            
+          <DataRowValue><FormattedMessage defaultMessage="Esim. {exampleSchool} ({title})" values={{exampleSchool: exampleSchool,title: title}} /></DataRowValue>            
           </>}
           {title===undefined||title===''&&showSchools&&<>
           <DataRowTitle></DataRowTitle>
-          <DataRowValue><FormattedMessage defaultMessage="Esim. Mansikkalan koulu" values={{title: title}} /></DataRowValue>            
+          <DataRowValue><FormattedMessage defaultMessage="Esim. {exampleSchool}" values={{exampleSchool: exampleSchool}} /></DataRowValue>            
           </>}
            
           
