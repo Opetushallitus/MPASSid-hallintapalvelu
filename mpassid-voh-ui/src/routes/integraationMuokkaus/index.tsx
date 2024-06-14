@@ -102,7 +102,11 @@ export default function IntegraatioMuokkaus() {
             if(logo){
               const formData = new FormData();
               formData.append("file", logo);
-              const uploadLogoR = await uploadLogo({ id },formData as any);
+              const logoId:number = result.current.id||0;
+              if(logoId!==0) {
+                await uploadLogo({ id: logoId },formData as any);
+              }
+              
 
               
             }
