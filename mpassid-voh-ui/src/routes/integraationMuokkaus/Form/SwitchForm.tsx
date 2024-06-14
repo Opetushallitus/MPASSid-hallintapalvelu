@@ -25,7 +25,7 @@ export default function SwitchForm({ object, type, isEditable=false, mandatory=f
   const intl = useIntl();
   const [value, setValue] = useState<any>(object?.content);
   
-  console.log("***** SwitchForm (value): ",value)
+  //console.log("***** SwitchForm (value): ",value)
 
   const updateFormValue = (event: any) => {
     

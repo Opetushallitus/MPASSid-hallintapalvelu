@@ -20,46 +20,7 @@ const MenuProps = {
 export interface oneEnum {
     label: string;
     value: string;
-}
-const enumss = [
-    { 
-        label: 'Ammatilliset erityisoppilaitokset',
-        value: '22'
-    },
-    { 
-        label: 'Ammatilliset oppilaitokset',
-        value: '21'
-    },
-    { 
-        label: 'Kansalaisopistot',
-        value: '64'
-    },
-    { 
-        label: 'Kansanopistot',
-        value: '63'
-    },
-    { 
-        label: 'Lukiot',
-        value: '15'
-    },
-    { 
-        label: 'Musiikkioppilaitokset',
-        value: '61'
-    },
-    { 
-        label: 'Perus- ja lukioasteen koulut',
-        value: '19'
-    },
-    { 
-        label: 'Peruskouluasteen erityiskoulut',
-        value: '12'
-    },
-    { 
-        label: 'Peruskoulut',
-        value: '11'
-    }
-]
-	
+}	
 
 interface Props {
   

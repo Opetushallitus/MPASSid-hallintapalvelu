@@ -34,6 +34,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 
+  //console.log("*** ListForm (object): ",object)
   const updateFormState = useCallback(
     function updateFormState() {
       if(inputRef.current) {

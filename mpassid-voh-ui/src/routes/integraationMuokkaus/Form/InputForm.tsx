@@ -27,7 +27,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 
-  console.log("********* InputForm(object): ",object)
+  //console.log("********* InputForm(object): ",object)
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
