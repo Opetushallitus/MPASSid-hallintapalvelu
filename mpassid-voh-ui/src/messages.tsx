@@ -185,7 +185,7 @@ defineMessage({
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisä kouluvalinta säännöt",
+  defaultMessage: "Lisää kouluvalinta säännöt",
   id: "attribuutti.extraSchoolsConfiguration",
   description: "attribuutti",
 });

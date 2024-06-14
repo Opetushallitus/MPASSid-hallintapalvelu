@@ -1,9 +1,9 @@
 
-import { Box, Checkbox, Chip, FormControl, Input, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent, TextField } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
+import { Box, Checkbox, Chip, FormControl, Input, ListItemText, MenuItem, Select } from "@mui/material";
 import type { Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
-import { get } from "lodash";
 import type { Components } from '@/api';
 
 const ITEM_HEIGHT = 48;
@@ -40,7 +40,6 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
   const intl = useIntl();
 
   
-  const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 
@@ -70,38 +69,11 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
-      setIsValid(false)
       setCanSave(false)  
     }
     
-  }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
-  /*
-  const updateFormValue = () => {
-    if(onValidate(inputRef.current?.value)) {
-      setIsValid(true)
-      if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
-        setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
-        setIsValid(false)
-        setCanSave(false)  
-        onUpdate(type,"",attributeType);
-      } else {
-        setCanSave(true) 
-        if(inputRef.current?.value) {
-          onUpdate(type,inputRef.current.value,attributeType);  
-        } else {
-          onUpdate(type,"",attributeType);
-        }
-        setUsedHelperText(<></>)
-      }
-      
-    } else {
-      setUsedHelperText(helperText(inputRef.current?.value))
-      setIsValid(false)  
-      setCanSave(false)
-      onUpdate(type,"",attributeType);
-    }
-  };
-  */
+  }, [ label, mandatory, setUsedHelperText, setCanSave ]);
+  
   if(isEditable) {
     return (
      
@@ -129,34 +101,25 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                     }}
                 MenuProps={MenuProps}
                 >
-                {enums.map((name) => (
+                {enums&&enums.length>0&&enums.map((name) => (
                     <MenuItem key={name.value} value={name.value}>
                     <Checkbox checked={selection.indexOf(name.value) > -1} />
                     <ListItemText primary={name.label} />
                     </MenuItem>
                 ))}
+                {enums&&enums.length===0&&(
+                    <MenuItem key='none' >
+                    <ListItemText primary={<span >{intl.formatMessage({
+                    defaultMessage: "Ei valintoja",
+                  })}</span>} />
+                    </MenuItem>
+                )}
                 </Select>
             </FormControl>
             </div>
      
     );
-  } else {
-    /*
-    <TextList
-            value={
-            identityProvider.institutionTypes?.length
-                ? identityProvider.institutionTypes.map(
-                    (institutionType) =>
-                    `${getKoodistoValue(
-                        institutionTypes,
-                        String(institutionType),
-                        language
-                    )} (${institutionType})`
-                )
-                : []
-            }
-        />
-    */
+  } else {    
     return( <Box
       sx={(theme) => ({
         ...theme.typography.body1
