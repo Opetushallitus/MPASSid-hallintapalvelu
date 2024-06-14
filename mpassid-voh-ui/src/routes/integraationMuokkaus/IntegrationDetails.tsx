@@ -87,10 +87,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
           if(newConfigurationEntityData) {
             setSaveDialogState(true);
-            if(isEqual(newConfigurationEntityData,integration.configurationEntity)&&!newLogo){              
+            if(isEqual(newConfigurationEntityData,integration.configurationEntity)&&((role==='idp'&&!newLogo)||role==='sp')){              
               setCanSave(false)
             } else {                  
-              if(isValid&&isValidSchoolSelection) {                
+              if(isValid&&isValidSchoolSelection&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||role==='sp')) {                
                 setCanSave(true)
               } else {
                 setCanSave(false)
