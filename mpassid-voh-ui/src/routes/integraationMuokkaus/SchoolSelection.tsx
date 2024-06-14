@@ -75,7 +75,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const [schools, setSchools] = useState<string[]>(integration?.discoveryInformation?.schools||[]);
     const [excludeSchools, setExcludeSchools] = useState<string[]>(integration?.discoveryInformation?.excludedSchools||[]);
     const [alreadyExcludeSchools, setAlreadyExcludeSchools] = useState<boolean>(false);
-    const [exampleSchool, setExampleSchool] = useState<string>(possibleSchools.current.filter(p=>excludeSchools.indexOf(p.value)===-1)[0].label||'Mansikkalan koulu');
+    const [exampleSchool, setExampleSchool] = useState<string>(possibleSchools.current?.filter(p=>excludeSchools.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu');
     const [schoolData, setSchoolData] = useState<SchoolData>(kouluData);
     const [showLogo, setShowLogo] = useState<boolean>(false);
     const intl = useIntl();
@@ -109,12 +109,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         if(integration.organization&&integration.organization.oid) {
           getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList})
             .then(response=>{
-              if(response.existingExcluded&&response.existingExcluded.length===1&&response.existingExcluded[0]!==String(integration.id)) {
+              if(response.existingExcluded&&response.existingExcluded!==null&&response.existingExcluded.length===1&&response.existingExcluded[0]!==String(integration.id)) {
                 setAlreadyExcludeSchools(true)
               } else {
                 setAlreadyExcludeSchools(false)
               }
-              possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+              possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded!==null&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
               
               if(excludeSchools.length>0){
                 updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
@@ -205,7 +205,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setDiscoveryInformation(clone(discoveryInformation))
         
       }
-      setExampleSchool(possibleSchools.current.filter(p=>values.indexOf(p.value)===-1)[0].label||'Mansikkalan koulu')
+      setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
       setExcludeSchools(values)
       setCanSave(true)
   }
