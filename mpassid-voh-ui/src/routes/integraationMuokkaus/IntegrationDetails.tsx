@@ -155,6 +155,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setDiscoveryInformation={setNewDiscoveryInformation} 
                 setCanSave={setIsValidSchoolSelection}
                 setLogo={setLogo}
+                newLogo={newLogo}
                 setNewLogo={setNewLogo}
                 isEditable={true}/>
               )
@@ -168,6 +169,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setDiscoveryInformation={setNewDiscoveryInformation}
                 setCanSave={setIsValidSchoolSelection}
                 setLogo={setLogo}
+                newLogo={newLogo}
                 setNewLogo={setNewLogo}
                 isEditable={false}/>
             )

@@ -1,6 +1,6 @@
 import type { ChangeEvent, Dispatch} from "react";
-import { useEffect, useState } from "react";
-import {  Box, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import {  Box, colors, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import { DataRow, TextList } from "../integraatio/IntegrationTab/DataRow";
 import { getIntegrationDiscoveryInformation, type Components } from "@/api";
@@ -15,6 +15,7 @@ import { clone, last, toPath } from "lodash";
 import { PhotoCamera } from "@mui/icons-material";
 
 interface Props {
+    newLogo: boolean;
     isEditable: boolean; 
     integration: Components.Schemas.Integration;
     configurationEntity: Components.Schemas.ConfigurationEntity;
@@ -46,7 +47,7 @@ const kouluData:SchoolData = {
   existingExcludes: []
 }
 
-export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo }: Props){
+export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo, newLogo }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
     const [showSchools, setShowSchools] = useState<boolean>(discoveryInformation?.showSchools||true);
@@ -63,7 +64,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       );
     const language = toLanguage(useIntl().locale).toUpperCase();
     const identityProvider = integration.configurationEntity!.idp!;
-    const [possibleSchools, setPossibleSchools] = useState<oneEnum[]>([]);
+    //const [possibleSchools, setPossibleSchools] = useState<oneEnum[]>([]);
+    const possibleSchools = useRef<oneEnum[]>([]);
     const [schools, setSchools] = useState<string[]>(discoveryInformation?.schools||[]);
     const [excludeSchools, setExcludeSchools] = useState<string[]>(discoveryInformation?.excludedSchools||[]);
     const [alreadyExcludeSchools, setAlreadyExcludeSchools] = useState<boolean>(false);
@@ -94,11 +96,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       }
       
      
-    }, [integration]);  
+    }, [integration]);
 
     useEffect(() => {
-      setPossibleSchools(schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: k.koulukoodi })));
-    }, [institutionTypeList, schoolData]);
+      possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: k.koulukoodi }));
+    }, [institutionTypeList, schoolData, possibleSchools]);
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
       setShowSchools(checked);
@@ -111,7 +113,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
     };
 
-    const getExtraSchoolsConfiguration = () => {
+    const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
         if(integration.organization&&integration.organization.oid) {
           getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList})
             .then(response=>{
@@ -120,8 +122,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               } else {
                 setAlreadyExcludeSchools(false)
               }
-              if(response.existingIncluded&&response.existingIncluded.length>0) {
-                setPossibleSchools(schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) })));
+              possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+              
+              if(excludeSchools.length>0){
+                updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
+              }
+              
+              if(schools.length>0) {
+                updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
               }
             })
         }
@@ -130,7 +138,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const changeExtraSchoolsConfiguration = (event: ChangeEvent<HTMLInputElement>) => {
       if(event.target.checked) {
-          getExtraSchoolsConfiguration()
+          getExtraSchoolsConfiguration(institutionTypeList)
+      } else {
+        updateExcludeSchools([])
+        updateSchools([])
       }
       setExtraSchoolsConfiguration(event.target.checked)
       
@@ -189,7 +200,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           setInstitutionTypeList(configurationEntity.idp.institutionTypes)  
         }
         if(extraSchoolsConfiguration) {
-          getExtraSchoolsConfiguration()
+          getExtraSchoolsConfiguration(values.map(v=>Number(v)))
         }
         setConfigurationEntity(clone(configurationEntity))
         setCanSave(true)
@@ -368,51 +379,52 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     } } 
                     setCanSave={setCanSave}/>}
 
-                  <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
-                  <Grid item xs={8}>
-                    <Switch checked={extraSchoolsConfiguration}
-                            onChange={changeExtraSchoolsConfiguration} />
-                  </Grid>
+                   
+                    <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
+                    <Grid item xs={8}>
+                      <Switch checked={extraSchoolsConfiguration}
+                              onChange={changeExtraSchoolsConfiguration} />
+                    </Grid>
+                          
                   
-                  
-                  {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
-                          possibleSchools.length>0&&excludeSchools.length===0&&extraSchoolsConfiguration&&
+                  {showSchools&&configurationEntity&&configurationEntity.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
+                          excludeSchools.length===0&&extraSchoolsConfiguration&&
                   <>
                     <Grid item xs={4}>
                       <FormattedMessage defaultMessage="schools" />
                     </Grid>
                     <Grid item xs={8}>
-                    {possibleSchools&&<MultiSelectForm 
+                      <MultiSelectForm 
                               values={discoveryInformation.schools||[]}
                               label={"schools"}
                               attributeType={"data"}
                               isEditable={true}
                               mandatory={false}                    
                               helperText={helpGeneratorText}
-                              enums={possibleSchools}
+                              enums={possibleSchools.current}
                               onValidate={validator} 
                               setCanSave={setCanSave} 
-                              onUpdate={updateSchools}/>}
+                              onUpdate={updateSchools}/>
                     </Grid>
                   </>} 
                   {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
-                      possibleSchools.length>0&&schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
+                      possibleSchools.current.length>0&&schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
                   <>
                     <Grid item xs={4}>
                       <FormattedMessage defaultMessage="excludedSchools" />
                     </Grid>
                     <Grid item xs={8}>
-                    {possibleSchools&&<MultiSelectForm 
+                      <MultiSelectForm 
                               values={discoveryInformation.excludedSchools||[]}
                               label={"excludeSchools"}
                               attributeType={"data"}
                               isEditable={true}
                               mandatory={false}                    
                               helperText={helpGeneratorText}
-                              enums={possibleSchools}
+                              enums={possibleSchools.current}
                               onValidate={validator} 
                               setCanSave={setCanSave} 
-                              onUpdate={updateExcludeSchools}/>}
+                              onUpdate={updateExcludeSchools}/>
                     </Grid>
                   </>}
                   
@@ -449,9 +461,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                   onChange={e=>loadFile(e)}
                 />
                 <label htmlFor="contained-button-file">
-                <IconButton color="primary" component="span">
+                {(integration?.configurationEntity?.idp?.logoUrl||newLogo)&&<><IconButton color="primary" component="span">
                   <PhotoCamera />
-                </IconButton><FormattedMessage defaultMessage="Valitse" values={{title: title}} />
+                </IconButton><FormattedMessage defaultMessage="Valitse"  /></>}
+                {!(integration?.configurationEntity?.idp?.logoUrl||newLogo)&&<><IconButton color="error" component="span">
+                  <PhotoCamera />
+                </IconButton><span >{intl.formatMessage({
+                    defaultMessage: "Valitse, logo on pakollinen",
+                  })}</span></>}
                   
                 </label>   
               </form>
@@ -482,14 +499,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
         </Grid>
         
-        {!showSchools&&customDisplayName&&configurationEntity&&
+        {!showSchools&&configurationEntity&&
           <Grid container spacing={2} mb={3}>    
               <SchoolForm 
               isVisible={true} 
               isEditable={true} 
               isMandatory={false} 
               name="customDisplayName"
-              value={customDisplayName} 
+              value={customDisplayName||''} 
               newConfigurationEntityData={configurationEntity} 
               helperText={helpGeneratorText} 
               onUpdate={handleCustomDisplayNameChange} 

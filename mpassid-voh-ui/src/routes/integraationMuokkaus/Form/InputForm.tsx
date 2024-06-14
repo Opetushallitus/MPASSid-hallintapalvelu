@@ -4,7 +4,6 @@ import type { Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from "lodash";
-import type { Components } from '@/api';
 
 interface Props {
   object: any;
