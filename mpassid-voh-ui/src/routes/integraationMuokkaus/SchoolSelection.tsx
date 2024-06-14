@@ -108,21 +108,22 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
         if(integration.organization&&integration.organization.oid) {
           getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList})
-            .then(response=>{
+            .then(response=>{              
+
               if(response.existingExcluded&&response.existingExcluded!==null&&response.existingExcluded.length===1&&response.existingExcluded[0]!==String(integration.id)) {
                 setAlreadyExcludeSchools(true)
               } else {
                 setAlreadyExcludeSchools(false)
-              }
+              }              
+
               possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded!==null&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
               
-              if(excludeSchools.length>0){
-                updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-              }
               
-              if(schools.length>0) {
-                updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-              }
+              updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
+              updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
+              
+
+              
               
             })
         }
