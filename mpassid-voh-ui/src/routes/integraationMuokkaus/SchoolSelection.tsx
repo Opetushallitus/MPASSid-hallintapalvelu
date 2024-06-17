@@ -116,8 +116,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 setAlreadyExcludeSchools(false)
               }              
 
-              possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded!==null&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-              
+              if(response.existingIncluded&&response.existingIncluded!==null) {
+                possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+              } else {
+                possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+              }              
               
               updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
               updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
@@ -374,54 +377,58 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     } } 
                     setCanSave={setCanSave}/>}
 
-                   
-                    <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
-                    <Grid item xs={8}>
-                      <Switch checked={extraSchoolsConfiguration}
-                              onChange={changeExtraSchoolsConfiguration} />
-                    </Grid>
-                          
-                  
-                  {showSchools&&configurationEntity&&configurationEntity.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
-                          excludeSchools.length===0&&extraSchoolsConfiguration&&
-                  <>
-                    <Grid item xs={4}>
-                      <FormattedMessage defaultMessage="schools" />
-                    </Grid>
-                    <Grid item xs={8}>
-                      <MultiSelectForm 
-                              values={schools}
-                              label={"schools"}
-                              attributeType={"data"}
-                              isEditable={true}
-                              mandatory={false}                    
-                              helperText={helpGeneratorText}
-                              enums={possibleSchools.current}
-                              onValidate={validator} 
-                              setCanSave={setCanSave} 
-                              onUpdate={updateSchools}/>
-                    </Grid>
-                  </>} 
-                  {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
-                      possibleSchools.current.length>0&&schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
-                  <>
-                    <Grid item xs={4}>
-                      <FormattedMessage defaultMessage="excludedSchools" />
-                    </Grid>
-                    <Grid item xs={8}>
-                      <MultiSelectForm 
-                              values={excludeSchools}
-                              label={"excludeSchools"}
-                              attributeType={"data"}
-                              isEditable={true}
-                              mandatory={false}                    
-                              helperText={helpGeneratorText}
-                              enums={possibleSchools.current}
-                              onValidate={validator} 
-                              setCanSave={setCanSave} 
-                              onUpdate={updateExcludeSchools}/>
-                    </Grid>
-                  </>}
+                  { configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
+                    <>
+                      <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
+                        <Grid item xs={8}>
+                          <Switch checked={extraSchoolsConfiguration}
+                                  onChange={changeExtraSchoolsConfiguration} />
+                        </Grid>
+                              
+                      
+                      {showSchools&&configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
+                              excludeSchools.length===0&&extraSchoolsConfiguration&&
+                      <>
+                        <Grid item xs={4}>
+                          <FormattedMessage defaultMessage="schools" />
+                        </Grid>
+                        <Grid item xs={8}>
+                          <MultiSelectForm 
+                                  values={schools}
+                                  label={"schools"}
+                                  attributeType={"data"}
+                                  isEditable={true}
+                                  mandatory={false}                    
+                                  helperText={helpGeneratorText}
+                                  enums={possibleSchools.current}
+                                  onValidate={validator} 
+                                  setCanSave={setCanSave} 
+                                  onUpdate={updateSchools}/>
+                        </Grid>
+                      </>} 
+                      {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
+                          possibleSchools.current.length>0&&schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
+                      <>
+                        <Grid item xs={4}>
+                          <FormattedMessage defaultMessage="excludedSchools" />
+                        </Grid>
+                        <Grid item xs={8}>
+                          <MultiSelectForm 
+                                  values={excludeSchools}
+                                  label={"excludeSchools"}
+                                  attributeType={"data"}
+                                  isEditable={true}
+                                  mandatory={false}                    
+                                  helperText={helpGeneratorText}
+                                  enums={possibleSchools.current}
+                                  onValidate={validator} 
+                                  setCanSave={setCanSave} 
+                                  onUpdate={updateExcludeSchools}/>
+                        </Grid>
+                      </>}
+                    </>
+                  } 
+                    
                   
                 </Grid>
               </Grid>
