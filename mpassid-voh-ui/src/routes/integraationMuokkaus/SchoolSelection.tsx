@@ -123,7 +123,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const saveCheck = (value:boolean) => {
       
-      if(value&&(!discoveryInformation?.showSchools!||configurationEntity?.idp?.institutionTypes?.length!>0)) {
+      if(value&&(!(discoveryInformation?.showSchools!)||(configurationEntity?.idp?.institutionTypes?.length!>0))) {
         setCanSave(true)  
       } else {
         setCanSave(false)  
@@ -205,7 +205,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
       if(value===undefined||value==="") {
         setTitle('');
-        delete discoveryInformation.title
+        discoveryInformation.title=integration?.organization?.name||''
       } else {
         setTitle(value);
         discoveryInformation.title=value;
@@ -243,11 +243,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           getExtraSchoolsConfiguration(values.map(v=>Number(v)))
         }
         setConfigurationEntity(clone(configurationEntity))
-        if(values.length>0) {
-          setCanSave(true);
-        } else {
-          setCanSave(false);
-        }
+        saveCheck(true);
         
         
     }

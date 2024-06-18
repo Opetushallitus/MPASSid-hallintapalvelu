@@ -87,8 +87,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
           if(newConfigurationEntityData) {
             setSaveDialogState(true);
-            if(isEqual(newConfigurationEntityData,integration.configurationEntity)&&((role==='idp'&&!newLogo)||role==='sp')){              
-              setCanSave(false)
+            if(isEqual(newConfigurationEntityData,integration.configurationEntity)&&((role==='idp'&&!newLogo)||role==='sp')){       
+              if(newDiscoveryInformation&&!isEqual(newDiscoveryInformation,integration?.discoveryInformation)) {
+                setCanSave(true)
+              } else {
+                setCanSave(false)
+              }       
             } else {                  
               if(isValid&&isValidSchoolSelection&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||role==='sp')) {                
                 setCanSave(true)
@@ -104,13 +108,17 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration, newLogo]);
+    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration, newLogo, role, newDiscoveryInformation]);
 
     useEffect(() => {
       if(newDiscoveryInformation) {
         setSaveDialogState(true);
         if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
-          setCanSave(false)
+          if(newConfigurationEntityData&&!isEqual(newConfigurationEntityData,integration.configurationEntity)||((role==='idp'&&newLogo))) {
+            setCanSave(true)
+          } else {
+            setCanSave(false)
+          }  
         } else {                  
           if(isValid&&isValidSchoolSelection) {                
             setCanSave(true)
@@ -126,7 +134,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           setSaveDialogState(false);  
       }
     
-}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration]);
+}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration, newConfigurationEntityData, role, newLogo]);
 
     var hasAttributes =
                 role === "idp" &&
