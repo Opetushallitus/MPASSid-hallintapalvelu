@@ -12,7 +12,7 @@ import MultiSelectForm from "./Form/MultiSelectForm";
 import { helperText, validate } from "@/utils/Validators";
 import { SchoolForm } from "./Form";
 import { clone, last, toPath } from "lodash";
-import { Check, PhotoCamera } from "@mui/icons-material";
+import { PhotoCamera } from "@mui/icons-material";
 
 interface Props {
     newLogo: boolean;
@@ -118,7 +118,17 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setSchoolData(newSchoolData)
       }
       
+      
     }, [institutionTypeList, integration,possibleSchools]);
+
+    const saveCheck = (value:boolean) => {
+      
+      if(value&&(!discoveryInformation?.showSchools!||configurationEntity?.idp?.institutionTypes?.length!>0)) {
+        setCanSave(true)  
+      } else {
+        setCanSave(false)  
+      }
+    }
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
       setShowSchools(checked);
@@ -134,8 +144,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       }
       setDiscoveryInformation(clone(discoveryInformation))
       setConfigurationEntity(clone(configurationEntity))
-      setCanSave(true)
-      
+      saveCheck(true);
     };
 
     const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
@@ -188,7 +197,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         discoveryInformation.customDisplayName=value;
       }
       setDiscoveryInformation(clone(discoveryInformation))
-      setCanSave(true)
+      saveCheck(true)
       
     };
     
@@ -202,7 +211,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         discoveryInformation.title=value;
       }
       setDiscoveryInformation(clone(discoveryInformation))
-      setCanSave(true)
+      saveCheck(true)
       
     };
 
@@ -234,7 +243,13 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           getExtraSchoolsConfiguration(values.map(v=>Number(v)))
         }
         setConfigurationEntity(clone(configurationEntity))
-        setCanSave(true)
+        if(values.length>0) {
+          setCanSave(true);
+        } else {
+          setCanSave(false);
+        }
+        
+        
     }
 
     const updateExcludeSchools = (values:string[]) => {
@@ -245,7 +260,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       }
       setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
       setExcludeSchools(values)
-      setCanSave(true)
+      saveCheck(true)
   }
 
   const updateSchools = (values:string[]) => {
@@ -255,7 +270,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
     }
     setSchools(values.map(value=>value))
-    setCanSave(true)
+    saveCheck(true)
 }
 
     const validator = (value:string) => {
@@ -331,7 +346,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 img.removeAttribute("hidden")             
                 setLogo(result)
                 setNewLogo(true)
-                setCanSave(true)
+                saveCheck(true)
                 setShowLogo(true)
               })
            
