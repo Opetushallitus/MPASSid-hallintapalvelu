@@ -89,10 +89,32 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                             existingExcludes: [] }
 
         newSchoolData.koulut = integration.organization?.children.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: c.oppilaitosKoodi||''}))
+        
+        possibleSchools.current=newSchoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+        if(integration?.discoveryInformation?.schools&&integration.discoveryInformation.schools.length>0) {
+          const existingSchools=integration.discoveryInformation.schools;
+          newSchoolData.koulut.map(k=>({ label: k.nimi, value: String(k.koulukoodi) }))
+          .forEach(element => {
+            if(existingSchools.indexOf(element.value)>-1) {
+              possibleSchools.current.push(element)
+            }
+            
+          });
+        }
+        if(integration?.discoveryInformation?.excludedSchools&&integration.discoveryInformation.excludedSchools.length>0) {
+          const existingExcludeSchools=integration.discoveryInformation.excludedSchools;
+          newSchoolData.koulut.map(k=>({ label: k.nimi, value: String(k.koulukoodi) }))
+          .forEach(element => {
+            if(existingExcludeSchools.indexOf(element.value)>-1&&possibleSchools.current.map(ps=>ps.value).indexOf(element.value)>-1) {
+              possibleSchools.current.push(element)
+            }
+            
+          });
+        }
         setSchoolData(newSchoolData)
       }
       
-    }, [integration]);
+    }, [institutionTypeList, integration]);
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
       setShowSchools(checked);
@@ -125,13 +147,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               } else {
                 possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
               }              
-              
               updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
               updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-              
 
-              
-              
             })
         }
         
