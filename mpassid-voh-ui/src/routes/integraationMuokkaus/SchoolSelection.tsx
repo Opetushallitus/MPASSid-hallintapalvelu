@@ -96,7 +96,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           newSchoolData.koulut.map(k=>({ label: k.nimi, value: String(k.koulukoodi) }))
           .forEach(element => {
             if(existingSchools.indexOf(element.value)>-1) {
-              possibleSchools.current.push(element)
+              if(possibleSchools.current.map(p=>p.value).indexOf(element.value)<0) {
+                possibleSchools.current.push(element)
+              }
             }
             
           });
@@ -106,7 +108,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           newSchoolData.koulut.map(k=>({ label: k.nimi, value: String(k.koulukoodi) }))
           .forEach(element => {
             if(existingExcludeSchools.indexOf(element.value)>-1&&possibleSchools.current.map(ps=>ps.value).indexOf(element.value)>-1) {
-              possibleSchools.current.push(element)
+              if(possibleSchools.current.map(p=>p.value).indexOf(element.value)<0) {
+                possibleSchools.current.push(element)
+              }
             }
             
           });
@@ -114,7 +118,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setSchoolData(newSchoolData)
       }
       
-    }, [institutionTypeList, integration]);
+    }, [institutionTypeList, integration,possibleSchools]);
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
       setShowSchools(checked);
@@ -146,7 +150,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
               } else {
                 possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-              }              
+              }  
+            
               updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
               updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
 
@@ -429,7 +434,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                         </Grid>
                       </>} 
                       {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
-                          possibleSchools.current.length>0&&schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
+                          schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
                       <>
                         <Grid item xs={4}>
                           <FormattedMessage defaultMessage="excludedSchools" />
