@@ -12,7 +12,7 @@ import MultiSelectForm from "./Form/MultiSelectForm";
 import { helperText, validate } from "@/utils/Validators";
 import { SchoolForm } from "./Form";
 import { clone, last, toPath } from "lodash";
-import { PhotoCamera } from "@mui/icons-material";
+import { Check, PhotoCamera } from "@mui/icons-material";
 
 interface Props {
     newLogo: boolean;
@@ -57,7 +57,7 @@ const convertSchoolCode = (value?:string) => {
 export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo, newLogo }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
-    const [showSchools, setShowSchools] = useState<boolean>(discoveryInformation?.showSchools||true);
+    const [showSchools, setShowSchools] = useState<boolean>(integration.id===0||integration?.discoveryInformation?.showSchools!);
     const [extraSchoolsConfiguration, setExtraSchoolsConfiguration] = useState<boolean>(
           ((discoveryInformation?.schools&&discoveryInformation?.schools?.length>0)||
           (discoveryInformation?.excludedSchools&&discoveryInformation?.excludedSchools?.length>0))||
@@ -125,8 +125,15 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
        discoveryInformation.showSchools=checked;
       if(checked) {
         delete discoveryInformation.customDisplayName;
+      } else {
+        handleTitleChange('')
+        updateInstitutionTypes([])
+        updateExcludeSchools([])
+        updateSchools([])
+        
       }
       setDiscoveryInformation(clone(discoveryInformation))
+      setConfigurationEntity(clone(configurationEntity))
       setCanSave(true)
       
     };
