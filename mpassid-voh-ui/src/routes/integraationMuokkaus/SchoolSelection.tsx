@@ -117,7 +117,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               }              
 
               if(response.existingIncluded&&response.existingIncluded!==null) {
-                possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+                var existingIncluded = response.existingIncluded
+                if(integration?.discoveryInformation?.schools&&integration.discoveryInformation?.schools.length>0) {
+                  existingIncluded = existingIncluded.filter(e=>integration?.discoveryInformation?.schools&&integration?.discoveryInformation?.schools?.indexOf(e)<0)
+                }
+                possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
               } else {
                 possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
               }              
