@@ -168,7 +168,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const handleCustomDisplayNameChange = (value:string) => {
       
-      if(value||value==="") {
+      if(value==="") {
         setCustomDisplayName('');
         delete discoveryInformation.customDisplayName
       } else {
