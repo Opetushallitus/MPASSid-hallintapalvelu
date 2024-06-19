@@ -94,7 +94,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setCanSave(false)
               }       
             } else {                  
-              if(isValid&&isValidSchoolSelection&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||role==='sp')) {                
+              if(isValid&&isValidSchoolSelection&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||role==='sp')) {   
                 setCanSave(true)
               } else {
                 setCanSave(false)
@@ -114,7 +114,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
       if(newDiscoveryInformation) {
         setSaveDialogState(true);
         if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
-          if(newConfigurationEntityData&&!isEqual(newConfigurationEntityData,integration.configurationEntity)||((role==='idp'&&newLogo))) {
+          if(newConfigurationEntityData&&!isEqual(newConfigurationEntityData,integration.configurationEntity)&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||(role==='sp'))) {
             setCanSave(true)
           } else {
             setCanSave(false)
