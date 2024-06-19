@@ -39,15 +39,18 @@ export default function Attributes({ attributes, role, type, attributeType, newC
       }
     }
     
-    if(mandatoryAttributes.filter(ma=>!attributes.map(a=>a.name).includes(ma)).length===0) {
-      setCanSave(true)
-    }
+    
     
     if(newConfigurationEntityData?.attributes&&setNewConfigurationEntityData) {
       newConfigurationEntityData.attributes=attributes;
       setNewConfigurationEntityData({ ...newConfigurationEntityData })
     }
     
+    if(mandatoryAttributes.filter(ma=>attributes.filter(a=>a.content!=='').map(a=>a.name).indexOf(ma)<0).length===0) {
+      setCanSave(true)
+    } else {
+      setCanSave(false)
+    }
   }
   
     return (
@@ -73,6 +76,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   attributePreferredOrder.indexOf(a.name!)) -
               (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
           )
+          .filter((configuration) => configuration.integrationType.filter(it=>it.name===type&&it.visible).length>0)
           .map((configuration) => {
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
@@ -89,14 +93,15 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     onUpdate={updateAttribute}
                     onValidate={validator}
                     newConfigurationEntityData={newConfigurationEntityData}
-                    setNewConfigurationEntityData={setNewConfigurationEntityData}  
+                    setNewConfigurationEntityData={setNewConfigurationEntityData}
                     uiConfiguration={configuration}
-                    attribute={attributes.find(a=>a.name===configuration.name)||{ type: attributeType, content: '',name: configuration.name}}
+                    attribute={attributes.find(a => a.name === configuration.name) || { type: attributeType, content: '', name: configuration.name }}
                     attributeType={attributeType!}
                     type={type}
-                    role={role} 
-                    helperText={helpGeneratorText}
-                    setCanSave={setCanSave}/>)
+                    role={role}
+                    helperText={helpGeneratorText} 
+                    setCanSave={function (value: boolean): void {} }                    
+                    />)
                 }
             
               )

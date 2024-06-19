@@ -87,16 +87,24 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
 
     useEffect(() => {
+
+          
           if(newConfigurationEntityData) {
+            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
+            const logoOK=(role==='sp'||
+                          newLogo||
+                          (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
+        )
+
             setSaveDialogState(true);
-            if(isEqual(newConfigurationEntityData,integration.configurationEntity)&&((role==='idp'&&!newLogo)||role==='sp')){       
-              if(newDiscoveryInformation&&!isEqual(newDiscoveryInformation,integration?.discoveryInformation)) {            
+            if(isEqual(newConfigurationEntityData,integration.configurationEntity)){       
+              if(newDiscoveryInformation&&!isEqual(newDiscoveryInformation,integration?.discoveryInformation)&&isValid&&logoOK) {                            
                 setCanSave(true)
               } else {
                 setCanSave(false)
               }       
-            } else {                  
-              if(isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||role==='sp')) {   
+            } else {                             
+              if(isValid&&logoOK) {   
                 setCanSave(true)
               } else {
                 setCanSave(false)
@@ -113,16 +121,22 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection, newIntegration, setNewIntegration, newLogo, role, newDiscoveryInformation]);
 
     useEffect(() => {
-      if(newDiscoveryInformation) {
+      if(newDiscoveryInformation !== undefined) {
+        const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
+        const logoOK=(role==='sp'||
+                          newLogo||
+                          (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
+        )
+        
         setSaveDialogState(true);
-        if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
-          if(newConfigurationEntityData&&!isEqual(newConfigurationEntityData,integration.configurationEntity)&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||(role==='sp'))) {
+        if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){           
+          if(newConfigurationEntityData !== undefined&&!isEqual(newConfigurationEntityData,integration.configurationEntity)&&logoOK&&isValid) {
             setCanSave(true)
           } else {
             setCanSave(false)
           }  
-        } else {                  
-          if(isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection) {                
+        } else {               
+          if(isValid) {                
             setCanSave(true)
           } else {
             setCanSave(false)
