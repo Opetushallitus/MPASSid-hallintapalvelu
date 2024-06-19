@@ -121,9 +121,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
     }, [institutionTypeList, integration,possibleSchools]);
 
-    const saveCheck = (value:boolean) => {
+    const saveCheck = (value:boolean,showLogo:boolean) => {
       
-      if(value&&(!(discoveryInformation?.showSchools!)||(configurationEntity?.idp?.institutionTypes?.length!>0))) {
+      if(value&&
+        ((discoveryInformation?.showSchools===false)||(configurationEntity?.idp?.institutionTypes?.length!>0))&&
+        ((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo)) {
         setCanSave(true)  
       } else {
         setCanSave(false)  
@@ -142,9 +144,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         updateSchools([])
         
       }
-      setDiscoveryInformation(clone(discoveryInformation))
+      updateDiscoveryInformation(discoveryInformation)
       setConfigurationEntity(clone(configurationEntity))
-      saveCheck(true);
+      saveCheck(true,showLogo);
     };
 
     const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
@@ -196,8 +198,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setCustomDisplayName(value);
         discoveryInformation.customDisplayName=value;
       }
-      setDiscoveryInformation(clone(discoveryInformation))
-      saveCheck(true)
+      updateDiscoveryInformation(discoveryInformation)
+      saveCheck(true,showLogo)
       
     };
     
@@ -210,8 +212,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setTitle(value);
         discoveryInformation.title=value;
       }
-      setDiscoveryInformation(clone(discoveryInformation))
-      saveCheck(true)
+      updateDiscoveryInformation(clone(discoveryInformation))
+      saveCheck(true,showLogo)
       
     };
 
@@ -234,6 +236,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         maksimikoko 125x36 px
         huom! siirretään ui:ssa logo otsikon "Oppilaitoksen valintanäkymän tiedot"
     */
+
+    const updateDiscoveryInformation = (value:Components.Schemas.DiscoveryInformation) => {
+        value.showSchools=showSchools
+        setDiscoveryInformation(clone(value))
+    }
+
     const updateInstitutionTypes = (values:string[]) => {
         if(configurationEntity&&configurationEntity.idp) {
           configurationEntity.idp.institutionTypes=values.map(value=>Number(value))
@@ -243,7 +251,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           getExtraSchoolsConfiguration(values.map(v=>Number(v)))
         }
         setConfigurationEntity(clone(configurationEntity))
-        saveCheck(true);
+        saveCheck(true,showLogo);
         
         
     }
@@ -251,22 +259,22 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const updateExcludeSchools = (values:string[]) => {
       if(discoveryInformation) {
         discoveryInformation.excludedSchools=values.map(value=>value)
-        setDiscoveryInformation(clone(discoveryInformation))
+        updateDiscoveryInformation(discoveryInformation)
         
       }
       setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
       setExcludeSchools(values)
-      saveCheck(true)
+      saveCheck(true,showLogo)
   }
 
   const updateSchools = (values:string[]) => {
     if(discoveryInformation) {
       discoveryInformation.schools=values
-      setDiscoveryInformation(clone(discoveryInformation))
+      updateDiscoveryInformation(discoveryInformation)
       
     }
     setSchools(values.map(value=>value))
-    saveCheck(true)
+    saveCheck(true,showLogo)
 }
 
     const validator = (value:string) => {
@@ -342,8 +350,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 img.removeAttribute("hidden")             
                 setLogo(result)
                 setNewLogo(true)
-                saveCheck(true)
                 setShowLogo(true)
+                updateDiscoveryInformation(discoveryInformation)
+                saveCheck(true,true)
               })
            
           }
