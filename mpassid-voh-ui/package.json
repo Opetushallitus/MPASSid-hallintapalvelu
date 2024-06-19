@@ -24,7 +24,7 @@
     "@fontsource/roboto": "^4.5.8",
     "@mui/icons-material": "^5.10.3",
     "@mui/lab": "^5.0.0-alpha.108",
-    "@mui/material": "^5.10.14",
+    "@mui/material": "^5.15.18",
     "@opetushallitus/virkailija-ui-components": "^0.4.7",
     "@rehooks/document-title": "^1.0.2",
     "@visma/react-app-super-template": "^1.1.3",
