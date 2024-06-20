@@ -87,7 +87,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
 
     useEffect(() => {
-
           
           if(newConfigurationEntityData) {
             const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
@@ -98,7 +97,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
             setSaveDialogState(true);
             if(isEqual(newConfigurationEntityData,integration.configurationEntity)){       
-              if(newDiscoveryInformation&&!isEqual(newDiscoveryInformation,integration?.discoveryInformation)&&isValid&&logoOK) {                            
+              if(newDiscoveryInformation&&!isEqual(newDiscoveryInformation,integration?.discoveryInformation)&&isValid&&logoOK) {      
                 setCanSave(true)
               } else {
                 setCanSave(false)
@@ -121,6 +120,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection, newIntegration, setNewIntegration, newLogo, role, newDiscoveryInformation]);
 
     useEffect(() => {
+
       if(newDiscoveryInformation !== undefined) {
         const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
         const logoOK=(role==='sp'||
