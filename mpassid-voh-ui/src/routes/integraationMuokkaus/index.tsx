@@ -104,7 +104,8 @@ export default function IntegraatioMuokkaus() {
               formData.append("file", logo);
               const logoId:number = result.current.id||0;
               if(logoId!==0) {
-                await uploadLogo({ id: logoId },formData as any);
+                const logoResult= await uploadLogo({ id: logoId },formData as any);
+                
               }
               
 
@@ -162,15 +163,11 @@ export default function IntegraatioMuokkaus() {
                   <Typography variant="h6" component="h2" sx={{ my: 2, marginLeft: 'auto', marginRight: 'auto', marginTop: '6%' }}>
                       <FormattedMessage defaultMessage="Tallenna muutokset" />
                   </Typography>
-                  {isEntraId()&&false&&<><IconButton size="large" color="primary" aria-label="rule-icon">
-                      <RuleIcon />
-                  </IconButton><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
                   
-                  {isEntraId()&&true&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
-                  <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
-                  </Button></>}
-                  {isEntraId()&&false&&<><Button  size="small"  startIcon={<RuleIcon />}>
-                  </Button><FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" /></>}
+                  {isEntraId()&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
+                                      <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
+                                  </Button></>}
+                  
                   <Box display="flex" justifyContent="center" mt={2}> 
                       {id!=='0'&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
                       {id==='0'&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
