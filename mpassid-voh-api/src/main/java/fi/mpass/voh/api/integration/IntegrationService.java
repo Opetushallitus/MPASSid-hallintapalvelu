@@ -626,6 +626,30 @@ public class IntegrationService {
     }
   }
 
+  private List<Integration> getFilteredIntegrationsBy(String role) {
+
+    IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
+    if (role != null && role.length() > 0) {
+      builder.withEqualAnd(Category.ROLE, "role", role);
+      Specification<Integration> spec = builder.build();
+      List<Integration> integrations = integrationRepository.findAll(spec);
+      for (Integration integration : integrations) {
+        List<IntegrationPermission> permissions = integration.getPermissions();
+        Iterator<IntegrationPermission> iter = permissions.iterator();
+        while (iter.hasNext()) {
+          IntegrationPermission permission = iter.next();
+          if (permission.getTo().getId().equals(defaultTestServiceIntegrationId)) {
+            iter.remove();
+          }
+        }
+      }
+
+      return integrations;
+    } else {
+      throw new EntityNotFoundException("No role specified");
+    }
+  }
+
   private List<Integration> getIntegrationsBy(String role, String type) {
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();
@@ -640,7 +664,7 @@ public class IntegrationService {
   }
 
   public List<Integration> getIdentityProviders() {
-    return getIntegrationsBy("idp");
+    return getFilteredIntegrationsBy("idp");
   }
 
   public List<Integration> getServiceProviders() {

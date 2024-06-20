@@ -31,6 +31,7 @@ import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.DiscoveryInformationDTO;
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationPermission;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
@@ -53,6 +54,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,7 +71,7 @@ class IntegrationServiceTests {
     private LoadingService loadingService;
 
     private IntegrationService underTest;
-
+    
     private Integration integration;
     private Integration updatedIntegration;
     private Integration existingUpdatedAllowingIntegration;
@@ -78,6 +80,7 @@ class IntegrationServiceTests {
     private List<Integration> updatedIntegrations;
     private List<Integration> integrationSets;
     private List<Integration> serviceProviders;
+    private Long defaultTestServiceIntegrationId = 1001L;
 
     @BeforeEach
     void setUp() {
@@ -343,6 +346,27 @@ class IntegrationServiceTests {
 
         // then
         assertEquals(2, integrations.size());
+    }
+
+    @Test
+    void testGetFilteredIdentityProviders() {
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(existingUpdatedAllowingIntegration);
+        integrations.add(updatedAllowingIntegration);
+
+
+        // given
+        given(integrationRepository.findAll(any(Specification.class))).willReturn(integrations);
+
+        // when
+        List<Integration> integrationsWithoutTestSpPermission = underTest.getIdentityProviders();
+
+        // then
+        for (Integration integration : integrationsWithoutTestSpPermission) {
+            for (IntegrationPermission permission : integration.getPermissions()) {
+                assertNotEquals(defaultTestServiceIntegrationId, permission.getTo().getId());
+            }
+        }
     }
 
     @Test
