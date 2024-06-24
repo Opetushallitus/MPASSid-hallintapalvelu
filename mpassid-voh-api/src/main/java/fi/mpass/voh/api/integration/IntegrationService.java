@@ -544,7 +544,8 @@ public class IntegrationService {
 
       for (IntegrationPermission permission : integration.getPermissions()) {
         // permission updates to the configurable default test service are skipped
-        if (permission.getTo().getId() != null && permission.getTo().getId().equals(configuration.getDefaultTestServiceIntegrationId())) {
+        if (permission.getTo().getId() != null
+            && permission.getTo().getId().equals(configuration.getDefaultTestServiceIntegrationId())) {
           continue;
         }
         // permission to integration set
@@ -891,6 +892,10 @@ public class IntegrationService {
   }
 
   public InputStreamResource getDiscoveryInformationLogo(Long id) {
+    if (configuration.getImageBasePath() == null) {
+      logger.error("Logo not found: {}", id);
+      throw new EntityNotFoundException("Logo not found.");
+    }
     Path rootLocation = Paths.get(configuration.getImageBasePath());
     Path sourceFile = rootLocation.resolve(Paths.get(Long.toString(id))).normalize().toAbsolutePath();
 
@@ -903,25 +908,25 @@ public class IntegrationService {
   }
 
   public String getDiscoveryInformationLogoContentType(InputStream inputStream) {
-		ImageInputStream imageStream = null;
-		try {
-			imageStream = ImageIO.createImageInputStream(inputStream);
-		} catch (IOException e) {
+    ImageInputStream imageStream = null;
+    try {
+      imageStream = ImageIO.createImageInputStream(inputStream);
+    } catch (IOException e) {
       logger.error("Error in creating image input stream.");
-		}
+    }
 
-		if (imageStream != null) {
-			Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
+    if (imageStream != null) {
+      Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
 
-			while (readers.hasNext()) {
-				ImageReader r = readers.next();
-				try {
+      while (readers.hasNext()) {
+        ImageReader r = readers.next();
+        try {
           return "image/" + r.getFormatName().toLowerCase();
-				} catch (IOException e) {
-					logger.error("Error in reading input image stream.");
-				}
-			}
-		}
+        } catch (IOException e) {
+          logger.error("Error in reading input image stream.");
+        }
+      }
+    }
     return null;
-	}
+  }
 }

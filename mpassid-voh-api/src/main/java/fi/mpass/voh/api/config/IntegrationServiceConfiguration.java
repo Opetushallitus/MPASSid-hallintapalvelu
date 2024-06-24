@@ -2,13 +2,18 @@ package fi.mpass.voh.api.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
+import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.constraints.NotBlank;
 
 @ConfigurationProperties(prefix = "application.integrationservice")
+@Validated
 public class IntegrationServiceConfiguration {
 
     private String adminOrganizationOid;
     private Long defaultTestServiceIntegrationId;
     private String imageBaseUrl;
+    @NotBlank
     private String imageBasePath;
 
     @ConstructorBinding
