@@ -630,6 +630,7 @@ public class IntegrationService {
         while (iter.hasNext()) {
           IntegrationPermission permission = iter.next();
           if (permission.getTo().getId().equals(configuration.getDefaultTestServiceIntegrationId())) {
+            logger.debug("Filtering out integration #{}", configuration.getDefaultTestServiceIntegrationId());
             iter.remove();
           }
         }
