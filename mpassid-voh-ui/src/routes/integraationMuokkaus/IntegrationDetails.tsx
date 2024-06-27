@@ -34,7 +34,9 @@ interface Props {
 export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo }: Props) {
     
     const [isValidSchoolSelection, setIsValidSchoolSelection] = useState(true);
-    const [isValid, setIsValid] = useState(true);
+    const [isValidDataAttribute, setIsValidDataAttribute] = useState(true);
+    const [isValidUserAttribute, setIsValidUserAttribute] = useState(true);
+    const [isValidMetadata, setIsValidMetadata] = useState(true);
     const [newLogo, setNewLogo] = useState(false);
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
@@ -85,12 +87,23 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
 
     useEffect(() => {
+          
           if(newConfigurationEntityData) {
+            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
+            const logoOK=(role==='sp'||
+                          newLogo||
+                          (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
+        )
+
             setSaveDialogState(true);
-            if(isEqual(newConfigurationEntityData,integration.configurationEntity)&&((role==='idp'&&!newLogo)||role==='sp')){              
-              setCanSave(false)
-            } else {                  
-              if(isValid&&isValidSchoolSelection&&((role==='idp'&&(newLogo||newConfigurationEntityData?.idp?.logoUrl))||role==='sp')) {                
+            if(isEqual(newConfigurationEntityData,integration.configurationEntity)){       
+              if(newDiscoveryInformation&&!isEqual(newDiscoveryInformation,integration?.discoveryInformation)&&isValid&&logoOK) {      
+                setCanSave(true)
+              } else {
+                setCanSave(false)
+              }       
+            } else {                             
+              if(isValid&&logoOK) {   
                 setCanSave(true)
               } else {
                 setCanSave(false)
@@ -104,15 +117,26 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration, newLogo]);
+    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection, newIntegration, setNewIntegration, newLogo, role, newDiscoveryInformation]);
 
     useEffect(() => {
-      if(newDiscoveryInformation) {
+
+      if(newDiscoveryInformation !== undefined) {
+        const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
+        const logoOK=(role==='sp'||
+                          newLogo||
+                          (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
+        )
+        
         setSaveDialogState(true);
-        if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){              
-          setCanSave(false)
-        } else {                  
-          if(isValid&&isValidSchoolSelection) {                
+        if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){           
+          if(newConfigurationEntityData !== undefined&&!isEqual(newConfigurationEntityData,integration.configurationEntity)&&logoOK&&isValid) {
+            setCanSave(true)
+          } else {
+            setCanSave(false)
+          }  
+        } else {               
+          if(isValid) {                
             setCanSave(true)
           } else {
             setCanSave(false)
@@ -126,7 +150,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           setSaveDialogState(false);  
       }
     
-}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValid, isValidSchoolSelection, newIntegration, setNewIntegration]);
+}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValidSchoolSelection, newIntegration, setNewIntegration, newConfigurationEntityData, role, newLogo, isValidDataAttribute, isValidUserAttribute, isValidMetadata]);
 
     var hasAttributes =
                 role === "idp" &&
@@ -178,7 +202,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData && (
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} />
         )}    
-        <Role integration={integration} oid={oid} environment={environment} setCanSave={setIsValid}/>
+        <Role integration={integration} oid={oid} environment={environment} />
 
         {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
@@ -191,7 +215,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               type={type}
               role={role}
               oid={oid}
-              setCanSave={setIsValid}
+              setCanSave={setIsValidDataAttribute}
             />
           </ErrorBoundary>
         </Grid>}
@@ -207,7 +231,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           configurationEntity={integration.configurationEntity!}
           role={role}
           type={type}
-          setCanSave={setIsValid}
+          setCanSave={setIsValidMetadata}
           oid={oid}
           environment={environment}
         />
@@ -228,7 +252,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 environment={environment}
                 type={type}
                 oid={oid}
-                setCanSave={setIsValid}
+                setCanSave={setIsValidUserAttribute}
               />
             </ErrorBoundary>
               

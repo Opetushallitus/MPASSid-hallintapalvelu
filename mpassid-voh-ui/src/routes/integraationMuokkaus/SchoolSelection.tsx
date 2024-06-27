@@ -57,7 +57,7 @@ const convertSchoolCode = (value?:string) => {
 export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo, newLogo }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
-    const [showSchools, setShowSchools] = useState<boolean>(discoveryInformation?.showSchools||true);
+    const [showSchools, setShowSchools] = useState<boolean>(integration.id===0||integration?.discoveryInformation?.showSchools!);
     const [extraSchoolsConfiguration, setExtraSchoolsConfiguration] = useState<boolean>(
           ((discoveryInformation?.schools&&discoveryInformation?.schools?.length>0)||
           (discoveryInformation?.excludedSchools&&discoveryInformation?.excludedSchools?.length>0))||
@@ -89,20 +89,64 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                             existingExcludes: [] }
 
         newSchoolData.koulut = integration.organization?.children.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: c.oppilaitosKoodi||''}))
+        
+        possibleSchools.current=newSchoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+        if(integration?.discoveryInformation?.schools&&integration.discoveryInformation.schools.length>0) {
+          const existingSchools=integration.discoveryInformation.schools;
+          newSchoolData.koulut.map(k=>({ label: k.nimi, value: String(k.koulukoodi) }))
+          .forEach(element => {
+            if(existingSchools.indexOf(element.value)>-1) {
+              if(possibleSchools.current.map(p=>p.value).indexOf(element.value)<0) {
+                possibleSchools.current.push(element)
+              }
+            }
+            
+          });
+        }
+        if(integration?.discoveryInformation?.excludedSchools&&integration.discoveryInformation.excludedSchools.length>0) {
+          const existingExcludeSchools=integration.discoveryInformation.excludedSchools;
+          newSchoolData.koulut.map(k=>({ label: k.nimi, value: String(k.koulukoodi) }))
+          .forEach(element => {
+            if(existingExcludeSchools.indexOf(element.value)>-1&&possibleSchools.current.map(ps=>ps.value).indexOf(element.value)>-1) {
+              if(possibleSchools.current.map(p=>p.value).indexOf(element.value)<0) {
+                possibleSchools.current.push(element)
+              }
+            }
+            
+          });
+        }
         setSchoolData(newSchoolData)
       }
       
-    }, [integration]);
+      
+    }, [institutionTypeList, integration,possibleSchools]);
+
+    const saveCheck = (value:boolean,showLogo:boolean) => {
+      
+      if(value&&
+        ((discoveryInformation?.showSchools===false)||(configurationEntity?.idp?.institutionTypes?.length!>0))&&
+        ((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo)) {
+        setCanSave(true)  
+      } else {
+        setCanSave(false)  
+      }
+    }
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
       setShowSchools(checked);
        discoveryInformation.showSchools=checked;
       if(checked) {
         delete discoveryInformation.customDisplayName;
+      } else {
+        handleTitleChange('')
+        updateInstitutionTypes([])
+        updateExcludeSchools([])
+        updateSchools([])
+        
       }
-      setDiscoveryInformation(clone(discoveryInformation))
-      setCanSave(true)
-      
+      updateDiscoveryInformation(discoveryInformation)
+      setConfigurationEntity(clone(configurationEntity))
+      saveCheck(true,showLogo);
     };
 
     const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
@@ -116,15 +160,19 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 setAlreadyExcludeSchools(false)
               }              
 
-              possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>response.existingIncluded&&response.existingIncluded!==null&&response.existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-              
-              
+              if(response.existingIncluded&&response.existingIncluded!==null) {
+                var existingIncluded = response.existingIncluded
+                if(integration?.discoveryInformation?.schools&&integration.discoveryInformation?.schools.length>0) {
+                  existingIncluded = existingIncluded.filter(e=>integration?.discoveryInformation?.schools&&integration?.discoveryInformation?.schools?.indexOf(e)<0)
+                }
+                possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+              } else {
+                possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+              }  
+            
               updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
               updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-              
 
-              
-              
             })
         }
         
@@ -143,15 +191,15 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const handleCustomDisplayNameChange = (value:string) => {
       
-      if(value||value==="") {
+      if(value==="") {
         setCustomDisplayName('');
         delete discoveryInformation.customDisplayName
       } else {
         setCustomDisplayName(value);
         discoveryInformation.customDisplayName=value;
       }
-      setDiscoveryInformation(clone(discoveryInformation))
-      setCanSave(true)
+      updateDiscoveryInformation(discoveryInformation)
+      saveCheck(true,showLogo)
       
     };
     
@@ -159,13 +207,13 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
       if(value===undefined||value==="") {
         setTitle('');
-        delete discoveryInformation.title
+        discoveryInformation.title=integration?.organization?.name||''
       } else {
         setTitle(value);
         discoveryInformation.title=value;
       }
-      setDiscoveryInformation(clone(discoveryInformation))
-      setCanSave(true)
+      updateDiscoveryInformation(clone(discoveryInformation))
+      saveCheck(true,showLogo)
       
     };
 
@@ -188,6 +236,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         maksimikoko 125x36 px
         huom! siirretään ui:ssa logo otsikon "Oppilaitoksen valintanäkymän tiedot"
     */
+
+    const updateDiscoveryInformation = (value:Components.Schemas.DiscoveryInformation) => {
+        value.showSchools=showSchools
+        setDiscoveryInformation(clone(value))
+    }
+
     const updateInstitutionTypes = (values:string[]) => {
         if(configurationEntity&&configurationEntity.idp) {
           configurationEntity.idp.institutionTypes=values.map(value=>Number(value))
@@ -197,28 +251,30 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           getExtraSchoolsConfiguration(values.map(v=>Number(v)))
         }
         setConfigurationEntity(clone(configurationEntity))
-        setCanSave(true)
+        saveCheck(true,showLogo);
+        
+        
     }
 
     const updateExcludeSchools = (values:string[]) => {
       if(discoveryInformation) {
         discoveryInformation.excludedSchools=values.map(value=>value)
-        setDiscoveryInformation(clone(discoveryInformation))
+        updateDiscoveryInformation(discoveryInformation)
         
       }
       setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
       setExcludeSchools(values)
-      setCanSave(true)
+      saveCheck(true,showLogo)
   }
 
   const updateSchools = (values:string[]) => {
     if(discoveryInformation) {
       discoveryInformation.schools=values
-      setDiscoveryInformation(clone(discoveryInformation))
+      updateDiscoveryInformation(discoveryInformation)
       
     }
     setSchools(values.map(value=>value))
-    setCanSave(true)
+    saveCheck(true,showLogo)
 }
 
     const validator = (value:string) => {
@@ -294,8 +350,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 img.removeAttribute("hidden")             
                 setLogo(result)
                 setNewLogo(true)
-                setCanSave(true)
                 setShowLogo(true)
+                updateDiscoveryInformation(discoveryInformation)
+                saveCheck(true,true)
               })
            
           }
@@ -374,54 +431,58 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     } } 
                     setCanSave={setCanSave}/>}
 
-                   
-                    <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
-                    <Grid item xs={8}>
-                      <Switch checked={extraSchoolsConfiguration}
-                              onChange={changeExtraSchoolsConfiguration} />
-                    </Grid>
-                          
-                  
-                  {showSchools&&configurationEntity&&configurationEntity.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
-                          excludeSchools.length===0&&extraSchoolsConfiguration&&
-                  <>
-                    <Grid item xs={4}>
-                      <FormattedMessage defaultMessage="schools" />
-                    </Grid>
-                    <Grid item xs={8}>
-                      <MultiSelectForm 
-                              values={schools}
-                              label={"schools"}
-                              attributeType={"data"}
-                              isEditable={true}
-                              mandatory={false}                    
-                              helperText={helpGeneratorText}
-                              enums={possibleSchools.current}
-                              onValidate={validator} 
-                              setCanSave={setCanSave} 
-                              onUpdate={updateSchools}/>
-                    </Grid>
-                  </>} 
-                  {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
-                      possibleSchools.current.length>0&&schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
-                  <>
-                    <Grid item xs={4}>
-                      <FormattedMessage defaultMessage="excludedSchools" />
-                    </Grid>
-                    <Grid item xs={8}>
-                      <MultiSelectForm 
-                              values={excludeSchools}
-                              label={"excludeSchools"}
-                              attributeType={"data"}
-                              isEditable={true}
-                              mandatory={false}                    
-                              helperText={helpGeneratorText}
-                              enums={possibleSchools.current}
-                              onValidate={validator} 
-                              setCanSave={setCanSave} 
-                              onUpdate={updateExcludeSchools}/>
-                    </Grid>
-                  </>}
+                  { configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
+                    <>
+                      <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
+                        <Grid item xs={8}>
+                          <Switch checked={extraSchoolsConfiguration}
+                                  onChange={changeExtraSchoolsConfiguration} />
+                        </Grid>
+                              
+                      
+                      {showSchools&&configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
+                              excludeSchools.length===0&&extraSchoolsConfiguration&&
+                      <>
+                        <Grid item xs={4}>
+                          <FormattedMessage defaultMessage="schools" />
+                        </Grid>
+                        <Grid item xs={8}>
+                          <MultiSelectForm 
+                                  values={schools}
+                                  label={"schools"}
+                                  attributeType={"data"}
+                                  isEditable={true}
+                                  mandatory={false}                    
+                                  helperText={helpGeneratorText}
+                                  enums={possibleSchools.current}
+                                  onValidate={validator} 
+                                  setCanSave={setCanSave} 
+                                  onUpdate={updateSchools}/>
+                        </Grid>
+                      </>} 
+                      {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
+                          schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
+                      <>
+                        <Grid item xs={4}>
+                          <FormattedMessage defaultMessage="excludedSchools" />
+                        </Grid>
+                        <Grid item xs={8}>
+                          <MultiSelectForm 
+                                  values={excludeSchools}
+                                  label={"excludeSchools"}
+                                  attributeType={"data"}
+                                  isEditable={true}
+                                  mandatory={false}                    
+                                  helperText={helpGeneratorText}
+                                  enums={possibleSchools.current}
+                                  onValidate={validator} 
+                                  setCanSave={setCanSave} 
+                                  onUpdate={updateExcludeSchools}/>
+                        </Grid>
+                      </>}
+                    </>
+                  } 
+                    
                   
                 </Grid>
               </Grid>
