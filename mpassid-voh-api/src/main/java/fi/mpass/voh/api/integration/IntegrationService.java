@@ -48,6 +48,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import fi.mpass.voh.api.config.IntegrationServiceConfiguration;
 import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
@@ -72,27 +73,17 @@ import org.slf4j.LoggerFactory;
 public class IntegrationService {
   private static final Logger logger = LoggerFactory.getLogger(IntegrationService.class);
 
-  @Value("${application.admin-organization-oid}")
-  private String adminOrganizationOid;
-
-  @Value("${application.defaultTestServiceIntegrationId}")
-  private Long defaultTestServiceIntegrationId;
-
-  @Value("${application.image.base.url}")
-  private String logoUrlBase;
-
-  @Value("${application.image.base.path}")
-  private String logoPathBase;
-
   private final IntegrationRepository integrationRepository;
   private final OrganizationService organizationService;
   private final LoadingService loadingService;
+  private final IntegrationServiceConfiguration configuration;
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
-      LoadingService loadingService) {
+      LoadingService loadingService, IntegrationServiceConfiguration configuration) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
+    this.configuration = configuration;
   }
 
   public List<Integration> getIntegrations() {
@@ -126,7 +117,7 @@ public class IntegrationService {
           boolean b = m.matches();
           // accept admin organization oid even if it doesn't match to the given oid
           // regexp
-          if (b || authorityElements[4].equals(adminOrganizationOid)) {
+          if (b || authorityElements[4].equals(configuration.getAdminOrganizationOid())) {
             organizationOids.add(authorityElements[4]);
           }
         }
@@ -136,9 +127,9 @@ public class IntegrationService {
   }
 
   private boolean includesAdminOrganization(List<String> organizationOids) {
-    if (adminOrganizationOid != null && !adminOrganizationOid.isEmpty()) {
+    if (configuration.getAdminOrganizationOid() != null && !configuration.getAdminOrganizationOid().isEmpty()) {
       for (String oid : organizationOids) {
-        if (oid.contains(adminOrganizationOid)) {
+        if (oid.contains(configuration.getAdminOrganizationOid())) {
           logger.debug("A request from an admin organization");
           return true;
         }
@@ -444,13 +435,13 @@ public class IntegrationService {
   private Optional<Integration> extendPermissions(Optional<Integration> integration) {
     if (integration.isPresent()) {
       if (integration.get().getConfigurationEntity().getIdp() instanceof IdentityProvider) {
-        if (defaultTestServiceIntegrationId == null) {
+        if (configuration.getDefaultTestServiceIntegrationId() == null) {
           logger.error("Configuration error of the default test service integration identifier");
           return integration;
         }
 
         Optional<Integration> defaultTestServiceIntegration = integrationRepository
-            .findById(defaultTestServiceIntegrationId);
+            .findById(configuration.getDefaultTestServiceIntegrationId());
         if (defaultTestServiceIntegration.isPresent()) {
           integration.get().addPermissionTo(defaultTestServiceIntegration.get());
         } else {
@@ -553,7 +544,8 @@ public class IntegrationService {
 
       for (IntegrationPermission permission : integration.getPermissions()) {
         // permission updates to the configurable default test service are skipped
-        if (permission.getTo().getId() != null && permission.getTo().getId().equals(defaultTestServiceIntegrationId)) {
+        if (permission.getTo().getId() != null
+            && permission.getTo().getId().equals(configuration.getDefaultTestServiceIntegrationId())) {
           continue;
         }
         // permission to integration set
@@ -568,7 +560,7 @@ public class IntegrationService {
       // a permission was removed
       if (!existingPermittedIntegrations.isEmpty()) {
         for (Long permittedIntegrationId : existingPermittedIntegrations) {
-          if (permittedIntegrationId.equals(defaultTestServiceIntegrationId)) {
+          if (permittedIntegrationId.equals(configuration.getDefaultTestServiceIntegrationId())) {
             continue;
           }
           logger.debug("Updated #{}: Removed permitted integration #{}", existingIntegration.getId(),
@@ -638,7 +630,8 @@ public class IntegrationService {
         Iterator<IntegrationPermission> iter = permissions.iterator();
         while (iter.hasNext()) {
           IntegrationPermission permission = iter.next();
-          if (permission.getTo().getId().equals(defaultTestServiceIntegrationId)) {
+          if (permission.getTo().getId().equals(configuration.getDefaultTestServiceIntegrationId())) {
+            logger.debug("Filtering out integration #{}", configuration.getDefaultTestServiceIntegrationId());
             iter.remove();
           }
         }
@@ -865,8 +858,8 @@ public class IntegrationService {
     Optional<Integration> integration = this.getIntegration(id);
 
     if (integration.isPresent()) {
-      String url = this.logoUrlBase + "/" + Long.toString(id);
-      Path rootLocation = Paths.get(this.logoPathBase);
+      String url = this.configuration.getImageBaseUrl() + "/" + Long.toString(id);
+      Path rootLocation = Paths.get(this.configuration.getImageBasePath());
       try {
         if (file.isEmpty()) {
           logger.error("Empty file {}", file);
@@ -899,7 +892,11 @@ public class IntegrationService {
   }
 
   public InputStreamResource getDiscoveryInformationLogo(Long id) {
-    Path rootLocation = Paths.get(logoPathBase);
+    if (configuration.getImageBasePath() == null) {
+      logger.error("Logo not found: {}", id);
+      throw new EntityNotFoundException("Logo not found.");
+    }
+    Path rootLocation = Paths.get(configuration.getImageBasePath());
     Path sourceFile = rootLocation.resolve(Paths.get(Long.toString(id))).normalize().toAbsolutePath();
 
     try {
@@ -911,25 +908,25 @@ public class IntegrationService {
   }
 
   public String getDiscoveryInformationLogoContentType(InputStream inputStream) {
-		ImageInputStream imageStream = null;
-		try {
-			imageStream = ImageIO.createImageInputStream(inputStream);
-		} catch (IOException e) {
+    ImageInputStream imageStream = null;
+    try {
+      imageStream = ImageIO.createImageInputStream(inputStream);
+    } catch (IOException e) {
       logger.error("Error in creating image input stream.");
-		}
+    }
 
-		if (imageStream != null) {
-			Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
+    if (imageStream != null) {
+      Iterator<ImageReader> readers = ImageIO.getImageReaders(imageStream);
 
-			while (readers.hasNext()) {
-				ImageReader r = readers.next();
-				try {
+      while (readers.hasNext()) {
+        ImageReader r = readers.next();
+        try {
           return "image/" + r.getFormatName().toLowerCase();
-				} catch (IOException e) {
-					logger.error("Error in reading input image stream.");
-				}
-			}
-		}
+        } catch (IOException e) {
+          logger.error("Error in reading input image stream.");
+        }
+      }
+    }
     return null;
-	}
+  }
 }

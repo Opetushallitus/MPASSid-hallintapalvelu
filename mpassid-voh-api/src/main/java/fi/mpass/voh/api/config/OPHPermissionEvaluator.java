@@ -2,7 +2,6 @@ package fi.mpass.voh.api.config;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,13 +17,12 @@ import org.slf4j.LoggerFactory;
 public class OPHPermissionEvaluator {
     private static final Logger logger = LoggerFactory.getLogger(OPHPermissionEvaluator.class);
 
-    @Value("${application.admin-organization-oid}")
-    private String adminOrganizationOid;
-
     private final IntegrationRepository integrationRepository;
+    private final IntegrationServiceConfiguration integrationServiceConfiguration;
 
-    public OPHPermissionEvaluator(IntegrationRepository integrationRepository) {
+    public OPHPermissionEvaluator(IntegrationRepository integrationRepository, IntegrationServiceConfiguration integrationServiceConfiguration) {
         this.integrationRepository = integrationRepository;
+        this.integrationServiceConfiguration = integrationServiceConfiguration;
     }
 
     /**
@@ -127,7 +125,7 @@ public class OPHPermissionEvaluator {
                                         // (3, 5) the granted authority must include the integration organization oid
                                         if (authorityElements[4]
                                                 .equals(existingIntegration.get().getOrganization().getOid())
-                                                || authorityElements[4].equals(this.adminOrganizationOid)) {
+                                                || authorityElements[4].equals(this.integrationServiceConfiguration.getAdminOrganizationOid())) {
                                             return true;
                                         }
                                     }
