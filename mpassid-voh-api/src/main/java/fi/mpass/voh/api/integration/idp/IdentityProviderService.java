@@ -2,6 +2,8 @@ package fi.mpass.voh.api.integration.idp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -81,8 +83,15 @@ public class IdentityProviderService {
     }
 
     public InputStreamResource getSAMLMetadata(String entityId) {
-        // TODO
-        throw new UnsupportedOperationException("Unimplemented method 'getSAMLMetadata'");
+        Path rootLocation = Paths.get(metadataPathBase);
+        Path sourceFile = rootLocation.resolve(Paths.get(entityId)).normalize().toAbsolutePath();
+
+        try {
+            return new InputStreamResource(new FileInputStream(sourceFile.toString()));
+        } catch (FileNotFoundException e) {
+            logger.error("Metadata not found: {}", sourceFile);
+            throw new EntityNotFoundException("Metadata not found.");
+        }
     }
 
 }
