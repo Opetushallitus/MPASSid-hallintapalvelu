@@ -1,0 +1,98 @@
+stages:
+  - test
+  - build
+  - push
+
+.build:
+  stage: build
+  tags:
+    - mpassid-voh
+  script:
+    - echo "APP_VERSION=$(grep -E -o -m 1 "(<version>)(.*)(</version>)" pom.xml | sed 's/<version>//' | sed 's/<\/version>//')" >> build.env
+    - echo "APP_ID=$(grep -E -o -m 1 "(<artifactId>)(.*)(</artifactId>)" pom.xml | sed 's/<artifactId>//' | sed 's/<\/artifactId>//')" >> build.env
+    - echo "DEPLOY_ENV=${ENV}" >> build.env
+    - mvn clean package -D"${SKIPTESTS}" -P"${ENV}" -Dlane="${ENV}"
+
+Test:
+  stage: test
+  tags:
+    - mpassid-voh
+  variables:
+    ENV: "test"
+    SKIPTESTS: ""
+  artifacts:
+    reports:
+      dotenv: build.env
+  script:
+    - mvn test
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature/
+      when: manual
+  extends: .build
+  
+Build devel application:
+  stage: build
+  tags:
+    - mpassid-voh
+  variables:
+    ENV: "test"
+    SKIPTESTS: "skipTests"
+  artifacts:
+    paths:
+      - mpassid-voh-app/target/*${ENV}.jar
+    reports:
+      dotenv: build.env
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature/
+      when: manual
+  extends: .build
+
+Build test application:
+  stage: build
+  tags:
+    - mpassid-voh
+  variables:
+    ENV: "test"
+    SKIPTESTS: ""
+  artifacts:
+    paths:
+      - mpassid-voh-app/target/*${ENV}.jar
+    reports:
+      dotenv: build.env
+  rules:
+    - if: $CI_COMMIT_BRANCH  == "devel"
+      when: manual
+  extends: .build
+
+Build production application:
+  stage: build
+  tags:
+    - mpassid-voh
+  variables:
+    ENV: "prod"
+    SKIPTESTS: ""
+  artifacts:
+    paths:
+      - mpassid-voh-app/target/*${ENV}.jar
+    reports:
+      dotenv: build.env
+  rules:
+    - if: $CI_COMMIT_BRANCH  == "main"
+      when: manual
+  extends: .build
+
+Push to repository:
+  stage: push
+  tags:
+    - mpassid-voh
+  needs:
+    - job: Build devel application
+      optional: true
+    - job: Build test application
+      optional: true
+    - job: Build production application
+      optional: true
+  script:
+    - echo "$APP_ID $APP_VERSION $DEPLOY_ENV"
+    - $DEPLOY_CMD $TARGET_PATH/${APP_ID}-app-${APP_VERSION}-${DEPLOY_ENV}.jar $REPOSITORY/$REPOSITORY_PATH/${APP_ID}-${APP_VERSION}-${DEPLOY_ENV}.jar
+  when: manual
