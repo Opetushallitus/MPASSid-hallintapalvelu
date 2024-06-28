@@ -27,8 +27,11 @@ import fi.mpass.voh.api.integration.mp.SamlMetadataProvider;
 public class IdentityProviderService {
     private static final Logger logger = LoggerFactory.getLogger(IdentityProviderService.class);
 
-    @Value("${application.metadata.base.path}")
     private String metadataPathBase;
+
+    public IdentityProviderService(@Value("${application.metadata.base.path:metadata}") String metadataPathBase) {
+        this.metadataPathBase = metadataPathBase;
+    }
 
     public String saveMetadata(MultipartFile file) {
 
