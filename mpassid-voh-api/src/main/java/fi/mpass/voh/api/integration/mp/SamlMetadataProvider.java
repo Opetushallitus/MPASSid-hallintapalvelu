@@ -52,6 +52,7 @@ public class SamlMetadataProvider {
     private LocalDate metadataValidUntil;
     private LocalDate signingCertificateValidUntil;
     private LocalDate encryptionCertificateValidUntil;
+    private String entityId;
 
     private final RestClient restClient;
 
@@ -79,9 +80,34 @@ public class SamlMetadataProvider {
         }
 
         if (metadata != null) {
-            extractValidUntilDates();
+            extract();
         } else {
-            logger.error("No extraction done from " + metadataUrl);
+            logger.error("No extraction done from {}", metadataUrl);
+        }
+    }
+
+    public SamlMetadataProvider(InputStream inputStream) {
+
+        registry = ConfigurationService.get(XMLObjectProviderRegistry.class);
+        if (registry == null) {
+            logger.debug("XMLObjectProviderRegistry did not exist in ConfigurationService, will be created");
+            registry = new XMLObjectProviderRegistry();
+            ConfigurationService.register(XMLObjectProviderRegistry.class, registry);
+        }
+        registry.setParserPool(getParserPool());
+
+        restClient = null;
+        try {
+            // TODO size sanity check
+            metadata = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            metadata = null;
+        }
+
+        if (metadata != null) {
+            extract();
+        } else {
+            logger.error("No extraction done");
         }
     }
 
@@ -146,12 +172,16 @@ public class SamlMetadataProvider {
         return metadata;
     }
 
-    private void extractValidUntilDates() {
+    private void extract() {
         XMLObject xmlMetadata;
         try {
             xmlMetadata = doGetMetadata();
             if (xmlMetadata == null)
                 return;
+
+            if (((EntityDescriptorImpl) xmlMetadata).getEntityID() != null) {
+                this.entityId = ((EntityDescriptorImpl) xmlMetadata).getEntityID();
+            }
 
             if (((EntityDescriptorImpl) xmlMetadata).getValidUntil() != null) {
                 this.metadataValidUntil = LocalDate.ofInstant(((EntityDescriptorImpl) xmlMetadata).getValidUntil(),
@@ -228,5 +258,9 @@ public class SamlMetadataProvider {
 
     public LocalDate getEncryptionCertificateValidUntil() {
         return this.encryptionCertificateValidUntil;
+    }
+
+    public String getEntityId() {
+        return this.entityId;
     }
 }

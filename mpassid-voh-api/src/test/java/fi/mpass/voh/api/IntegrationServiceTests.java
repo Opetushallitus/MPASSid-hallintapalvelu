@@ -25,12 +25,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import fi.mpass.voh.api.config.IntegrationServiceConfiguration;
 import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.DiscoveryInformationDTO;
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationPermission;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
@@ -53,6 +55,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,6 +72,7 @@ class IntegrationServiceTests {
     private LoadingService loadingService;
 
     private IntegrationService underTest;
+    private IntegrationServiceConfiguration configuration;
 
     private Integration integration;
     private Integration updatedIntegration;
@@ -81,15 +85,21 @@ class IntegrationServiceTests {
 
     @BeforeEach
     void setUp() {
-        underTest = new IntegrationService(integrationRepository, organizationService, loadingService);
+        configuration = new IntegrationServiceConfiguration("1.2.246.562.10.00000000001", 3000001L,
+                "http://localhost/mpassid/integration/discoveryinformation/logo",
+                "/logos");
+
+        underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
         Organization organization = new Organization("Organization zyx", "1.2.3.4.5.6.7.8");
-        SubOrganization subOrganization1 = new SubOrganization("SubOrganization abc of Organization zyx", "1.2.3.4.5.6.7.100");
+        SubOrganization subOrganization1 = new SubOrganization("SubOrganization abc of Organization zyx",
+                "1.2.3.4.5.6.7.100");
         subOrganization1.setInstitutionType("11"); // peruskoulu
         subOrganization1.setInstitutionCode("0");
-        SubOrganization subOrganization2 = new SubOrganization("SubOrganization def of Organization zyx", "1.2.3.4.5.6.7.101");
+        SubOrganization subOrganization2 = new SubOrganization("SubOrganization def of Organization zyx",
+                "1.2.3.4.5.6.7.101");
         subOrganization1.setInstitutionType("15"); // lukio
         List<SubOrganization> children = new ArrayList<>();
         children.add(subOrganization1);
@@ -346,6 +356,26 @@ class IntegrationServiceTests {
     }
 
     @Test
+    void testGetFilteredIdentityProviders() {
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(existingUpdatedAllowingIntegration);
+        integrations.add(updatedAllowingIntegration);
+
+        // given
+        given(integrationRepository.findAll(any(Specification.class))).willReturn(integrations);
+
+        // when
+        List<Integration> integrationsWithoutTestSpPermission = underTest.getIdentityProviders();
+
+        // then
+        for (Integration integration : integrationsWithoutTestSpPermission) {
+            for (IntegrationPermission permission : integration.getPermissions()) {
+                assertNotEquals(configuration.getDefaultTestServiceIntegrationId(), permission.getTo().getId());
+            }
+        }
+    }
+
+    @Test
     void testGetIntegrationsByPermissionUpdateTimeSince() {
         // when
         underTest.getIntegrationsByPermissionUpdateTimeSince(LocalDateTime.now(), 0);
@@ -360,7 +390,8 @@ class IntegrationServiceTests {
     void testCreateBlankIntegration() throws JsonMappingException, JsonProcessingException {
         // given
         // given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
-        given(organizationService.retrieveSubOrganizations(any(String.class))).willReturn(integration.getOrganization());
+        given(organizationService.retrieveSubOrganizations(any(String.class)))
+                .willReturn(integration.getOrganization());
 
         // when
         Integration resultIntegration = underTest.createBlankIntegration("idp", "wilma", "1.2.3.4.5.6.7.8", null);
@@ -446,7 +477,7 @@ class IntegrationServiceTests {
 
         // given
         given(integrationRepository.findAllByOrganizationOid(any(String.class))).willReturn(integrations);
-        
+
         // when
         List<Integer> types = new ArrayList<>();
         types.add(11);
@@ -463,11 +494,11 @@ class IntegrationServiceTests {
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     void testGetDiscoveryInformationLogoContentType() throws IllegalStateException, IOException {
-    
+
         // given
         Path imageFile = Paths.get("src/test/resources/testimage.jpg");
-		InputStreamResource resource = new InputStreamResource(new FileInputStream(imageFile.toString()));
-        
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(imageFile.toString()));
+
         // when
         String logoContentType = underTest.getDiscoveryInformationLogoContentType(resource.getInputStream());
 

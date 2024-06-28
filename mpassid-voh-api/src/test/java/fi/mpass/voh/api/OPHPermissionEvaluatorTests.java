@@ -26,6 +26,7 @@ import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
+import fi.mpass.voh.api.config.IntegrationServiceConfiguration;
 import fi.mpass.voh.api.config.OPHPermissionEvaluator;
 import fi.mpass.voh.api.organization.Organization;
 
@@ -35,6 +36,8 @@ class OPHPermissionEvaluatorTests {
 
         @Mock
         private IntegrationRepository integrationRepository;
+
+        private IntegrationServiceConfiguration integrationServiceConfiguration;
 
         private Integration integration1;
         private Integration integration2;
@@ -139,6 +142,9 @@ class OPHPermissionEvaluatorTests {
 
         @BeforeEach
         void setUp() {
+                integrationServiceConfiguration = new IntegrationServiceConfiguration();
+                integrationServiceConfiguration.setAdminOrganizationOid("1.2.246.562.10.00000000001");
+
                 Organization organization1 = new Organization("Organization 123", "1.2.246.562.10.00000000005");
                 integration1 = new Integration(99L, LocalDate.now(), new ConfigurationEntity(),
                                 LocalDate.of(2023, 7, 30),
@@ -153,7 +159,8 @@ class OPHPermissionEvaluatorTests {
         @Test
         void testSpecificIntegrationTallentajaAuthorized() {
                 // given
-                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository,
+                                integrationServiceConfiguration);
                 given(integrationRepository.findById(any(Long.class))).willReturn(Optional.of(integration1));
 
                 // when
@@ -168,7 +175,8 @@ class OPHPermissionEvaluatorTests {
         @Test
         void testSpecificIntegrationTallentajaUnauthorized() {
                 // given
-                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository,
+                                integrationServiceConfiguration);
                 given(integrationRepository.findById(any(Long.class))).willReturn(Optional.of(integration2));
 
                 // when
@@ -184,7 +192,8 @@ class OPHPermissionEvaluatorTests {
         @Test
         void testAuthorized() {
                 // given
-                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository,
+                                integrationServiceConfiguration);
 
                 // when
                 TestingAuthenticationToken token = new TestingAuthenticationToken("user",
@@ -198,7 +207,8 @@ class OPHPermissionEvaluatorTests {
         @Test
         void testUnauthorized() {
                 // given
-                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository,
+                                integrationServiceConfiguration);
 
                 // when
                 TestingAuthenticationToken token = new TestingAuthenticationToken("user",
@@ -213,7 +223,8 @@ class OPHPermissionEvaluatorTests {
         @Test
         void testUnauthorizedWhenAuthorityWithoutPermission() {
                 // given
-                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository,
+                                integrationServiceConfiguration);
 
                 // when
                 TestingAuthenticationToken token = new TestingAuthenticationToken("user",
@@ -228,7 +239,8 @@ class OPHPermissionEvaluatorTests {
         @Test
         void testAuthorizedWhenEmptyRequiredPermissionWithRestrictedAuthorities() {
                 // given
-                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository);
+                OPHPermissionEvaluator permissionEvaluator = new OPHPermissionEvaluator(integrationRepository,
+                                integrationServiceConfiguration);
 
                 // when
                 TestingAuthenticationToken token = new TestingAuthenticationToken("user",
