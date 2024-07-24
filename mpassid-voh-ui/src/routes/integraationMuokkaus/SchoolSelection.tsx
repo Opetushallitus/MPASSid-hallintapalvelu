@@ -142,9 +142,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         updateInstitutionTypes([])
         updateExcludeSchools([])
         updateSchools([])
-        
+        setExtraSchoolsConfiguration(false)
       }
-      updateDiscoveryInformation(discoveryInformation)
+      updateDiscoveryInformation(clone(discoveryInformation))
       setConfigurationEntity(clone(configurationEntity))
       saveCheck(true,showLogo);
     };
@@ -239,7 +239,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const updateDiscoveryInformation = (value:Components.Schemas.DiscoveryInformation) => {
         value.showSchools=showSchools
-        setDiscoveryInformation(clone(value))
+        setDiscoveryInformation(clone(value)) 
     }
 
     const updateInstitutionTypes = (values:string[]) => {

@@ -105,6 +105,9 @@ export default function IntegraatioMuokkaus() {
               const logoId:number = result.current.id||0;
               if(logoId!==0) {
                 const logoResult= await uploadLogo({ id: logoId },formData as any);
+                if(result.current.configurationEntity?.idp) {
+                  result.current.configurationEntity.idp.logoUrl=logoResult
+                }
                 
               }
               

@@ -1,6 +1,6 @@
 import type { Components } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { cloneDeep, isEqual } from "lodash";
+import { clone, cloneDeep, isEqual } from "lodash";
 import {
   Alert,
   AlertTitle,
@@ -108,16 +108,18 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               } else {
                 setCanSave(false)
               }
-              if(newIntegration) {            
-                newIntegration.configurationEntity=newConfigurationEntityData
-                setNewIntegration(newIntegration)
+              if(integration) {            
+                var changedIntegration=clone(integration)
+                changedIntegration.discoveryInformation=newDiscoveryInformation
+                changedIntegration.configurationEntity=newConfigurationEntityData
+                setNewIntegration(changedIntegration)
               }
             }
           } else {
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection, newIntegration, setNewIntegration, newLogo, role, newDiscoveryInformation]);
+    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection, setNewIntegration, newLogo, role, newDiscoveryInformation]);
 
     useEffect(() => {
 
@@ -141,16 +143,18 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           } else {
             setCanSave(false)
           }
-          if(newIntegration) {            
-            newIntegration.discoveryInformation=newDiscoveryInformation
-            setNewIntegration(newIntegration)
+          if(integration) {            
+            var changedIntegration=clone(integration)
+            changedIntegration.discoveryInformation=newDiscoveryInformation
+            changedIntegration.configurationEntity=newConfigurationEntityData
+            setNewIntegration(changedIntegration)
           }
         }
       } else {
           setSaveDialogState(false);  
       }
     
-}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValidSchoolSelection, newIntegration, setNewIntegration, newConfigurationEntityData, role, newLogo, isValidDataAttribute, isValidUserAttribute, isValidMetadata]);
+}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, newLogo, isValidDataAttribute, isValidUserAttribute, isValidMetadata]);
 
     var hasAttributes =
                 role === "idp" &&
