@@ -808,22 +808,27 @@ public class IntegrationService {
         Set<String> allExcluded = new HashSet<>();
         Set<String> allIncluded = new HashSet<>();
         for (Integration i : integrations) {
-          if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
-            if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
-              allExcluded.add(Long.toString(i.getId()));
+          if (i.isActive()) {
+            if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
+              if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
+                allExcluded.add(Long.toString(i.getId()));
+              }
+              for (String school : i.getDiscoveryInformation().getSchools()) {
+                allIncluded.add(school);
+              }
             }
-            for (String school : i.getDiscoveryInformation().getSchools()) {
-              allIncluded.add(school);
-            }
+            di.setExistingExcluded(allExcluded);
+            di.setExistingIncluded(allIncluded);
           }
         }
-
+/*
         if (!allExcluded.isEmpty()) {
           di.setExistingExcluded(allExcluded);
         }
         if (!allIncluded.isEmpty()) {
           di.setExistingIncluded(allIncluded);
         }
+*/
       }
     } else {
       throw new EntityNotFoundException("Authentication not successful");
