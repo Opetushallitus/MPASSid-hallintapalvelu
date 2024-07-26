@@ -816,19 +816,19 @@ public class IntegrationService {
               for (String school : i.getDiscoveryInformation().getSchools()) {
                 allIncluded.add(school);
               }
+              di.setExistingExcluded(allExcluded);
+              di.setExistingIncluded(allIncluded);
             }
-            di.setExistingExcluded(allExcluded);
-            di.setExistingIncluded(allIncluded);
           }
         }
-/*
-        if (!allExcluded.isEmpty()) {
-          di.setExistingExcluded(allExcluded);
-        }
-        if (!allIncluded.isEmpty()) {
-          di.setExistingIncluded(allIncluded);
-        }
-*/
+        /*
+         * if (!allExcluded.isEmpty()) {
+         * di.setExistingExcluded(allExcluded);
+         * }
+         * if (!allIncluded.isEmpty()) {
+         * di.setExistingIncluded(allIncluded);
+         * }
+         */
       }
     } else {
       throw new EntityNotFoundException("Authentication not successful");
