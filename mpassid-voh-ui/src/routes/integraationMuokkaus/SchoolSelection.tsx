@@ -1,6 +1,6 @@
 import type { ChangeEvent, Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
-import {  Alert, AlertTitle, Box, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
+import {  Alert, Box, Grid, IconButton, Paper, Switch, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 import { DataRow, TextList } from "../integraatio/IntegrationTab/DataRow";
 import { getIntegrationDiscoveryInformation, type Components } from "@/api";
@@ -57,7 +57,8 @@ const convertSchoolCode = (value?:string) => {
 export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo, newLogo }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
-    const [showSchools, setShowSchools] = useState<boolean>(integration.id===0||integration?.discoveryInformation?.showSchools!);
+    //const [showSchools, setShowSchools] = useState<boolean>(integration.id===0||integration?.discoveryInformation?.showSchools!);
+    const showSchools = useRef<boolean>(integration.id===0||integration?.discoveryInformation?.showSchools!)
     const [extraSchoolsConfiguration, setExtraSchoolsConfiguration] = useState<boolean>(
           ((discoveryInformation?.schools&&discoveryInformation?.schools?.length>0)||
           (discoveryInformation?.excludedSchools&&discoveryInformation?.excludedSchools?.length>0))||
@@ -79,6 +80,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const [exampleSchool, setExampleSchool] = useState<string>(possibleSchools.current?.filter(p=>excludeSchools.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu');
     const [schoolData, setSchoolData] = useState<SchoolData>(kouluData);
     const [showLogo, setShowLogo] = useState<boolean>(false);
+    const [alert, setAlert] = useState<boolean>(false);
     const extraSchoolConfigurationNeeded = useRef<boolean>(false)
     const disableExtraSchoolConfiguration = useRef<boolean>(false);
     const intl = useIntl();
@@ -126,81 +128,61 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
 
     const isExtraSchoolConfigurationOk = () => {
-      const test=(((discoveryInformation?.schools&&discoveryInformation?.schools?.length>0)||
-      (discoveryInformation?.excludedSchools&&discoveryInformation?.excludedSchools?.length>0)))
-      console.log("************** save extraSchoolsConfiguration (test)", test)
       
-      console.log("***************** extraSchoolConfigurationNeeded:",extraSchoolConfigurationNeeded.current)
-
-
       if(extraSchoolConfigurationNeeded.current) {
-        console.log("************** save extraSchoolsConfiguration (true)", (discoveryInformation?.showSchools&&configurationEntity&&
-          configurationEntity?.idp?.institutionTypes?.length!>0&&
-          (((discoveryInformation?.excludedSchools?.length!>0||discoveryInformation?.schools?.length!>0)))))
         return (discoveryInformation?.showSchools&&configurationEntity&&
           configurationEntity?.idp?.institutionTypes?.length!>0&&
           ((discoveryInformation?.excludedSchools?.length!>0||discoveryInformation?.schools?.length!>0)))
       } else {
-        console.log("************** save extraSchoolsConfiguration (false)", (discoveryInformation?.excludedSchools?.length===0&&discoveryInformation?.schools?.length===0))
         return discoveryInformation?.excludedSchools?.length!>=0&&discoveryInformation?.schools?.length!>=0;
       }
 
-
-      /*
-      if(test) {
-        console.log("************** save extraSchoolsConfiguration (true)", (discoveryInformation?.showSchools&&configurationEntity&&
-          configurationEntity?.idp?.institutionTypes?.length!>0&&
-          (test&&((discoveryInformation?.excludedSchools?.length!>0||discoveryInformation?.schools?.length!>0)))))
-        return (discoveryInformation?.showSchools&&configurationEntity&&
-          configurationEntity?.idp?.institutionTypes?.length!>0&&
-          (test&&((discoveryInformation?.excludedSchools?.length!>0||discoveryInformation?.schools?.length!>0))))
-      } else {
-        console.log("************** save extraSchoolsConfiguration (false)", (discoveryInformation?.excludedSchools?.length===0&&discoveryInformation?.schools?.length===0))
-        return discoveryInformation?.excludedSchools?.length===0&&discoveryInformation?.schools?.length===0;
-      }
-        */
     }
 
-    const saveCheck = (value:boolean,showLogo:boolean) => {
+    const saveCheck = (value:boolean,showLogo:boolean,showSchools:boolean) => {
 
       if(integration?.configurationEntity?.idp) {
-        console.log("****** IDP")
-        //showSchools&&configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&excludeSchools.length===0&&extraSchoolsConfiguration&&schools.length>0 
-
-        console.log("************** save ehto1 ",((discoveryInformation?.showSchools===false)))
-        console.log("************** save ehto2 ",isExtraSchoolConfigurationOk())
+        
+        console.log("************** save ehto1 ",((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo))
+        console.log("************** save ehto2 ",(!showSchools||
+          (showSchools&&
+           isExtraSchoolConfigurationOk()&&
+           (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0))
+          )
+         ))
           
-        console.log("************** save ehto3 ",(configurationEntity?.idp&&configurationEntity.idp.institutionTypes?.length!>0)||(configurationEntity?.sp))
-        console.log("************** save ehto4 ",(configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo)
+        console.log("************** save ehto2.1 ",(!showSchools))
+        console.log("************** save ehto2.2 ",isExtraSchoolConfigurationOk()&&
+        (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0)))
+        console.log("************** save ehto2.2.1 ",(isExtraSchoolConfigurationOk()))
+        console.log("************** save ehto2.2.2 ",(configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0)))
         console.log("************** configurationEntity.idp.institutionTypes ",configurationEntity?.idp?.institutionTypes)
+
         if(value&&
-          (
-            (discoveryInformation?.showSchools===false)||
-            isExtraSchoolConfigurationOk()
-          )&&
-          (
-            (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0))
-          )&&
-          (
-            (configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo
-          )) {
+          ((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo)&&
+           (!showSchools||
+            (showSchools&&
+             isExtraSchoolConfigurationOk()&&
+             (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0))
+            )
+           )
+        ) {
           console.log("***************** setCanSave: true")
           setCanSave(true)  
         } else {
           console.log("***************** setCanSave: false")
-          setCanSave(false)  
+          setCanSave(false)
         }
+
       } else {
         setCanSave(false)
       }
 
-      
-      
-
     }
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
-      setShowSchools(checked);
+
+      showSchools.current=checked
        discoveryInformation.showSchools=checked;
       if(checked) {
         delete discoveryInformation.customDisplayName;
@@ -215,7 +197,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       }
       updateDiscoveryInformation(clone(discoveryInformation))
       setConfigurationEntity(clone(configurationEntity))
-      saveCheck(true,showLogo);
+
+      saveCheck(true,showLogo,checked);
     };
 
     const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
@@ -230,7 +213,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 setAlreadyExcludeSchools(true)
                 setExtraSchoolsConfiguration(true)
                 extraSchoolConfigurationNeeded.current=true
-                console.log("******** setDisableExtraSchoolConfiguration 1")
                 disableExtraSchoolConfiguration.current=true
                 newExtraSchoolConfigurationNeeded=true;
                 
@@ -246,8 +228,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).filter(k=>existingIncluded.indexOf(String(k.koulukoodi))<0).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
                 setExtraSchoolsConfiguration(true)
                 extraSchoolConfigurationNeeded.current=true
-                console.log("******** setDisableExtraSchoolConfiguration 2")
                 disableExtraSchoolConfiguration.current=true;
+                if(response.existingIncluded.length===0||possibleSchools.current.length===0){
+                  possibleSchools.current=[]
+                  setAlert(true)
+                }
+
               } else {
                 possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
                 extraSchoolConfigurationNeeded.current=newExtraSchoolConfigurationNeeded
@@ -275,18 +261,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
     };
 
-    const changeExtraSchoolsConfigurationBoolean = (event: boolean) => {
-      if(event) {
-          getExtraSchoolsConfiguration(institutionTypeList)
-      } else {
-        updateExcludeSchools([])
-        updateSchools([])
-      }
-      extraSchoolConfigurationNeeded.current=event
-      setExtraSchoolsConfiguration(event)
-      
-    };
-
     const handleCustomDisplayNameChange = (value:string) => {
       
       if(value==="") {
@@ -297,7 +271,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         discoveryInformation.customDisplayName=value;
       }
       updateDiscoveryInformation(discoveryInformation)
-      saveCheck(true,showLogo)
+      
+      saveCheck(true,showLogo,showSchools.current)
       
     };
     
@@ -311,7 +286,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         discoveryInformation.title=value;
       }
       updateDiscoveryInformation(clone(discoveryInformation))
-      saveCheck(true,showLogo)
+      saveCheck(true,showLogo,showSchools.current)
       
     };
 
@@ -336,7 +311,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     */
 
     const updateDiscoveryInformation = (value:Components.Schemas.DiscoveryInformation) => {
-        value.showSchools=showSchools
+        value.showSchools=showSchools.current
         setDiscoveryInformation(clone(value)) 
     }
 
@@ -345,7 +320,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         if(configurationEntity&&configurationEntity.idp) {
           configurationEntity.idp.institutionTypes=values.map(value=>Number(value))
           setInstitutionTypeList(configurationEntity.idp.institutionTypes)  
-          console.log("***************updateInstitutionTypes (values)", values)
           if(values&&values.length>0) {
             getExtraSchoolsConfiguration(values.map(v=>Number(v)))
           }
@@ -354,7 +328,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           getExtraSchoolsConfiguration(values.map(v=>Number(v)))
         }
         setConfigurationEntity(clone(configurationEntity))
-        saveCheck(true,showLogo);
+        saveCheck(true,showLogo,showSchools.current)
         
         
     }
@@ -367,7 +341,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       }
       setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
       setExcludeSchools(values)
-      saveCheck(true,showLogo)
+      saveCheck(true,showLogo,showSchools.current)
   }
 
   const updateSchools = (values:string[]) => {
@@ -377,15 +351,13 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
     }
     setSchools(values.map(value=>value))
-    saveCheck(true,showLogo)
+    saveCheck(true,showLogo,showSchools.current)
 }
 
     const validator = (value:string) => {
-        //return validate(configuration.validation,value);
         return validate([],value);
       }
       const helpGeneratorText = (value:string) => {
-        //return helperText(configuration.validation,value);
         return helperText([],value);
       }
       
@@ -455,7 +427,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 setNewLogo(true)
                 setShowLogo(true)
                 updateDiscoveryInformation(discoveryInformation)
-                saveCheck(true,true)
+                saveCheck(true,showLogo,showSchools.current)
+                
               })
            
           }
@@ -493,12 +466,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           <>
             <DataRowTitle path="showSchools"></DataRowTitle>
             <Grid item xs={8}>
-              <Switch checked={showSchools}
+              <Switch checked={showSchools.current}
                       onChange={handleShowSchoolsChange} />
             </Grid>
           </>      
           
-          {showSchools&&
+          {showSchools.current&&
             <>
               {/*<Grid item xs={4}></Grid>*/}
               <Grid item xs={12}>
@@ -519,7 +492,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                               setCanSave={setCanSave} 
                               onUpdate={updateInstitutionTypes}/>}
                   </Grid>
-                  {showSchools&&configurationEntity&&
+                  {showSchools.current&&configurationEntity&&
                     <SchoolForm 
                     isVisible={true} 
                     isEditable={true} 
@@ -545,9 +518,18 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                   disabled={disableExtraSchoolConfiguration.current}/>
                                   
                         </Grid>
+
+                        {possibleSchools.current.length===0&&extraSchoolsConfiguration&&
+                        <>
+                        <Grid item xs={4}>
+                        </Grid>
+                        <Grid item xs={6}>
+                        <Alert severity="warning"><FormattedMessage defaultMessage="Kaikki koulut jo käytössä muissa integraatioissa" /></Alert>
+                        </Grid>
+                        </>}
                               
                          
-                      {showSchools&&configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
+                      {showSchools.current&&configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
                               excludeSchools.length===0&&extraSchoolsConfiguration&&
                       <>
                         <Grid item xs={4}>
@@ -567,7 +549,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                   onUpdate={updateSchools}/>
                         </Grid>
                       </>} 
-                      {showSchools&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
+                      {showSchools.current&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
                           schools.length===0&&extraSchoolsConfiguration&&!alreadyExcludeSchools&&
                       <>
                         <Grid item xs={4}>
@@ -597,16 +579,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           </Grid>
           
           <Grid container spacing={2} mb={3}>    
-          {false&&!showSchools&&<DataRow
-            object={integration}
-            path="discoveryInformation.earlyEducationProvider"
-            type="text-list"
-          />}
-          {title&&title!==''&&showSchools&&<>
+          
+          {title&&title!==''&&showSchools.current&&<>
           <DataRowTitle></DataRowTitle>
           <DataRowValue><FormattedMessage defaultMessage="Esim. {exampleSchool} ({title})" values={{exampleSchool: exampleSchool,title: title}} /></DataRowValue>            
           </>}
-          {title===undefined||title===''&&showSchools&&<>
+          {title===undefined||title===''&&showSchools.current&&<>
           <DataRowTitle></DataRowTitle>
           <DataRowValue><FormattedMessage defaultMessage="Esim. {exampleSchool}" values={{exampleSchool: exampleSchool}} /></DataRowValue>            
           </>}
@@ -662,7 +640,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
         </Grid>
         
-        {!showSchools&&configurationEntity&&
+        {!showSchools.current&&configurationEntity&&
           <Grid container spacing={2} mb={3}>    
               <SchoolForm 
               isVisible={true} 
