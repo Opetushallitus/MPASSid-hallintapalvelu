@@ -80,7 +80,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const [exampleSchool, setExampleSchool] = useState<string>(possibleSchools.current?.filter(p=>excludeSchools.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu');
     const [schoolData, setSchoolData] = useState<SchoolData>(kouluData);
     const [showLogo, setShowLogo] = useState<boolean>(false);
-    const [alert, setAlert] = useState<boolean>(false);
     const extraSchoolConfigurationNeeded = useRef<boolean>(false)
     const disableExtraSchoolConfiguration = useRef<boolean>(false);
     const intl = useIntl();
@@ -141,23 +140,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const saveCheck = (value:boolean,showLogo:boolean,showSchools:boolean) => {
 
+      
       if(integration?.configurationEntity?.idp) {
         
-        console.log("************** save ehto1 ",((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo))
-        console.log("************** save ehto2 ",(!showSchools||
-          (showSchools&&
-           isExtraSchoolConfigurationOk()&&
-           (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0))
-          )
-         ))
-          
-        console.log("************** save ehto2.1 ",(!showSchools))
-        console.log("************** save ehto2.2 ",isExtraSchoolConfigurationOk()&&
-        (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0)))
-        console.log("************** save ehto2.2.1 ",(isExtraSchoolConfigurationOk()))
-        console.log("************** save ehto2.2.2 ",(configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0)))
-        console.log("************** configurationEntity.idp.institutionTypes ",configurationEntity?.idp?.institutionTypes)
-
         if(value&&
           ((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo)&&
            (!showSchools||
@@ -167,10 +152,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             )
            )
         ) {
-          console.log("***************** setCanSave: true")
           setCanSave(true)  
         } else {
-          console.log("***************** setCanSave: false")
           setCanSave(false)
         }
 
@@ -205,9 +188,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         if(integration.organization&&integration.organization.oid) {
           getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList})
             .then(response=>{              
-              console.log("******** getIntegrationDiscoveryInformation (response): ",response)
-              console.log("******** response.existingIncluded: ",response.existingIncluded)
-              console.log("******** response.existingExcluded: ",response.existingExcluded)
               var newExtraSchoolConfigurationNeeded=false
               if(response.existingExcluded&&response.existingExcluded!==null&&response.existingExcluded.length>0&&response.existingExcluded.indexOf(String(integration.id))<0) {
                 setAlreadyExcludeSchools(true)
@@ -231,7 +211,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 disableExtraSchoolConfiguration.current=true;
                 if(response.existingIncluded.length===0||possibleSchools.current.length===0){
                   possibleSchools.current=[]
-                  setAlert(true)
                 }
 
               } else {
@@ -427,7 +406,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 setNewLogo(true)
                 setShowLogo(true)
                 updateDiscoveryInformation(discoveryInformation)
-                saveCheck(true,showLogo,showSchools.current)
+                saveCheck(true,true,showSchools.current)
                 
               })
            
