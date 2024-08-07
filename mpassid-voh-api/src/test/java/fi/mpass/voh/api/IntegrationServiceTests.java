@@ -75,6 +75,7 @@ class IntegrationServiceTests {
     private IntegrationServiceConfiguration configuration;
 
     private Integration integration;
+    private Integration inactiveIntegration;
     private Integration updatedIntegration;
     private Integration existingUpdatedAllowingIntegration;
     private Integration updatedAllowingIntegration;
@@ -135,6 +136,10 @@ class IntegrationServiceTests {
                 0, discoveryInformation, organization,
                 "serviceContactAddress@example.net");
 
+        inactiveIntegration = new Integration(999L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
+                0, discoveryInformation, organization,
+                "serviceContactAddress@example.net");
+
         updatedIntegration = new Integration(999L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
                 0, discoveryInformation, organization,
                 "foo@bar");
@@ -153,6 +158,8 @@ class IntegrationServiceTests {
                 0, discoveryInformation, organization,
                 "zap@bar");
 
+        inactiveIntegration.setStatus(1);
+        
         updatedIntegrations = new ArrayList<Integration>();
         updatedIntegration.setServiceContactAddress("zyx@domain");
         updatedIntegrations.add(updatedIntegration);
@@ -489,6 +496,73 @@ class IntegrationServiceTests {
         assertEquals(2, dto.getExistingExcluded().size());
         assertTrue(dto.getExistingIncluded().contains("00907")); // institution code
         assertTrue(dto.getExistingExcluded().contains("1111")); // integration identifier
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetDiscoveryInformationInactive() throws JsonMappingException, JsonProcessingException {
+
+        Set<String> excluded = new HashSet<>();
+        excluded.add("00907");
+        excluded.add("05899");
+        inactiveIntegration.getDiscoveryInformation().setExcludedSchools(excluded);
+        Set<Integer> institutionTypes = new HashSet<>();
+        institutionTypes.add(11);
+        institutionTypes.add(15);
+        inactiveIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        Set<String> included = new HashSet<>();
+        referenceIntegration.getDiscoveryInformation().setSchools(included);
+        referenceIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(inactiveIntegration);
+
+        // given
+        given(integrationRepository.findAllByOrganizationOid(any(String.class))).willReturn(integrations);
+
+        // when
+        List<Integer> types = new ArrayList<>();
+        types.add(11);
+        types.add(15);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types);
+
+        // then
+        assertTrue(dto.getExistingIncluded() == null);
+        assertTrue(dto.getExistingExcluded() == null);
+    
+}
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetDiscoveryInformationEmpty() throws JsonMappingException, JsonProcessingException {
+
+        Set<String> excluded = new HashSet<>();
+        integration.getDiscoveryInformation().setExcludedSchools(excluded);
+        Set<Integer> institutionTypes = new HashSet<>();
+        institutionTypes.add(11);
+        institutionTypes.add(15);
+        integration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        Set<String> included = new HashSet<>();
+        referenceIntegration.getDiscoveryInformation().setSchools(included);
+        referenceIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(integration);
+        integrations.add(referenceIntegration);
+
+        // given
+        given(integrationRepository.findAllByOrganizationOid(any(String.class))).willReturn(integrations);
+
+        // when
+        List<Integer> types = new ArrayList<>();
+        types.add(11);
+        types.add(15);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types);
+
+        // then
+        assertTrue(dto.getExistingIncluded().isEmpty());
+        assertTrue(dto.getExistingExcluded().isEmpty());
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
