@@ -821,14 +821,6 @@ public class IntegrationService {
             }
           }
         }
-        /*
-         * if (!allExcluded.isEmpty()) {
-         * di.setExistingExcluded(allExcluded);
-         * }
-         * if (!allIncluded.isEmpty()) {
-         * di.setExistingIncluded(allIncluded);
-         * }
-         */
       }
     } else {
       throw new EntityNotFoundException("Authentication not successful");
