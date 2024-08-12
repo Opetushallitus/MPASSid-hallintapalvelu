@@ -134,13 +134,23 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const tooltipId = `työkaluvihje.${attribute.name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
     const currentObject= useRef<any>({});
+
     
-    const updateObject = () => {
+    const updateListObject = () => {
+        console.log("*************** updateListObject: ",attribute.name,currentObject.current)
         //console.log("*** currentObject.current: ",currentObject.current)
+        //TODO: MANDATORY CHECK for object values, if valid update ....
         onUpdate(attribute.name,currentObject.current)
         currentObject.current={}
     }
 
+    const updateListItem = () => {
+        console.log("*************** updateListObject: ",attribute.name,attribute.content)
+        //console.log("*** currentObject.current: ",currentObject.current)
+        //TODO: MANDATORY CHECK for object values, if valid update ....
+        onUpdate(attribute.name,attribute.content)
+        // currentObject.current={}
+    }
 
     /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
                         dataConfiguration.find((c:UiConfiguration) => !c.oid && c.type===attribute.type&&c.name===attribute.name) || 
@@ -172,6 +182,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         
                         
                     </Grid>
+                    
                     <Grid item xs={8} sx={{}}>
                         <Typography
                         sx={{
@@ -180,6 +191,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         }}
                         variant="caption"
                         >
+                            
                             {configuration&&roleConfiguration&&configuration.object&&
                             (<ObjectForm key={attribute.name+"_"+configuration.name} 
                                 object={attribute} 
@@ -232,7 +244,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                         aria-label={intl.formatMessage({
                                         defaultMessage: "lisää",
                                         })}
-                                        onClick={updateObject} >
+                                        //disabled={listObjectValid}
+                                        onClick={updateListObject} >
                                         <AddIcon />
                                     </IconButton>
                                 </Grid>
@@ -250,6 +263,20 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 helperText={helperText}
                                 onUpdate={onUpdate} 
                                 setCanSave={setCanSave}/>)}        
+                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
+                                (<Grid container spacing={2} >
+                                    <Grid item xs={10}></Grid>
+                                    <Grid item xs={2}>
+                                        <IconButton 
+                                            aria-label={intl.formatMessage({
+                                            defaultMessage: "lisää",
+                                            })}                                            
+                                            onClick={updateListItem} >
+                                            <AddIcon />
+                                        </IconButton>
+                                    </Grid>
+                                </Grid>)
+                                }
                         </Typography>
                     </Grid>
                     </Grid>

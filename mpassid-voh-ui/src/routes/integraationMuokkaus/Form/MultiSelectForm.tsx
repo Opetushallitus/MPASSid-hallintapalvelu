@@ -30,13 +30,15 @@ interface Props {
   mandatory: boolean;
   enums: oneEnum[];
   values: string[];
+  multiple?: boolean;
+  createEmpty?: boolean;
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
   onUpdate: (values: string[]) => void;
   onValidate: (data:string) => boolean;
 }
 
-export default function MultiSelectForm({ values, isEditable=false, mandatory=false, helperText, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
+export default function MultiSelectForm({ values, isEditable=false, mandatory=false, multiple=true, createEmpty=true, helperText, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
   const intl = useIntl();
 
   
@@ -58,6 +60,9 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
       target: { value },
     } = event;
     
+
+    
+
     setSelection(
       // On autofill we get a stringified value.
       typeof value === 'string' ? value.split(',') : value,
@@ -74,7 +79,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
     
   }, [ label, mandatory, setUsedHelperText, setCanSave ]);
   
-  if(isEditable) {
+  if(isEditable&&(createEmpty||selection.length>0)) {
     return (
      
         <div>
@@ -82,7 +87,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                 <Select
                 labelId="multiselectForm"
                 id="multiselectForm-checkbox"
-                multiple
+                multiple={multiple}
                 multiline
                 value={selection}
                 onChange={handleChange}
@@ -107,7 +112,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                     <ListItemText primary={name.label} />
                     </MenuItem>
                 ))}
-                {enums&&enums.length===0&&(
+                {createEmpty&&enums&&enums.length===0&&(
                     <MenuItem key='none' >
                     <ListItemText primary={<span >{intl.formatMessage({
                     defaultMessage: "Ei valintoja",

@@ -81,7 +81,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
                     if(attributes.filter(a => a.name === configuration.name).length===0||attributes.filter(a => a.name === configuration.name)[0].content=== undefined||attributes.filter(a => a.name === configuration.name)[0].content===''){
-                      setCanSave(false)
+                      if(attributes.length>0) {
+                        setCanSave(false)
+                      }
+                      
                     }
                   }
                   const validator = (value:string) => {
