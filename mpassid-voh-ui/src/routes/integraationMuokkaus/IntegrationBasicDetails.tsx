@@ -10,7 +10,8 @@ import {
 import UniqueId from "./UniqueId";
 import type { oneEnum } from "./Form/MultiSelectForm";
 import MultiSelectForm from "./Form/MultiSelectForm";
-import { Dispatch, MutableRefObject, useState } from "react";
+import type { Dispatch, MutableRefObject} from "react";
+import { useState } from "react";
 
 
 interface Props {
@@ -24,8 +25,6 @@ interface Props {
 export default function IntegrationBasicDetails({ integration, configurationEntity, environment, setNewEnvironment, newEnvironment }: Props) {
 
     const [ values, setValues ] = useState<string[]>([String(environment.current)])
-    console.log("****** environment: ",environment.current)
-    console.log("****** values: ",values[0])
     const intl = useIntl();
     const role  = (configurationEntity?.idp) ? "idp" : "sp"
 
@@ -67,7 +66,7 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
                     ValueComponent={UniqueIdValue}
                   />}
                 </Grid>
-                {values&&values.length>0&&(values[0]==='0'||values[0]==='1'||values[0]==='2')&&<>
+                {false&&values&&values.length>0&&(values[0]==='0'||values[0]==='1'||values[0]==='2')&&<>
                   <Grid item xs={4}>
                     <FormattedMessage defaultMessage="deploymentPhase" />
                   </Grid>
