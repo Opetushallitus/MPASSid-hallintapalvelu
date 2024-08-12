@@ -41,9 +41,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
     const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
-    const environment = useRef<number>(0);
+    const environment = useRef<number>(1);
     const originalEnvironment = useRef<number>(-5);
     const [newEnvironment, setNewEnvironment] = useState(false);
+    
     
     const { state } = useLocation();
     const integration: Components.Schemas.Integration = state;
@@ -55,27 +56,19 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType; 
     
     
+    
     useEffect(() => {
       
       if(integration.deploymentPhase) {
         environment.current=integration.deploymentPhase
         if(originalEnvironment.current===-5) {
-          console.log("************* set originalEnvironment': ")
           originalEnvironment.current=integration.deploymentPhase
-          console.log("************* set originalEnvironment': ",originalEnvironment.current)
         }
       }
 
       
       
     }, [integration]);
-
-    useEffect(() => {
-      
-     console.log("****************************************************** newEnvironment: ",newEnvironment)
-      
-    }, [newEnvironment]);
-    
     
     useEffect(() => {
       
@@ -92,7 +85,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     }, [role, integration, setNewIntegration,newEnvironment]);
     
     useEffect(() => {
-       
       if(newConfigurationEntityData&&type!=='unknown') {
         
         const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||''; 
@@ -115,16 +107,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
     useEffect(() => {
 
-      console.log("******* (integration.deploymentPhase!==environment.current) 1: ", integration.deploymentPhase,environment.current)
-          console.log("********** newConfigurationEntityData: ",newConfigurationEntityData)
-          console.log("********** newLogo: ",newLogo)
           if(newConfigurationEntityData) {
-            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
-            console.log("******* 1:",isValidDataAttribute)
-              console.log("******* 2:",isValidUserAttribute)
-              console.log("******* 3:",isValidMetadata)
-              console.log("******* 4:",isValidSchoolSelection)
-              
+            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;        
             const logoOK=(role==='sp'||
                           newLogo||
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
@@ -133,20 +117,14 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             setSaveDialogState(true);
             if(isEqual(newConfigurationEntityData,integration.configurationEntity)){       
               if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK) {      
-                console.log("************ setCanSave 1")
                 setCanSave(true)
               } else {
-                console.log("************ setCanSave 2")
                 setCanSave(false)
               }       
-            } else {        
-              console.log("******* 5:",isValid)
-              console.log("******* 6:",logoOK)                     
-              if(isValid&&logoOK) {   
-                console.log("************ setCanSave 3")
+            } else {                      
+              if(isValid&&logoOK) {         
                 setCanSave(true)
               } else {
-                console.log("************ setCanSave 4")
                 setCanSave(false)
               }
               if(integration) {            
@@ -164,8 +142,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection, setNewIntegration, newLogo, role, newDiscoveryInformation, newEnvironment]);
 
     useEffect(() => {
-
-      console.log("******* (integration.deploymentPhase!==environment.current) 2: ", integration.deploymentPhase,environment.current)
       
       if(newDiscoveryInformation !== undefined) {
         const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
@@ -177,20 +153,14 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         setSaveDialogState(true);
         if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){           
           if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,integration.configurationEntity)||newLogo||(originalEnvironment.current!==environment.current))&&logoOK&&isValid) {
-            console.log("************ originalEnvironment: ",originalEnvironment.current)
-            console.log("************ environment.current: ",environment.current)
-            console.log("************ setCanSave 5")
             setCanSave(true)
           } else {
-            console.log("************ setCanSave 6")
             setCanSave(false)
           }  
         } else {               
           if(isValid) {                
-            console.log("************ setCanSave 7")
             setCanSave(true)
           } else {
-            console.log("************ setCanSave 8")
             setCanSave(false)
           }
           if(integration) {            
