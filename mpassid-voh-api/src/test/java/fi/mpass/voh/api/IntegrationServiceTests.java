@@ -489,7 +489,7 @@ class IntegrationServiceTests {
         List<Integer> types = new ArrayList<>();
         types.add(11);
         types.add(15);
-        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types, -1L);
 
         // then
         assertEquals(2, dto.getExistingIncluded().size());
@@ -525,7 +525,7 @@ class IntegrationServiceTests {
         List<Integer> types = new ArrayList<>();
         types.add(11);
         types.add(15);
-        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types, -1L);
 
         // then
         assertTrue(dto.getExistingIncluded() == null);
@@ -558,7 +558,7 @@ class IntegrationServiceTests {
         List<Integer> types = new ArrayList<>();
         types.add(11);
         types.add(15);
-        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types, -1L);
 
         // then
         assertTrue(dto.getExistingIncluded().isEmpty());

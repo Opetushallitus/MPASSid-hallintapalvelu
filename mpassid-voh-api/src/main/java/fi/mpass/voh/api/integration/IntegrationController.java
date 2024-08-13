@@ -195,8 +195,9 @@ public class IntegrationController {
 	// @JsonView(value = IntegrationView.Default.class)
 	public DiscoveryInformationDTO getIntegrationDiscoveryInformation(
 			@RequestParam(required = true, value = "organizationOid") String organizationOid,
-			@RequestParam(required = false, value = "institutionType") List<Integer> types) {
-		return integrationService.getDiscoveryInformation(organizationOid, types);
+			@RequestParam(required = false, value = "institutionType") List<Integer> types,
+			@RequestParam(required = true, value = "id") Long id) {
+		return integrationService.getDiscoveryInformation(organizationOid, types, id);
 	}
 
 	@Operation(summary = "Update discovery information logo")

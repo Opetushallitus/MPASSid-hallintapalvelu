@@ -795,7 +795,7 @@ public class IntegrationService {
    *                        existing integrations' institution types
    * @return DiscoveryInformationDTO
    */
-  public DiscoveryInformationDTO getDiscoveryInformation(String organizationOid, List<Integer> institutionTypes) {
+  public DiscoveryInformationDTO getDiscoveryInformation(String organizationOid, List<Integer> institutionTypes, Long id) {
     DiscoveryInformationDTO di = new DiscoveryInformationDTO();
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null) {
@@ -808,7 +808,7 @@ public class IntegrationService {
         Set<String> allExcluded = new HashSet<>();
         Set<String> allIncluded = new HashSet<>();
         for (Integration i : integrations) {
-          if (i.isActive()) {
+          if (i.isActive() && i.getId() != id) {
             if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
               if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
                 allExcluded.add(Long.toString(i.getId()));
