@@ -186,7 +186,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
         if(integration.organization&&integration.organization.oid) {
-          getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList})
+          getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList, id: integration.id})
             .then(response=>{              
               var newExtraSchoolConfigurationNeeded=false
               if(response.existingExcluded&&response.existingExcluded!==null&&response.existingExcluded.length>0&&response.existingExcluded.indexOf(String(integration.id))<0) {
