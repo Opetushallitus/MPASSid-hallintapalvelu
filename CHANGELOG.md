@@ -1,5 +1,8 @@
 # MPASSid-hallinta
 
+## 2.3
+
+
 ## 2.2
 
 - Koulutustoimija voi poistaa, lisätä ja muokata Entra ID -integraation käyttäjäattribuutteja.
