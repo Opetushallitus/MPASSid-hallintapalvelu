@@ -3,6 +3,8 @@
 ## 2.3
 - Koulutustoimija voi lisätä ja poistaa Wilma-integraation ja muokata olemassa olevan Wilma-integraation tietoja.
 - Koulutustoimija voi määrittää MPASSid-koulunvalintasivulla näytettävät oppilaitokset Wilma-integraatiossa.
+- Utbildningsaktörerna kan tillägga och ta bort Wilma-integrationer och redigera existerande Wilma-integrationers inställningar. 
+- Utbildningsaktörerna kan sätta vilka läroanstalter visas på MPASSid-inloggninssidan.
 
 ## 2.2
 
