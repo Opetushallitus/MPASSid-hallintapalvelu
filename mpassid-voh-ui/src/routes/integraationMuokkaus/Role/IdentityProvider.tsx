@@ -17,21 +17,14 @@ interface Props {
 
 export default function Koulutustoimija({ integration }: Props) {
     const { role } = useParams();
-    const { type } = useParams();
-    const { id } = useParams();
     
-    
-    const institutionTypes = useKoodisByKoodisto(
-        "mpassidnsallimatoppilaitostyypit"
+    const identityProvider = integration.configurationEntity!.idp!;
+  
+    const testLinkHref =
+      // eslint-disable-next-line no-new-func
+      new Function("flowName", `return \`${testLink}\``)(
+        identityProvider.flowName
       );
-      const language = toLanguage(useIntl().locale).toUpperCase();
-      const identityProvider = integration.configurationEntity!.idp!;
-    
-      const testLinkHref =
-        // eslint-disable-next-line no-new-func
-        new Function("flowName", `return \`${testLink}\``)(
-          identityProvider.flowName
-        );
 
     if(role==='idp') {
         
@@ -43,25 +36,7 @@ export default function Koulutustoimija({ integration }: Props) {
         
               <Grid container spacing={2} mb={2}>
                 <DataRow object={identityProvider} path="type" type={Type} />
-                <Grid item xs={4}>
-                  <FormattedMessage defaultMessage="Oppilaitostyypit" />
-                </Grid>
-                <Grid item xs={8}>
-                  <TextList
-                    value={
-                      identityProvider.institutionTypes?.length
-                        ? identityProvider.institutionTypes.map(
-                            (institutionType) =>
-                              `${getKoodistoValue(
-                                institutionTypes,
-                                String(institutionType),
-                                language
-                              )} (${institutionType})`
-                          )
-                        : []
-                    }
-                  />
-                </Grid>
+                
                 {["adfs", "azure", "gsuite"].includes(identityProvider.type!) && (
                   <>
                     <DataRow

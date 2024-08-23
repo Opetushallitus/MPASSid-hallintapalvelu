@@ -1,6 +1,7 @@
-import React, { Dispatch, useState, useEffect } from "react";
+import type { Dispatch } from "react";
 import { Box, Fab } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import { useIntl } from "react-intl";
 
 interface Props {
   setOpen: Dispatch<boolean>;
@@ -8,12 +9,16 @@ interface Props {
 
 function AddIntegrationButton({setOpen}:Props) {
 
+  const intl = useIntl();
+
   return (
     <Box display="flex" alignItems="center" justifyContent="center">
       <Fab
         color="primary"
-        onClick={()=>{setOpen(true);console.log("painettu")}}
-        aria-label="add"
+        onClick={()=>setOpen(true)}
+        aria-label={intl.formatMessage({
+          defaultMessage: "lisää",
+        })}
         size="large"
         sx={{
           position: "fixed",

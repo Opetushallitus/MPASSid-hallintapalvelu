@@ -2,11 +2,10 @@ import type { Components } from "@/api";
 import { attributePreferredOrder } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
-import { DataRow } from "../integraatio/IntegrationTab/DataRow";
-import { Dispatch, useEffect, useRef, useState } from "react";
-import IntegraatioForm from "./Form";
+import type { Dispatch} from "react";
+import AttributeForm from "./Form";
 import { dataConfiguration } from '../../config';
-
+import { helperText, validate } from "@/utils/Validators";
 
 interface Props {
   role?: any;
@@ -26,13 +25,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
 
-  const logValidateValue = (value:String) => {  
-    console.log("attributes: ",attributes)
-    return true;
-  }
-
-  const updateAttribute = (name:string, value:string, type:Components.Schemas.Attribute['type'] ) => {  
-    
+  const updateAttribute = (name:string, value:string, type:string ) => {  
      
     if(attributes.map(a=>a.name).indexOf(name)>-1) {
       attributes.forEach(attribute=>{
@@ -41,20 +34,24 @@ export default function Attributes({ attributes, role, type, attributeType, newC
         }
       })
     } else {
-      attributes.push({type: type, name: name,content: value }) 
+      if(type==='data'||type==='user') {
+        attributes.push({type: type, name: name,content: value }) 
+      }
     }
     
-    if(mandatoryAttributes.filter(ma=>!attributes.map(a=>a.name).includes(ma)).length===0) {
-      setCanSave(true)
-    }
-  
+    
+    
     if(newConfigurationEntityData?.attributes&&setNewConfigurationEntityData) {
       newConfigurationEntityData.attributes=attributes;
       setNewConfigurationEntityData({ ...newConfigurationEntityData })
     }
     
+    if(mandatoryAttributes.filter(ma=>attributes.filter(a=>a.content!=='').map(a=>a.name).indexOf(ma)<0).length===0) {
+      setCanSave(true)
+    } else {
+      setCanSave(false)
+    }
   }
-  
   
     return (
       <Grid container >
@@ -66,7 +63,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
           .map((configuration) => {
             const id = `attribuutti.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;
-
             return {
               ...configuration,
               label: label && intl.formatMessage(label),
@@ -80,22 +76,38 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   attributePreferredOrder.indexOf(a.name!)) -
               (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
           )
+          .filter((configuration) => configuration.integrationType.filter(it=>it.name===type&&it.visible).length>0)
           .map((configuration) => {
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
+                    if(attributes.filter(a => a.name === configuration.name).length===0||attributes.filter(a => a.name === configuration.name)[0].content=== undefined||attributes.filter(a => a.name === configuration.name)[0].content===''){
+                      
+                        setCanSave(false)
+                      
+                      
+                    }
                   }
-                  return (<IntegraatioForm 
+                  const validator = (value:string) => {
+                    return validate(configuration.validation,value);
+                  }
+                  const helpGeneratorText = (value:string) => {
+                    return helperText(configuration.validation,value);
+                  }
+                  
+                  return (<AttributeForm 
                     key={configuration.name!}
                     onUpdate={updateAttribute}
-                    onValidate={logValidateValue}
+                    onValidate={validator}
                     newConfigurationEntityData={newConfigurationEntityData}
-                    setNewConfigurationEntityData={setNewConfigurationEntityData}  
+                    setNewConfigurationEntityData={setNewConfigurationEntityData}
                     uiConfiguration={configuration}
-                    attribute={attributes.find(a=>a.name===configuration.name)||{ type: attributeType, content: '',name: configuration.name}}
-                    attributeType={attributeType}
+                    attribute={attributes.find(a => a.name === configuration.name) || { type: attributeType, content: '', name: configuration.name }}
+                    attributeType={attributeType!}
                     type={type}
-                    role={role} 
-                    setCanSave={setCanSave}/>)
+                    role={role}
+                    helperText={helpGeneratorText} 
+                    setCanSave={function (value: boolean): void {} }                    
+                    />)
                 }
             
               )

@@ -5,6 +5,7 @@ import type { Document } from "openapi-backend";
 import koodistoDefinition from "../../schemas/koodisto.json";
 import käyttöoikeusDefinition from "../../schemas/käyttöoikeus.json";
 import localisationDefinition from "../../schemas/localisation.json";
+import organisaatioDefinition from "../../schemas/organisaatio.json";
 import requestLogicHandlers, { definition } from "./requestLogicHandlers.js";
 
 function mapDeep(object: any, callback: any): any {
@@ -45,5 +46,8 @@ export const worker = setupWorker(
   }),
   ...handlers({
     definition: patchSchema(localisationDefinition as Document),
+  }),
+  ...handlers({
+    definition: patchSchema(organisaatioDefinition as Document),
   })
 );

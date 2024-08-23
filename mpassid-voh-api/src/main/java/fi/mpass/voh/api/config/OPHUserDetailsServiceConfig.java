@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl;
 
 import java.util.List;
@@ -22,7 +24,7 @@ import org.slf4j.LoggerFactory;
 @PropertySource("classpath:kayttooikeus-prod.properties")
 public class OPHUserDetailsServiceConfig {
 
-    private final static Logger logger = LoggerFactory.getLogger(OPHUserDetailsServiceConfig.class);
+    private static final Logger logger = LoggerFactory.getLogger(OPHUserDetailsServiceConfig.class);
 
     private static final SimpleGrantedAuthority[] RESTRICTED_AUTHORITIES = new SimpleGrantedAuthority[] {
             new SimpleGrantedAuthority("ROLE_APP_MPASSID")
@@ -60,11 +62,12 @@ public class OPHUserDetailsServiceConfig {
 
         @Override
         public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+            String random = RandomStringUtils.randomAlphanumeric(10);
             switch (username) {
                 default:
                     return User.builder()
                             .authorities(List.of(RESTRICTED_AUTHORITIES))
-                            .password(this.passwordEncoder.encode("t9qeub211o"))
+                            .password(this.passwordEncoder.encode(random))
                             .username(username)
                             .build();
             }

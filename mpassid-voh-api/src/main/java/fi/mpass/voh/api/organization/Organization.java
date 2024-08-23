@@ -1,9 +1,11 @@
 package fi.mpass.voh.api.organization;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -18,6 +20,8 @@ public class Organization {
     private String name;
     @JsonProperty("ytunnus")
     private String businessId;
+    @Transient
+    private List<SubOrganization> children;
 
     public Organization() { }
 
@@ -55,11 +59,20 @@ public class Organization {
         this.oid = oid;
     }
 
+    public List<SubOrganization> getChildren() {
+        return children;
+    }
+    
+    public void setChildren(List<SubOrganization> children) {
+        this.children = children;
+    }
+    
     @Override
     public String toString() {
         return "{" +
                 " name='" + getName() + "'" +
                 ", oid='" + getOid() + "'" +
+                ", children: " + getChildren() +
                 "}";
     }
 }

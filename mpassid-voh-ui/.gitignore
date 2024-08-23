@@ -21,4 +21,5 @@ dist-ssr
 /src/api/käyttöoikeus.ts
 /src/api/koodisto.ts
 /src/api/localisation.ts
+/src/api/organisaatio.ts
 /target/*

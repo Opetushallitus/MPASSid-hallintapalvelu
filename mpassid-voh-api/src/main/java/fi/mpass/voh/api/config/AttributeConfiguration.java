@@ -29,6 +29,9 @@ public class AttributeConfiguration {
         this.attributes = attributes;
     }
 
+    /* Configuration for persisting attribute test authorization token in a session scope.
+     * See fi.mpass.voh.api.integration.attribute package.
+     */
     @Bean
     @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
     public AttributeTestAuthorizationToken token() {

@@ -33,6 +33,9 @@ class SetLoaderTests {
     OrganizationService organizationService;
 
     @Autowired
+    CredentialService credentialService;
+
+    @Autowired
     ResourceLoader loader;
 
     @BeforeEach
@@ -45,7 +48,7 @@ class SetLoaderTests {
     void testIntegrationSetLoader() throws Exception {
         // 64, one with organization
         String setLocation = "set/integration_sets.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -61,7 +64,7 @@ class SetLoaderTests {
     void testIntegrationSetLoaderWithDuplicateSet() throws Exception {
         // total 65 with a duplicate, 64 unique
         String setLocation = "set/integration_invalid_sets.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -76,7 +79,7 @@ class SetLoaderTests {
     void testIntegrationSetLoaderWithLessThanThreshold() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -89,7 +92,7 @@ class SetLoaderTests {
 
         // 4 in input, 64 should remain due to exceeded maximum removal number
         setLocation = "set/integration_sets_more_than_max_removals.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setMaxRemovalNumber(8);
         setLoader.setInput(setLocation);
         loading = new Loading();
@@ -103,7 +106,7 @@ class SetLoaderTests {
     void testIntegrationSetLoaderReloadModifications() throws Exception {
         // 64, one with organization
         String setLocation = "set/integration_sets.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -115,7 +118,7 @@ class SetLoaderTests {
         assertEquals(64, repository.count());
 
         setLocation = "set/integration_sets_mods.json";
-        SetLoader setReloader = new SetLoader(repository, organizationService, loader);
+        SetLoader setReloader = new SetLoader(repository, organizationService, credentialService, loader);
         setReloader.setInput(setLocation);
         loading = new Loading();
         setReloader.init(loading);
@@ -153,7 +156,7 @@ class SetLoaderTests {
     void testIntegrationSetLoaderReloadAdditions() throws Exception {
         // 64, one with organization
         String setLocation = "set/integration_sets.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -166,7 +169,7 @@ class SetLoaderTests {
 
         // 6000002 add allowtestlearnerid2 attribute to integration
         setLocation = "set/integration_sets_adds.json";
-        SetLoader setReloader = new SetLoader(repository, organizationService, loader);
+        SetLoader setReloader = new SetLoader(repository, organizationService, credentialService, loader);
         setReloader.setInput(setLocation);
         loading = new Loading();
         setReloader.init(loading);
@@ -191,7 +194,7 @@ class SetLoaderTests {
     void testIntegrationSetLoaderReloadDeletions() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -204,7 +207,7 @@ class SetLoaderTests {
 
         // 62
         setLocation = "set/integration_sets_dels.json";
-        SetLoader setReloader = new SetLoader(repository, organizationService, loader);
+        SetLoader setReloader = new SetLoader(repository, organizationService, credentialService, loader);
         setReloader.setInput(setLocation);
         loading = new Loading();
         setReloader.init(loading);
@@ -240,7 +243,7 @@ class SetLoaderTests {
     void testIntegrationSetLoaderReloadDeletionsRestore() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        setLoader = new SetLoader(repository, organizationService, loader);
+        setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -253,7 +256,7 @@ class SetLoaderTests {
 
         // 62
         setLocation = "set/integration_sets_dels.json";
-        SetLoader setReloader = new SetLoader(repository, organizationService, loader);
+        SetLoader setReloader = new SetLoader(repository, organizationService, credentialService, loader);
         setReloader.setInput(setLocation);
         loading = new Loading();
         setReloader.init(loading);
@@ -273,7 +276,7 @@ class SetLoaderTests {
 
         // 64
         String restoreLocation = "set/integration_sets.json";
-        setReloader = new SetLoader(repository, organizationService, loader);
+        setReloader = new SetLoader(repository, organizationService, credentialService, loader);
         setReloader.setInput(restoreLocation);
         loading = new Loading();
         setReloader.init(loading);

@@ -54,9 +54,9 @@ public class IdentityProviderLoader extends Loader {
     @Value("#{${application.home-organizations.input}}")
     private List<String> homeOrganizationsInput;
 
-    public IdentityProviderLoader(IntegrationRepository repository, OrganizationService organizationService,
+    public IdentityProviderLoader(IntegrationRepository repository, OrganizationService organizationService, CredentialService credentialService,
             ResourceLoader loader) {
-        super(repository, organizationService, loader);
+        super(repository, organizationService, credentialService, loader);
         if (this.homeOrganizationsInput == null) {
             this.homeOrganizationsInput = Arrays.asList("home_organizations.json");
         }

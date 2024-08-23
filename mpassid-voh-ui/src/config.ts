@@ -24,7 +24,9 @@ export interface IntegrationType {
     name: string;
     editable: boolean;
     visible: boolean;
-    attribute?: string; 
+    attribute?: string;
+    path?: string; 
+    defaultValue?: string;
 }
 export interface UiConfiguration {
   name: string;
@@ -32,6 +34,8 @@ export interface UiConfiguration {
   oid?: string;
   mandatory: boolean;
   multivalue?: boolean;
+  object?: boolean;
+  enum?: boolean[]
   environment?: number;
   label?: string;
   validation: string[];
@@ -40,7 +44,7 @@ export interface UiConfiguration {
 
 export const defaultIntegrationType:IntegrationType = {
   name: 'default',
-  editable: false,
+  editable: true,
   visible: false,
   attribute: ''
 }
@@ -348,26 +352,323 @@ export const dataConfiguration:UiConfiguration[] = [
       ]
   },
   {
-      name: 'redirect_uris',
+      name: 'post_logout_redirect_uris',
       type: 'metadata',
       mandatory: true,
       multivalue: true,
-      environment: 1,
-      validation: [ 'fqdn', 'nohash', 'https' ],
+      validation: [],
       integrationType: [
           {
-              name: 'oidcrp',
+              name: 'oidc',
               editable: true,
               visible: true,
           }
       ]
+  },
+  
+  {
+    name: 'grant_types',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: true,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+   },
+   {
+        name: 'redirect_uris',
+        type: 'metadata',
+        mandatory: true,
+        multivalue: true,
+        //validation: [ 'fqdn', 'nohash', 'https' ],
+        validation: [ ],
+        integrationType: [
+            {
+                name: 'oidc',
+                editable: true,
+                visible: true,
+            }
+        ]
+  },
+  {
+    name: 'scope',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    validation: [],
+    integrationType: [
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+},
+{
+    name: 'client_secret',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    validation: [],
+    integrationType: [
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+},
+{
+    name: 'client_id',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    validation: [],
+    integrationType: [
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+},
+{
+    name: 'response_types',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: true,
+    validation: [],
+    integrationType: [
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+},
+  {
+    name: 'wantAssertionsSigned',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    enum: [ true, false ],
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'signingCertificates0NotAfter',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: false,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'assertionConsumerServiceUrls',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: true,
+    object: true,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'authnRequestsSigned',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    enum: [ true, false ],
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'encryptionCertificates',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: true,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'entityId',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'signingCertificates',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: true,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'allowtestlearnerid',
+    type: 'data',
+    mandatory: true,
+    multivalue: false,
+    enum: [ true, false ],
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+  },
+  {
+    name: 'bindings',
+    type: 'assertionConsumerServiceUrls',
+    mandatory: true,
+    multivalue: false,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        }
+    ]
+  },
+  {
+    name: 'index',
+    type: 'assertionConsumerServiceUrls',
+    mandatory: true,
+    multivalue: false,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        }
+    ]
+  },
+  {
+    name: 'isDefault',
+    type: 'assertionConsumerServiceUrls',
+    mandatory: true,
+    multivalue: false,
+    enum: [ true, false ],
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        }
+    ]
+  },
+  {
+    name: 'location',
+    type: 'assertionConsumerServiceUrls',
+    mandatory: true,
+    multivalue: false,
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        }
+    ]
   },
   {
       name: 'hostname',
       type: 'data',
       mandatory: true,
       multivalue: true,
-      environment: 1,
       validation: [ 'hostname' ],
       integrationType: [
           {
@@ -382,7 +683,6 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'data',
       mandatory: false,
       multivalue: true,
-      environment: 1,
       validation: [  ],
       integrationType: [
           {
@@ -399,6 +699,12 @@ export const dataConfiguration:UiConfiguration[] = [
         },
         {
             name: 'azure',
+            editable: false,
+            visible: false,
+            attribute: 'entityId'
+        },
+        {
+            name: 'saml',
             editable: false,
             visible: false,
             attribute: 'entityId'

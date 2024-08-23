@@ -3,13 +3,12 @@ import { getRole } from "../../home/IntegrationsTable";
 import IdentityProvider from "./IdentityProvider";
 import ServiceProvider from "./ServiceProvider";
 import SetProvider from "./SetProvider";
-import { Dispatch } from "react";
+import type { Dispatch } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
   environment: number;
-  setCanSave: Dispatch<boolean>;
 }
 
 const roleComponents = {
@@ -18,14 +17,14 @@ const roleComponents = {
   set: SetProvider
 };
 
-export default function Role({ integration, oid, environment, setCanSave }: Props) {
+export default function Role({ integration, oid, environment }: Props) {
   const role = getRole(integration);
 
   const Component = roleComponents[role];
 
   return (
     <>
-      <Component integration={integration} oid={oid} environment={environment} setCanSave={setCanSave}/>
+      <Component integration={integration} oid={oid} environment={environment} />
     </>
   );
 }

@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -36,6 +37,9 @@ class ServiceProviderLoaderTests {
     OrganizationService organizationService;
 
     @Autowired
+    CredentialService credentialService;
+
+    @Autowired
     ResourceLoader loader;
 
     @BeforeEach
@@ -48,7 +52,7 @@ class ServiceProviderLoaderTests {
     void testOidcLoader() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -56,7 +60,7 @@ class ServiceProviderLoaderTests {
         assertEquals(64, repository.count());
 
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -67,7 +71,7 @@ class ServiceProviderLoaderTests {
     void testOidcReloadWithJsonSyntaxErrors() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -75,14 +79,14 @@ class ServiceProviderLoaderTests {
         assertEquals(64, repository.count());
 
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
         assertEquals(68, repository.count());
 
         location = "oidc_services_json_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         loading = new Loading();
         spLoader.init(loading);
@@ -95,7 +99,7 @@ class ServiceProviderLoaderTests {
     void testSamlLoader() throws Exception {
         // 64
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -103,7 +107,7 @@ class ServiceProviderLoaderTests {
         assertEquals(64, repository.count());
 
         String location = "saml_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -114,14 +118,14 @@ class ServiceProviderLoaderTests {
     void testOidcSetLoader() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -145,14 +149,14 @@ class ServiceProviderLoaderTests {
     void testOidcWithDuplicates() throws Exception {
         // 63, all with an attribute, one with organization
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
 
         // 4
         String location = "oidc_services_duplicates.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -169,14 +173,14 @@ class ServiceProviderLoaderTests {
     void testOidcWithReloadDuplicates() throws Exception {
         // 64, all with an attribute, one with organization
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -184,7 +188,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         location = "oidc_services_duplicates.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         Loading reloading = new Loading();
         spLoader.setInput(location);
         spLoader.init(reloading);
@@ -204,7 +208,7 @@ class ServiceProviderLoaderTests {
     void testOidcWithNoIntegrationIdOrClientid() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -216,7 +220,7 @@ class ServiceProviderLoaderTests {
         // one integration with ununique identifier
         // thus all input integrations are skipped in order to fail fast
         String spLocation = "oidc_services_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         spLoader.init(loading);
 
@@ -228,7 +232,7 @@ class ServiceProviderLoaderTests {
     void testOidcWithUnexistentingSets() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         setLoader.setInput(setLocation);
         Loading loading = new Loading();
         setLoader.init(loading);
@@ -238,7 +242,7 @@ class ServiceProviderLoaderTests {
 
         // 2, with unexisting sets
         String spLocation = "oidc_services_set_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         spLoader.init(loading);
 
@@ -250,14 +254,14 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -265,7 +269,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_mods.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -302,14 +306,14 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadIncorrectModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -317,7 +321,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_mods_errors.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -339,7 +343,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadAttributeModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -348,7 +352,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -356,7 +360,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_mods.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -378,7 +382,7 @@ class ServiceProviderLoaderTests {
     void testOidcReloadOrganizationModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -387,7 +391,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -395,7 +399,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String spLocation = "oidc_services_organization_mods.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -413,7 +417,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadAdditions() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -422,7 +426,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -430,7 +434,7 @@ class ServiceProviderLoaderTests {
 
         // 5
         String spLocation = "oidc_services_adds.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -477,7 +481,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadDeletions() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -486,7 +490,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -494,7 +498,7 @@ class ServiceProviderLoaderTests {
 
         // 3
         String spLocation = "oidc_services_dels.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -551,7 +555,7 @@ class ServiceProviderLoaderTests {
     void testOidcSetReloadDeletionsRestore() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
@@ -560,7 +564,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String location = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -568,7 +572,7 @@ class ServiceProviderLoaderTests {
 
         // 3
         String spLocation = "oidc_services_dels.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -583,7 +587,7 @@ class ServiceProviderLoaderTests {
 
         // 4
         String restoreLocation = "oidc_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(restoreLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -600,14 +604,14 @@ class ServiceProviderLoaderTests {
     void testSamlReloadModifications() throws Exception {
         // 64, all with an attribute
         String setLocation = "set/integration_sets.json";
-        SetLoader setLoader = new SetLoader(repository, organizationService, loader);
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
         Loading loading = new Loading();
         setLoader.setInput(setLocation);
         setLoader.init(loading);
 
         // 2
         String location = "saml_services.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(location);
         spLoader.init(loading);
 
@@ -615,7 +619,7 @@ class ServiceProviderLoaderTests {
 
         // 2
         String spLocation = "saml_services_mods_organization.json";
-        spLoader = new ServiceProviderLoader(repository, organizationService, loader);
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
         spLoader.setInput(spLocation);
         loading = new Loading();
         spLoader.init(loading);
@@ -626,5 +630,41 @@ class ServiceProviderLoaderTests {
         Optional<Integration> modifiedIntegration = repository.findById(5000010L);
         assertTrue(modifiedIntegration.isPresent());
         assertEquals("1.2.246.562.10.65243241471", modifiedIntegration.get().getOrganization().getOid());
+    }
+
+    @Test
+    void testSamlReloadCredentialModifications() throws Exception {
+        // 64, all with an attribute
+        String setLocation = "set/integration_sets.json";
+        SetLoader setLoader = new SetLoader(repository, organizationService, credentialService, loader);
+        Loading loading = new Loading();
+        setLoader.setInput(setLocation);
+        setLoader.init(loading);
+
+        assertEquals(64, repository.count());
+
+        // 4
+        String location = "oidc_services.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
+        spLoader.setInput(location);
+        spLoader.init(loading);
+
+        assertEquals(68, repository.count());
+
+        // 4
+        String spLocation = "oidc_services_cred_mods.json";
+        spLoader = new ServiceProviderLoader(repository, organizationService, credentialService, loader);
+        spLoader.setInput(spLocation);
+        loading = new Loading();
+        spLoader.init(loading);
+
+        assertEquals(68, repository.count());
+
+        // 5000010, changed organization oid
+        Optional<Integration> modifiedIntegration = repository.findById(5000001L);
+        assertTrue(modifiedIntegration.isPresent());
+        Map<String, Object> metadata = modifiedIntegration.get().getConfigurationEntity().getSp().getMetadata();
+        assertEquals("clientId2modified", metadata.get("client_id"));
+        //assertEquals("1.2.246.562.10.65243241471", modifiedIntegration.get().getOrganization().getOid());
     }
 }

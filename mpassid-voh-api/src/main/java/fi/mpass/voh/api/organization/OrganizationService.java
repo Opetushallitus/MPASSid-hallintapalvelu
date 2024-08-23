@@ -10,10 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
-//import org.springframework.web.reactive.function.client.WebClient;
-//import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import java.nio.charset.Charset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +31,7 @@ public class OrganizationService {
 
     restClient = RestClient.builder().requestFactory(new HttpComponentsClientHttpRequestFactory())
         .baseUrl(this.externalOrganizationServiceUrl)
-        .defaultHeaders(httpHeaders -> {
-          httpHeaders.set("Accept-Charset", "utf-8");
-        })
+        .defaultHeaders(httpHeaders -> httpHeaders.set("Accept-Charset", "utf-8"))
         .build();
   }
 
@@ -52,22 +46,12 @@ public class OrganizationService {
    * @throws JsonMappingException
    * @throws WebClientResponseException
    */
-  public Organization retrieveOrganization(String id)
-      throws JsonProcessingException, JsonMappingException {
+  public Organization retrieveOrganization(String id) throws JsonProcessingException {
 
     String url = externalOrganizationServiceUrl.replaceAll("/$", "") + "/";
 
     logger.debug("Retrieving organization information from {}", url);
 
-    /*
-     * WebClient client = WebClient.create();
-     * WebClient.ResponseSpec response = client.get()
-     * .uri(url + id)
-     * .retrieve();
-     * 
-     * 
-     * String responseBody = response.bodyToMono(String.class).block();
-     */
     String responseBody = restClient.get()
         .uri(url + id)
         .accept(MediaType.APPLICATION_JSON)
@@ -78,6 +62,42 @@ public class OrganizationService {
     Organization organization = mapper.readValue(responseBody, Organization.class);
 
     return organization;
+  }
+
+  /**
+   * 
+   * Retrieves organization information from an external organization service.
+   * https://virkailija.opintopolku.fi/organisaatio-service/swagger-ui/index.html
+   * 
+   * @param oid the organization oid
+   * @return the retrieved organization
+   * @throws JsonProcessingException
+   * @throws JsonMappingException
+   * @throws WebClientResponseException
+   */
+  public Organization retrieveSubOrganizations(String oid) throws JsonProcessingException {
+
+    if (!oid.isEmpty()) {
+      String url = externalOrganizationServiceUrl.replaceAll("/$", "") + "/"
+          + "hierarkia/hae?aktiiviset=true&suunnitellut=false&lakkautetut=false&oid=" + oid;
+
+      logger.debug("Retrieving suborganizations information from {}", url);
+
+      String responseBody = restClient.get()
+          .uri(url)
+          .accept(MediaType.APPLICATION_JSON)
+          .retrieve()
+          .body(String.class);
+
+      ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      OrganizationDTO organization = mapper.readValue(responseBody, OrganizationDTO.class);
+      if (organization != null && !organization.getOrganizations().isEmpty()) {
+        return organization.getOrganizations().get(0);
+      } else {
+        logger.debug("No organizations found.");
+      }
+    }
+    return null;
   }
 
   /**

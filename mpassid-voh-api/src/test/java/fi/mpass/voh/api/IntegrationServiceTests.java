@@ -1,13 +1,20 @@
 package fi.mpass.voh.api;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,18 +22,27 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
+import fi.mpass.voh.api.config.IntegrationServiceConfiguration;
+import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.integration.ConfigurationEntity;
 import fi.mpass.voh.api.integration.DiscoveryInformation;
+import fi.mpass.voh.api.integration.DiscoveryInformationDTO;
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationPermission;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
+import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
+import fi.mpass.voh.api.organization.SubOrganization;
 
 import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
@@ -39,6 +55,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -53,8 +72,10 @@ class IntegrationServiceTests {
     private LoadingService loadingService;
 
     private IntegrationService underTest;
+    private IntegrationServiceConfiguration configuration;
 
     private Integration integration;
+    private Integration inactiveIntegration;
     private Integration updatedIntegration;
     private Integration existingUpdatedAllowingIntegration;
     private Integration updatedAllowingIntegration;
@@ -65,11 +86,26 @@ class IntegrationServiceTests {
 
     @BeforeEach
     void setUp() {
-        underTest = new IntegrationService(integrationRepository, organizationService, loadingService);
+        configuration = new IntegrationServiceConfiguration("1.2.246.562.10.00000000001", 3000001L,
+                "http://localhost/mpassid/integration/discoveryinformation/logo",
+                "/logos");
+
+        underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
         Organization organization = new Organization("Organization zyx", "1.2.3.4.5.6.7.8");
+        SubOrganization subOrganization1 = new SubOrganization("SubOrganization abc of Organization zyx",
+                "1.2.3.4.5.6.7.100");
+        subOrganization1.setInstitutionType("11"); // peruskoulu
+        subOrganization1.setInstitutionCode("0");
+        SubOrganization subOrganization2 = new SubOrganization("SubOrganization def of Organization zyx",
+                "1.2.3.4.5.6.7.101");
+        subOrganization1.setInstitutionType("15"); // lukio
+        List<SubOrganization> children = new ArrayList<>();
+        children.add(subOrganization1);
+        children.add(subOrganization2);
+        organization.setChildren(children);
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Opinsys opinsys = new Opinsys("tenantId");
         configurationEntity.setIdp(opinsys);
@@ -100,6 +136,10 @@ class IntegrationServiceTests {
                 0, discoveryInformation, organization,
                 "serviceContactAddress@example.net");
 
+        inactiveIntegration = new Integration(999L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
+                0, discoveryInformation, organization,
+                "serviceContactAddress@example.net");
+
         updatedIntegration = new Integration(999L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
                 0, discoveryInformation, organization,
                 "foo@bar");
@@ -118,6 +158,8 @@ class IntegrationServiceTests {
                 0, discoveryInformation, organization,
                 "zap@bar");
 
+        inactiveIntegration.setStatus(1);
+        
         updatedIntegrations = new ArrayList<Integration>();
         updatedIntegration.setServiceContactAddress("zyx@domain");
         updatedIntegrations.add(updatedIntegration);
@@ -266,10 +308,12 @@ class IntegrationServiceTests {
         // existing integration with 9 existing permissions
         given(integrationRepository.findOne(any(Specification.class)))
                 .willReturn(Optional.of(updatedAllowingIntegration));
-        given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(existingUpdatedAllowingIntegration);
+        given(integrationRepository.saveAndFlush(any(Integration.class)))
+                .willReturn(existingUpdatedAllowingIntegration);
 
         // when removing 2 permissions
-        Integration resultIntegration = underTest.updateIntegration(integration.getId(), existingUpdatedAllowingIntegration);
+        Integration resultIntegration = underTest.updateIntegration(integration.getId(),
+                existingUpdatedAllowingIntegration);
 
         // then - verify the output
         assertEquals(999, resultIntegration.getId());
@@ -319,6 +363,26 @@ class IntegrationServiceTests {
     }
 
     @Test
+    void testGetFilteredIdentityProviders() {
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(existingUpdatedAllowingIntegration);
+        integrations.add(updatedAllowingIntegration);
+
+        // given
+        given(integrationRepository.findAll(any(Specification.class))).willReturn(integrations);
+
+        // when
+        List<Integration> integrationsWithoutTestSpPermission = underTest.getIdentityProviders();
+
+        // then
+        for (Integration integration : integrationsWithoutTestSpPermission) {
+            for (IntegrationPermission permission : integration.getPermissions()) {
+                assertNotEquals(configuration.getDefaultTestServiceIntegrationId(), permission.getTo().getId());
+            }
+        }
+    }
+
+    @Test
     void testGetIntegrationsByPermissionUpdateTimeSince() {
         // when
         underTest.getIntegrationsByPermissionUpdateTimeSince(LocalDateTime.now(), 0);
@@ -326,5 +390,193 @@ class IntegrationServiceTests {
         // then
         verify(integrationRepository).findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(
                 any(LocalDateTime.class), any(Integer.class));
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testCreateBlankIntegration() throws JsonMappingException, JsonProcessingException {
+        // given
+        // given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
+        given(organizationService.retrieveSubOrganizations(any(String.class)))
+                .willReturn(integration.getOrganization());
+
+        // when
+        Integration resultIntegration = underTest.createBlankIntegration("idp", "wilma", "1.2.3.4.5.6.7.8", null);
+
+        // then
+        assertEquals(0, resultIntegration.getId());
+        assertNotNull(resultIntegration.getConfigurationEntity().getIdp());
+        assertInstanceOf(Wilma.class, resultIntegration.getConfigurationEntity().getIdp());
+        assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
+        assertEquals(2, resultIntegration.getOrganization().getChildren().size());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testCreateIntegration() throws JsonMappingException, JsonProcessingException {
+
+        ArrayList<Long> availableIdentifiers = new ArrayList<>();
+        availableIdentifiers.add(1000339L);
+        availableIdentifiers.add(1000439L);
+        availableIdentifiers.add(2000439L);
+        // given
+        given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
+        given(integrationRepository.getAvailableIdpIntegrationIdentifier()).willReturn(availableIdentifiers);
+        given(integrationRepository.save(any(Integration.class))).willReturn(integration);
+
+        // when
+        Integration resultIntegration = underTest.createIntegration(integration);
+
+        // then
+        assertEquals(1000339L, resultIntegration.getId());
+        assertNotNull(resultIntegration.getConfigurationEntity().getIdp());
+        assertInstanceOf(Opinsys.class, resultIntegration.getConfigurationEntity().getIdp());
+        assertEquals("opinsys1000339", resultIntegration.getConfigurationEntity().getIdp().getFlowName());
+        assertEquals("opinsys_1000339", resultIntegration.getConfigurationEntity().getIdp().getIdpId());
+        assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testCreateIntegrationWithNoAvailableIdentifiers() throws JsonMappingException, JsonProcessingException {
+
+        ArrayList<Long> availableIdentifiers = new ArrayList<>();
+
+        // given
+        given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
+        given(integrationRepository.getAvailableIdpIntegrationIdentifier()).willReturn(availableIdentifiers);
+        given(integrationRepository.save(any(Integration.class))).willReturn(integration);
+
+        // when
+        EntityCreationException thrown = assertThrows(EntityCreationException.class, () -> {
+            Integration resultIntegration = underTest.createIntegration(integration);
+        });
+
+        // then
+        assertTrue(thrown.getMessage().contains("Integration creation failed"));
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetDiscoveryInformation() throws JsonMappingException, JsonProcessingException {
+
+        // organization 1.2.246.562.10.40384720658 has two integrations
+        // 1
+        Set<String> excluded = new HashSet<>();
+        excluded.add("00907");
+        excluded.add("05899");
+        integration.getDiscoveryInformation().setExcludedSchools(excluded);
+        Set<Integer> institutionTypes = new HashSet<>();
+        institutionTypes.add(11);
+        institutionTypes.add(15);
+        integration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        // 2
+        Set<String> included = new HashSet<>();
+        included.add("00907");
+        included.add("05899");
+        referenceIntegration.getDiscoveryInformation().setSchools(included);
+        referenceIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(integration);
+        integrations.add(referenceIntegration);
+
+        // given
+        given(integrationRepository.findAllByOrganizationOid(any(String.class))).willReturn(integrations);
+
+        // when
+        List<Integer> types = new ArrayList<>();
+        types.add(11);
+        types.add(15);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types, -1L);
+
+        // then
+        assertEquals(2, dto.getExistingIncluded().size());
+        assertEquals(2, dto.getExistingExcluded().size());
+        assertTrue(dto.getExistingIncluded().contains("00907")); // institution code
+        assertTrue(dto.getExistingExcluded().contains("1111")); // integration identifier
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetDiscoveryInformationInactive() throws JsonMappingException, JsonProcessingException {
+
+        Set<String> excluded = new HashSet<>();
+        excluded.add("00907");
+        excluded.add("05899");
+        inactiveIntegration.getDiscoveryInformation().setExcludedSchools(excluded);
+        Set<Integer> institutionTypes = new HashSet<>();
+        institutionTypes.add(11);
+        institutionTypes.add(15);
+        inactiveIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        Set<String> included = new HashSet<>();
+        referenceIntegration.getDiscoveryInformation().setSchools(included);
+        referenceIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(inactiveIntegration);
+
+        // given
+        given(integrationRepository.findAllByOrganizationOid(any(String.class))).willReturn(integrations);
+
+        // when
+        List<Integer> types = new ArrayList<>();
+        types.add(11);
+        types.add(15);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types, -1L);
+
+        // then
+        assertTrue(dto.getExistingIncluded() == null);
+        assertTrue(dto.getExistingExcluded() == null);
+    
+}
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetDiscoveryInformationEmpty() throws JsonMappingException, JsonProcessingException {
+
+        Set<String> excluded = new HashSet<>();
+        integration.getDiscoveryInformation().setExcludedSchools(excluded);
+        Set<Integer> institutionTypes = new HashSet<>();
+        institutionTypes.add(11);
+        institutionTypes.add(15);
+        integration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        Set<String> included = new HashSet<>();
+        referenceIntegration.getDiscoveryInformation().setSchools(included);
+        referenceIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+
+        List<Integration> integrations = new ArrayList<>();
+        integrations.add(integration);
+        integrations.add(referenceIntegration);
+
+        // given
+        given(integrationRepository.findAllByOrganizationOid(any(String.class))).willReturn(integrations);
+
+        // when
+        List<Integer> types = new ArrayList<>();
+        types.add(11);
+        types.add(15);
+        DiscoveryInformationDTO dto = underTest.getDiscoveryInformation("1.2.3.4.5.6.7.8", types, -1L);
+
+        // then
+        assertTrue(dto.getExistingIncluded().isEmpty());
+        assertTrue(dto.getExistingExcluded().isEmpty());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testGetDiscoveryInformationLogoContentType() throws IllegalStateException, IOException {
+
+        // given
+        Path imageFile = Paths.get("src/test/resources/testimage.jpg");
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(imageFile.toString()));
+
+        // when
+        String logoContentType = underTest.getDiscoveryInformationLogoContentType(resource.getInputStream());
+
+        // then
+        assertEquals("image/jpeg", logoContentType);
     }
 }

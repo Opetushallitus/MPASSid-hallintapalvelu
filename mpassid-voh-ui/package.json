@@ -14,6 +14,7 @@
     "generate:käyttöoikeus-client": "react-openapi-client-generator ./schemas/käyttöoikeus.json src/api/käyttöoikeus.ts",
     "generate:koodisto-client": "react-openapi-client-generator ./schemas/koodisto.json src/api/koodisto.ts",
     "generate:localisation-client": "react-openapi-client-generator ./schemas/localisation.json src/api/localisation.ts",
+    "generate:organisaatio-client": "react-openapi-client-generator ./schemas/organisaatio.json src/api/organisaatio.ts",
     "generate:messages": "formatjs-scripts && node scripts/export-messages.js",
     "preview": "vite preview",
     "postinstall": "patch-package"
