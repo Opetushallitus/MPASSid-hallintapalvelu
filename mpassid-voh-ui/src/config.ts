@@ -1,3 +1,4 @@
+import { validate } from './utils/Validators';
 export const roles = ["idp", "sp", "set"] as const;
 export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
@@ -35,7 +36,7 @@ export interface UiConfiguration {
   mandatory: boolean;
   multivalue?: boolean;
   object?: boolean;
-  enum?: boolean[]
+  enum?: any[]
   environment?: number;
   label?: string;
   validation: string[];
@@ -590,7 +591,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'allowtestlearnerid',
     type: 'data',
-    mandatory: true,
+    mandatory: false,
     multivalue: false,
     enum: [ true, false ],
     validation: [ ],
@@ -612,7 +613,8 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
-    validation: [ ],
+    validation: [],
+    //enum: [ 'HTTP-POST', 'HTTP-REDIRECT', 'HTTP-ARTIFACT' ],
     integrationType: [
         {
             name: 'saml',
@@ -626,7 +628,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
-    validation: [ ],
+    validation: ['number'],
     integrationType: [
         {
             name: 'saml',
@@ -655,7 +657,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
-    validation: [ ],
+    validation: [ 'uri'],
     integrationType: [
         {
             name: 'saml',
@@ -678,6 +680,25 @@ export const dataConfiguration:UiConfiguration[] = [
           }
       ]
   },
+  {
+    name: 'entityId',
+    type: 'data',
+    mandatory: false,
+    multivalue: false,
+    validation: [ 'uri' ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: false,
+            visible: true,              
+        },
+        {
+            name: 'azure',
+            editable: false,
+            visible: false,              
+        }
+    ]
+},
   {
       name: 'uniqueId',
       type: 'data',
@@ -710,6 +731,21 @@ export const dataConfiguration:UiConfiguration[] = [
             attribute: 'entityId'
         }
       ]
-  }
+  },
+  {
+    name: 'deploymentPhase',
+    type: 'root',
+    mandatory: false,
+    multivalue: true,
+    validation: [  ],
+    integrationType: [
+        {
+            name: 'wilma',
+            editable: true,
+            visible: true
+        }
+    ]
+}
+
 
 ]

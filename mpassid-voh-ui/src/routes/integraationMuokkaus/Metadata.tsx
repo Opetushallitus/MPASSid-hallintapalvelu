@@ -9,6 +9,8 @@ import { dataConfiguration } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
+import { clone } from "lodash";
+import { devLog } from "@/utils/devLog";
 
 
 export default function Metadata({
@@ -20,6 +22,8 @@ export default function Metadata({
   setCanSave,
   oid,
   environment,
+  metadata,
+  setMetadata
 }: {
   newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
@@ -29,26 +33,30 @@ export default function Metadata({
   setCanSave: Dispatch<boolean>;
   oid: string;
   environment: number;
+  metadata: any;
+  setMetadata: Dispatch<boolean>;
 }) {
   
   const intl = useIntl();
   const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
-  const [metadata, setMetadata] = useState<any>(newConfigurationEntityData?.sp?.metadata||{});
+  
   
   //console.log("*** metadata (metadata): ",metadata)
   //console.log("*** metadata (type): ",type)
 
   const updateMetadata = (multivalue: boolean,name:string, value:any ) => {  
-    console.log("*** updateMetadata: ",multivalue,name,value)
+    devLog("updateMetadata 1",multivalue)
+    devLog("updateMetadata 2",name)
+    devLog("updateMetadata 3",value)
     if(multivalue) {
       updateMultivalueMetadata(name,value);
     } else {
       metadata[name]=value
     }
     setMetadata({...metadata})
-    //console.log("*** metadata: ",metadata)
+    
     if(newConfigurationEntityData?.sp){
       if(newConfigurationEntityData?.sp?.metadata === undefined){
         newConfigurationEntityData.sp.metadata={}
@@ -56,12 +64,13 @@ export default function Metadata({
       newConfigurationEntityData.sp.metadata=metadata
     }
     
-    setNewConfigurationEntityData({...newConfigurationEntityData})
+    setNewConfigurationEntityData(clone(newConfigurationEntityData))
     
   }
 
   const updateMultivalueMetadata = (name:string, value:String) => {
 
+    devLog("updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
     if(metadata[name]) {
         const index = metadata[name].indexOf(value)
         if(index>=0) {
@@ -73,7 +82,29 @@ export default function Metadata({
       metadata[name]=[]
       metadata[name].push(value)
     }
-  
+    if(metadata[name].length>0||mandatoryAttributes.indexOf(name)===-1) {
+      setCanSave(true)
+    } else {
+      setCanSave(false)
+    }
+    devLog("updateMultivalueMetadata (metadata)",metadata)
+  }
+
+  const saveCheck = (value:boolean) => {
+
+      
+    if(configurationEntity?.sp) {
+      
+      if(value) {
+        setCanSave(true)  
+      } else {
+        setCanSave(false)
+      }
+
+    } else {
+      setCanSave(false)
+    }
+
   }
   
   
@@ -141,6 +172,9 @@ export default function Metadata({
                         mandatoryAttributes.push(configuration.name);
                       }
                       const validator = (value:string) => {
+                        devLog("validator",configuration.name)
+                        devLog("validator",configuration.validation)
+                        devLog("validator",value)
                         return validate(configuration.validation,value);
                       }
                       const helpGeneratorText = (value:string) => {
@@ -169,11 +203,13 @@ export default function Metadata({
                       const onUpdate = (name:string,value:string) => {
                         
                         if(configuration?.enum&&configuration.enum.length>0) {
-                          return updateMetadata(false,name,value);
+                          //return updateMetadata(false,name,value);
                         } else {
                           if(configuration?.multivalue) {
+                            devLog("attribute (multivalue)",attribute)
                             return updateMetadata(configuration.multivalue,name,value);
                           } else {
+                            devLog("attribute (siglevalue)",attribute)
                             return updateMetadata(false,name,value);
                           }
                           

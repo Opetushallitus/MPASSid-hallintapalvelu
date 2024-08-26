@@ -29,7 +29,7 @@ export default function SwitchForm({ object, type, isEditable=false, mandatory=f
 
   const updateFormValue = (event: any) => {
     
-        console.log("*** updateFormValue: ",event.target.checked)
+        //console.log("*** updateFormValue: ",event.target.checked)
     
         setCanSave(true) 
         onUpdate(type,event.target.checked,attributeType);

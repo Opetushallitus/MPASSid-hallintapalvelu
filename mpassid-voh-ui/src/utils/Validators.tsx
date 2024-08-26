@@ -1,6 +1,6 @@
 import { FormattedMessage } from 'react-intl';
 
-const validateRedirectUri = (value:string) => {
+const validateUri = (value:string) => {
       
     var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
@@ -26,6 +26,13 @@ const validateHostname = (value:string) => {
 
 }
 
+const validateNumber = (value:string) => {
+      
+    const urlPattern = new RegExp('^([0-9]*)$'); 
+    return !!urlPattern.test(value);
+
+}
+
 const logValidateValue = (value:String) => {  
     return true;
   }
@@ -44,9 +51,15 @@ export const validate = (validators:string[],value:string) => {
                 case "hostname":
                     validateStatus=validateHostname(value);
                     break;
+                case "uri":
+                        validateStatus=validateUri(value);
+                    break;    
                 case "ip":
                     validateStatus=validateIpAddress(value);
                     break;
+                case "number":
+                    validateStatus=validateNumber(value);
+                    break;    
                 default:
                     validateStatus=false;
                     console.warn("Unknown validation!")
@@ -79,12 +92,24 @@ export const helperText = (validators:string[],value:string) => {
                         helperText=<FormattedMessage defaultMessage="hostname ei ole validi!" />
                     }
                     break;
+                case "uri":
+                    validateStatus=validateUri(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="uri ei ole validi!" />
+                    }
+                    break;
                 case "ip":
                         validateStatus=validateIpAddress(value);
                         if(!validateStatus) {
                             helperText=<FormattedMessage defaultMessage="ip osoitte ei ole validi!" />
                         }
-                        break;    
+                        break;  
+                case "number":
+                    validateStatus=validateIpAddress(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentän arvon pitää olla numero!" />
+                    }
+                    break;            
                 default:
                     validateStatus=false;
                     if(!validateStatus) {

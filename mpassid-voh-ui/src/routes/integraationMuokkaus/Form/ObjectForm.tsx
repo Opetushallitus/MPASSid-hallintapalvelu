@@ -7,11 +7,13 @@ import { get } from "lodash";
 import type { Components } from '@/api';
 import type { IntegrationType, UiConfiguration } from "@/config";
 import { dataConfiguration, defaultIntegrationType } from "@/config";
-import { helperText, validate } from "@/utils/Validators";
+import { helperText as vHelperText, validate } from "@/utils/Validators";
 import SwitchForm from "./SwitchForm";
 import ListForm from "./ListForm";
 import InputForm from "./InputForm";
 import ClearIcon from '@mui/icons-material/Clear';
+import EditIcon from '@mui/icons-material/Edit';
+import { devLog } from "@/utils/devLog";
 
 interface Props {
   object: any;
@@ -45,9 +47,6 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
   
-
-  //console.log("***** ObjectForm (object): ",object)
-  
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: String(label)}} />)
@@ -59,17 +58,33 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   
   const updateObjectInputFormValue = (name: string,value: string,type: string) => {
     
+    devLog("updateObjectInputFormValue (name)",name)
+    devLog("updateObjectInputFormValue (value)",value)
+    devLog("updateObjectInputFormValue (type)",type)
+    devLog("updateObjectInputFormValue (object)",object)
+    devLog("updateObjectInputFormValue (attributeType)",attributeType)
+    devLog("updateObjectInputFormValue (objectConfiguration)",objectConfiguration)
+    var currentObjectConfiguration=objectConfiguration.filter(o=>o.name===name)||[]
+    if(currentObjectConfiguration.length>0){
+      devLog("updateObjectInputFormValue (isValid)",validate(currentObjectConfiguration[0].validation,value))
+      if(!validate(currentObjectConfiguration[0].validation,value)) {
+        devLog("updateObjectInputFormValue (vHelperText)",vHelperText(currentObjectConfiguration[0].validation,value))
+        setUsedHelperText(vHelperText(currentObjectConfiguration[0].validation,value))
+      }
+      
+    }
+    
     currentObject.current[name]=value;
-    //console.log("********** currentObject: ",currentObject.current)
+    onUpdate(name,value)
   }
 
   const updateObjectSwitchFormValue = (name: string,value: string,type: string) => {
     
-    //console.log("*** updateObjectSwitchFormValue: ",name,value,type)
     currentObject.current[name]=value;
-    //console.log("********** currentObject: ",currentObject.current)
+    
   }
 
+  /*
   const updateFormValue = () => {
     if(onValidate(inputRef.current?.value)) {
       setIsValid(true)
@@ -95,8 +110,14 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
       onUpdate(type,"");
     }
   };
-
+  */
   const deleteObject = (index:number) => {
+    object.content.splice(index, 1)
+    onUpdate(object.type,object);
+  };
+
+  const editObject = (index:number) => {
+    currentObject.current=object[index];
     object.content.splice(index, 1)
     onUpdate(object.type,object);
   };
@@ -104,6 +125,8 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   if(isEditable) {
     
     return (<Grid container >
+      {object.content.length===0&&(<FormattedMessage defaultMessage="ei arvoja" />)
+          }
         {object.content.map((content:any,index:number)=>{
             return(<Grid key={object.name+"_"+index} container spacing={2} >
                         <Grid item xs={11}>
@@ -114,9 +137,17 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                 aria-label={intl.formatMessage({
                                 defaultMessage: "lisää",
                                 })}
+                                onClick={(e)=>editObject(index)} >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton 
+                                aria-label={intl.formatMessage({
+                                defaultMessage: "poista",
+                                })}
                                 onClick={(e)=>deleteObject(index)} >
                                 <ClearIcon />
                             </IconButton>
+                            
                         </Grid>
                     </Grid>)
         })}
@@ -144,11 +175,18 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   }
 
                   const validator = (value:string) => {
+                    devLog("validator ( configuration.name)", configuration.name)
+                    devLog("validator (configuration)",configuration)
+                    devLog("validator (value)",value)
                     return validate(configuration.validation,value);
                   }
 
                   const helpGeneratorText = (value:string) => {
-                    //return helperText(configuration.validation,value);
+                    devLog("helpGeneratorText ( configuration.name)", configuration.name)
+                    devLog("helpGeneratorText (configuration)",configuration)
+                    devLog("helpGeneratorText (value)",value)
+                    
+                    return vHelperText(configuration.validation,value)
                   }
                   
                   const onObjectUpdate = (name:string,value:string) => {
@@ -173,20 +211,19 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                           name: configuration.name}
 
                     
-
-                    if(configuration.multivalue) {
+                    
+                    if(configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
                         currentObject.current[configuration.name]=[];
                     }
-                    if(!configuration.multivalue) {
-                        currentObject.current[configuration.name]='';
-                    }
-                    if(configuration?.enum?.length===2) {
+                    
+                    if(configuration?.enum?.length===2&&!currentObject.current.hasOwnProperty(configuration.name)) {
                         currentObject.current[configuration.name]=configuration.enum[0];
                     }
-                        
+                    if(!configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                        currentObject.current[configuration.name]='';
+                    }    
 
-                
-            
+                    devLog("objectForm",currentObject.current)
                   
                   return (
                     <Grid key={configuration.name} container >
@@ -237,11 +274,11 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         type={configuration.name!} 
                                         isEditable={roleConfiguration.editable} 
                                         onUpdate={updateObjectInputFormValue} 
-                                        onValidate={onValidate} 
+                                        onValidate={validator} 
                                         mandatory={configuration.mandatory}
                                         label={label?intl.formatMessage(label):configuration.name!}
                                         attributeType={configuration.type}
-                                        helperText={helperText}
+                                        helperText={helpGeneratorText}
                                         setCanSave={setCanSave}/>)
                                     }    
                                     
@@ -254,7 +291,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                       label={label ? intl.formatMessage(label) : object.name!}
                                       attributeType={configuration.type}
                                       onValidate={onValidate}
-                                      helperText={helperText}
+                                      helperText={helpGeneratorText}
 
                                       setCanSave={setCanSave} onUpdate={function (name: string, data: any): void {
                                           throw new Error("Function not implemented.");

@@ -13,6 +13,8 @@ import SwitchForm from "./SwitchForm";
 import ObjectForm from "./ObjectForm";
 import { IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import { devLog } from "@/utils/devLog";
+import MultiSelectForm, { oneEnum } from "./MultiSelectForm";
 
 interface AttributeProps {
     uiConfiguration: UiConfiguration;
@@ -134,22 +136,28 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const tooltipId = `työkaluvihje.${attribute.name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
     const currentObject= useRef<any>({});
+    const pressButtonRef= useRef<any>(true);
 
+    const updateobjectItem  = (name: string, data:any) => {
+        
+        devLog("updateobjectItem (name)",name)
+        devLog("updateobjectItem (data)",data)
+        devLog("updateobjectItem (uiConfiguration)",uiConfiguration)
+        //console.log("*** currentObject.current: ",currentObject.current)
+        //TODO: MANDATORY CHECK for object values, if valid update ....
+        //onUpdate(attribute.name,currentObject.current)
+        currentObject.current[name]=data;
+        devLog("updateobjectItem (result)",currentObject.current)
+        
+    }
     
     const updateListObject = () => {
-        console.log("*************** updateListObject: ",attribute.name,currentObject.current)
+        devLog("updateListObject (attribute)",attribute)
+        devLog("updateListObject (currentObject)",currentObject.current)
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
         onUpdate(attribute.name,currentObject.current)
         currentObject.current={}
-    }
-
-    const updateListItem = () => {
-        console.log("*************** updateListObject: ",attribute.name,attribute.content)
-        //console.log("*** currentObject.current: ",currentObject.current)
-        //TODO: MANDATORY CHECK for object values, if valid update ....
-        onUpdate(attribute.name,attribute.content)
-        // currentObject.current={}
     }
 
     /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
@@ -160,6 +168,12 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
     
     if(roleConfiguration.visible) {
+        var enumValues: oneEnum[] = [];
+        if(configuration.enum) {
+            enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
+        }
+        
+        
         return (
             <Grid container >
                 
@@ -198,7 +212,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 path="content" 
                                 type={attribute.name!} 
                                 isEditable={roleConfiguration.editable} 
-                                onUpdate={onUpdate} 
+                                onUpdate={updateobjectItem} 
                                 onValidate={onValidate} 
                                 mandatory={configuration.mandatory}
                                 label={label?intl.formatMessage(label):attribute.name!}
@@ -221,6 +235,26 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     attributeType={"metadata"}
                                     helperText={helperText}
                                     setCanSave={setCanSave}/>)
+                            }
+                            {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
+                                (<MultiSelectForm key={attribute.name}
+                                    //object={attribute} 
+                                    //path="content" 
+                                    //type={attribute.name!} 
+                                    values={configuration.enum}
+                                    isEditable={roleConfiguration.editable}
+                                    //onUpdate={onUpdate} 
+                                    onValidate={onValidate}
+                                    mandatory={configuration.mandatory}
+                                    label={label ? intl.formatMessage(label) : attribute.name!}
+                                    //attributeType={"metadata"}
+                                    helperText={helperText}
+                                    setCanSave={setCanSave} 
+                                    attributeType={"data"} 
+                                    enums={enumValues} 
+                                    onUpdate={function (values: string[]): void {
+                                        throw new Error("Function not implemented.");
+                                    } }/>)
                             }
                             {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
                                 (<InputForm key={attribute.name} 
@@ -262,6 +296,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 onValidate={onValidate}
                                 helperText={helperText}
                                 onUpdate={onUpdate} 
+                                pressButton={pressButtonRef}
                                 setCanSave={setCanSave}/>)}        
                             {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
                                 (<Grid container spacing={2} >
@@ -271,7 +306,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                             aria-label={intl.formatMessage({
                                             defaultMessage: "lisää",
                                             })}                                            
-                                            onClick={updateListItem} >
+                                            onClick={()=>pressButtonRef.current.pressEnter()} >
                                             <AddIcon />
                                         </IconButton>
                                     </Grid>

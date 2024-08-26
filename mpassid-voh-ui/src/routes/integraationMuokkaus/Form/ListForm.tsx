@@ -1,7 +1,7 @@
 import Clear from "@mui/icons-material/Clear";
 import RestoreIcon from '@mui/icons-material/Restore';
 import { IconButton, InputAdornment, TextField } from "@mui/material";
-import { Dispatch, useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -23,9 +23,10 @@ interface Props {
   onUpdate: (name: string, data: any) => void;
   onValidate: (data: any) => boolean;
   setCanSave: Dispatch<boolean>;
+  pressButton?: any;
 }
 
-export default function ListForm({ object, type, isEditable=false, mandatory=false, label, attributeType, setCanSave,  helperText, onValidate, onUpdate }: Props) {
+export default function ListForm({ object, type, isEditable=false, mandatory=false, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton }: Props) {
   const intl = useIntl();
   const defaultValue = object;
   const [isEmpty, setIsEmpty] = useState(!defaultValue);
@@ -33,6 +34,13 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
+  
+  useImperativeHandle(pressButton, () => ({
+    pressEnter() {
+      updateFormValue();
+    }
+    
+  }));
 
   //console.log("*** ListForm (object): ",object)
   const updateFormState = useCallback(
@@ -133,6 +141,8 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
       >
         
         <List >
+        {object.content.length===0&&(<FormattedMessage defaultMessage="ei arvoja" />)
+          }
           {object.content.map((value: any,index: number) => (
             <ListItem
               key={index}
