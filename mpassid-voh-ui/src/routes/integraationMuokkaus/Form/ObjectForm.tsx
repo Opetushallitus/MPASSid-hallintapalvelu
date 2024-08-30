@@ -271,7 +271,12 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                           if(element[configuration.name]!==undefined&&newIndex===element[configuration.name]) {
                             newIndex++
                           } else {
-                            newIndexFound=true;
+                            if(object.content.filter(o=>o[configuration.name]!==undefined&&newIndex===o[configuration.name]).length===0) {
+                              newIndexFound=true;                            
+                            } else {
+                              newIndex++
+                            }
+                            
                           }
                         }
                         
