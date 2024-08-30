@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 import { devLog } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
+import { environments } from "@/config";
 
 export const defaults = {
     typePI: "saml",
@@ -43,7 +44,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const [integration, setIntegration] = useState('idp');
     const [type, setType] = useState(defaults.typeOKJ);
     const [types, setTypes] = useState(defaults.typesOKJ);
-    const [service, setService] = useState<serviceProps>({name: 'uusi', environment: 0, setId: 0 });
+    const [service, setService] = useState<serviceProps>();
     const me = useMe();
     const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
@@ -98,27 +99,40 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         }
     }, [language, me]);
 
+    useEffect(() => {
+        
+        
+        if(open) {
+            setService(undefined)
+        }
+    }, [open]);
+
+
+    devLog("********* service",service)
+
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
                 devLog("createIntegration (result)",result)
                 result.id=0;
-                if(result?.configurationEntity?.sp&&service.name!=='uusi') {
+                if(result?.configurationEntity?.sp) {
                     devLog("createIntegration (oldSet)",service)
-                    result.configurationEntity.sp.name=service.name
-                    result.deploymentPhase=service.environment
-                    result.integrationSets=[]
-                    result.integrationSets.push( { id: service.setId })
+                    if(service!==undefined) {
+                        result.configurationEntity.sp.name=service.name
+                        result.deploymentPhase=service.environment
+                        result.integrationSets=[]
+                        result.integrationSets.push( { id: service.setId })
 
+                        
+                        devLog("createIntegration (type service.environment)",(typeof service.environment))
+                        devLog("createIntegration (service.environment)",service.environment)
+                    }
                     
-                    devLog("createIntegration (type service.environment)",(typeof service.environment))
-                    devLog("createIntegration (service.environment)",service.environment)
                 }
                 if(result?.configurationEntity?.idp) {
                     result.deploymentPhase=1
                     
-                    devLog("createIntegration (type service.environment)",(typeof service.environment))
-                    devLog("createIntegration (service.environment)",service.environment)
+                    
                 }
                 devLog("createIntegration (integration)",result)
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
@@ -152,7 +166,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         devLog("handleService",value)
         setService(value)
     }; 
-
+    
     return(<Dialog
         open={open}
         onClose={()=>setOpen(false)}
@@ -241,7 +255,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     <Grid item xs={8}>
                         
                             
-                            <PossibleServices service={service} oid={organization} handleService={handleService} />
+                            <PossibleServices oid={organization} handleService={handleService} />
                             
                         
                     </Grid>
@@ -254,7 +268,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                 <Button sx={{ marginRight: "auto" }} onClick={()=>setOpen(false)} >
                     <FormattedMessage defaultMessage="Peruuta" />
                 </Button>                              
-                <Button onClick={createIntegration} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Luo" /></Button>
+                {!(!service&&integration==='sp')&&<Button onClick={createIntegration} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Luo" /></Button>}
+                {!service&&integration==='sp'&&<Button onClick={createIntegration} sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Luo" /></Button>}
             
         </DialogActions>
     </Dialog>)    

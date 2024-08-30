@@ -5,7 +5,7 @@ import LinkValue from "./LinkValue";
 import InputForm from "./Form/InputForm";
 import ListForm from "./Form/ListForm";
 import { useState, type Dispatch } from "react";
-import { dataConfiguration } from '../../config';
+import { dataConfiguration, defaultIntegrationType, IntegrationType, UiConfiguration } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
@@ -42,11 +42,33 @@ export default function Metadata({
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
   
+  devLog("function Metadata (dataConfiguration)",dataConfiguration)
+  devLog("function Metadata (oid)",oid)
+  devLog("function Metadata (specialConfiguration)",specialConfiguration)
+  devLog("function Metadata (environment)",environment)
+  devLog("function Metadata (environmentConfiguration)",environmentConfiguration)
   
   //console.log("*** metadata (metadata): ",metadata)
   //console.log("*** metadata (type): ",type)
 
-  const updateMetadata = (multivalue: boolean,name:string, value:any ) => {  
+  const validateMetadata = () => {
+    var result=true;
+    mandatoryAttributes.forEach(ma=>{
+      
+      devLog("validateMetadata (mandatoryAttribute)",ma)
+      devLog("validateMetadata (mandatoryAttribute "+ma+")",metadata[ma])
+      if(metadata[ma] === undefined) {
+        result = false
+      }
+      if(metadata[ma] !== undefined&&metadata[ma].length===0) {
+        result = false
+      }
+      
+    })
+    return result
+  }
+  const updateMetadata = (multivalue: boolean,name:string, value:any) => {  
+    devLog("updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
     devLog("updateMetadata 1",multivalue)
     devLog("updateMetadata 2",name)
     devLog("updateMetadata 3",value)
@@ -54,8 +76,9 @@ export default function Metadata({
       updateMultivalueMetadata(name,value);
     } else {
       metadata[name]=value
+      setMetadata({...metadata})
     }
-    setMetadata({...metadata})
+    
     
     if(newConfigurationEntityData?.sp){
       if(newConfigurationEntityData?.sp?.metadata === undefined){
@@ -63,7 +86,12 @@ export default function Metadata({
       }    
       newConfigurationEntityData.sp.metadata=metadata
     }
-    
+    devLog("validateMetadata (updateMetadata)", validateMetadata())
+    if(validateMetadata()) {
+      setCanSave(true)
+    } else {
+      setCanSave(false)
+    }
     setNewConfigurationEntityData(clone(newConfigurationEntityData))
     
   }
@@ -71,6 +99,7 @@ export default function Metadata({
   const updateMultivalueMetadata = (name:string, value:String) => {
 
     devLog("updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
+    devLog("updateMultivalueMetadata (metadata[name])",metadata[name])
     if(metadata[name]) {
         const index = metadata[name].indexOf(value)
         if(index>=0) {
@@ -79,15 +108,21 @@ export default function Metadata({
           metadata[name].push(value)
         }
     } else {
-      metadata[name]=[]
-      metadata[name].push(value)
+      metadata[name]=[ value ]
+      
+      devLog("updateMultivalueMetadata (new metadata[name])",metadata[name])
     }
-    if(metadata[name].length>0||mandatoryAttributes.indexOf(name)===-1) {
+    setMetadata({...metadata} )
+    /*
+    devLog("validateMetadata (updateMultivalueMetadata)", validateMetadata())
+    if(validateMetadata()) {
       setCanSave(true)
     } else {
       setCanSave(false)
     }
+      */
     devLog("updateMultivalueMetadata (metadata)",metadata)
+    
   }
 
   const saveCheck = (value:boolean) => {
@@ -111,39 +146,12 @@ export default function Metadata({
   if(role=="sp") {
 
     const providerData:Components.Schemas.ServiceProvider = configurationEntity[role]!;
-  
-    const logUpdateValue = (value:String) => {  
-      console.log("newConfigurationEntityData: ",newConfigurationEntityData)
-    }
-    const emptyValidate = (value:String) => {  
-      return true;
-    }
-
-    const updateScope = (name: string, value:String, type: Components.Schemas.Attribute["type"]|'metadata') => {
-      console.log("value: ",value)
-        console.log("newConfigurationEntityData: ",newConfigurationEntityData)
-
-    }
-    
-    const validateRedirectUri = (value:string) => {
-      
-      var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
-	    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
-	    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
-	    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
-	    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
-	    '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
-	    return !!urlPattern.test(value);
-
-    }
-    const helperTextForRedirectUri= (data:string)=><FormattedMessage defaultMessage="Uri ei ole FQDN muodossa!" />
-    const emptyHelperText= (data:string)=> <></>
-
    
     if (role&&providerData !== undefined&&providerData.metadata && providerData.metadata !== undefined) {  
+      console.log("**************** providerData.metadata",providerData.metadata)
       const value = providerData.metadata.encoding && providerData.metadata.content !== undefined
         ? atob(providerData.metadata.content as unknown as string)
-        : JSON.stringify(providerData.metadata, null, 2);
+        : JSON.stringify(providerData.metadata.content, null, 2);
 
         if(type==="saml"||type==="oidc") {
           return (<Grid container >
@@ -170,6 +178,7 @@ export default function Metadata({
               .map((configuration) => {
                       if(configuration.mandatory) {
                         mandatoryAttributes.push(configuration.name);
+                       devLog("validateMetadata (mandatoryAttributes)",validateMetadata())
                       }
                       const validator = (value:string) => {
                         devLog("validator",configuration.name)
@@ -180,11 +189,13 @@ export default function Metadata({
                       const helpGeneratorText = (value:string) => {
                         return helperText(configuration.validation,value);
                       }
-                      //console.log("*** metadata (configuration.name): ",configuration.name);
-                      //console.log("*** metadata (content): ",metadata[configuration.name]);
-                      const attribute = { type: 'metadata', 
-                                          content: metadata[configuration.name],
-                                          name: configuration.name}
+
+                      const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
+                      
+                      var attribute = { type: 'metadata', 
+                                          content: metadata[configuration.name]||roleConfiguration?.defaultValue||'',
+                                          name: configuration.name,
+                                          role: role}
                       
                       if(metadata[configuration.name] === undefined) {
 
@@ -194,32 +205,69 @@ export default function Metadata({
                         if(!configuration.multivalue) {
                           attribute.content='';
                         }
-                        if(configuration?.enum?.length===2) {
+                        
+                        if(configuration?.enum?.length===2&&attribute.content==='') {
                           attribute.content=configuration.enum[0];
                         }
-                          
+
+                        if(configuration?.enum?.length===2&&configuration.multivalue===false) {
+                          updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                        }
+                        
+
                       }
                       //console.log("*** metadata (attribute): ",attribute);
                       const onUpdate = (name:string,value:string) => {
-                        
+                        devLog("MetadataForm onUpdate (name)",name)
+                        devLog("MetadataForm onUpdate (value)",value)
                         if(configuration?.enum&&configuration.enum.length>0) {
-                          //return updateMetadata(false,name,value);
+                          devLog("MetadataForm attribute (enum)",attribute)
+                          return updateMetadata(false,name,value);
                         } else {
-                          if(configuration?.multivalue) {
-                            devLog("attribute (multivalue)",attribute)
+                          if(configuration.multivalue) {
+                            devLog("MetadataForm attribute (multivalue)",attribute)
                             return updateMetadata(configuration.multivalue,name,value);
                           } else {
-                            devLog("attribute (siglevalue)",attribute)
+                            devLog("MetadataForm attribute (siglevalue)",attribute)
                             return updateMetadata(false,name,value);
                           }
                           
                         }
                         
                       }
-                      
+
+                      const onDelete = (name:string,index:number) => {
+                        devLog("MetadataForm onDelete (metadata)",metadata)
+                        devLog("MetadataForm onDelete (name)",name)
+                        devLog("MetadataForm onDelete (index)",index)
+                        const newMetadata=clone(metadata)
+                        if(metadata[attribute.name]&&metadata[attribute.name].length>=index) {
+                          metadata[attribute.name].splice(index, 1);
+                        }
+                        setMetadata(newMetadata)
+                        if(validateMetadata()) {
+                          setCanSave(true)
+                        } else {
+                          setCanSave(false)
+                        }
+                      }
+
+                      const onEdit = (name:string,value:string) => {
+                        devLog("MetadataForm onEdit (name)",name)
+                        devLog("MetadataForm onEdit (value)",value)      
+                        attribute= { type: 'metadata', 
+                          content: metadata[configuration.name],
+                          name: name,
+                          role: role}                                                                
+                      }
+
+                      setCanSave(validateMetadata())
+
                       return (<MetadataForm 
                         key={configuration.name!}
                         onUpdate={onUpdate}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
                         onValidate={validator}
                         newConfigurationEntityData={newConfigurationEntityData}
                         setNewConfigurationEntityData={setNewConfigurationEntityData}  

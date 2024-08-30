@@ -22,6 +22,8 @@ interface Props {
 export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
+
+  console.log("***** object",object)
   
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
@@ -38,6 +40,9 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
   
   const updateFormValue = () => {
+
+    console.log("*************** updateFormValue: ",inputRef.current?.value)
+
     if(onValidate(inputRef.current?.value)) {
       setIsValid(true)
       if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
@@ -46,6 +51,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
         setCanSave(false)  
         onUpdate(type,"",attributeType);
       } else {
+        console.log("*************** updateFormValue1: ",inputRef.current?.value)
         setCanSave(true) 
         if(inputRef.current?.value) {
           onUpdate(type,inputRef.current.value,attributeType);  

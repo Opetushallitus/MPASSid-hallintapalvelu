@@ -5,7 +5,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useIntl, FormattedMessage } from 'react-intl';
 import InputForm from "./InputForm";
-import { useRef, type Dispatch } from 'react';
+import { useEffect, useRef, useState, type Dispatch } from 'react';
 import type { IntegrationType, UiConfiguration } from "../../../config";
 import { defaultIntegrationType } from "../../../config"
 import ListForm from "./ListForm";
@@ -124,12 +124,14 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
     helperText: (data:string) => JSX.Element;
     onUpdate: (name: string,value: string) => void;
+    onEdit: (name: string,value: string) => void;
+    onDelete: (name: string,index: number) => void;
     onValidate: (data:string) => boolean;
     setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
 }
 
-export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: MetadataProps) {
+export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave }: MetadataProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -137,20 +139,97 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
     const currentObject= useRef<any>({});
     const pressButtonRef= useRef<any>(true);
+    const [ canSaveItem, setCanSaveItem ] = useState(true)
+    //const [ object, setObject ] = useState<any>(attribute)
 
-    const updateobjectItem  = (name: string, data:any) => {
+    useEffect(() => {
+        devLog("MetadataForm (canSaveItem)",canSaveItem)
+    }, [canSaveItem]);
+
+    const objectOnValidate  = (data:string) => {
+        devLog("objectOnValidate (data)",data)
+        devLog("objectOnValidate (canSaveItem)",canSaveItem)
+        return onValidate(data);
+    }
+
+    const listOnValidate  = (data:string) => {
+        devLog("************ listOnValidate (data)",data)
+        devLog("************ listOnValidate (canSaveItem)",canSaveItem)
+        return onValidate(data);
+    }
+    
+    const updatObjectItem  = (name: string, data:any) => {
         
-        devLog("updateobjectItem (name)",name)
-        devLog("updateobjectItem (data)",data)
-        devLog("updateobjectItem (uiConfiguration)",uiConfiguration)
+        devLog("updatObjectItem (name)",name)
+        devLog("updatObjectItem (data)",data)
+        devLog("updatObjectItem (uiConfiguration)",uiConfiguration)
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
-        currentObject.current[name]=data;
-        devLog("updateobjectItem (result)",currentObject.current)
+        devLog("updatObjectItem (mandatory)",uiConfiguration.mandatory)
+
+        if(data.content) {
+            currentObject.current[name]=data.content;
+        } else {
+            currentObject.current[name]=data;
+        }
+        devLog("updatObjectItem (result)",currentObject.current)
         
     }
-    
+
+    const editObjectItem  = (name: string, data:any) => {
+        
+        devLog("editObjectItem (name)",name)
+        devLog("editObjectItem (data)",data)
+        devLog("editObjectItem (uiConfiguration)",uiConfiguration)
+        devLog("editObjectItem (attribute)",attribute)
+        //console.log("*** currentObject.current: ",currentObject.current)
+        //TODO: MANDATORY CHECK for object values, if valid update ....
+        //onUpdate(attribute.name,currentObject.current)
+        onEdit(name,data)
+        /*
+        if(data.content) {
+            currentObject.current[name]=data.content;
+            onEdit(name,data)
+        } else {
+            currentObject.current[name]=data;
+        }
+            */
+        devLog("editObjectItem (result)",currentObject.current)
+        
+    }
+
+    const deleteObjectItem  = (name: string, index:number) => {
+        
+        devLog("deleteObjectItem (name)",name)
+        devLog("deleteObjectItem (index)",index)
+        devLog("deleteObjectItem (uiConfiguration)",uiConfiguration)
+        devLog("deleteObjectItem (attribute)",attribute)
+        //console.log("*** currentObject.current: ",currentObject.current)
+        //TODO: MANDATORY CHECK for object values, if valid update ....
+        //onUpdate(attribute.name,currentObject.current)
+        /*
+        if(data.content) {
+            currentObject.current[name]=data.content;
+        } else {
+            currentObject.current[name]=data;
+        }
+            */
+        onDelete(attribute.name,index);
+        devLog("deleteObjectItem (result)",currentObject.current)
+        
+    }
+    const updateSwitchItem = (name:any,value:any) => {
+        devLog("updateSwitchItem (checked)",value)
+        devLog("updateSwitchItem (type)",name)
+        
+        devLog("updateSwitchItem (attribute)",attribute)
+        devLog("updateSwitchItem (currentObject)",currentObject.current)
+        //console.log("*** currentObject.current: ",currentObject.current)
+        //TODO: MANDATORY CHECK for object values, if valid update ....
+        onUpdate(name,value)
+        //currentObject.current={}
+    }
     const updateListObject = () => {
         devLog("updateListObject (attribute)",attribute)
         devLog("updateListObject (currentObject)",currentObject.current)
@@ -173,7 +252,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
             enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
         }
         
-        
+        devLog("updateMultivalueMetadata looppi (metadataForm)",attribute)
         return (
             <Grid container >
                 
@@ -208,17 +287,20 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             
                             {configuration&&roleConfiguration&&configuration.object&&
                             (<ObjectForm key={attribute.name+"_"+configuration.name} 
+                                integrationType={type}
                                 object={attribute} 
                                 path="content" 
                                 type={attribute.name!} 
                                 isEditable={roleConfiguration.editable} 
-                                onUpdate={updateobjectItem} 
-                                onValidate={onValidate} 
+                                onUpdate={updatObjectItem} 
+                                onEdit={editObjectItem} 
+                                onDelete={deleteObjectItem} 
+                                onValidate={objectOnValidate} 
                                 mandatory={configuration.mandatory}
                                 label={label?intl.formatMessage(label):attribute.name!}
                                 attributeType={"metadata"}
                                 helperText={helperText}
-                                setCanSave={setCanSave}
+                                setCanSave={setCanSaveItem}
                                 currentObject={currentObject}/>)
                             }
                             {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
@@ -228,13 +310,13 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     type={attribute.name!} 
                                     values={configuration.enum}
                                     isEditable={roleConfiguration.editable} 
-                                    onUpdate={onUpdate} 
+                                    onUpdate={updateSwitchItem} 
                                     onValidate={onValidate} 
                                     mandatory={configuration.mandatory}
                                     label={label?intl.formatMessage(label):attribute.name!}
                                     attributeType={"metadata"}
                                     helperText={helperText}
-                                    setCanSave={setCanSave}/>)
+                                    setCanSave={setCanSaveItem}/>)
                             }
                             {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
                                 (<MultiSelectForm key={attribute.name}
@@ -249,7 +331,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     label={label ? intl.formatMessage(label) : attribute.name!}
                                     //attributeType={"metadata"}
                                     helperText={helperText}
-                                    setCanSave={setCanSave} 
+                                    setCanSave={setCanSaveItem} 
                                     attributeType={"data"} 
                                     enums={enumValues} 
                                     onUpdate={function (values: string[]): void {
@@ -268,7 +350,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     label={label?intl.formatMessage(label):attribute.name!}
                                     attributeType={"metadata"}
                                     helperText={helperText}
-                                    setCanSave={setCanSave}/>)
+                                    setCanSave={setCanSaveItem}/>)
                             }
                             {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&configuration.object&&
                             (<Grid container spacing={2} >
@@ -293,11 +375,11 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 mandatory={configuration.mandatory}
                                 label={label ? intl.formatMessage(label) : attribute.name!}
                                 attributeType={"metadata"}
-                                onValidate={onValidate}
+                                onValidate={listOnValidate}
                                 helperText={helperText}
                                 onUpdate={onUpdate} 
                                 pressButton={pressButtonRef}
-                                setCanSave={setCanSave}/>)}        
+                                setCanSave={setCanSaveItem}/>)}        
                             {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>

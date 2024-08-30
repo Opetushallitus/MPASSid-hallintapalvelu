@@ -1,8 +1,9 @@
 import { FormattedMessage } from 'react-intl';
+import { devLog } from './devLog';
 
 const validateUri = (value:string) => {
       
-    var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
+    var urlPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
       '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
@@ -11,6 +12,13 @@ const validateUri = (value:string) => {
       return !!urlPattern.test(value);
 
   }
+
+  const validateHttps = (value:string) => {
+      
+    var urlPattern = new RegExp('^((https):\\/\\/)'); 
+      return !!urlPattern.test(value);
+
+  }  
 
 const validateIpAddress = (value:string) => {
       
@@ -33,6 +41,13 @@ const validateNumber = (value:string) => {
 
 }
 
+const validateNoHash = (value:string) => {
+      
+    const urlPattern = new RegExp('^[^#]+$'); 
+    return !!urlPattern.test(value);
+
+}
+
 const logValidateValue = (value:String) => {  
     return true;
   }
@@ -43,8 +58,10 @@ export const validate = (validators:string[],value:string) => {
         if(validateStatus&&value!='') {
             switch (validator)
             {
-                case "mandatory":
-                    if(!value||value==='') {
+                case "notempty":
+                    console.log("************ value",value)
+                    if(value===undefined||value==='') {
+                        console.log("************ validateStatus",validateStatus)
                         validateStatus=false
                     }
                     break;
@@ -53,16 +70,24 @@ export const validate = (validators:string[],value:string) => {
                     break;
                 case "uri":
                         validateStatus=validateUri(value);
+                        devLog("validate uri",value)
+                        devLog("validate uri",validateStatus)
                     break;    
                 case "ip":
                     validateStatus=validateIpAddress(value);
                     break;
                 case "number":
                     validateStatus=validateNumber(value);
+                    break; 
+                case "nohash":
+                    validateStatus=validateNoHash(value);
                     break;    
+                    case "https":
+                        validateStatus=validateHttps(value);
+                        break;        
                 default:
                     validateStatus=false;
-                    console.warn("Unknown validation!")
+                    console.warn("Unknown validation: ",validator)
                     break;
                 }
             }
@@ -78,12 +103,12 @@ export const helperText = (validators:string[],value:string) => {
         if(validateStatus) {
             switch (validator)
             {
-                case "mandatory":
-                    if(!value||value==='') {
+                case "notempty":
+                    if(value===undefined||value==='') {
                         validateStatus=false
                     }
                     if(!validateStatus) {
-                        helperText=<FormattedMessage defaultMessage="kenttä on pakollinen!" />
+                        helperText=<FormattedMessage defaultMessage="kentän arvon pitää olla vähintään yhden merkin!" />
                     }
                     break;
                 case "hostname":
@@ -109,7 +134,19 @@ export const helperText = (validators:string[],value:string) => {
                     if(!validateStatus) {
                         helperText=<FormattedMessage defaultMessage="Kentän arvon pitää olla numero!" />
                     }
-                    break;            
+                    break;      
+                case "nohash":
+                    validateStatus=validateNoHash(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentässä ei saa olla # merkkiä!" />
+                    }
+                    break;
+                    case "https":
+                        validateStatus=validateHttps(value);
+                        if(!validateStatus) {
+                            helperText=<FormattedMessage defaultMessage="Kentän pitää olla https muodossa!" />
+                        }
+                        break;       
                 default:
                     validateStatus=false;
                     if(!validateStatus) {

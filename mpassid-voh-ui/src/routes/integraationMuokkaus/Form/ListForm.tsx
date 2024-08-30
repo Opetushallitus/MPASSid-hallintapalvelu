@@ -9,6 +9,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ClearIcon from '@mui/icons-material/Clear';
+import { devLog } from "@/utils/devLog";
 
 const SEARCH_PARAM_NANE = "hae";
 
@@ -18,7 +19,8 @@ interface Props {
   type: string;
   isEditable?: boolean;
   mandatory: boolean;
-  attributeType: String;
+  attributeType: string;
+  index?: number;
   helperText: (data: string) => JSX.Element;
   onUpdate: (name: string, data: any) => void;
   onValidate: (data: any) => boolean;
@@ -26,7 +28,7 @@ interface Props {
   pressButton?: any;
 }
 
-export default function ListForm({ object, type, isEditable=false, mandatory=false, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton }: Props) {
+export default function ListForm({ object, type, isEditable=false, mandatory=false, index=0, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton }: Props) {
   const intl = useIntl();
   const defaultValue = object;
   const [isEmpty, setIsEmpty] = useState(!defaultValue);
@@ -42,18 +44,19 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     
   }));
 
-  //console.log("*** ListForm (object): ",object)
   const updateFormState = useCallback(
     function updateFormState() {
       if(inputRef.current) {
         //setIsEmpty(!inputRef.current!.value);
         setIsDirty(inputRef.current!.value !== (defaultValue ?? ""));
+        setIsValid(onValidate(inputRef.current?.value))
       }
       
     },
-    [defaultValue]
+    [defaultValue, onValidate]
   );
 
+  /*
   useEffect(() => {
 
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
@@ -67,28 +70,55 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     }
     
   }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave, isEmpty ]);
-
+*/
   useEffect(() => {
     updateFormState();
   }, [updateFormState]);
 
   const updateFormValue = () => {
 
+   devLog("************ ",inputRef.current?.value)
+   devLog("************ ",onValidate(inputRef.current?.value))
+      if(onValidate(inputRef.current?.value)) {
+        setIsValid(true)
+        if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
+          setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
+          setIsValid(false)
+          setCanSave(false)  
+          onUpdate(type,"");
+        } else {
+          setCanSave(true) 
+          setUsedHelperText(<></>)
+          if(inputRef.current?.value) {
+            onUpdate(type,inputRef.current.value);
+            inputRef.current.value=''  
+          } else {
+            onUpdate(type,"");
+          }
+          
+          
+        }
+        
+      } else {
+        setUsedHelperText(helperText(inputRef.current?.value))
+        setIsValid(false)  
+        setCanSave(false)
+        onUpdate(type,"");
+      }
+   
+    
+  };
+
+  const validateFormValue = () => {
+    devLog("************ listOnValidate (validateFormValue)",inputRef.current?.value)
+devLog("************ listOnValidate (validateFormValue)",onValidate(inputRef.current?.value))
     if(onValidate(inputRef.current?.value)) {
       setIsValid(true)
       if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
         setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
         setIsValid(false)
-        setCanSave(false)  
-        onUpdate(type,"");
       } else {
-        setCanSave(true) 
-        if(inputRef.current?.value) {
-          onUpdate(type,inputRef.current.value);
-          inputRef.current.value=''  
-        } else {
-          onUpdate(type,"");
-        }
+        
         setUsedHelperText(<></>)
         
       }
@@ -96,8 +126,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     } else {
       setUsedHelperText(helperText(inputRef.current?.value))
       setIsValid(false)  
-      setCanSave(false)
-      //onUpdate(type,"");
+      
     }
   };
 
@@ -141,7 +170,9 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
       >
         
         <List >
-        {object.content.length===0&&(<FormattedMessage defaultMessage="ei arvoja" />)
+        {object.content.length===0&&mandatory&&(<Box sx={{ color: "#db2828" }}><FormattedMessage defaultMessage="ei arvoja, pakollinen" /></Box>)
+          }
+          {object.content.length===0&&!mandatory&&(<FormattedMessage defaultMessage="ei arvoja" />)
           }
           {object.content.map((value: any,index: number) => (
             <ListItem
@@ -178,10 +209,11 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
             ref: inputRef,
             autoComplete: "off",
           }}
-          onKeyDown={(ev) => {
-            console.log(`Pressed keyCode ${ev.key}`);
+          onKeyUp={(ev) => {            
             if (ev.key === 'Enter') {
               updateFormValue()
+            } else {
+              validateFormValue()
             }
           }}
         />

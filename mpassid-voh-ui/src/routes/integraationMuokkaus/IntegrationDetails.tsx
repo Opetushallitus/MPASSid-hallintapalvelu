@@ -47,6 +47,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const environment = useRef<number>(-5);
     const originalEnvironment = useRef<number>(-5);
     const [newEnvironment, setNewEnvironment] = useState(false);
+    const [name, setName] = useState<string>('');
     const [metadata, setMetadata] = useState<any>(newConfigurationEntityData?.sp?.metadata||{});
     
     const { state } = useLocation();
@@ -62,6 +63,9 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     
     useEffect(() => {
       devLog("IntegrationDetails (integration)",integration)
+      if(integration?.configurationEntity?.sp?.name) {
+        setName(integration.configurationEntity.sp.name)
+      }
       if(integration.deploymentPhase) {
         environment.current=integration.deploymentPhase
         if(originalEnvironment.current===-5) {
@@ -129,7 +133,11 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           }
 
           if(type==='oidc') {
-            if(metadata.clientId) {
+            if(metadata.clientId&&newConfigurationEntityData.sp) {
+              const oidcServiceProvider:Components.Schemas.OidcServiceProvider = cloneDeep(newConfigurationEntityData.sp)
+              oidcServiceProvider.clientId=metadata.clientId;
+              const newConfiguration = cloneDeep(newConfigurationEntityData)
+              newConfiguration.sp=oidcServiceProvider;
               setShowConfigurationEntityData(newConfigurationEntityData);
             }
           }
@@ -304,7 +312,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} environment={environment} setNewEnvironment={setNewEnvironment} newEnvironment={newEnvironment} metadata={metadata}/>
         )}    
         
-        <Role integration={integration} oid={oid} environment={environment.current} />
+        <Role integration={integration} oid={oid} environment={environment.current} setName={setName}/>
 
         {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
@@ -335,7 +343,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           type={type}
           setCanSave={setIsValidMetadata}
           oid={oid}
-          environment={environment.current}
+          environment={integration.deploymentPhase||-5}
           metadata={metadata}
           setMetadata={setMetadata}
         />
