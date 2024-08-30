@@ -39,6 +39,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
   
   useImperativeHandle(pressButton, () => ({
     pressEnter() {
+      setIsValid(onValidate(inputRef.current!.value))
       updateFormValue();
     }
     
@@ -50,10 +51,11 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
         //setIsEmpty(!inputRef.current!.value);
         setIsDirty(inputRef.current!.value !== (defaultValue ?? ""));
         setIsValid(onValidate(inputRef.current?.value))
+        setUsedHelperText(helperText(inputRef.current!.value))
       }
       
     },
-    [defaultValue, onValidate]
+    [defaultValue, helperText, onValidate]
   );
 
   /*
@@ -77,56 +79,43 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
 
   const updateFormValue = () => {
 
-   devLog("************ ",inputRef.current?.value)
-   devLog("************ ",onValidate(inputRef.current?.value))
-      if(onValidate(inputRef.current?.value)) {
-        setIsValid(true)
-        if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
-          setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
-          setIsValid(false)
-          setCanSave(false)  
-          onUpdate(type,"");
-        } else {
-          setCanSave(true) 
-          setUsedHelperText(<></>)
-          if(inputRef.current?.value) {
-            onUpdate(type,inputRef.current.value);
-            inputRef.current.value=''  
-          } else {
-            onUpdate(type,"");
-          }
-          
-          
-        }
-        
-      } else {
-        setUsedHelperText(helperText(inputRef.current?.value))
-        setIsValid(false)  
-        setCanSave(false)
-        onUpdate(type,"");
-      }
-   
     
+    if(onValidate(inputRef.current!.value)) {
+      
+      setCanSave(true) 
+      setUsedHelperText(<></>)
+      setIsValid(true)    
+      if(inputRef.current?.value) {
+        onUpdate(type,inputRef.current.value);
+        inputRef.current.value=''  
+      } else {
+        //onUpdate(type,"");
+      }
+    } else {
+      setUsedHelperText(helperText(inputRef.current!.value))
+      setIsValid(false)  
+      setCanSave(false)
+      //onUpdate(type,"");
+    }
+
   };
 
   const validateFormValue = () => {
-    devLog("************ listOnValidate (validateFormValue)",inputRef.current?.value)
-devLog("************ listOnValidate (validateFormValue)",onValidate(inputRef.current?.value))
-    if(onValidate(inputRef.current?.value)) {
-      setIsValid(true)
-      if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
-        setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
-        setIsValid(false)
-      } else {
-        
-        setUsedHelperText(<></>)
-        
-      }
-      
+    var value=''
+    if(inputRef.current?.value) {
+      value=inputRef.current.value
+      console.log("********** 0")
+    }
+  
+    console.log("***************** inputRef.current!.value  >"+value+"<")
+    if(onValidate(value)) {
+      console.log("********** 1")
+      setUsedHelperText(<></>)
+      setIsValid(true)    
     } else {
-      setUsedHelperText(helperText(inputRef.current?.value))
+      console.log("********** 2")
+      setUsedHelperText(helperText(value))
       setIsValid(false)  
-      
     }
   };
 
@@ -216,6 +205,7 @@ devLog("************ listOnValidate (validateFormValue)",onValidate(inputRef.cur
               validateFormValue()
             }
           }}
+          
         />
       </form>
     );

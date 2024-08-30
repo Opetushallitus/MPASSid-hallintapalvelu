@@ -55,13 +55,11 @@ const logValidateValue = (value:String) => {
 export const validate = (validators:string[],value:string) => {
     let validateStatus:boolean=true;
     validators.forEach(validator=>{
-        if(validateStatus&&value!='') {
+        if(validateStatus) {
             switch (validator)
             {
                 case "notempty":
-                    console.log("************ value",value)
-                    if(value===undefined||value==='') {
-                        console.log("************ validateStatus",validateStatus)
+                    if(value===undefined||value==='') {                        
                         validateStatus=false
                     }
                     break;

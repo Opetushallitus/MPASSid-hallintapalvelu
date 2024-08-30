@@ -577,7 +577,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: true,
-    validation: [ 'nohash','notempty' ],
+    validation: [ ],
     environment: 0,
     integrationType: [
         {
@@ -597,7 +597,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
-    validation: [  'nohash', 'notempty'],
+    validation: [ ],
     integrationType: [
         {
             name: 'saml',
