@@ -11,6 +11,7 @@ import ListItemText from '@mui/material/ListItemText';
 import ClearIcon from '@mui/icons-material/Clear';
 import { devLog } from "@/utils/devLog";
 
+
 const SEARCH_PARAM_NANE = "hae";
 
 interface Props {
@@ -36,6 +37,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
+  
   
   useImperativeHandle(pressButton, () => ({
     pressEnter() {

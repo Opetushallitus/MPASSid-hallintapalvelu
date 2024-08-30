@@ -48,10 +48,6 @@ const validateNoHash = (value:string) => {
 
 }
 
-const logValidateValue = (value:String) => {  
-    return true;
-  }
-
 export const validate = (validators:string[],value:string) => {
     let validateStatus:boolean=true;
     validators.forEach(validator=>{
@@ -160,3 +156,22 @@ export const helperText = (validators:string[],value:string) => {
 }
 
 
+/*
+TODO: validator for certificate, e.g. using 
+
+https://github.com/PeculiarVentures/x509
+
+npm install @peculiar/x509
+
+import { X509Certificate } from '@peculiar/x509';
+
+const cert = new X509Certificate(inputRef.current!.value);
+      const certDetails = {
+        subject: cert.subjectName,
+        issuer: cert.issuerName,
+        validFrom: cert.notBefore,
+        validTo: cert.notAfter,
+        serialNumber: cert.serialNumber,
+      };
+
+*/      

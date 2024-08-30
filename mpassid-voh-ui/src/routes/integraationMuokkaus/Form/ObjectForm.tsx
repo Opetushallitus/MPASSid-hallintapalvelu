@@ -263,13 +263,12 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                         currentObject.current[configuration.name]=roleConfiguration?.defaultValue||'';
                     }    
                     if(roleConfiguration?.index&&roleConfiguration.index==='auto') {
-                      devLog("ObjectForm (INDEX) "+configuration.name+": ",currentObject.current[configuration.name])
                       
                       var newIndex=0
                       var newIndexFound=false
                       object.content.forEach((element: any) => {
-                        if(!newIndexFound) {
-                          if(element[configuration.name]&&newIndex===element[configuration.name]) {
+                        if(!newIndexFound) {                    
+                          if(element[configuration.name]!==undefined&&newIndex===element[configuration.name]) {
                             newIndex++
                           } else {
                             newIndexFound=true;
@@ -277,6 +276,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                         }
                         
                       });
+                      
                       attribute.content=String(newIndex);
                       currentObject.current[configuration.name]=newIndex;
                     }
