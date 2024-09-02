@@ -674,7 +674,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: 'false'
+            defaultValue: false
         }
     ]
   },

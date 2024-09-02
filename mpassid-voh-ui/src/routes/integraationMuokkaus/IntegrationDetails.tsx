@@ -223,6 +223,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )
         setSaveDialogState(true);
         if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){     
+          devLog("setCanSave - ",(newConfigurationEntityData !== undefined))
+          devLog("setCanSave - ",(!isEqual(newConfigurationEntityData,integration.configurationEntity)))
           if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,integration.configurationEntity)||newLogo||(originalEnvironment.current!==environment.current))&&logoOK&&isValid) {
             devLog("setCanSave","5")
             setCanSave(true)

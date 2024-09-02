@@ -1,7 +1,7 @@
 
 import { Box, Grid, IconButton, Tooltip, Typography } from "@mui/material";
 import type { Dispatch} from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { IntegrationType, UiConfiguration } from "@/config";
 import { dataConfiguration, defaultIntegrationType } from "@/config";
@@ -29,10 +29,11 @@ interface Props {
   onEdit: (name: string,value: string) => void;
   onDelete: (name: string,index: number) => void;
   onValidate: (data:string) => boolean;
+  cleanObject?: any;
 }
 
   
-export default function ObjectForm({ object, type, isEditable=false, mandatory=false,helperText, path, onUpdate, onEdit, onDelete, onValidate, attributeType,setCanSave, currentObject, integrationType }: Props) {
+export default function ObjectForm({ object, type, isEditable=false, mandatory=false,helperText, path, onUpdate, onEdit, onDelete, onValidate, attributeType,setCanSave, currentObject, integrationType, cleanObject }: Props) {
   const intl = useIntl();
   const id = `attribuutti.${object.name}`;
   const tooltipId = `työkaluvihje.${object.name}`;
@@ -49,9 +50,12 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   //const roleConfiguration:IntegrationType=defaultIntegrationType;
   
   const [isValid, setIsValid] = useState(true);
+  const [reload, setReload] = useState(true);
+  const resetStat = useRef<any>({});
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
   const inputValue = useRef<any>(null);
+  
   
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
@@ -61,6 +65,22 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     }
     
   }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
+
+  useImperativeHandle(cleanObject, () => ({
+    clean() {
+      devLog("ObjectForm (clean)",object)
+      devLog("ObjectForm (clean)",currentObject.current)
+
+      setReload(!reload)
+      currentObject.current={}
+      resetStat.current={}
+      setCanSave(validateObject())
+      devLog("ObjectForm (clean)",resetStat.current)
+      devLog("ObjectForm (clean)",currentObject.current)
+      
+    }
+    
+  }));
 
   const validateObject = () => {
     var result=true;
@@ -105,38 +125,15 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   }
 
   const updateObjectSwitchFormValue = (name: string,value: string,type: string) => {
-    
+    devLog("updateObjectSwitchFormValue (name)",name)
+    devLog("updateObjectSwitchFormValue (value)",value)
+    devLog("updateObjectSwitchFormValue (type)",type)
     currentObject.current[name]=value;
+    devLog("updateObjectSwitchFormValue (currentObject.current)",currentObject.current)
+    onUpdate(name,value)
     
   }
 
-  /*
-  const updateFormValue = () => {
-    if(onValidate(inputRef.current?.value)) {
-      setIsValid(true)
-      if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
-        setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: String(label)}} />)
-        setIsValid(false)
-        setCanSave(false)  
-        onUpdate(type,"");
-      } else {
-        setCanSave(true) 
-        if(inputRef.current?.value) {
-          onUpdate(type,inputRef.current.value);  
-        } else {
-          onUpdate(type,"");
-        }
-        setUsedHelperText(<></>)
-      }
-      
-    } else {
-      setUsedHelperText(helperText(inputRef.current?.value))
-      setIsValid(false)  
-      setCanSave(false)
-      onUpdate(type,"");
-    }
-  };
-  */
   const deleteObject = (index:number) => {
     devLog("deleteObject (index) ",index)
     onDelete(object.type,index);
@@ -161,8 +158,8 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   };
   
   if(isEditable) {
-    devLog("updateMultivalueMetadata looppi (objectForm)",object.content)
-    return (<Grid container >
+    
+    return (<Grid key={object.name} container >
       
       {object.content.length===0&&mandatory&&(<Box sx={{ color: "#db2828" }}><FormattedMessage defaultMessage="ei arvoja, pakollinen" /></Box>)
           }
@@ -208,8 +205,8 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
             (a, b) => (a.label ?? a.name!).localeCompare(b.label ?? b.name!)
           )
           .map((configuration) => {
-                    
-            //console.log("***** ObjectForm (configuration): ",configuration)
+                                                     
+                  devLog("ObjectForm (configuration)",configuration)
 
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
@@ -229,71 +226,91 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     
                     return vHelperText(configuration.validation,value)
                   }
-                  
-                  console.log("**** ObjectForm (configuration): ",configuration)
-                  console.log("**** ObjectForm (object): ",object)
-                  console.log("**** ObjectForm (integrationType): ",integrationType)
-
-
-                  console.log("ObjectForm 1: ",object)
-                  console.log("ObjectForm 2: ",configuration)
-                  console.log("ObjectForm 3: ",configuration.integrationType.find(c=>c.name===integrationType))
                                   
                   const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===integrationType) || defaultIntegrationType;
 
-                  devLog("roleConfiguration",roleConfiguration)
-                  devLog("inputValue.current",inputValue.current)
-
-                  configuration.integrationType.filter(i=>i.name===integrationType)
+                  devLog("ObjectForm (roleConfiguration)",roleConfiguration) 
+                  //configuration.integrationType.find(i=>i.name===integrationType)
                   const attribute = { type: configuration.type, 
-                                          content: roleConfiguration?.defaultValue||'',
+                                          content: roleConfiguration?.defaultValue,
                                           name: configuration.name}
+                  
+                  if(!currentObject.current.hasOwnProperty(configuration.name)) {
+                    devLog("ObjectForm (reset)",configuration.name)   
+                    if(roleConfiguration.defaultValue !== undefined) {
+                      attribute.content=roleConfiguration?.defaultValue
+                    } else {
+                      attribute.content=''
+                    }                
+                    
+                  } 
+
+                  //If not default value for switch, then take first enum
+                  if(configuration?.enum?.length===2&&attribute.content==='') {
+                    attribute.content=configuration.enum[0];
+                  }
+
+                  //Initialize switchvalue currentObject                
+                  if(configuration?.enum?.length===2&&configuration.multivalue===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                    devLog("ObjectForm (switch init)",configuration.name)
+                    currentObject.current[configuration.name]=attribute.content;
+                    resetStat.current[configuration.name]=false
+                    //updateObjectSwitchFormValue(configuration.name,attribute.content,attribute.type)
+                  }
+                  
+                  devLog("ObjectForm (attribute init)",attribute)  
+                  devLog("ObjectForm (currentObject.current)",currentObject.current)  
+                    
+                    //Initialize multivalue currentObject
+                    if(configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                        devLog("ObjectForm (multivalue init)",configuration.name)  
+                        currentObject.current[configuration.name]=attribute.content||[];
+                        resetStat.current[configuration.name]=false
+                        
+                    }
+                    
+                    //Initialize siglevalue currentObject
+                    if(!configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                        devLog("ObjectForm (siglevalue init)",configuration.name)                             
+                        currentObject.current[configuration.name]=attribute.content||'';
+                        resetStat.current[configuration.name]=false
+                    }    
 
                     
                     
-                    if(configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                        currentObject.current[configuration.name]=[];
-                    }
-                    /*
-                    if(configuration?.enum?.length===2&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                        currentObject.current[configuration.name]=configuration.enum[0];
-                    }
-                        */
-                    if(!configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                        currentObject.current[configuration.name]=roleConfiguration?.defaultValue||'';
-                    }    
                     if(roleConfiguration?.index&&roleConfiguration.index==='auto') {
-                      
-                      var newIndex=0
-                      var newIndexFound=false
-                      object.content.forEach((element: any) => {
-                        if(!newIndexFound) {                    
-                          if(element[configuration.name]!==undefined&&newIndex===element[configuration.name]) {
-                            newIndex++
-                          } else {
-                            if(object.content.filter(o=>o[configuration.name]!==undefined&&newIndex===o[configuration.name]).length===0) {
-                              newIndexFound=true;                            
-                            } else {
+                        devLog("ObjectForm (index init)",configuration.name)
+                        var newIndex=0
+                        var newIndexFound=false
+                        object.content.forEach((element: any) => {
+                          if(!newIndexFound) {                    
+                            if(element[configuration.name]!==undefined&&newIndex===element[configuration.name]) {
                               newIndex++
+                            } else {
+                              if(object.content.filter((o:any)=>o[configuration.name]!==undefined&&newIndex===o[configuration.name]).length===0) {
+                                newIndexFound=true;                            
+                              } else {
+                                newIndex++
+                              }
+                              
                             }
-                            
                           }
-                        }
-                        
                       });
                       
                       attribute.content=String(newIndex);
                       currentObject.current[configuration.name]=newIndex;
+                      resetStat.current[configuration.name]=false
                     }
 
                     if(inputValue.current&&inputValue.current[object.name]) {
                       console.log("********************* configuration.name",configuration.name)
                       console.log("********************* currentObject.current[configuration.name]",currentObject.current[configuration.name])
                       console.log("********************* inputValue.current[object.name]",inputValue.current[object.name][configuration.name])
-                      attribute.content=inputValue.current[object.name][configuration.name];
+                      //attribute.content=inputValue.current[object.name][configuration.name];                    
                     }
                     setCanSave(validateObject())
-                    devLog("objectForm",currentObject.current)
+                    devLog("ObjectForm (currentObject post)",currentObject.current)
+                    devLog("ObjectForm (attribute post)",attribute)
                   
                     if(roleConfiguration.visible) {
                       return (
@@ -324,8 +341,8 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         variant="caption"
                                     >                                    
                                         {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
-                                        (<SwitchForm key={object.name} 
-                                            object={object} 
+                                        (<SwitchForm key={object.name}                                             
+                                            object={attribute} 
                                             path="content" 
                                             type={configuration.name!} 
                                             values={configuration.enum}
@@ -340,6 +357,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         }                                    
                                         {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
                                         (<InputForm key={object.name} 
+                                            reload={reload}
                                             object={attribute} 
                                             path="content" 
                                             type={configuration.name!} 

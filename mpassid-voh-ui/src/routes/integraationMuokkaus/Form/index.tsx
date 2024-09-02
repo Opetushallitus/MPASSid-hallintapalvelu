@@ -139,6 +139,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
     const currentObject= useRef<any>({});
     const pressButtonRef= useRef<any>(true);
+    const cleanObjectDataRef= useRef<any>(true);
     const [ canSaveItem, setCanSaveItem ] = useState(true)
     //const [ object, setObject ] = useState<any>(attribute)
 
@@ -235,8 +236,10 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         devLog("updateListObject (currentObject)",currentObject.current)
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
+        
         onUpdate(attribute.name,currentObject.current)
-        currentObject.current={}
+        cleanObjectDataRef.current.clean()
+        //currentObject.current={}
     }
 
     /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
@@ -301,6 +304,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 attributeType={"metadata"}
                                 helperText={helperText}
                                 setCanSave={setCanSaveItem}
+                                cleanObject={cleanObjectDataRef}
                                 currentObject={currentObject}/>)
                             }
                             {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&

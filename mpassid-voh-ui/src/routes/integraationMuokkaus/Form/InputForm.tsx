@@ -13,13 +13,14 @@ interface Props {
   isEditable: boolean;
   mandatory: boolean;
   path: any;
+  reload?: boolean;
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
   onUpdate: (name: string,value: string,type: string) => void;
   onValidate: (data:string) => boolean;
 }
 
-export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
+export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave, reload }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
 
@@ -31,14 +32,24 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
 
   //console.log("********* InputForm(object): ",object)
   useEffect(() => {
+      if(inputRef.current) {
+        if(defaultValue) {
+          inputRef.current.value=defaultValue
+        } else {
+          inputRef.current.value=''
+        }
+      }
+  }, [defaultValue, reload]);
+  
+  useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
       setIsValid(false)      
       setCanSave(false)  
     }
     
-  }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
-  
+  }, [ reload ]);
+
   const updateFormValue = () => {
 
     console.log("*************** updateFormValue: ",inputRef.current?.value)

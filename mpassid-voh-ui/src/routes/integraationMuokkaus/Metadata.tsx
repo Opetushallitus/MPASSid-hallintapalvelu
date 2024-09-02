@@ -9,7 +9,7 @@ import { dataConfiguration, defaultIntegrationType, IntegrationType, UiConfigura
 import { useIntl } from 'react-intl';
 import { helperText, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
-import { clone } from "lodash";
+import { clone, isEqual } from "lodash";
 import { devLog } from "@/utils/devLog";
 
 
@@ -86,7 +86,8 @@ export default function Metadata({
       }    
       newConfigurationEntityData.sp.metadata=metadata
     }
-    devLog("validateMetadata (updateMetadata)", validateMetadata())
+    devLog("updateMetadata (validateMetadata)", validateMetadata())
+    devLog("updateMetadata (isEqual)", isEqual(newConfigurationEntityData,configurationEntity))
     if(validateMetadata()) {
       setCanSave(true)
     } else {
@@ -221,14 +222,14 @@ export default function Metadata({
                         devLog("MetadataForm onUpdate (name)",name)
                         devLog("MetadataForm onUpdate (value)",value)
                         if(configuration?.enum&&configuration.enum.length>0) {
-                          devLog("MetadataForm attribute (enum)",attribute)
+                          devLog("MetadataForm onUpdate (attribute enum)",attribute)
                           return updateMetadata(false,name,value);
                         } else {
                           if(configuration.multivalue) {
-                            devLog("MetadataForm attribute (multivalue)",attribute)
+                            devLog("MetadataForm onUpdate (attribute multivalue)",attribute)                            
                             return updateMetadata(configuration.multivalue,name,value);
                           } else {
-                            devLog("MetadataForm attribute (siglevalue)",attribute)
+                            devLog("MetadataForm onUpdate (attribute siglevalue)",attribute)
                             return updateMetadata(false,name,value);
                           }
                           
