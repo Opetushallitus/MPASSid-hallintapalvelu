@@ -93,6 +93,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         }
         
         setNewIntegration(cloneDeep(integration))
+        
         setNewConfigurationEntityData(cloneDeep(integration.configurationEntity))
         if(integration?.discoveryInformation){
           setNewDiscoveryInformation(cloneDeep(integration.discoveryInformation))
@@ -105,7 +106,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         
       }
       
-    }, [role, integration, setNewIntegration,newEnvironment, setMetadata]);
+    }, [role, integration, name, setNewIntegration,newEnvironment, setMetadata]);
     
     useEffect(() => {
       if(newConfigurationEntityData&&type!=='unknown') {
@@ -133,6 +134,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             if(metadata.entityId&&newConfigurationEntityData.sp) {
               const samlServiceProvider:Components.Schemas.SamlServiceProvider = cloneDeep(newConfigurationEntityData.sp)
               samlServiceProvider.entityId=metadata.entityId;
+              if(name) {
+                devLog("newConfigurationEntityData (name)",name)
+                samlServiceProvider.name=name;
+              }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
               newConfiguration.sp=samlServiceProvider;
               setShowConfigurationEntityData(newConfiguration)
@@ -143,6 +148,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             if(metadata.clientId&&newConfigurationEntityData.sp) {
               const oidcServiceProvider:Components.Schemas.OidcServiceProvider = cloneDeep(newConfigurationEntityData.sp)
               oidcServiceProvider.clientId=metadata.clientId;
+              if(name) {
+                devLog("newConfigurationEntityData (name)",name)
+                oidcServiceProvider.name=name;
+              }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
               newConfiguration.sp=oidcServiceProvider;
               setShowConfigurationEntityData(newConfigurationEntityData);
@@ -200,6 +209,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 if(role==='sp'&&integration.configurationEntity&&integration.configurationEntity.sp&&newConfigurationEntityData.sp&&integration.configurationEntity.sp.type==='saml') {
                   const samlSP:Components.Schemas.SamlServiceProvider = clone(newConfigurationEntityData.sp);
                   samlSP.entityId=metadata.entityId;
+                  samlSP.name=name;
                   changedIntegration.configurationEntity.sp=samlSP
                 }
                 if(changedIntegration?.discoveryInformation&&changedIntegration.discoveryInformation?.showSchools&&(changedIntegration.discoveryInformation.title===''||changedIntegration.discoveryInformation.title===undefined)) {

@@ -154,8 +154,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     }
 
     const listOnValidate  = (data:string) => {
-        devLog("************ listOnValidate (data)",data)
-        devLog("************ listOnValidate (canSaveItem)",canSaveItem)
+        devLog("listOnValidate (data)",data)
+        devLog("listOnValidate (canSaveItem)",canSaveItem)
         return onValidate(data);
     }
     

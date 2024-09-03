@@ -20,6 +20,7 @@ export default function IntegraatioMuokkaus() {
   const { id } = useParams();
   const [saveDialogState, setSaveDialogState] = useState(true);
   const [canSave, setCanSave] = useState(false);
+  const [name, setName] = useState(false);
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration|undefined>();
   const navigate = useNavigate();
   const [openConfirmation, setOpenConfirmation] = useState(false);

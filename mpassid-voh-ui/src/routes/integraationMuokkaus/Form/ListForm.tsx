@@ -107,16 +107,12 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     var value=''
     if(inputRef.current?.value) {
       value=inputRef.current.value
-      console.log("********** 0")
     }
   
-    console.log("***************** inputRef.current!.value  >"+value+"<")
     if(onValidate(value)) {
-      console.log("********** 1")
       setUsedHelperText(<></>)
       setIsValid(true)    
     } else {
-      console.log("********** 2")
       setUsedHelperText(helperText(value))
       setIsValid(false)  
     }

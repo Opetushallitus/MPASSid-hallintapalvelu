@@ -107,9 +107,6 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         }
     }, [open]);
 
-
-    devLog("********* service",service)
-
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{

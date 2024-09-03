@@ -24,14 +24,11 @@ interface Props {
 export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave, reload=false, noErros=false }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
-
-  console.log("***** object",object)
   
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 
-  //console.log("********* InputForm(object): ",object)
   useEffect(() => {
       if(inputRef.current) {
         if(defaultValue) {

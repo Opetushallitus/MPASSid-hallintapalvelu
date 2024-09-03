@@ -46,7 +46,7 @@ function PossibleServices({oid,handleService}: Props) {
     }
 
     const addEnv = (value:number|undefined) => {
-        devLog("addEnv",value)
+        
         if(value !== undefined) {
             if(value===0) {
                 return <FormattedMessage defaultMessage="Testi" />
