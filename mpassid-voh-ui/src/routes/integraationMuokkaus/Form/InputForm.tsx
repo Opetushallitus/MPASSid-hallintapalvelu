@@ -14,13 +14,14 @@ interface Props {
   mandatory: boolean;
   path: any;
   reload?: boolean;
+  noErros?: boolean;
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
   onUpdate: (name: string,value: string,type: string) => void;
   onValidate: (data:string) => boolean;
 }
 
-export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave, reload }: Props) {
+export default function InputForm({ object, type, isEditable=false, mandatory=false, helperText, path, onUpdate, onValidate, attributeType, label,setCanSave, reload=false, noErros=false }: Props) {
   const intl = useIntl();
   const defaultValue = get(object, path);
 
@@ -48,11 +49,9 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
       setCanSave(false)  
     }
     
-  }, [ reload ]);
+  }, [label, mandatory, reload, setCanSave]);
 
   const updateFormValue = () => {
-
-    console.log("*************** updateFormValue: ",inputRef.current?.value)
 
     if(onValidate(inputRef.current?.value)) {
       setIsValid(true)
@@ -62,7 +61,6 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
         setCanSave(false)  
         onUpdate(type,"",attributeType);
       } else {
-        console.log("*************** updateFormValue1: ",inputRef.current?.value)
         setCanSave(true) 
         if(inputRef.current?.value) {
           onUpdate(type,inputRef.current.value,attributeType);  
@@ -92,7 +90,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
           )}
           defaultValue={defaultValue}
           fullWidth
-          error={!isValid}
+          error={!isValid&&!noErros}
           helperText={usedHelperText}
           inputProps={{
             ref: inputRef,

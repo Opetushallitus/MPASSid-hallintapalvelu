@@ -149,7 +149,6 @@ export default function Metadata({
     const providerData:Components.Schemas.ServiceProvider = configurationEntity[role]!;
    
     if (role&&providerData !== undefined&&providerData.metadata && providerData.metadata !== undefined) {  
-      console.log("**************** providerData.metadata",providerData.metadata)
       const value = providerData.metadata.encoding && providerData.metadata.content !== undefined
         ? atob(providerData.metadata.content as unknown as string)
         : JSON.stringify(providerData.metadata.content, null, 2);

@@ -4,35 +4,59 @@ import { FormattedMessage } from 'react-intl';
 import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
 import InputForm from "../Form/InputForm";
-import { Dispatch, useRef } from "react";
+import type { Dispatch} from "react";
+import { useEffect, useRef } from "react";
+import { devLog } from "@/utils/devLog";
+import { helperText, validate } from "@/utils/Validators";
+import { dataConfiguration, defaultDataConfiguration, UiConfiguration } from "@/config";
 
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
   environment: number;
   setName: Dispatch<string>;
+  setCanSave: Dispatch<boolean>;
 }
 
-export default function ServiceProvider({ integration, setName }: Props) {
+export default function ServiceProvider({ integration, setName, setCanSave }: Props) {
   const currentName = useRef<string>(integration.configurationEntity?.sp?.name||'ERROR');
   const serviceProvider = integration.configurationEntity!.sp!;
+  const configuration:UiConfiguration = dataConfiguration.filter(conf=>conf.type&&conf.type==='integrationDetails').find(conf=>conf.name&&conf.name==='serviceName') || defaultDataConfiguration;
 
-  const updateName = (name: string,value: string,type: string) => {
-    console.log("********* name: ",name,value,type)
-    if(name) {
-      setName(name);
+  useEffect(() => {
+    devLog("ServiceProvider (currentName)",currentName)
+    if(currentName.current===''||currentName.current==='uusi'){
+      setCanSave(false);
+    } else {
+      setCanSave(true);
     }
     
-  }
+  }, [currentName, setCanSave]);
 
-  const validateName = (name:string) => {
-    console.log("********* name: ",name)
-    return true
+  const updateName = (name: string,value: string,type: string) => {
+    devLog("ServiceProvider (updateName)",value)
+    currentName.current=value
+    setName(value)
   }
 
   const canSave = (data:boolean) => {
-    console.log("********* data: ",data)
-    return true
+    devLog("ServiceProvider (canSave)",data)
+    setCanSave(data)
+  }
+
+  const validator = (value:string) => {
+    devLog("ServiceProvider validator ( configuration.name)", configuration.name)
+    devLog("ServiceProvider validator (configuration)",configuration)
+    devLog("ServiceProvider validator (value)",value)
+    return validate(configuration.validation,value);
+  }
+
+  const helpGeneratorText = (value:string) => {
+    devLog("helpGeneratorText ( configuration.name)", configuration.name)
+    devLog("helpGeneratorText (configuration)",configuration)
+    devLog("helpGeneratorText (value)",value)
+    
+    return helperText(configuration.validation,value)
   }
 
   return (
@@ -70,14 +94,12 @@ export default function ServiceProvider({ integration, setName }: Props) {
                 type={""} label={""} 
                 attributeType={""} 
                 isEditable={serviceProvider.name==='uusi'} 
-                mandatory={false} 
+                mandatory={true} 
                 path={"undefined"} 
-                helperText={function (data: string): JSX.Element {
-                  throw new Error("Function not implemented.");
-                } } 
+                helperText={helpGeneratorText} 
                 setCanSave={canSave} 
                 onUpdate={updateName} 
-                onValidate={validateName}></InputForm>
+                onValidate={validator}></InputForm>
         </Grid>
       </>)}
         <DataRow object={serviceProvider} path="type" type={Type} />

@@ -78,6 +78,10 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
       devLog("ObjectForm (clean)",resetStat.current)
       devLog("ObjectForm (clean)",currentObject.current)
       
+    },
+    validate() {
+      devLog("ObjectForm (validateObject)",currentObject.current)
+      return validateObject()
     }
     
   }));
@@ -87,18 +91,19 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     mandatoryAttributes.forEach(ma=>{
       
       devLog("validateObject (mandatoryAttribute)",ma)
-      devLog("validateObject (mandatoryAttribute)",object)
-      /*
-      devLog("validateMetadata (mandatoryAttribute "+ma+")",metadata[ma])
-      if(metadata[ma] === undefined) {
+      //devLog("validateObject (mandatoryAttribute)",object[ma])
+      //devLog("validateObject (mandatoryAttribute "+ma+")",currentObject.current)
+      devLog("validateObject (mandatoryAttribute "+ma+")",currentObject.current[ma])
+      
+      if(currentObject.current[ma] === undefined) {
         result = false
       }
-      if(metadata[ma] !== undefined&&metadata[ma].length===0) {
+      if(currentObject.current[ma] !== undefined&&currentObject.current[ma].length===0) {
         result = false
       }
-      */
+      
     })
-    
+    devLog("validateObject (result)",result)
     return result
   }
   
@@ -302,7 +307,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                       resetStat.current[configuration.name]=false
                     }
 
-                    if(inputValue.current&&inputValue.current[object.name]) {
+                    if(inputValue.current&&!inputValue.current[object.name]) {
                       console.log("********************* configuration.name",configuration.name)
                       console.log("********************* currentObject.current[configuration.name]",currentObject.current[configuration.name])
                       console.log("********************* inputValue.current[object.name]",inputValue.current[object.name][configuration.name])
@@ -360,6 +365,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                             reload={reload}
                                             object={attribute} 
                                             path="content" 
+                                            noErros={true}
                                             type={configuration.name!} 
                                             isEditable={roleConfiguration.editable} 
                                             onUpdate={updateObjectInputFormValue} 
@@ -381,7 +387,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                           attributeType={configuration.type}
                                           onValidate={onValidate}
                                           helperText={helpGeneratorText}
-    
+                                          
                                           setCanSave={setCanSave} onUpdate={function (name: string, data: any): void {
                                               throw new Error("Function not implemented.");
                                           } }/>)}

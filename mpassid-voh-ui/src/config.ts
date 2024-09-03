@@ -356,13 +356,13 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'post_logout_redirect_uris',
       type: 'metadata',
-      mandatory: true,
+      mandatory: false,
       multivalue: true,
       validation: [ ],
       integrationType: [
           {
               name: 'oidc',
-              editable: true,
+              editable: false,
               visible: true,
           }
       ]
@@ -377,7 +377,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -387,7 +387,7 @@ export const dataConfiguration:UiConfiguration[] = [
         type: 'metadata',
         mandatory: true,
         multivalue: true,
-        validation: [ 'uri', 'nohash' ],
+        validation: [ 'uri' ],
         //validation: [ ],
         integrationType: [
             {
@@ -398,6 +398,22 @@ export const dataConfiguration:UiConfiguration[] = [
         ]
   },
   {
+    name: 'redirect_uris',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: true,
+    environment: 1,
+    validation: [ 'uri', 'https', 'nolocalhost' ],
+    //validation: [ ],
+    integrationType: [
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+  },
+  {
     name: 'scope',
     type: 'metadata',
     mandatory: true,
@@ -406,7 +422,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -420,7 +436,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -434,7 +450,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -448,7 +464,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -629,6 +645,26 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: true,
             visible: true,
+            defaultValue: false
+        }
+    ]
+  },
+  {
+    name: 'serviceName',
+    type: 'integrationDetails',
+    mandatory: true,
+    multivalue: false,
+    validation: [ 'notempty'],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
         }
     ]
   },
@@ -760,7 +796,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: false,
-            attribute: 'clientId'
+            attribute: 'client_id'
         }
       ]
   },

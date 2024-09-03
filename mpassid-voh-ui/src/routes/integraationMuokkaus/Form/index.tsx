@@ -232,14 +232,15 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         //currentObject.current={}
     }
     const updateListObject = () => {
+        
         devLog("updateListObject (attribute)",attribute)
         devLog("updateListObject (currentObject)",currentObject.current)
-        //console.log("*** currentObject.current: ",currentObject.current)
-        //TODO: MANDATORY CHECK for object values, if valid update ....
         
-        onUpdate(attribute.name,currentObject.current)
-        cleanObjectDataRef.current.clean()
-        //currentObject.current={}
+        if(cleanObjectDataRef.current.validate()) {
+            onUpdate(attribute.name,currentObject.current)
+            cleanObjectDataRef.current.clean()
+        }
+        
     }
 
     /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
@@ -356,7 +357,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     helperText={helperText}
                                     setCanSave={setCanSaveItem}/>)
                             }
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&configuration.object&&
+                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&configuration.object&&roleConfiguration.editable&&
                             (<Grid container spacing={2} >
                                 <Grid item xs={10}></Grid>
                                 <Grid item xs={2}>
@@ -374,6 +375,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
                                 (<ListForm key={attribute.name}
                                 object={attribute}
+                                noErrors={true}
                                 type={attribute.name!}
                                 isEditable={roleConfiguration.editable}
                                 mandatory={configuration.mandatory}
@@ -384,7 +386,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 onUpdate={onUpdate} 
                                 pressButton={pressButtonRef}
                                 setCanSave={setCanSaveItem}/>)}        
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
+                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&roleConfiguration.editable&&
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>

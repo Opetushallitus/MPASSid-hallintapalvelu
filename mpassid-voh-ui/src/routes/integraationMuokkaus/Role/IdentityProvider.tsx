@@ -15,6 +15,7 @@ import { Dispatch } from "react";
 interface Props {
   integration: Components.Schemas.Integration;
   setName?: Dispatch<string>;
+  setCanSave?: Dispatch<boolean>;
 }
 
 export default function Koulutustoimija({ integration }: Props) {

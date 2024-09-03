@@ -9,7 +9,7 @@ import {
   Typography
 } from "@mui/material";
 import type { Dispatch} from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, isValidElement } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from "react-router-dom";
 import Role from "./Role";
@@ -40,6 +40,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [isValidDataAttribute, setIsValidDataAttribute] = useState(true);
     const [isValidUserAttribute, setIsValidUserAttribute] = useState(true);
     const [isValidMetadata, setIsValidMetadata] = useState(true);
+    const [isValidRoleDetails, setIsValidRoleDetails] = useState(true);
     const [newLogo, setNewLogo] = useState(false);
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
@@ -75,6 +76,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
       } 
       
     }, [integration]);
+
+    useEffect(() => {
+      devLog("ServiceProvider (name)",name)
+      devLog("ServiceProvider (isValidRoleDetails)",isValidRoleDetails)
+      
+    }, [name,isValidRoleDetails]);
     
     useEffect(() => {
       
@@ -155,11 +162,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
 
           if(newConfigurationEntityData) {
-            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
+            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
             devLog("isvalid newConfigurationEntityData (isValidDataAttribute)",isValidDataAttribute)
             devLog("isvalid newConfigurationEntityData (isValidUserAttribute)",isValidUserAttribute)
             devLog("isvalid newConfigurationEntityData (isValidMetadata)",isValidMetadata)
             devLog("isvalid newConfigurationEntityData (isValidSchoolSelection)",isValidSchoolSelection)
+            devLog("isvalid newConfigurationEntityData (isValidRoleDetails)",isValidRoleDetails)
             
             const logoOK=(role==='sp'||
                           newLogo||
@@ -206,16 +214,18 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection, setNewIntegration, newLogo, role, newDiscoveryInformation, newEnvironment,metadata]);
+    }, [newConfigurationEntityData, integration, setCanSave, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection,isValidRoleDetails, setNewIntegration, newLogo, role, newDiscoveryInformation, newEnvironment,metadata,name]);
 
     useEffect(() => {
       
       if(newDiscoveryInformation !== undefined) {
-        const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection;
+        const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
         devLog("isvalid newDiscoveryInformation (isValidDataAttribute)",isValidDataAttribute)
             devLog("isvalid newDiscoveryInformation (isValidUserAttribute)",isValidUserAttribute)
             devLog("isvalid newDiscoveryInformation (isValidMetadata)",isValidMetadata)
             devLog("isvalid newDiscoveryInformation (isValidSchoolSelection)",isValidSchoolSelection)
+            devLog("isvalid newDiscoveryInformation (isValidRoleDetails)",isValidRoleDetails)
+            
         
         const logoOK=(role==='sp'||
                           newLogo||
@@ -261,7 +271,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           
       }
     
-}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, newLogo, isValidDataAttribute, isValidUserAttribute, isValidMetadata,newEnvironment]);
+}, [newDiscoveryInformation, integration, setCanSave, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, newLogo, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidRoleDetails,newEnvironment]);
 
     var hasAttributes =
                 role === "idp" &&
@@ -314,7 +324,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} environment={environment} setNewEnvironment={setNewEnvironment} newEnvironment={newEnvironment} metadata={metadata}/>
         )}    
         
-        <Role integration={integration} oid={oid} environment={environment.current} setName={setName}/>
+        <Role integration={integration} oid={oid} environment={environment.current} setName={setName} setCanSave={setIsValidRoleDetails}/>
 
         {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>

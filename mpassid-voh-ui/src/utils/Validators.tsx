@@ -2,50 +2,56 @@ import { FormattedMessage } from 'react-intl';
 import { devLog } from './devLog';
 
 const validateUri = (value:string) => {
-      
-    var urlPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
+    
+    var regExpPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|localhost|'+ // validate domain name 
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
       '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
       '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
       '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
-      return !!urlPattern.test(value);
+      return !!regExpPattern.test(value);
 
   }
 
   const validateHttps = (value:string) => {
       
-    var urlPattern = new RegExp('^((https):\\/\\/)'); 
-      return !!urlPattern.test(value);
+    var regExpPattern = new RegExp('^((https):\\/\\/)'); 
+      return !!regExpPattern.test(value);
 
   }  
 
 const validateIpAddress = (value:string) => {
       
-    const urlPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
-    return !!urlPattern.test(value);
+    const regExpPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
+    return !!regExpPattern.test(value);
 
   }
 
 const validateHostname = (value:string) => {
       
-    const urlPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'); 
-    return !!urlPattern.test(value);
+    const regExpPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'); 
+    return !!regExpPattern.test(value);
 
 }
 
 const validateNumber = (value:string) => {
       
-    const urlPattern = new RegExp('^([0-9]*)$'); 
-    return !!urlPattern.test(value);
+    const regExpPattern = new RegExp('^([0-9]*)$'); 
+    return !!regExpPattern.test(value);
 
 }
 
 const validateNoHash = (value:string) => {
       
-    const urlPattern = new RegExp('^[^#]+$'); 
-    return !!urlPattern.test(value);
+    const regExpPattern = new RegExp('^[^#]+$'); 
+    return !!regExpPattern.test(value);
 
+}
+
+const validateNoLocalhost = (value:string) => {
+    const regExpPattern = new RegExp('^((?!localhost|127.0.0.1).)*$'); 
+    return !!regExpPattern.test(value);
+    
 }
 
 export const validate = (validators:string[],value:string) => {
@@ -76,9 +82,12 @@ export const validate = (validators:string[],value:string) => {
                 case "nohash":
                     validateStatus=validateNoHash(value);
                     break;    
-                    case "https":
-                        validateStatus=validateHttps(value);
-                        break;        
+                case "https":
+                    validateStatus=validateHttps(value);
+                    break;
+                case "nolocalhost":
+                    validateStatus=validateNoLocalhost(value);
+                    break;         
                 default:
                     validateStatus=false;
                     console.warn("Unknown validation: ",validator)
@@ -135,12 +144,18 @@ export const helperText = (validators:string[],value:string) => {
                         helperText=<FormattedMessage defaultMessage="Kentässä ei saa olla # merkkiä!" />
                     }
                     break;
-                    case "https":
-                        validateStatus=validateHttps(value);
-                        if(!validateStatus) {
-                            helperText=<FormattedMessage defaultMessage="Kentän pitää olla https muodossa!" />
-                        }
-                        break;       
+                case "https":
+                    validateStatus=validateHttps(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentän pitää olla https muodossa!" />
+                    }
+                    break;
+                case "nolocalhost":
+                    validateStatus=validateNoLocalhost(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Localhost ei ole sallittu!" />
+                    }
+                    break;       
                 default:
                     validateStatus=false;
                     if(!validateStatus) {

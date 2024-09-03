@@ -20,6 +20,7 @@ interface Props {
   type: string;
   isEditable?: boolean;
   mandatory: boolean;
+  noErrors?: boolean;
   attributeType: string;
   index?: number;
   helperText: (data: string) => JSX.Element;
@@ -29,7 +30,7 @@ interface Props {
   pressButton?: any;
 }
 
-export default function ListForm({ object, type, isEditable=false, mandatory=false, index=0, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton }: Props) {
+export default function ListForm({ object, type, isEditable=false, mandatory=false, index=0, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton, noErrors=false }: Props) {
   const intl = useIntl();
   const defaultValue = object;
   const [isEmpty, setIsEmpty] = useState(!defaultValue);
@@ -194,7 +195,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
           )}
           name={type}
           fullWidth
-          error={!isValid}
+          error={!isValid&&!noErrors}
           helperText={usedHelperText}
           inputProps={{
             ref: inputRef,
@@ -213,7 +214,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     );
   } else {
     return(<List >
-      {object.map((value: any,index: number) => (
+      {object.content.map((value: any,index: number) => (
         <ListItem
           key={value}
           disableGutters

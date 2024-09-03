@@ -10,6 +10,7 @@ interface Props {
   oid: string;
   environment: number;
   setName: Dispatch<string>;
+  setCanSave: Dispatch<boolean>;
 }
 
 const roleComponents = {
@@ -18,14 +19,18 @@ const roleComponents = {
   set: SetProvider
 };
 
-export default function Role({ integration, oid, environment, setName }: Props) {
+export default function Role({ integration, oid, environment, setName, setCanSave }: Props) {
   const role = getRole(integration);
 
   const Component = roleComponents[role];
 
+  const canSave = (value: boolean) => {
+    setCanSave(value)
+  }
+
   return (
     <>
-      <Component integration={integration} oid={oid} environment={environment} setName={setName}/>
+      <Component integration={integration} oid={oid} environment={environment} setName={setName} setCanSave={canSave}/>
     </>
   );
 }
