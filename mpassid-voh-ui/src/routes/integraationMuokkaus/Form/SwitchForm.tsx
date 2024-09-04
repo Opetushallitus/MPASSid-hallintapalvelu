@@ -23,13 +23,9 @@ interface Props {
 
 export default function SwitchForm({ object, type, isEditable=false, mandatory=false, values=[], helperText, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
   const intl = useIntl();
-  const [value, setValue] = useState<any>(object?.content);
-  
-  //console.log("***** SwitchForm (value): ",value)
+  const [value, setValue] = useState<boolean>(object?.content);
 
   const updateFormValue = (event: any) => {
-    
-        console.log("*** updateFormValue: ",event.target.checked)
     
         setCanSave(true) 
         onUpdate(type,event.target.checked,attributeType);

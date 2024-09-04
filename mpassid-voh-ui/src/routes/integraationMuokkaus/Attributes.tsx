@@ -6,6 +6,8 @@ import type { Dispatch} from "react";
 import AttributeForm from "./Form";
 import { dataConfiguration } from '../../config';
 import { helperText, validate } from "@/utils/Validators";
+import { devLog } from "@/utils/devLog";
+import { clone } from "lodash";
 
 interface Props {
   role?: any;
@@ -81,7 +83,8 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
                     if(attributes.filter(a => a.name === configuration.name).length===0||attributes.filter(a => a.name === configuration.name)[0].content=== undefined||attributes.filter(a => a.name === configuration.name)[0].content===''){
-                      
+                        devLog("attributes",attributes)
+                        devLog("configuration",configuration)                        
                         setCanSave(false)
                       
                       
@@ -93,6 +96,22 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   const helpGeneratorText = (value:string) => {
                     return helperText(configuration.validation,value);
                   }
+                  var useAttribute:Components.Schemas.Attribute
+                  if(attributes.find(a => a.name&&a.name === configuration.name)) {
+                    useAttribute=attributes.find(a => a.name&&a.name === configuration.name)||{ type: attributeType, content: '', name: 'configurationError' }
+                  } else {
+                    const testCOnfigurationEntity:any = clone(newConfigurationEntityData) 
+                    if(configuration?.name&&testCOnfigurationEntity?.idp?.[configuration.name]) {
+                      useAttribute={ type: attributeType, content: testCOnfigurationEntity.idp[configuration.name], name: configuration.name }
+                    } else {
+                      if(configuration.name) {
+                        useAttribute={ type: attributeType, content: '', name: configuration.name }
+                      } else {
+                        useAttribute={ type: attributeType, content: '', name: 'configurationError' }
+                      }
+                      
+                    }
+                  }
                   
                   return (<AttributeForm 
                     key={configuration.name!}
@@ -101,7 +120,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     newConfigurationEntityData={newConfigurationEntityData}
                     setNewConfigurationEntityData={setNewConfigurationEntityData}
                     uiConfiguration={configuration}
-                    attribute={attributes.find(a => a.name === configuration.name) || { type: attributeType, content: '', name: configuration.name }}
+                    attribute={useAttribute}
                     attributeType={attributeType!}
                     type={type}
                     role={role}

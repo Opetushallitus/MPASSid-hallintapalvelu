@@ -1,18 +1,21 @@
 import { getBlankIntegration } from "@/api";
+
 import { useMe } from "@/api/käyttöoikeus";
 import { getOrganisaatioNimet } from "@/api/organisaatio";
 import type { SelectChangeEvent} from "@mui/material";
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
 import type { Dispatch} from "react";
 import { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
+import { devLog } from "@/utils/devLog";
+import PossibleServices from "./PossibleServices";
 
 export const defaults = {
     typePI: "saml",
-    typesPI: [ "saml", "oidc" ],
-    //typesPI: [ "saml"],
+    //typesPI: [ "saml", "oidc" ],
+    typesPI: [ "saml"],
     typeOKJ: "wilma",
     //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
     typesOKJ: [ "wilma" ]
@@ -28,12 +31,19 @@ export const defaults = {
     name: string;
   }
 
+  interface serviceProps {
+    name:string;
+    environment:number;  
+    setId:number;  
+}  
+
 function NewIntegrationSelection({ open, setOpen}: Props) {
 
     const [organization, setOrganization] = useState('');
     const [integration, setIntegration] = useState('idp');
     const [type, setType] = useState(defaults.typeOKJ);
     const [types, setTypes] = useState(defaults.typesOKJ);
+    const [service, setService] = useState<serviceProps>();
     const me = useMe();
     const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
@@ -86,12 +96,41 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             
             
         }
-    }, [language, me]);    
+    }, [language, me]);
+
+    useEffect(() => {
+        
+        
+        if(open) {
+            setService(undefined)
+        }
+    }, [open]);
 
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
+                devLog("createIntegration (result)",result)
                 result.id=0;
+                if(result?.configurationEntity?.sp) {
+                    devLog("createIntegration (oldSet)",service)
+                    if(service!==undefined) {
+                        result.configurationEntity.sp.name=service.name
+                        result.deploymentPhase=service.environment
+                        result.integrationSets=[]
+                        result.integrationSets.push( { id: service.setId })
+
+                        
+                        devLog("createIntegration (type service.environment)",(typeof service.environment))
+                        devLog("createIntegration (service.environment)",service.environment)
+                    }
+                    
+                }
+                if(result?.configurationEntity?.idp) {
+                    result.deploymentPhase=1
+                    
+                    
+                }
+                devLog("createIntegration (integration)",result)
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
             })       
       };
@@ -119,6 +158,11 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         setType(value)
     }; 
 
+    const handleService = (value: serviceProps) => {
+        devLog("handleService",value)
+        setService(value)
+    }; 
+    
     return(<Dialog
         open={open}
         onClose={()=>setOpen(false)}
@@ -129,7 +173,6 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             <FormattedMessage defaultMessage="Luo uusi integraatio" />
         </DialogTitle>
         <DialogContent>
-        <DialogContentText id="alert-dialog-description">
             <Grid container spacing={2}>
                 <Grid item xs={4}>
                     <InputLabel id="organisaatio" sx={{ mr: 1, display: "inline", ml: "auto" }}>
@@ -199,15 +242,30 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         
                     </Select>
                 </Grid>
+                {integration==='sp'&&(<>
+                    <Grid item xs={4}>
+                        <InputLabel id="palvelu" sx={{ mr: 1, display: "inline", marginLeft: "auto" }}>
+                            <FormattedMessage defaultMessage="palvelu" />:
+                        </InputLabel>
+                    </Grid>
+                    <Grid item xs={8}>
+                        
+                            
+                            <PossibleServices oid={organization} handleService={handleService} />
+                            
+                        
+                    </Grid>
+                </>)}
             </Grid>
-        </DialogContentText>
+        
         </DialogContent>
         <DialogActions>
             
                 <Button sx={{ marginRight: "auto" }} onClick={()=>setOpen(false)} >
                     <FormattedMessage defaultMessage="Peruuta" />
                 </Button>                              
-                <Button onClick={createIntegration} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Luo" /></Button>
+                {!(!service&&integration==='sp')&&<Button onClick={createIntegration} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Luo" /></Button>}
+                {!service&&integration==='sp'&&<Button onClick={createIntegration} sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Luo" /></Button>}
             
         </DialogActions>
     </Dialog>)    

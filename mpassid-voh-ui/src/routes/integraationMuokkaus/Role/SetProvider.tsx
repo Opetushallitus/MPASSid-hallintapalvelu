@@ -3,9 +3,12 @@ import { Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
+import { Dispatch } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;
+  setName?: Dispatch<string>;
+  setCanSave?: Dispatch<boolean>;
 }
 
 export default function SetProvider({ integration }: Props) {

@@ -1,55 +1,96 @@
 import { FormattedMessage } from 'react-intl';
+import { devLog } from './devLog';
 
-const validateRedirectUri = (value:string) => {
-      
-    var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
+const validateUri = (value:string) => {
+    
+    var regExpPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|localhost|'+ // validate domain name 
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
       '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
       '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
       '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
-      return !!urlPattern.test(value);
+      return !!regExpPattern.test(value);
 
   }
 
+  const validateHttps = (value:string) => {
+      
+    var regExpPattern = new RegExp('^((https):\\/\\/)'); 
+      return !!regExpPattern.test(value);
+
+  }  
+
 const validateIpAddress = (value:string) => {
       
-    const urlPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
-    return !!urlPattern.test(value);
+    const regExpPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
+    return !!regExpPattern.test(value);
 
   }
 
 const validateHostname = (value:string) => {
       
-    const urlPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'); 
-    return !!urlPattern.test(value);
+    const regExpPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'); 
+    return !!regExpPattern.test(value);
 
 }
 
-const logValidateValue = (value:String) => {  
-    return true;
-  }
+const validateNumber = (value:string) => {
+      
+    const regExpPattern = new RegExp('^([0-9]*)$'); 
+    return !!regExpPattern.test(value);
+
+}
+
+const validateNoHash = (value:string) => {
+      
+    const regExpPattern = new RegExp('^[^#]+$'); 
+    return !!regExpPattern.test(value);
+
+}
+
+const validateNoLocalhost = (value:string) => {
+    const regExpPattern = new RegExp('^((?!localhost|127.0.0.1).)*$'); 
+    return !!regExpPattern.test(value);
+    
+}
 
 export const validate = (validators:string[],value:string) => {
     let validateStatus:boolean=true;
     validators.forEach(validator=>{
-        if(validateStatus&&value!='') {
+        if(validateStatus) {
             switch (validator)
             {
-                case "mandatory":
-                    if(!value||value==='') {
+                case "notempty":
+                    if(value===undefined||value==='') {                        
                         validateStatus=false
                     }
                     break;
                 case "hostname":
                     validateStatus=validateHostname(value);
                     break;
+                case "uri":
+                        validateStatus=validateUri(value);
+                        devLog("validate uri",value)
+                        devLog("validate uri",validateStatus)
+                    break;    
                 case "ip":
                     validateStatus=validateIpAddress(value);
                     break;
+                case "number":
+                    validateStatus=validateNumber(value);
+                    break; 
+                case "nohash":
+                    validateStatus=validateNoHash(value);
+                    break;    
+                case "https":
+                    validateStatus=validateHttps(value);
+                    break;
+                case "nolocalhost":
+                    validateStatus=validateNoLocalhost(value);
+                    break;         
                 default:
                     validateStatus=false;
-                    console.warn("Unknown validation!")
+                    console.warn("Unknown validation: ",validator)
                     break;
                 }
             }
@@ -65,12 +106,12 @@ export const helperText = (validators:string[],value:string) => {
         if(validateStatus) {
             switch (validator)
             {
-                case "mandatory":
-                    if(!value||value==='') {
+                case "notempty":
+                    if(value===undefined||value==='') {
                         validateStatus=false
                     }
                     if(!validateStatus) {
-                        helperText=<FormattedMessage defaultMessage="kenttä on pakollinen!" />
+                        helperText=<FormattedMessage defaultMessage="kentän arvon pitää olla vähintään yhden merkin!" />
                     }
                     break;
                 case "hostname":
@@ -79,12 +120,42 @@ export const helperText = (validators:string[],value:string) => {
                         helperText=<FormattedMessage defaultMessage="hostname ei ole validi!" />
                     }
                     break;
+                case "uri":
+                    validateStatus=validateUri(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="uri ei ole validi!" />
+                    }
+                    break;
                 case "ip":
                         validateStatus=validateIpAddress(value);
                         if(!validateStatus) {
                             helperText=<FormattedMessage defaultMessage="ip osoitte ei ole validi!" />
                         }
-                        break;    
+                        break;  
+                case "number":
+                    validateStatus=validateIpAddress(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentän arvon pitää olla numero!" />
+                    }
+                    break;      
+                case "nohash":
+                    validateStatus=validateNoHash(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentässä ei saa olla # merkkiä!" />
+                    }
+                    break;
+                case "https":
+                    validateStatus=validateHttps(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentän pitää olla https muodossa!" />
+                    }
+                    break;
+                case "nolocalhost":
+                    validateStatus=validateNoLocalhost(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Localhost ei ole sallittu!" />
+                    }
+                    break;       
                 default:
                     validateStatus=false;
                     if(!validateStatus) {
@@ -100,3 +171,22 @@ export const helperText = (validators:string[],value:string) => {
 }
 
 
+/*
+TODO: validator for certificate, e.g. using 
+
+https://github.com/PeculiarVentures/x509
+
+npm install @peculiar/x509
+
+import { X509Certificate } from '@peculiar/x509';
+
+const cert = new X509Certificate(inputRef.current!.value);
+      const certDetails = {
+        subject: cert.subjectName,
+        issuer: cert.issuerName,
+        validFrom: cert.notBefore,
+        validTo: cert.notAfter,
+        serialNumber: cert.serialNumber,
+      };
+
+*/      

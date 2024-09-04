@@ -1,3 +1,4 @@
+import { validate } from './utils/Validators';
 export const roles = ["idp", "sp", "set"] as const;
 export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
@@ -26,7 +27,8 @@ export interface IntegrationType {
     visible: boolean;
     attribute?: string;
     path?: string; 
-    defaultValue?: string;
+    defaultValue?: any;
+    index?: string;
 }
 export interface UiConfiguration {
   name: string;
@@ -35,7 +37,7 @@ export interface UiConfiguration {
   mandatory: boolean;
   multivalue?: boolean;
   object?: boolean;
-  enum?: boolean[]
+  enum?: any[]
   environment?: number;
   label?: string;
   validation: string[];
@@ -354,13 +356,13 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'post_logout_redirect_uris',
       type: 'metadata',
-      mandatory: true,
+      mandatory: false,
       multivalue: true,
-      validation: [],
+      validation: [ ],
       integrationType: [
           {
               name: 'oidc',
-              editable: true,
+              editable: false,
               visible: true,
           }
       ]
@@ -375,7 +377,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -385,8 +387,8 @@ export const dataConfiguration:UiConfiguration[] = [
         type: 'metadata',
         mandatory: true,
         multivalue: true,
-        //validation: [ 'fqdn', 'nohash', 'https' ],
-        validation: [ ],
+        validation: [ 'uri' ],
+        //validation: [ ],
         integrationType: [
             {
                 name: 'oidc',
@@ -394,6 +396,22 @@ export const dataConfiguration:UiConfiguration[] = [
                 visible: true,
             }
         ]
+  },
+  {
+    name: 'redirect_uris',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: true,
+    environment: 1,
+    validation: [ 'uri', 'https', 'nolocalhost' ],
+    //validation: [ ],
+    integrationType: [
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
   },
   {
     name: 'scope',
@@ -404,7 +422,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -418,7 +436,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -432,7 +450,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -446,7 +464,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -463,6 +481,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+            defaultValue: false
         },
         {
             name: 'oidc',
@@ -474,7 +493,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'signingCertificates0NotAfter',
     type: 'metadata',
-    mandatory: true,
+    mandatory: false,
     multivalue: false,
     validation: [ ],
     integrationType: [
@@ -522,6 +541,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+            defaultValue: true
         },
         {
             name: 'oidc',
@@ -533,7 +553,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'encryptionCertificates',
     type: 'metadata',
-    mandatory: true,
+    mandatory: false,
     multivalue: true,
     validation: [ ],
     integrationType: [
@@ -571,6 +591,26 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'signingCertificates',
     type: 'metadata',
+    mandatory: false,
+    multivalue: true,
+    validation: [ ],
+    environment: 0,
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
+    name: 'signingCertificates',
+    type: 'metadata',
     mandatory: true,
     multivalue: true,
     validation: [ ],
@@ -590,10 +630,31 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'allowtestlearnerid',
     type: 'data',
-    mandatory: true,
+    mandatory: false,
     multivalue: false,
     enum: [ true, false ],
     validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: true,
+            visible: true,
+            defaultValue: false
+        },
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+            defaultValue: false
+        }
+    ]
+  },
+  {
+    name: 'serviceName',
+    type: 'integrationDetails',
+    mandatory: true,
+    multivalue: false,
+    validation: [ 'notempty'],
     integrationType: [
         {
             name: 'saml',
@@ -612,12 +673,13 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
-    validation: [ ],
+    validation: [],
     integrationType: [
         {
             name: 'saml',
-            editable: true,
-            visible: true,
+            editable: false,
+            visible: false,
+            defaultValue: 'HTTP-POST'
         }
     ]
   },
@@ -626,12 +688,13 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
-    validation: [ ],
+    validation: ['number'],
     integrationType: [
         {
             name: 'saml',
-            editable: true,
+            editable: false,
             visible: true,
+            index: 'auto'
         }
     ]
   },
@@ -647,6 +710,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
+            defaultValue: false
         }
     ]
   },
@@ -655,7 +719,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
-    validation: [ ],
+    validation: [ 'uri', 'https' ],
     integrationType: [
         {
             name: 'saml',
@@ -677,6 +741,25 @@ export const dataConfiguration:UiConfiguration[] = [
               visible: true,              
           }
       ]
+  },
+  {
+    name: 'entityId',
+    type: 'data',
+    mandatory: false,
+    multivalue: false,
+    validation: [ 'uri' ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: false,
+            visible: false,              
+        },
+        {
+            name: 'azure',
+            editable: false,
+            visible: false,              
+        }
+    ]
   },
   {
       name: 'uniqueId',
@@ -708,8 +791,29 @@ export const dataConfiguration:UiConfiguration[] = [
             editable: false,
             visible: false,
             attribute: 'entityId'
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+            attribute: 'client_id'
         }
       ]
-  }
+  },
+  {
+    name: 'deploymentPhase',
+    type: 'root',
+    mandatory: false,
+    multivalue: true,
+    validation: [  ],
+    integrationType: [
+        {
+            name: 'wilma',
+            editable: true,
+            visible: true
+        }
+    ]
+}
+
 
 ]

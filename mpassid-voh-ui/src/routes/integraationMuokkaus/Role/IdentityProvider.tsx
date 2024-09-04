@@ -10,9 +10,12 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { DataRow, TextList } from "../../integraatio/IntegrationTab/DataRow"
 import LinkValue from "../LinkValue";
 import Type from "./Type";
+import { Dispatch } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;
+  setName?: Dispatch<string>;
+  setCanSave?: Dispatch<boolean>;
 }
 
 export default function Koulutustoimija({ integration }: Props) {

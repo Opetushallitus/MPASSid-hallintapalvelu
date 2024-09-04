@@ -6,7 +6,7 @@ export default function MpassSymboliIcon() {
 <SvgIcon>
 <svg width="24px" height="24px" viewBox="0 0 64 49" version="1.1" >
     <title>Symboli</title>
-    <g id="Eevan-logotyöstö-helmi-2022" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <g id="Eevan-logotyöstö-helmi-2022" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g id="Kirjautusmipainikkeiden-logot" transform="translate(-234.000000, -342.000000)">
             <g id="Symboli" transform="translate(234.553485, 342.404647)">
                 <g id="Ribbon-thicker" transform="translate(0.667205, -0.389849)">
