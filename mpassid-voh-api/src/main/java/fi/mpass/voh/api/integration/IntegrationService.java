@@ -60,6 +60,7 @@ import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
@@ -756,25 +757,58 @@ public class IntegrationService {
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
       // TODO authz
-      List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
-      if (availableId != null && !availableId.isEmpty()) {
-        integration.setId(availableId.get(0));
-        // set identity provider specific information, e.g. flowname
-        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+      if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+        // Create IDP
+        List<Long> availableIdpIds = integrationRepository.getAvailableIdpIntegrationIdentifier();
+        if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
+          integration.setId(availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
-              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableId.get(0));
+              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
-              .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableId.get(0));
+              .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableIdpIds.get(0));
+        } else {
+          // TODO the case of the first integration without preloaded integrations
+          logger.error("Failed to find an available idp integration identifier");
+          throw new EntityCreationException("Integration creation failed");
         }
-        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
-          logger.debug("Creating SAML Service Provider");
-        }
-        return integrationRepository.save(integration);
-      } else {
-        // TODO the case of the first integration without preloaded integrations
-        logger.error("Failed to find an available integration identifier");
-        throw new EntityCreationException("Integration creation failed");
       }
+      if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+        // Create SP
+        Long setId = 0L;
+        try {
+          setId = integration.getIntegrationSets().iterator().next().getId();
+        } catch (Exception e) {
+          logger.error("No integration set id found", e);
+        }
+
+        if (setId == 0) {
+          // No existing integration set, create new
+          List<Long> availableSetIds = (integration.getDeploymentPhase() == 1)
+              ? integrationRepository.getAvailableSetProdIntegrationIdentifier()
+              : integrationRepository.getAvailableSetTestIntegrationIdentifier();
+          if (availableSetIds != null && !availableSetIds.isEmpty()) {
+            setId = availableSetIds.get(0);
+          } else {
+            logger.error("Failed to find an available set integration identifier");
+            throw new EntityCreationException("Integration creation failed");
+          }
+
+          IntegrationSet set = new IntegrationSet();
+          set.setId(setId);
+          set.setName(integration.getConfigurationEntity().getSp().getName());
+          set.setType("sp");
+          integration.getConfigurationEntity().setSet(set);
+
+        } else {
+          // Add to existing integration set
+          Optional<Integration> optionalSet = getIntegration(setId);
+          if (optionalSet.isPresent()) {
+            integration.addToSet(optionalSet.get());
+          }
+        }
+        logger.debug("Creating SAML Service Provider");
+      }
+      return integrationRepository.save(integration);
     } else {
       logger.debug("Integration creation failed.");
     }
