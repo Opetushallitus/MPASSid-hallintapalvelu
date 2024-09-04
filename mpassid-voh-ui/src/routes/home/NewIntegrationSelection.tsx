@@ -11,12 +11,11 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 import { devLog } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
-import { environments } from "@/config";
 
 export const defaults = {
     typePI: "saml",
-    typesPI: [ "saml", "oidc" ],
-    //typesPI: [ "saml"],
+    //typesPI: [ "saml", "oidc" ],
+    typesPI: [ "saml"],
     typeOKJ: "wilma",
     //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
     typesOKJ: [ "wilma" ]
