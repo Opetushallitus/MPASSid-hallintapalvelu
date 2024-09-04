@@ -14,6 +14,7 @@ import { tallentajaOphGroup } from '../../config';
 import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
+import { devLog } from "@/utils/devLog";
 
 export default function IntegraatioMuokkaus() {
   const { type } = useParams();
@@ -100,6 +101,7 @@ export default function IntegraatioMuokkaus() {
             } else {
               result.current = await updateIntegration({ id },newIntegration);            
             }
+            devLog("Integration save result",result.current)
             if(logo){
               const formData = new FormData();
               formData.append("file", logo);

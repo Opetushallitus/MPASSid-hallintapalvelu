@@ -4,6 +4,7 @@ import type { Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from "lodash";
+import { devLog } from "@/utils/devLog";
 
 interface Props {
   object: any;
@@ -28,16 +29,20 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
-
+  
   useEffect(() => {
       if(inputRef.current) {
-        if(defaultValue) {
-          inputRef.current.value=defaultValue
+        if(object.content) {
+          inputRef.current.value=object.content
         } else {
-          inputRef.current.value=''
-        }
+          if(defaultValue) {
+            inputRef.current.value=defaultValue
+          } else {
+            inputRef.current.value=''
+          }
+        }        
       }
-  }, [defaultValue, reload]);
+  }, [defaultValue, reload, object]);
   
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
@@ -71,7 +76,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
       setUsedHelperText(helperText(inputRef.current?.value))
       setIsValid(false)  
       setCanSave(false)
-      onUpdate(type,"",attributeType);
+      onUpdate(type,inputRef.current?.value,attributeType);
     }
   };
   

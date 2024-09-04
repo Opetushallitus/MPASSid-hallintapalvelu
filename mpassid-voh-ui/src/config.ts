@@ -387,7 +387,7 @@ export const dataConfiguration:UiConfiguration[] = [
         type: 'metadata',
         mandatory: true,
         multivalue: true,
-        validation: [ 'uri' ],
+        validation: [ 'uri', 'nohash' ],
         //validation: [ ],
         integrationType: [
             {
@@ -403,7 +403,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     multivalue: true,
     environment: 1,
-    validation: [ 'uri', 'https', 'nolocalhost' ],
+    validation: [ 'uri', 'https', 'nolocalhost', 'nohash' ],
     //validation: [ ],
     integrationType: [
         {
