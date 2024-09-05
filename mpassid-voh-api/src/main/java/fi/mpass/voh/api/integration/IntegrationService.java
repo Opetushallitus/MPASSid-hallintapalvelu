@@ -759,7 +759,7 @@ public class IntegrationService {
       // TODO authz
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
         // Create IDP
-        List<Long> availableIdpIds = integrationRepository.getAvailableIdpProdIntegrationIdentifier();
+        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1) ? integrationRepository.getAvailableIdpProdIntegrationIdentifier() : integrationRepository.getAvailableIdpTestIntegrationIdentifier();
         if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
           integration.setId(availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()

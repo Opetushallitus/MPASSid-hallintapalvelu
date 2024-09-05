@@ -39,6 +39,8 @@ import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
+import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
+import fi.mpass.voh.api.integration.sp.ServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -75,6 +77,7 @@ class IntegrationServiceTests {
     private IntegrationServiceConfiguration configuration;
 
     private Integration integration;
+    private Integration integrationSp;
     private Integration inactiveIntegration;
     private Integration updatedIntegration;
     private Integration existingUpdatedAllowingIntegration;
@@ -109,6 +112,10 @@ class IntegrationServiceTests {
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Opinsys opinsys = new Opinsys("tenantId");
         configurationEntity.setIdp(opinsys);
+        ConfigurationEntity configurationEntitySp = new ConfigurationEntity();
+        configurationEntitySp.setSp(new SamlServiceProvider());
+        configurationEntitySp.getSp().setName("Testipalvelu");
+
 
         // Integration sets
         integrationSets = new ArrayList<Integration>();
@@ -133,6 +140,10 @@ class IntegrationServiceTests {
         }
 
         integration = new Integration(999L, LocalDate.now(), configurationEntity, LocalDate.of(2023, 6, 30),
+                0, discoveryInformation, organization,
+                "serviceContactAddress@example.net");
+
+        integrationSp = new Integration(0L, LocalDate.now(), configurationEntitySp, LocalDate.of(2023, 6, 30),
                 0, discoveryInformation, organization,
                 "serviceContactAddress@example.net");
 
@@ -416,23 +427,53 @@ class IntegrationServiceTests {
     void testCreateIntegration() throws JsonMappingException, JsonProcessingException {
 
         ArrayList<Long> availableIdentifiers = new ArrayList<>();
-        availableIdentifiers.add(1000339L);
-        availableIdentifiers.add(1000439L);
-        availableIdentifiers.add(2000439L);
+        // availableIdentifiers.add(1000339L);
+        // availableIdentifiers.add(1000439L);
+        // availableIdentifiers.add(2000439L);
+        availableIdentifiers.add(4000001L);
+        availableIdentifiers.add(4000002L);
         // given
         given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
-        given(integrationRepository.getAvailableIdpProdIntegrationIdentifier()).willReturn(availableIdentifiers);
+        given(integrationRepository.getAvailableIdpTestIntegrationIdentifier()).willReturn(availableIdentifiers);
         given(integrationRepository.save(any(Integration.class))).willReturn(integration);
 
         // when
         Integration resultIntegration = underTest.createIntegration(integration);
 
         // then
-        assertEquals(1000339L, resultIntegration.getId());
+        assertEquals(4000001L, resultIntegration.getId());
         assertNotNull(resultIntegration.getConfigurationEntity().getIdp());
         assertInstanceOf(Opinsys.class, resultIntegration.getConfigurationEntity().getIdp());
-        assertEquals("opinsys1000339", resultIntegration.getConfigurationEntity().getIdp().getFlowName());
-        assertEquals("opinsys_1000339", resultIntegration.getConfigurationEntity().getIdp().getIdpId());
+        assertEquals("opinsys4000001", resultIntegration.getConfigurationEntity().getIdp().getFlowName());
+        assertEquals("opinsys_4000001", resultIntegration.getConfigurationEntity().getIdp().getIdpId());
+        assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
+    }
+
+    @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
+    @Test
+    void testCreateSpIntegration() throws JsonMappingException, JsonProcessingException {
+
+        ArrayList<Long> availableSpIdentifiers = new ArrayList<>();
+        ArrayList<Long> availableSetIdentifiers = new ArrayList<>();
+        availableSpIdentifiers.add(5000001L);
+        availableSpIdentifiers.add(5000002L);
+        availableSetIdentifiers.add(6000001L);
+        availableSetIdentifiers.add(6000002L);
+
+        // given
+        given(organizationService.retrieveOrganization(any(String.class))).willReturn(integrationSp.getOrganization());
+        given(integrationRepository.getAvailableSpTestIntegrationIdentifier()).willReturn(availableSpIdentifiers);
+        given(integrationRepository.getAvailableSetTestIntegrationIdentifier()).willReturn(availableSetIdentifiers);
+        given(integrationRepository.save(any(Integration.class))).willReturn(integrationSp);
+
+        // when
+        Integration resultIntegration = underTest.createIntegration(integrationSp);
+
+        // then
+        assertEquals(5000001L, resultIntegration.getId());
+        assertEquals(6000001L, resultIntegration.getConfigurationEntity().getSet().getId());
+        assertEquals("Testipalvelu", resultIntegration.getConfigurationEntity().getSet().getName());
+        assertNotNull(resultIntegration.getConfigurationEntity().getSp());
         assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
     }
 
