@@ -421,7 +421,7 @@ class IntegrationServiceTests {
         availableIdentifiers.add(2000439L);
         // given
         given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
-        given(integrationRepository.getAvailableIdpIntegrationIdentifier()).willReturn(availableIdentifiers);
+        given(integrationRepository.getAvailableIdpProdIntegrationIdentifier()).willReturn(availableIdentifiers);
         given(integrationRepository.save(any(Integration.class))).willReturn(integration);
 
         // when
@@ -444,7 +444,7 @@ class IntegrationServiceTests {
 
         // given
         given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
-        given(integrationRepository.getAvailableIdpIntegrationIdentifier()).willReturn(availableIdentifiers);
+        given(integrationRepository.getAvailableIdpProdIntegrationIdentifier()).willReturn(availableIdentifiers);
         given(integrationRepository.save(any(Integration.class))).willReturn(integration);
 
         // when

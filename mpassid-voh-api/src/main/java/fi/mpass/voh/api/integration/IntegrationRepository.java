@@ -46,19 +46,29 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
 
     List<Integration> findAllByLastUpdatedOnAfterAndDeploymentPhase(LocalDateTime updateDateTime, int deploymentPhase);
 
-    List<Integration> findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(LocalDateTime updateDateTime, int deploymentPhase);
+    List<Integration> findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(LocalDateTime updateDateTime,
+            int deploymentPhase);
 
     @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null")
     List<Long> getAvailableIntegrationIdentifier();
 
     @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id < 2000000")
-    List<Long> getAvailableIdpIntegrationIdentifier();
+    List<Long> getAvailableIdpProdIntegrationIdentifier();
+
+    @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id >= 4000000 AND a.id < 5000000")
+    List<Long> getAvailableIdpTestIntegrationIdentifier();
+
+    @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id >= 3000000 AND a.id < 4000000")
+    List<Long> getAvailableSetProdIntegrationIdentifier();
 
     @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id >= 6000000 AND a.id < 7000000")
     List<Long> getAvailableSetTestIntegrationIdentifier();
 
-    @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id >= 3000000 AND a.id < 4000000")
-    List<Long> getAvailableSetProdIntegrationIdentifier();
+    @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id >= 2000000 AND a.id < 3000000")
+    List<Long> getAvailableSpProdIntegrationIdentifier();
+
+    @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id >= 5000000 AND a.id < 6000000")
+    List<Long> getAvailableSpTestIntegrationIdentifier();
 
     List<Integration> findAllByOrganizationOid(String oid);
 }

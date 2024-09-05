@@ -759,7 +759,7 @@ public class IntegrationService {
       // TODO authz
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
         // Create IDP
-        List<Long> availableIdpIds = integrationRepository.getAvailableIdpIntegrationIdentifier();
+        List<Long> availableIdpIds = integrationRepository.getAvailableIdpProdIntegrationIdentifier();
         if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
           integration.setId(availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
@@ -774,6 +774,14 @@ public class IntegrationService {
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         // Create SP
+        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1) ? integrationRepository.getAvailableSpProdIntegrationIdentifier() : integrationRepository.getAvailableSpTestIntegrationIdentifier();
+        if (availableSpIds != null && !availableSpIds.isEmpty()) {
+          integration.setId(availableSpIds.get(0));
+        } else {
+          logger.error("Failed to find an available sp integration identifier");
+          throw new EntityCreationException("Integration creation failed");
+        }
+
         Long setId = 0L;
         try {
           setId = integration.getIntegrationSets().iterator().next().getId();
