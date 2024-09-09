@@ -776,7 +776,7 @@ public class IntegrationService {
         // Create SP
         List<Long> availableSpIds = (integration.getDeploymentPhase() == 1) ? integrationRepository.getAvailableSpProdIntegrationIdentifier() : integrationRepository.getAvailableSpTestIntegrationIdentifier();
         if (availableSpIds != null && !availableSpIds.isEmpty()) {
-          integration.setId(availableSpIds.get(0));
+          integration.setId(availableSpIds.get(0)); //Pitääkö laittaa näin?
         } else {
           logger.error("Failed to find an available sp integration identifier");
           throw new EntityCreationException("Integration creation failed");
@@ -802,11 +802,17 @@ public class IntegrationService {
           }
 
           IntegrationSet set = new IntegrationSet();
-          set.setId(setId);
+          //set.setId(setId); TURHA??? eikö tarvi laittaa id:tä? se tulee configurationEntityltä?
           set.setName(integration.getConfigurationEntity().getSp().getName());
-          set.setType("sp");
-          integration.getConfigurationEntity().setSet(set);
-
+          //integration.getConfigurationEntity().setSet(set); Tää on väärin?
+          ConfigurationEntity ce = new ConfigurationEntity();
+          // Pitääkö ce:tä muokata? id on generated?
+          ce.setSet(set);
+          Integration setIntegration = new Integration();
+          setIntegration.setId(setId);
+          setIntegration.setConfigurationEntity(ce);
+          integration.addToSet(setIntegration);
+          integrationRepository.save(setIntegration);
         } else {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
