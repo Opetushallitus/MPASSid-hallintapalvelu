@@ -737,6 +737,14 @@ public class IntegrationService {
         return new Integration(0L, null, configurationEntity, null, 0,
             discoveryInformation, organization, "");
       }
+      if (role.equals("set")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
+        IntegrationSet integrationSet = new IntegrationSet();
+        configurationEntity.setSet(integrationSet);
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
+      }
     }
     return new Integration();
   }
@@ -801,16 +809,10 @@ public class IntegrationService {
             throw new EntityCreationException("Integration creation failed");
           }
 
-          IntegrationSet set = new IntegrationSet();
-          //set.setId(setId); TURHA??? eikö tarvi laittaa id:tä? se tulee configurationEntityltä?
-          set.setName(integration.getConfigurationEntity().getSp().getName());
-          //integration.getConfigurationEntity().setSet(set); Tää on väärin?
-          ConfigurationEntity ce = new ConfigurationEntity();
-          // Pitääkö ce:tä muokata? id on generated?
-          ce.setSet(set);
-          Integration setIntegration = new Integration();
-          setIntegration.setId(setId);
-          setIntegration.setConfigurationEntity(ce);
+          Integration setIntegration = createBlankIntegration("set", null, null, null);
+          setIntegration.getConfigurationEntity().getSet().setId(setId); // ONKO TÄMÄ TARPEELLINEN?
+          setIntegration.getConfigurationEntity().getSet().setName(integration.getConfigurationEntity().getSp().getName());
+          // Pitääkö ce:tä muokata? id on generated??
           integration.addToSet(setIntegration);
           integrationRepository.save(setIntegration);
         } else {
