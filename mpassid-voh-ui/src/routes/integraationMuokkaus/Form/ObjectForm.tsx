@@ -26,14 +26,14 @@ interface Props {
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
   onUpdate: (name: string,value: string) => void;
-  onEdit: (name: string,value: string) => void;
+  onEdit: (name: string,value: string,index: number) => void;
   onDelete: (name: string,index: number) => void;
   onValidate: (data:string) => boolean;
-  cleanObject?: any;
+  objectData?: any;
 }
 
   
-export default function ObjectForm({ object, type, isEditable=false, mandatory=false,helperText, path, onUpdate, onEdit, onDelete, onValidate, attributeType,setCanSave, currentObject, integrationType, cleanObject }: Props) {
+export default function ObjectForm({ object, type, isEditable=false, mandatory=false,helperText, path, onUpdate, onEdit, onDelete, onValidate, attributeType,setCanSave, currentObject, integrationType, objectData }: Props) {
   const intl = useIntl();
   const id = `attribuutti.${object.name}`;
   const tooltipId = `työkaluvihje.${object.name}`;
@@ -56,7 +56,6 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   const inputRef = useRef<HTMLFormElement>(null);
   const inputValue = useRef<any>(null);
   
-  
   useEffect(() => {
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: String(label)}} />)
@@ -66,7 +65,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     
   }, [ label, mandatory, setUsedHelperText, setIsValid, setCanSave ]);
 
-  useImperativeHandle(cleanObject, () => ({
+  useImperativeHandle(objectData, (editObject?:any) => ({
     clean() {
       devLog("ObjectForm (clean)",object)
       devLog("ObjectForm (clean)",currentObject.current)
@@ -82,9 +81,32 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     validate() {
       devLog("ObjectForm (validateObject)",currentObject.current)
       return validateObject()
+    },
+    edit(editObject?:any) {
+      devLog("ObjectForm (editObject)",editObject)
+      inputValue.current=editObject
+      //setReload(!reload)
     }
     
   }));
+
+  const createAttributeContent = (name:string,inputValue: React.MutableRefObject<any>,currentObject: React.MutableRefObject<any>,roleConfiguration:IntegrationType) => {
+    devLog("createAttributeContent (name)",name)
+    if(inputValue.current&&inputValue.current[name]) {
+      devLog("createAttributeContent (inputValue)",inputValue.current[name])
+      return inputValue.current[name]
+    }
+    if(currentObject.current&&currentObject.current[name]) {
+      devLog("createAttributeContent (currentObject)",currentObject.current[name])
+      return currentObject.current[name]
+    }
+    if(roleConfiguration?.defaultValue) {
+      devLog("createAttributeContent (defaultValue)",roleConfiguration.defaultValue)
+      return roleConfiguration.defaultValue
+    }
+    devLog("createAttributeContent (empty)",'')
+    return ''
+  }
 
   const validateObject = () => {
     var result=true;
@@ -157,7 +179,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     inputValue.current[name]=clone(object.content[index]);
     */
     //onDelete(object.type,index);
-    onEdit(object.type,object.content[index]);
+    onEdit(object.type,object.content[index],index);
     //devLog("editObject (inputValue) 2",inputValue.current)
     
   };
@@ -237,7 +259,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   devLog("ObjectForm (roleConfiguration)",roleConfiguration) 
                   //configuration.integrationType.find(i=>i.name===integrationType)
                   const attribute = { type: configuration.type, 
-                                          content: roleConfiguration?.defaultValue,
+                                          content: createAttributeContent(configuration.name,inputValue,currentObject,roleConfiguration),
                                           name: configuration.name}
                   
                   if(!currentObject.current.hasOwnProperty(configuration.name)) {
@@ -254,10 +276,16 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   if(configuration?.enum?.length===2&&attribute.content==='') {
                     attribute.content=configuration.enum[0];
                   }
-
+                  if(configuration.name==='location') {
+                    devLog("ObjectForm (switch init)",attribute.content)
+                    devLog("ObjectForm (switch init)",currentObject.current[configuration.name])
+                    
+                  }
+                  
                   //Initialize switchvalue currentObject                
                   if(configuration?.enum?.length===2&&configuration.multivalue===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
                     devLog("ObjectForm (switch init)",configuration.name)
+                    devLog("ObjectForm (switch init)",attribute.content)
                     currentObject.current[configuration.name]=attribute.content;
                     resetStat.current[configuration.name]=false
                     //updateObjectSwitchFormValue(configuration.name,attribute.content,attribute.type)
@@ -305,6 +333,18 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                       attribute.content=String(newIndex);
                       currentObject.current[configuration.name]=newIndex;
                       resetStat.current[configuration.name]=false
+                    }
+
+                    if(inputValue.current&&inputValue.current.hasOwnProperty(configuration.name)){
+                      devLog("ObjectForm (reset)",configuration.name)
+                      devLog("ObjectForm (inputValue.current)",inputValue.current[configuration.name])
+                      currentObject.current[configuration.name]=inputValue.current[configuration.name]
+                      attribute.content=inputValue.current[configuration.name]
+                      delete inputValue.current[configuration.name]
+                      devLog("ObjectForm (inputValue.current)",inputValue.current)
+                      devLog("ObjectForm editObject (inputValue.current)",attribute)
+                      devLog("ObjectForm (inputValue.current)",currentObject.current)
+                      //setReload(!reload)
                     }
                     
                     setCanSave(validateObject())

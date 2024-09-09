@@ -46,7 +46,7 @@ function PossibleServices({oid,handleService}: Props) {
     }
 
     const addEnv = (value:number|undefined) => {
-        
+
         if(value !== undefined) {
             if(value===0) {
                 return <FormattedMessage defaultMessage="Testi" />
@@ -75,7 +75,7 @@ function PossibleServices({oid,handleService}: Props) {
           } as any
     );
 
-    if(possibleServices.content&&possibleServices.content.length>0) {
+    if(possibleServices.content) {
         return (<Select
             labelId="palvelu"
             id="palvelu"

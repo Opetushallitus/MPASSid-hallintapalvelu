@@ -14,6 +14,7 @@ import { Dispatch } from "react";
 
 interface Props {
   integration: Components.Schemas.Integration;
+  name?: string;
   setName?: Dispatch<string>;
   setCanSave?: Dispatch<boolean>;
 }

@@ -39,6 +39,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
       if(type==='data'||type==='user') {
         attributes.push({type: type, name: name,content: value }) 
       }
+      
+    }
+    if(type==='user') {
+      attributes=attributes.filter(a=>a.content!=='')
     }
     
     

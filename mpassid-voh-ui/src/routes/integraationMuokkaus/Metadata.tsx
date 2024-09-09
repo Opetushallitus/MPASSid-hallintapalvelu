@@ -2,10 +2,9 @@ import type { Components } from "@/api";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
-import InputForm from "./Form/InputForm";
-import ListForm from "./Form/ListForm";
-import { useState, type Dispatch } from "react";
-import { dataConfiguration, defaultIntegrationType, IntegrationType, UiConfiguration } from '../../config';
+import { type Dispatch } from "react";
+import type { IntegrationType} from '../../config';
+import { dataConfiguration, defaultIntegrationType } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
@@ -47,9 +46,6 @@ export default function Metadata({
   devLog("function Metadata (specialConfiguration)",specialConfiguration)
   devLog("function Metadata (environment)",environment)
   devLog("function Metadata (environmentConfiguration)",environmentConfiguration)
-  
-  //console.log("*** metadata (metadata): ",metadata)
-  //console.log("*** metadata (type): ",type)
 
   const validateMetadata = () => {
     var result=true;
