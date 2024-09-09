@@ -594,7 +594,6 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     multivalue: true,
     validation: [ ],
-    environment: 0,
     integrationType: [
         {
             name: 'saml',
@@ -614,6 +613,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     multivalue: true,
     validation: [ ],
+    environment: 1,
     integrationType: [
         {
             name: 'saml',
