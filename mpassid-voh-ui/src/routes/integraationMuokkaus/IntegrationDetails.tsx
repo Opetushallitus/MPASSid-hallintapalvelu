@@ -303,8 +303,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 );
 
     if(integration) {
-      devLog("****** role",role)
-      devLog("****** newConfigurationEntityData",newConfigurationEntityData)
+      
       return(<>
       
         <Typography component={"div"} variant="h2" gutterBottom >
