@@ -5,7 +5,7 @@ import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
 import InputForm from "../Form/InputForm";
 import type { Dispatch} from "react";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { devLog } from "@/utils/devLog";
 import { helperText, validate } from "@/utils/Validators";
 import { dataConfiguration, defaultDataConfiguration, UiConfiguration } from "@/config";
@@ -14,28 +14,19 @@ interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
   environment: number;
+  name: string;
   setName: Dispatch<string>;
   setCanSave: Dispatch<boolean>;
 }
 
-export default function ServiceProvider({ integration, setName, setCanSave }: Props) {
-  const currentName = useRef<string>(integration.configurationEntity?.sp?.name||'ERROR');
+export default function ServiceProvider({ integration, setName, setCanSave, name }: Props) {
+  const currentName = useRef<string>(name);
   const serviceProvider = integration.configurationEntity!.sp!;
   const configuration:UiConfiguration = dataConfiguration.filter(conf=>conf.type&&conf.type==='integrationDetails').find(conf=>conf.name&&conf.name==='serviceName') || defaultDataConfiguration;
-
-  useEffect(() => {
-    devLog("ServiceProvider (currentName)",currentName)
-    if(currentName.current===''||currentName.current==='uusi'){
-      setCanSave(false);
-    } else {
-      setCanSave(true);
-    }
-    
-  }, [currentName, setCanSave]);
+  const isEditable = (integration.integrationSets&&integration.integrationSets.length>0&&integration.integrationSets[0].id&&integration.integrationSets[0].id!==0)?false:true;
 
   const updateName = (name: string,value: string,type: string) => {
     devLog("ServiceProvider (updateName)",value)
-    currentName.current=value
     setName(value)
   }
 
@@ -80,10 +71,10 @@ export default function ServiceProvider({ integration, setName, setCanSave }: Pr
             values={{ deploymentPhase: integration.deploymentPhase }}
           />
         </Grid>
-        {serviceProvider.name!=='uusi'&&(
+        {!isEditable&&(
         <DataRow object={serviceProvider} path="name" />
         )}
-        {serviceProvider.name==='uusi'&&(
+        {isEditable&&(
           <>
         <Grid item xs={4}>
           <FormattedMessage defaultMessage="Palvelun nimi" />
@@ -93,7 +84,7 @@ export default function ServiceProvider({ integration, setName, setCanSave }: Pr
                 object={currentName.current} 
                 type={""} label={""} 
                 attributeType={""} 
-                isEditable={serviceProvider.name==='uusi'} 
+                isEditable={isEditable} 
                 mandatory={true} 
                 path={"undefined"} 
                 helperText={helpGeneratorText} 
