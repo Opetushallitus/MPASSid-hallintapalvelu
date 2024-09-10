@@ -53,7 +53,7 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
                   {role === "sp" && (
                       <DataRow
                       object={integration}
-                      path="integrationGroups"
+                      path="integrationSets"
                       type="service-list"
                     />
                   )}

@@ -115,7 +115,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     devLog("createIntegration (oldSet)",service)
                     if(service!==undefined) {
                         result.configurationEntity.sp.name=service.name
-                        result.deploymentPhase=service.environment
+                        result.deploymentPhase=service.environment                        
                         result.integrationSets=[]
                         result.integrationSets.push( { id: service.setId })
 
@@ -126,7 +126,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     
                 }
                 if(result?.configurationEntity?.idp) {
-                    result.deploymentPhase=1                    
+                    result.deploymentPhase=1                  
                 }
                 if(result?.configurationEntity?.sp&&result.configurationEntity.sp.metadata===null) {
                     result.configurationEntity.sp.metadata={}
