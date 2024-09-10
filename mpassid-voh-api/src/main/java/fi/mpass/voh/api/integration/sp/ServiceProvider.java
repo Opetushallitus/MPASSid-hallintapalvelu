@@ -168,7 +168,7 @@ public abstract class ServiceProvider {
 
     private Map<String, Object> addCertificateAttribute(Map<String, Object> hashMap, String certificate,
             String propertyPrefix) {
-        if (certificate.length() > 0) {
+        if (certificate != null && certificate.length() > 0) {
             X509Certificate x509Cert;
             try {
                 x509Cert = createX509Certificate(certificate);

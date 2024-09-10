@@ -809,12 +809,21 @@ public class IntegrationService {
             throw new EntityCreationException("Integration creation failed");
           }
 
-          Integration setIntegration = createBlankIntegration("set", null, null, null);
+          Integration setIntegration = createBlankIntegration("set", "", "", null);
+          setIntegration.setId(setId);
           setIntegration.getConfigurationEntity().getSet().setId(setId); // ONKO TÄMÄ TARPEELLINEN?
           setIntegration.getConfigurationEntity().getSet().setName(integration.getConfigurationEntity().getSp().getName());
-          // Pitääkö ce:tä muokata? id on generated??
+          setIntegration.getConfigurationEntity().getSet().setType("sp");
+          setIntegration.setOrganization(integration.getOrganization());
+          logger.debug("BEFORE SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}", integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(), setIntegration.getConfigurationEntity().getId());
+          integration.removeFromSets();
+          integrationRepository.save(setIntegration);
+          integrationRepository.save(integration);
           integration.addToSet(setIntegration);
           integrationRepository.save(setIntegration);
+          integration = integrationRepository.save(integration);
+          logger.debug("AFTER SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}", integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(), setIntegration.getConfigurationEntity().getId());
+          return integration;
         } else {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
