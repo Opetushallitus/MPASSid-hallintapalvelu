@@ -218,7 +218,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 var changedIntegration=clone(integration)
                 changedIntegration.discoveryInformation=newDiscoveryInformation
                 changedIntegration.configurationEntity=newConfigurationEntityData
-                changedIntegration.deploymentPhase=environment.current
+                if(environment.current>=0) {
+                  changedIntegration.deploymentPhase=environment.current
+                }            
+                
                 if(role==='sp'&&integration.configurationEntity&&integration.configurationEntity.sp&&newConfigurationEntityData.sp&&integration.configurationEntity.sp.type==='saml') {
                   const samlSP:Components.Schemas.SamlServiceProvider = clone(newConfigurationEntityData.sp);
                   samlSP.entityId=metadata.entityId;
