@@ -49,6 +49,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const environment = useRef<number>(-5);
     const originalEnvironment = useRef<number>(-5);
+    const originalIntegration = useRef<Components.Schemas.Integration>();
     const [newEnvironment, setNewEnvironment] = useState(false);
     const [name, setName] = useState<string>('');
     const [metadata, setMetadata] = useState<any>((newConfigurationEntityData?.sp?.metadata&&newConfigurationEntityData?.sp?.metadata!==null)?newConfigurationEntityData.sp.metadata:{});
@@ -58,11 +59,9 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const role  = (integration.configurationEntity?.idp) ? "idp" : "sp"
     const type = integration.configurationEntity?.idp?.type! || integration.configurationEntity?.sp?.type! || "unknown"
     const oid: string = integration?.organization?.oid || "0"
-    //const environment:number = integration?.deploymentPhase || -5
+    
     const uniqueIdConfiguration:UiConfiguration = dataConfiguration.filter(conf=>conf.name&&conf.name==='uniqueId')[0] || defaultDataConfiguration;
     const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType; 
-    
-    
     
     useEffect(() => {
       devLog("IntegrationDetails (integration)",integration)
@@ -76,6 +75,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           originalEnvironment.current=integration.deploymentPhase
         }
       } 
+      if(!originalIntegration.current) {
+        devLog("IntegrationDetails (originalIntegration)",integration)
+        originalIntegration.current=cloneDeep(integration)
+      }
       
     }, [integration]);
 
@@ -105,21 +108,24 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           integration.deploymentPhase=environment.current
         }
         
-        setNewIntegration(cloneDeep(integration))
+        if(!newIntegration) {
+          setNewIntegration(cloneDeep(integration))
         
-        setNewConfigurationEntityData(cloneDeep(integration.configurationEntity))
-        if(integration?.discoveryInformation){
-          setNewDiscoveryInformation(cloneDeep(integration.discoveryInformation))
-        }
-        if(integration?.configurationEntity) {
-          if(integration.configurationEntity.sp&&integration.configurationEntity.sp.metadata&&integration.configurationEntity.sp.metadata!==null) {
-            setMetadata(integration.configurationEntity.sp.metadata)
+          setNewConfigurationEntityData(cloneDeep(integration.configurationEntity))
+          if(integration?.discoveryInformation){
+            setNewDiscoveryInformation(cloneDeep(integration.discoveryInformation))
+          }
+          if(integration?.configurationEntity) {
+            if(integration.configurationEntity.sp&&integration.configurationEntity.sp.metadata&&integration.configurationEntity.sp.metadata!==null) {
+              setMetadata(integration.configurationEntity.sp.metadata)
+            }
           }
         }
         
+        
       }
       
-    }, [role, integration, name, setNewIntegration,newEnvironment, setMetadata]);
+    }, [role, integration, newIntegration, setNewIntegration,newEnvironment, setMetadata]);
     
     useEffect(() => {
       if(newConfigurationEntityData&&type!=='unknown') {
@@ -197,7 +203,15 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )
 
             setSaveDialogState(true);
-            if(isEqual(newConfigurationEntityData,integration.configurationEntity)){       
+            //const metadataEqual=(role==='idp'||JSON.stringify(newConfigurationEntityData.sp?.metadata)===JSON.stringify(originalIntegration.current?.configurationEntity?.sp?.metadata))
+            const metadataEqual=(role==='idp'||isEqual(newConfigurationEntityData.sp?.metadata,originalIntegration.current?.configurationEntity?.sp?.metadata))
+            
+            devLog("IntegrationDetails (metadataEqual)",metadataEqual)
+            devLog("IntegrationDetails (metadataEqual)",isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity))
+            devLog("IntegrationDetails (metadataEqual)",newConfigurationEntityData.sp?.metadata)
+            devLog("IntegrationDetails (metadataEqual)",originalIntegration.current?.configurationEntity?.sp?.metadata)
+            
+            if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)){       
               if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK) {      
                 devLog("setCanSave","1")
                 
@@ -260,8 +274,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         setSaveDialogState(true);
         if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){     
           devLog("setCanSave - ",(newConfigurationEntityData !== undefined))
-          devLog("setCanSave - ",(!isEqual(newConfigurationEntityData,integration.configurationEntity)))
-          if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,integration.configurationEntity)||newLogo||(originalEnvironment.current!==environment.current))&&logoOK&&isValid) {
+          devLog("setCanSave - ",(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)))
+          if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||(originalEnvironment.current!==environment.current))&&logoOK&&isValid) {
             devLog("setCanSave","5")
             setCanSaveDiscoveryInformation(true)
           } else {

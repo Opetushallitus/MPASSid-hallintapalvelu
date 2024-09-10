@@ -133,7 +133,7 @@ export default function IntegrationDetails({ integration }: Props) {
                 />
               </Grid>
                   
-                {role === "sp" && (
+                {role === "sp" && false && (
                     <DataRow
                     object={integration}
                     path="integrationSets"
