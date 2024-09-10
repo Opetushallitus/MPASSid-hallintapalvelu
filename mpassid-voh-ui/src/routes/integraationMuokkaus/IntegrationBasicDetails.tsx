@@ -50,7 +50,7 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
                     ValueComponent={UniqueIdValue}
                   />}
                 </Grid>  
-                  {role === "sp" && (
+                  {role === "sp" && false && (
                       <DataRow
                       object={integration}
                       path="integrationSets"
