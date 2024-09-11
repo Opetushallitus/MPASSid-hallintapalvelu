@@ -96,12 +96,17 @@ export default function IntegraatioMuokkaus() {
             newIntegration.permissions?.forEach((permission)=>{
               delete permission.lastUpdatedOn;
             })
-            if(id===0) {
-              result.current = await createIntegration({},newIntegration);   
-            } else {
-              result.current = await updateIntegration({ id },newIntegration);            
+            
+            try {
+              if(id===0) {
+                result.current = await createIntegration({},newIntegration);   
+              } else {
+                result.current = await updateIntegration({ id },newIntegration);            
+              }
+              devLog("Integration save result",result.current)
+            } catch (error) {
+              console.log('Error fetching data:', error);
             }
-            devLog("Integration save result",result.current)
             if(logo){
               const formData = new FormData();
               formData.append("file", logo);
@@ -110,12 +115,8 @@ export default function IntegraatioMuokkaus() {
                 const logoResult= await uploadLogo({ id: logoId },formData as any);
                 if(result.current.configurationEntity?.idp) {
                   result.current.configurationEntity.idp.logoUrl=logoResult
-                }
-                
-              }
-              
-
-              
+                }                
+              } 
             }
           }
           
