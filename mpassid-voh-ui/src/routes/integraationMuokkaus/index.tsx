@@ -1,4 +1,4 @@
-import { updateIntegration, inactivateIntegration, createIntegration, type Components, uploadLogo } from "@/api";
+import { inactivateIntegration, type Components, uploadLogo, createIntegrationRaw, updateIntegrationRaw } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
@@ -99,25 +99,29 @@ export default function IntegraatioMuokkaus() {
             
             try {
               if(id===0) {
-                result.current = await createIntegration({},newIntegration);   
+                result.current = (await createIntegrationRaw({},newIntegration)).data;   
               } else {
-                result.current = await updateIntegration({ id },newIntegration);            
+                await updateIntegrationRaw({ id },newIntegration);            
+                result.current = newIntegration
               }
               devLog("Integration save result",result.current)
-            } catch (error) {
-              console.log('Error fetching data:', error);
+              if(logo){
+                const formData = new FormData();
+                formData.append("file", logo);
+                const logoId:number = result.current.id||0;
+                if(logoId!==0) {
+                  const logoResult= await uploadLogo({ id: logoId },formData as any);
+                  if(result.current.configurationEntity?.idp) {
+                    result.current.configurationEntity.idp.logoUrl=logoResult
+                  }                
+                } 
+              }
+            } catch (error:any) {
+              console.log('Integration :', error);
+              console.log('Integration error deteil:', error?.detail);
+              console.log('Integration error status:', error?.status,"-",error?.title);
             }
-            if(logo){
-              const formData = new FormData();
-              formData.append("file", logo);
-              const logoId:number = result.current.id||0;
-              if(logoId!==0) {
-                const logoResult= await uploadLogo({ id: logoId },formData as any);
-                if(result.current.configurationEntity?.idp) {
-                  result.current.configurationEntity.idp.logoUrl=logoResult
-                }                
-              } 
-            }
+            
           }
           
           setOpenConfirmation(false);
