@@ -15,6 +15,7 @@ import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { devLog } from "@/utils/devLog";
+import { cloneDeep } from "lodash";
 
 export default function IntegraatioMuokkaus() {
   const { type } = useParams();
@@ -112,7 +113,11 @@ export default function IntegraatioMuokkaus() {
               if(id===0) {
                 result.current = (await createIntegrationRaw({},newIntegration)).data;   
               } else {
-                await updateIntegrationRaw({ id },newIntegration);            
+                const updateIntegration = cloneDeep(newIntegration);
+                if(newIntegration.integrationSets&&newIntegration.integrationSets.length>0) {
+                  updateIntegration.integrationSets = newIntegration.integrationSets.map(i=> { return { id: i.id}})
+                }
+                await updateIntegrationRaw({ id },updateIntegration);            
                 result.current = newIntegration
               }
               devLog("Integration save result",result.current)
@@ -127,11 +132,11 @@ export default function IntegraatioMuokkaus() {
                   }                
                 } 
               }
-            } catch (error:any) {
-              console.log('Integration :', error);
+            } catch (error:any) {              
               console.log('Integration error data:', error?.response?.data);
-              console.log('Integration error status:', error?.response?.status,"-",error?.response?.statusText);
+              console.log('Integration error status:', error?.response?.status);
               catchError=true;
+              
             }
             
           }
