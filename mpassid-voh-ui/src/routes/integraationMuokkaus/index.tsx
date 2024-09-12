@@ -3,7 +3,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
-import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@mui/material';
+import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, Alert } from '@mui/material';
 import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -26,6 +26,8 @@ export default function IntegraatioMuokkaus() {
   const navigate = useNavigate();
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [openAttributeTest, setOpenAttributeTest] = useState(false);
+  const [openIntegrationError, setOpenIntegrationError] = useState(false);
+  
   const [isConfirmed, setConfirmed] = useState(false);
   const [isDisabled, setDisabled] = useState(false);
   const me = useMe();
@@ -66,6 +68,14 @@ export default function IntegraatioMuokkaus() {
       
   };
 
+  const closeErrorNotice = () => {
+    setOpenNotice(false)
+    setOpenConfirmation(false);
+    setSaveDialogState(true); 
+    setOpenIntegrationError(false)
+    
+};
+
   const writeAccess = () => {
     
     if(newIntegration?.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration?.organization?.oid)||groups?.includes(tallentajaOphGroup))) {
@@ -85,6 +95,7 @@ export default function IntegraatioMuokkaus() {
   const saveIntegration = async (event:any) => {
     
     if(writeAccess()) {
+      var catchError=false
       if(newIntegration!==undefined) {
         if(!isConfirmed&&!openConfirmation) {
           setOpenConfirmation(true);
@@ -118,14 +129,20 @@ export default function IntegraatioMuokkaus() {
               }
             } catch (error:any) {
               console.log('Integration :', error);
-              console.log('Integration error deteil:', error?.detail);
-              console.log('Integration error status:', error?.status,"-",error?.title);
+              console.log('Integration error data:', error?.response?.data);
+              console.log('Integration error status:', error?.response?.status,"-",error?.response?.statusText);
+              catchError=true;
             }
             
           }
+          if(catchError) {
+            setOpenIntegrationError(true);
+            setOpenConfirmation(false);
+          } else {
+            setOpenConfirmation(false);
+            setOpenNotice(true);
+          }
           
-          setOpenConfirmation(false);
-          setOpenNotice(true);
         }
       } 
     } 
@@ -237,6 +254,18 @@ export default function IntegraatioMuokkaus() {
                     OK
                   </Button>
                 </DialogActions>
+              </Dialog>                          
+              <Dialog
+                open={openIntegrationError}
+                onClose={()=>closeErrorNotice()}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+              >
+                
+              <Alert severity="error"  onClose={()=>closeErrorNotice()}>
+                        <FormattedMessage defaultMessage="Muutosten tallenus epäonnistui" />
+              </Alert>
+                  
               </Dialog>
               <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
       </>
