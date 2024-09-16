@@ -754,6 +754,15 @@ public class IntegrationService {
     Optional<Integration> integration = this.getIntegration(id);
 
     if (integration.isPresent()) {
+      integration.get().getIntegrationSets().iterator();
+      for (Iterator<Integration> integrationIterator = integration.get().getIntegrationSets()
+          .iterator(); integrationIterator.hasNext();) {
+        Integration setIntegration = integrationIterator.next();
+        if (setIntegration.getIntegrationSets().size() == 1) {
+          setIntegration.setStatus(1);
+        }
+      }
+      integration.get().removeFromSets();
       integration.get().setStatus(1);
       return integrationRepository.save(integration.get());
     } else {
@@ -767,7 +776,9 @@ public class IntegrationService {
       // TODO authz
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
         // Create IDP
-        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1) ? integrationRepository.getAvailableIdpProdIntegrationIdentifier() : integrationRepository.getAvailableIdpTestIntegrationIdentifier();
+        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1)
+            ? integrationRepository.getAvailableIdpProdIntegrationIdentifier()
+            : integrationRepository.getAvailableIdpTestIntegrationIdentifier();
         if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
           integration.setId(availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
@@ -779,12 +790,15 @@ public class IntegrationService {
           logger.error("Failed to find an available idp integration identifier");
           throw new EntityCreationException("Integration creation failed");
         }
+        return integrationRepository.save(integration);
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         // Create SP
-        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1) ? integrationRepository.getAvailableSpProdIntegrationIdentifier() : integrationRepository.getAvailableSpTestIntegrationIdentifier();
+        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1)
+            ? integrationRepository.getAvailableSpProdIntegrationIdentifier()
+            : integrationRepository.getAvailableSpTestIntegrationIdentifier();
         if (availableSpIds != null && !availableSpIds.isEmpty()) {
-          integration.setId(availableSpIds.get(0)); //Pitääkö laittaa näin?
+          integration.setId(availableSpIds.get(0));
         } else {
           logger.error("Failed to find an available sp integration identifier");
           throw new EntityCreationException("Integration creation failed");
@@ -793,6 +807,8 @@ public class IntegrationService {
         Long setId = 0L;
         try {
           setId = integration.getIntegrationSets().iterator().next().getId();
+          logger.debug("\nsetId set to " + setId);
+          logger.debug("\ngetIntegrationSets() size is " + integration.getIntegrationSets().size());
         } catch (Exception e) {
           logger.error("No integration set id found", e);
         }
@@ -808,32 +824,45 @@ public class IntegrationService {
             logger.error("Failed to find an available set integration identifier");
             throw new EntityCreationException("Integration creation failed");
           }
+          logger.debug("\nsetId set to " + setId);
 
           Integration setIntegration = createBlankIntegration("set", "", "", null);
           setIntegration.setId(setId);
           setIntegration.getConfigurationEntity().getSet().setId(setId); // ONKO TÄMÄ TARPEELLINEN?
-          setIntegration.getConfigurationEntity().getSet().setName(integration.getConfigurationEntity().getSp().getName());
+          setIntegration.getConfigurationEntity().getSet()
+              .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
           setIntegration.setOrganization(integration.getOrganization());
-          logger.debug("BEFORE SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}", integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(), setIntegration.getConfigurationEntity().getId());
+          logger.debug(
+              "BEFORE SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}",
+              integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(),
+              setIntegration.getConfigurationEntity().getId());
           integration.removeFromSets();
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
           integration.addToSet(setIntegration);
           integrationRepository.save(setIntegration);
           integration = integrationRepository.save(integration);
-          logger.debug("AFTER SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}", integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(), setIntegration.getConfigurationEntity().getId());
+          logger.debug(
+              "AFTER SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}",
+              integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(),
+              setIntegration.getConfigurationEntity().getId());
           return integration;
         } else {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
           if (optionalSet.isPresent()) {
+            integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
+            // integration.getIntegrationSets().clear();
+            integrationRepository.saveAndFlush(optionalSet.get());
+            return integrationRepository.saveAndFlush(integration);
+          } else {
+            logger.error("No integration set with id {} found.", setId);
+            throw new EntityCreationException("Integration creation failed");
           }
         }
-        logger.debug("Creating SAML Service Provider");
       }
-      return integrationRepository.save(integration);
     } else {
       logger.debug("Integration creation failed.");
     }
