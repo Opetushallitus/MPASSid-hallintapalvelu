@@ -36,7 +36,7 @@ function PossibleServices({oid,handleService}: Props) {
         if(Number(event.target.value)>-1&&possibleServices.content&&possibleServices.content.length>0) {
             devLog('handleServiceView (possibleService)',possibleServices.content[Number(event.target.value)])
             const integration=possibleServices.content[Number(event.target.value)]
-            if(integration.deploymentPhase&&integration?.configurationEntity?.set?.name&&integration.id) {
+            if(integration.deploymentPhase!==undefined&&integration?.configurationEntity?.set?.name&&integration.id!==undefined) {
                 handleService({environment: integration.deploymentPhase, name: integration.configurationEntity.set.name, setId: integration.id})
                 setServiceIndex(Number(event.target.value))    
             }
@@ -46,7 +46,7 @@ function PossibleServices({oid,handleService}: Props) {
     }
 
     const addEnv = (value:number|undefined) => {
-        
+
         if(value !== undefined) {
             if(value===0) {
                 return <FormattedMessage defaultMessage="Testi" />
@@ -61,8 +61,6 @@ function PossibleServices({oid,handleService}: Props) {
         } else {
             return ''
         }
-            
-        
         
     }
     
@@ -75,7 +73,8 @@ function PossibleServices({oid,handleService}: Props) {
           } as any
     );
 
-    if(possibleServices.content&&possibleServices.content.length>0) {
+    if(possibleServices.content) {
+        devLog("possibleServices (content)",possibleServices.content)
         return (<Select
             labelId="palvelu"
             id="palvelu"
@@ -84,17 +83,17 @@ function PossibleServices({oid,handleService}: Props) {
             variant="standard"
             sx={{ marginRight: "auto"}}
         >
-            <MenuItem key={'valitse'} value={-3}>
+            <MenuItem key={'valitse'} value={-3} tabIndex={0}>
                 <FormattedMessage defaultMessage="Valitse" />
             </MenuItem>
-            <MenuItem key={'uusi_2'} value={-2}>
+            <MenuItem key={'uusi_2'} value={-2} tabIndex={1}>
                 {addEnv(0)} - uusi
             </MenuItem>
-            <MenuItem key={'uusi_1'} value={-1}>
+            <MenuItem key={'uusi_1'} value={-1} tabIndex={2}>
                 {addEnv(1)} - uusi
             </MenuItem>
             {possibleServices.content.map((integration,index) => {          
-                return(<MenuItem key={integration.configurationEntity?.set?.name+"_"+index} value={index} >
+                return(<MenuItem key={"possibleServices_"+index} value={index} tabIndex={3+index}>
                         {addEnv(integration?.deploymentPhase)} - {integration?.configurationEntity?.set?.name}
                     </MenuItem>)
             })}

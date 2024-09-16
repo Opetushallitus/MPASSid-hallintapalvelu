@@ -14,7 +14,8 @@ import ObjectForm from "./ObjectForm";
 import { IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import { devLog } from "@/utils/devLog";
-import MultiSelectForm, { oneEnum } from "./MultiSelectForm";
+import type { oneEnum } from "./MultiSelectForm";
+import MultiSelectForm from "./MultiSelectForm";
 
 interface AttributeProps {
     uiConfiguration: UiConfiguration;
@@ -139,7 +140,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
     const currentObject= useRef<any>({});
     const pressButtonRef= useRef<any>(true);
-    const cleanObjectDataRef= useRef<any>(true);
+    const objectDataRef= useRef<any>(true);
     const [ canSaveItem, setCanSaveItem ] = useState(true)
     //const [ object, setObject ] = useState<any>(attribute)
 
@@ -178,25 +179,21 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         
     }
 
-    const editObjectItem  = (name: string, data:any) => {
+    const editObject  = (name: string, data:any, index:number) => {
         
-        devLog("editObjectItem (name)",name)
-        devLog("editObjectItem (data)",data)
-        devLog("editObjectItem (uiConfiguration)",uiConfiguration)
-        devLog("editObjectItem (attribute)",attribute)
+        devLog("editObject (name)",name)
+        devLog("editObject (data)",data)
+        devLog("editObject (uiConfiguration)",uiConfiguration)
+        devLog("editObject (attribute)",attribute)
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
-        onEdit(name,data)
-        /*
-        if(data.content) {
-            currentObject.current[name]=data.content;
-            onEdit(name,data)
-        } else {
-            currentObject.current[name]=data;
-        }
-            */
-        devLog("editObjectItem (result)",currentObject.current)
+        //
+        //objectDataRef.current.clean()
+        
+        onDelete(attribute.name,index);
+        objectDataRef.current.edit(data)
+        //onEdit(name,data)
         
     }
 
@@ -236,9 +233,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         devLog("updateListObject (attribute)",attribute)
         devLog("updateListObject (currentObject)",currentObject.current)
         
-        if(cleanObjectDataRef.current.validate()) {
+        if(objectDataRef.current.validate()) {
             onUpdate(attribute.name,currentObject.current)
-            cleanObjectDataRef.current.clean()
+            objectDataRef.current.clean()
         }
         
     }
@@ -249,14 +246,14 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         */
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
-    
+    devLog("MetadataForm (configuration)",configuration)
+    devLog("MetadataForm (roleConfiguration)",roleConfiguration)
     if(roleConfiguration.visible) {
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
             enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
         }
         
-        devLog("updateMultivalueMetadata looppi (metadataForm)",attribute)
         return (
             <Grid container >
                 
@@ -297,7 +294,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 type={attribute.name!} 
                                 isEditable={roleConfiguration.editable} 
                                 onUpdate={updatObjectItem} 
-                                onEdit={editObjectItem} 
+                                onEdit={editObject} 
                                 onDelete={deleteObjectItem} 
                                 onValidate={objectOnValidate} 
                                 mandatory={configuration.mandatory}
@@ -305,7 +302,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 attributeType={"metadata"}
                                 helperText={helperText}
                                 setCanSave={setCanSaveItem}
-                                cleanObject={cleanObjectDataRef}
+                                objectData={objectDataRef}
                                 currentObject={currentObject}/>)
                             }
                             {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&

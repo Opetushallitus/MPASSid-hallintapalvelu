@@ -175,6 +175,11 @@ defineMessage({
   description: "attribuutti",
 });
 defineMessage({
+  defaultMessage: "Palveluryhmä",
+  id: "attribuutti.integrationSet",
+  description: "attribuutti",
+});
+defineMessage({
   defaultMessage: "Integraatio lista",
   id: "attribuutti.integrationSets",
   description: "attribuutti",

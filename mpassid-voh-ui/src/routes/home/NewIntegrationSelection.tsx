@@ -115,7 +115,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     devLog("createIntegration (oldSet)",service)
                     if(service!==undefined) {
                         result.configurationEntity.sp.name=service.name
-                        result.deploymentPhase=service.environment
+                        result.deploymentPhase=service.environment                        
                         result.integrationSets=[]
                         result.integrationSets.push( { id: service.setId })
 
@@ -126,9 +126,10 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     
                 }
                 if(result?.configurationEntity?.idp) {
-                    result.deploymentPhase=1
-                    
-                    
+                    result.deploymentPhase=1                  
+                }
+                if(result?.configurationEntity?.sp&&result.configurationEntity.sp.metadata===null) {
+                    result.configurationEntity.sp.metadata={}
                 }
                 devLog("createIntegration (integration)",result)
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
@@ -213,9 +214,9 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         <MenuItem key={'koulutustoimija'} value={'idp'}>
                             <FormattedMessage defaultMessage='Koulutustoimija'/>
                         </MenuItem>
-                        {!ENV.PROD&&<MenuItem key={'palveluintegraatio'} value={'sp'}>
+                        <MenuItem key={'palveluintegraatio'} value={'sp'}>
                             <FormattedMessage defaultMessage='Palveluintegraatio' />
-                        </MenuItem>}
+                        </MenuItem>
                     </Select>
                 </Grid>
                 <Grid item xs={4}>
