@@ -96,7 +96,8 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
       devLog("createAttributeContent (inputValue)",inputValue.current[name])
       return inputValue.current[name]
     }
-    if(currentObject.current&&currentObject.current[name]) {
+    
+    if(currentObject.current&&currentObject.current[name]!== undefined) {
       devLog("createAttributeContent (currentObject)",currentObject.current[name])
       return currentObject.current[name]
     }
@@ -274,12 +275,8 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
 
                   //If not default value for switch, then take first enum
                   if(configuration?.enum?.length===2&&attribute.content==='') {
+                    devLog("ObjectForm (SwitchForm init)",attribute.content)
                     attribute.content=configuration.enum[0];
-                  }
-                  if(configuration.name==='location') {
-                    devLog("ObjectForm (switch init)",attribute.content)
-                    devLog("ObjectForm (switch init)",currentObject.current[configuration.name])
-                    
                   }
                   
                   //Initialize switchvalue currentObject                

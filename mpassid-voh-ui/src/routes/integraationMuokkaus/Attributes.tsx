@@ -2,7 +2,7 @@ import type { Components } from "@/api";
 import { attributePreferredOrder } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
-import type { Dispatch} from "react";
+import { useEffect, type Dispatch} from "react";
 import AttributeForm from "./Form";
 import { dataConfiguration } from '../../config';
 import { helperText, validate } from "@/utils/Validators";
@@ -27,38 +27,51 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
 
+  useEffect(() => {
+    if(mandatoryAttributes.length>0) {
+      mandatoryAttributes.forEach(name=> {
+        if(attributes.filter(a => a.name === name).length===0||attributes.filter(a => a.name === name)[0].content=== undefined||attributes.filter(a => a.name === name)[0].content===''){
+          devLog("Attributes (attributes)",attributes)
+          devLog("Attributes (mandatory name)",name)    
+          devLog("Attributes (set(false))",false)                    
+          setCanSave(false)
+        }
+      })
+      
+    }
+  }, [mandatoryAttributes, attributes, setCanSave]);
+  
   const updateAttribute = (name:string, value:string, type:string ) => {  
-     
-    if(attributes.map(a=>a.name).indexOf(name)>-1) {
-      attributes.forEach(attribute=>{
+    devLog("Attributes (updateAttribute)",name) 
+    var attributeList:Components.Schemas.Attribute[] = [ ...attributes ]
+    if(attributeList.map(a=>a.name).indexOf(name)>-1) {
+      attributeList.forEach(attribute=>{
         if(attribute.name===name) {
           attribute.content=value;
         }
       })
     } else {
       if(type==='data'||type==='user') {
-        attributes.push({type: type, name: name,content: value }) 
+        attributeList.push({type: type, name: name,content: value }) 
       }
       
     }
     if(type==='user') {
-      attributes=attributes.filter(a=>a.content!=='')
+      attributeList=attributeList.filter(a=>a.content!=='')
     }
     
-    
-    
     if(newConfigurationEntityData?.attributes&&setNewConfigurationEntityData) {
-      newConfigurationEntityData.attributes=attributes;
+      newConfigurationEntityData.attributes=attributeList;
       setNewConfigurationEntityData({ ...newConfigurationEntityData })
     }
     
-    if(mandatoryAttributes.filter(ma=>attributes.filter(a=>a.content!=='').map(a=>a.name).indexOf(ma)<0).length===0) {
+    if(mandatoryAttributes.filter(ma=>attributeList.filter(a=>a.content!=='').map(a=>a.name).indexOf(ma)<0).length===0) {
       setCanSave(true)
     } else {
       setCanSave(false)
     }
   }
-  
+
     return (
       <Grid container >
         {dataConfiguration
@@ -87,10 +100,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   if(configuration.mandatory) {
                     mandatoryAttributes.push(configuration.name);
                     if(attributes.filter(a => a.name === configuration.name).length===0||attributes.filter(a => a.name === configuration.name)[0].content=== undefined||attributes.filter(a => a.name === configuration.name)[0].content===''){
-                        devLog("attributes",attributes)
-                        devLog("configuration",configuration)                        
-                        setCanSave(false)
-                      
+                        devLog("Attributes (attributes)",attributes)
+                        devLog("Attributes (configuration)",configuration)                        
+                        //setCanSave(false)
+                        devLog("Attributes (not active set(false))",false)
                       
                     }
                   }

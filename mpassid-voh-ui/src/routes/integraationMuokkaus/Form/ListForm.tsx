@@ -86,7 +86,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     if(onValidate(inputRef.current!.value)) {
       
       setCanSave(true) 
-      setUsedHelperText(<></>)
+      setUsedHelperText(helperText(inputRef.current!.value))
       setIsValid(true)    
       if(inputRef.current?.value) {
         onUpdate(type,inputRef.current.value);
@@ -110,7 +110,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     }
   
     if(onValidate(value)) {
-      setUsedHelperText(<></>)
+      setUsedHelperText(helperText(inputRef.current!.value))
       setIsValid(true)    
     } else {
       setUsedHelperText(helperText(value))

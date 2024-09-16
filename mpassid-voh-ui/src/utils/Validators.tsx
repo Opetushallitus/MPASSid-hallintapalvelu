@@ -1,5 +1,7 @@
 import { FormattedMessage } from 'react-intl';
 import { devLog } from './devLog';
+import { X509Certificate } from '@peculiar/x509';
+
 
 const validateUri = (value:string) => {
     
@@ -54,8 +56,87 @@ const validateNoLocalhost = (value:string) => {
     
 }
 
+function trimCertificate(pem) {
+    const base64Cert = pem.replace(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\n| |\r/g, '').trim();
+    return base64Cert;
+}
+
+const validateCert = (value:string) => {
+    
+    if(value||value!=='') {
+        devLog("trimmed cert",trimCertificate(value))
+        const cert = new X509Certificate(trimCertificate(value));
+        
+      const certDetails = {
+        subject: cert.subjectName,
+        issuer: cert.issuerName,
+        validFrom: cert.notBefore,
+        validTo: cert.notAfter,
+        serialNumber: cert.serialNumber,
+      };
+      devLog("certDetails",certDetails)
+      const currentDate = new Date();
+      const futureDate = new Date();
+      futureDate.setMonth(currentDate.getMonth() + 6);
+      if(currentDate  < certDetails.validFrom) {
+        devLog("Cert is not yet valid",certDetails.validFrom)
+      } 
+      if(currentDate  > certDetails.validTo) {
+        devLog("Cert is not valid",certDetails.validTo)
+      } else {
+        if(certDetails.validTo < futureDate) {
+            devLog("Cert is valid less than 6kk",certDetails.validTo)
+        } else {
+        devLog("Cert is valid more than 6kk",certDetails.validTo)
+        }
+      }
+      
+      
+      return true;
+    } else {
+        return false;
+    }
+    
+}
+
+const validateCertText = (value:string) => {
+    
+    if(value||value!=='') {
+        devLog("trimmed cert",trimCertificate(value))
+        const cert = new X509Certificate(trimCertificate(value));
+        
+      const certDetails = {
+        subject: cert.subjectName,
+        issuer: cert.issuerName,
+        validFrom: cert.notBefore,
+        validTo: cert.notAfter,
+        serialNumber: cert.serialNumber,
+      };
+      devLog("certDetails",certDetails)
+      const currentDate = new Date();
+      const futureDate = new Date();
+      futureDate.setMonth(currentDate.getMonth() + 6);
+      if(currentDate  < certDetails.validFrom) {
+        return(<FormattedMessage defaultMessage="Certificate ei ole vielä validi: {validFrom}" values={{validFrom: certDetails.validFrom.toLocaleDateString()}} />)
+      } 
+      if(currentDate  > certDetails.validTo) {
+        return(<FormattedMessage defaultMessage="Certificate ei ole enään validi: {validTo}" values={{validTo: certDetails.validTo.toLocaleDateString()}} />)
+      } else {
+        if(certDetails.validTo < futureDate) {
+            return(<FormattedMessage defaultMessage="Certificate on validi alle 6kk: {validTo}" values={{validTo: certDetails.validTo.toLocaleDateString()}} />)        
+        }
+      }
+      return(<></>);
+    } else {
+        return (<FormattedMessage defaultMessage="Ei validi certificate!" />);
+    }
+    
+}
+
+
+
 export const validate = (validators:string[],value:string) => {
-    let validateStatus:boolean=true;
+let validateStatus:boolean=true;
     validators.forEach(validator=>{
         if(validateStatus) {
             switch (validator)
@@ -87,6 +168,9 @@ export const validate = (validators:string[],value:string) => {
                     break;
                 case "nolocalhost":
                     validateStatus=validateNoLocalhost(value);
+                    break;
+                case "cert":
+                    validateStatus=validateCert(value);
                     break;         
                 default:
                     validateStatus=false;
@@ -155,6 +239,9 @@ export const helperText = (validators:string[],value:string) => {
                     if(!validateStatus) {
                         helperText=<FormattedMessage defaultMessage="Localhost ei ole sallittu!" />
                     }
+                    break;
+                case "cert":
+                    helperText=validateCertText(value)                    
                     break;       
                 default:
                     validateStatus=false;
@@ -179,6 +266,7 @@ https://github.com/PeculiarVentures/x509
 npm install @peculiar/x509
 
 import { X509Certificate } from '@peculiar/x509';
+import { CertificateInfo } from './CertificateParser';
 
 const cert = new X509Certificate(inputRef.current!.value);
       const certDetails = {

@@ -37,7 +37,7 @@ export default function IntegraatioMuokkaus() {
   const [logo, setLogo] = useState<Blob>();
   const result = useRef<Components.Schemas.Integration>({});
   const intl = useIntl();
-
+  
   useEffect(() => {
     if(me?.groups) {
       setGroups(me.groups)
@@ -78,7 +78,7 @@ export default function IntegraatioMuokkaus() {
 };
 
   const writeAccess = () => {
-    
+
     if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
       return true;
     } else {

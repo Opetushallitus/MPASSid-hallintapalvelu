@@ -1,10 +1,8 @@
 
-import { Box, SelectChangeEvent, Switch, TextField } from "@mui/material";
+import { devLog } from "@/utils/devLog";
+import { Box, Switch } from "@mui/material";
 import type { Dispatch} from "react";
-import { useEffect, useRef, useState } from "react";
-import { useIntl, FormattedMessage } from 'react-intl';
-import { get } from "lodash";
-import type { Components } from '@/api';
+import { useEffect, useState } from "react";
 
 interface Props {
   object: any;
@@ -22,14 +20,21 @@ interface Props {
 }
 
 export default function SwitchForm({ object, type, isEditable=false, mandatory=false, values=[], helperText, path, onUpdate, onValidate, attributeType, label,setCanSave }: Props) {
-  const intl = useIntl();
-  const [value, setValue] = useState<boolean>(object?.content);
+
+  const [value, setValue] = useState<boolean>((object?.content)?!!object.content:false);
+
+
+  useEffect(() => {
+      devLog("SwitchForm (object)",object?.content)      
+      setValue((object?.content)?!!object.content:false)
+  }, [object,setValue]);
+
 
   const updateFormValue = (event: any) => {
     
         setCanSave(true) 
         onUpdate(type,event.target.checked,attributeType);
-        setValue(event.target.checked)
+        setValue(!!event.target.checked)
       
   };
   
