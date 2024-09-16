@@ -88,6 +88,7 @@ public class AttributeService {
                             requestBody.getClientSecret(),
                             tenantId);
                 } catch (Exception e) {
+                    logger.debug(e.getMessage());
                     throw new EntityNotFoundException("Authorization not successful");
                 }
 
