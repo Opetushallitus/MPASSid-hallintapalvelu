@@ -64,35 +64,40 @@ function trimCertificate(pem:string) {
 const validateCert = (value:string) => {
     
     if(value||value!=='') {
-        devLog("trimmed cert",trimCertificate(value))
-        const cert = new X509Certificate(trimCertificate(value));
+        try {
+            devLog("trimmed cert",trimCertificate(value))
+            const cert = new X509Certificate(trimCertificate(value));
         
-      const certDetails = {
-        subject: cert.subjectName,
-        issuer: cert.issuerName,
-        validFrom: cert.notBefore,
-        validTo: cert.notAfter,
-        serialNumber: cert.serialNumber,
-      };
-      devLog("certDetails",certDetails)
-      const currentDate = new Date();
-      const futureDate = new Date();
-      futureDate.setMonth(currentDate.getMonth() + 6);
-      if(currentDate  < certDetails.validFrom) {
-        devLog("Cert is not yet valid",certDetails.validFrom)
-      } 
-      if(currentDate  > certDetails.validTo) {
-        devLog("Cert is not valid",certDetails.validTo)
-      } else {
-        if(certDetails.validTo < futureDate) {
-            devLog("Cert is valid less than 6kk",certDetails.validTo)
-        } else {
-        devLog("Cert is valid more than 6kk",certDetails.validTo)
+            const certDetails = {
+                subject: cert.subjectName,
+                issuer: cert.issuerName,
+                validFrom: cert.notBefore,
+                validTo: cert.notAfter,
+                serialNumber: cert.serialNumber,
+            };
+            devLog("certDetails",certDetails)
+            const currentDate = new Date();
+            const futureDate = new Date();
+            futureDate.setMonth(currentDate.getMonth() + 6);
+            if(currentDate  < certDetails.validFrom) {
+                devLog("Cert is not yet valid",certDetails.validFrom)
+            } 
+            if(currentDate  > certDetails.validTo) {
+                devLog("Cert is not valid",certDetails.validTo)
+            } else {
+                if(certDetails.validTo < futureDate) {
+                    devLog("Cert is valid less than 6kk",certDetails.validTo)
+                } else {
+                devLog("Cert is valid more than 6kk",certDetails.validTo)
+                }
+            }
+            
+            
+            return true;
+        } catch (error) {
+            return false
         }
-      }
-      
-      
-      return true;
+        
     } else {
         return false;
     }
@@ -102,31 +107,36 @@ const validateCert = (value:string) => {
 const validateCertText = (value:string) => {
     
     if(value||value!=='') {
-        devLog("trimmed cert",trimCertificate(value))
-        const cert = new X509Certificate(trimCertificate(value));
-        
-      const certDetails = {
-        subject: cert.subjectName,
-        issuer: cert.issuerName,
-        validFrom: cert.notBefore,
-        validTo: cert.notAfter,
-        serialNumber: cert.serialNumber,
-      };
-      devLog("certDetails",certDetails)
-      const currentDate = new Date();
-      const futureDate = new Date();
-      futureDate.setMonth(currentDate.getMonth() + 6);
-      if(currentDate  < certDetails.validFrom) {
-        return(<FormattedMessage defaultMessage="Certificate ei ole vielä validi: {validFrom}" values={{validFrom: certDetails.validFrom.toLocaleDateString()}} />)
-      } 
-      if(currentDate  > certDetails.validTo) {
-        return(<FormattedMessage defaultMessage="Certificate ei ole enään validi: {validTo}" values={{validTo: certDetails.validTo.toLocaleDateString()}} />)
-      } else {
-        if(certDetails.validTo < futureDate) {
-            return(<FormattedMessage defaultMessage="Certificate on validi alle 6kk: {validTo}" values={{validTo: certDetails.validTo.toLocaleDateString()}} />)        
+        try {
+            devLog("trimmed cert",trimCertificate(value))
+            const cert = new X509Certificate(trimCertificate(value));
+                
+            const certDetails = {
+                subject: cert.subjectName,
+                issuer: cert.issuerName,
+                validFrom: cert.notBefore,
+                validTo: cert.notAfter,
+                serialNumber: cert.serialNumber,
+            };
+            devLog("certDetails",certDetails)
+            const currentDate = new Date();
+            const futureDate = new Date();
+            futureDate.setMonth(currentDate.getMonth() + 6);
+            if(currentDate  < certDetails.validFrom) {
+                return(<FormattedMessage defaultMessage="Certificate ei ole vielä validi: {validFrom}" values={{validFrom: certDetails.validFrom.toLocaleDateString()}} />)
+            } 
+            if(currentDate  > certDetails.validTo) {
+                return(<FormattedMessage defaultMessage="Certificate ei ole enään validi: {validTo}" values={{validTo: certDetails.validTo.toLocaleDateString()}} />)
+            } else {
+                if(certDetails.validTo < futureDate) {
+                    return(<FormattedMessage defaultMessage="Certificate on validi alle 6kk: {validTo}" values={{validTo: certDetails.validTo.toLocaleDateString()}} />)        
+                }
+            }
+            return(<></>);    
+        } catch (error) {
+            return (<FormattedMessage defaultMessage="Ei validi certificate!" />);
         }
-      }
-      return(<></>);
+        
     } else {
         return (<FormattedMessage defaultMessage="Ei validi certificate!" />);
     }
