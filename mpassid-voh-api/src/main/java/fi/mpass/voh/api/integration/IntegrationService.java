@@ -807,8 +807,6 @@ public class IntegrationService {
         Long setId = 0L;
         try {
           setId = integration.getIntegrationSets().iterator().next().getId();
-          logger.debug("\nsetId set to " + setId);
-          logger.debug("\ngetIntegrationSets() size is " + integration.getIntegrationSets().size());
         } catch (Exception e) {
           logger.error("No integration set id found", e);
         }
@@ -828,25 +826,17 @@ public class IntegrationService {
 
           Integration setIntegration = createBlankIntegration("set", "", "", null);
           setIntegration.setId(setId);
-          setIntegration.getConfigurationEntity().getSet().setId(setId); // ONKO TÄMÄ TARPEELLINEN?
+          setIntegration.getConfigurationEntity().getSet().setId(setId);
           setIntegration.getConfigurationEntity().getSet()
               .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
           setIntegration.setOrganization(integration.getOrganization());
-          logger.debug(
-              "BEFORE SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}",
-              integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(),
-              setIntegration.getConfigurationEntity().getId());
           integration.removeFromSets();
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
           integration.addToSet(setIntegration);
           integrationRepository.save(setIntegration);
           integration = integrationRepository.save(integration);
-          logger.debug(
-              "AFTER SAVE\nintegration id: {}\nsetIntegration id: {}\nintegration conf entity id: {}\n setIntegration conf entity id: {}",
-              integration.getId(), setIntegration.getId(), integration.getConfigurationEntity().getId(),
-              setIntegration.getConfigurationEntity().getId());
           return integration;
         } else {
           // Add to existing integration set
@@ -854,7 +844,6 @@ public class IntegrationService {
           if (optionalSet.isPresent()) {
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
-            // integration.getIntegrationSets().clear();
             integrationRepository.saveAndFlush(optionalSet.get());
             return integrationRepository.saveAndFlush(integration);
           } else {
