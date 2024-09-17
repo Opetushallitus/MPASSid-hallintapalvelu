@@ -794,6 +794,15 @@ public class IntegrationService {
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         // Create SP
+        if (integration.getConfigurationEntity().getSp() != null && integration.getConfigurationEntity().getSp() instanceof SamlServiceProvider) {
+          SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
+          if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
+            logger.error("No entityID given or entityID is already in use.");
+            throw new EntityCreationException(
+                "Integration creation failed, no entityID given or entityID is already in use.");
+          }
+        }
+
         List<Long> availableSpIds = (integration.getDeploymentPhase() == 1)
             ? integrationRepository.getAvailableSpProdIntegrationIdentifier()
             : integrationRepository.getAvailableSpTestIntegrationIdentifier();
@@ -856,6 +865,19 @@ public class IntegrationService {
       logger.debug("Integration creation failed.");
     }
     return integration;
+  }
+
+  public Boolean validateAcsUrl(String url) {
+
+    return true;
+  }
+
+  public Boolean validateEntityId(String id) {
+    List<String> usedEntityIds = integrationRepository.getAllEntityIds();
+    if (usedEntityIds.contains(id)) {
+      return false;
+    }
+    return true;
   }
 
   /**
