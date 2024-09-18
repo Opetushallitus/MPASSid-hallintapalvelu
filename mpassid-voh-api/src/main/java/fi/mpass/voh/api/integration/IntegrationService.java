@@ -502,27 +502,34 @@ public class IntegrationService {
    * @throws EntityNotFoundException
    */
   public Integration updateIntegration(Long id, Integration integration) {
-    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
-      if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
-        SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
-        if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
-          logger.error("No entityID given or entityID is already in use.");
-          throw new EntityUpdateException(
-              "Integration update failed, no entityID given or entityID is already in use.");
-        }
-      }
-      if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
-        OidcServiceProvider oidcSP = ((OidcServiceProvider) integration.getConfigurationEntity().getSp());
-        if (oidcSP.getClientId() == null || !validateEntityId(oidcSP.getClientId())) {
-          logger.error("No entityID given or entityID is already in use.");
-          throw new EntityUpdateException(
-              "Integration update failed, no clientId given or clientId is already in use.");
-        }
-      }
-    }
-
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
+      if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+        if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
+          SamlServiceProvider samlSp = (SamlServiceProvider) integration.getConfigurationEntity().getSp();
+          SamlServiceProvider existingSamlSP = (SamlServiceProvider) existingIntegration.getConfigurationEntity()
+              .getSp();
+          if (samlSp.getEntityId() == null || !validateEntityId(samlSp.getEntityId())) {
+            if (!existingSamlSP.getEntityId().equals(samlSp.getEntityId())) {
+              logger.error("No entityID given or entityID is already in use.");
+              throw new EntityUpdateException(
+                  "Integration update failed, no entityID given or entityID is already in use.");
+            }
+          }
+        }
+        if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+          OidcServiceProvider oidcSp = ((OidcServiceProvider) integration.getConfigurationEntity().getSp());
+          OidcServiceProvider existingOidcSp = ((OidcServiceProvider) existingIntegration.getConfigurationEntity()
+              .getSp());
+          if (oidcSp.getClientId() == null || !validateEntityId(oidcSp.getClientId())) {
+            if (!existingOidcSp.getClientId().equals(oidcSp.getClientId())) {
+              logger.error("No entityID given or entityID is already in use.");
+              throw new EntityUpdateException(
+                  "Integration update failed, no clientId given or clientId is already in use.");
+            }
+          }
+        }
+      }
       try {
         // TODO check that integration.getId() and id matches
         Integration updatedIntegration = loadingService.loadOne(integration);
@@ -828,6 +835,9 @@ public class IntegrationService {
                 "Integration creation failed, no clientId given or clientId is already in use.");
           }
         }
+
+        String url = (String) integration.getConfigurationEntity().getSp().getMetadata()
+            .get("assertionConsumerServiceUrls");
 
         List<Long> availableSpIds = (integration.getDeploymentPhase() == 1)
             ? integrationRepository.getAvailableSpProdIntegrationIdentifier()
