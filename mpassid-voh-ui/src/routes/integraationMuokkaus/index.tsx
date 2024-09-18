@@ -3,7 +3,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
-import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, Alert } from '@mui/material';
+import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, Alert, AlertTitle, Link as MuiLink } from '@mui/material';
 import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -22,12 +22,12 @@ export default function IntegraatioMuokkaus() {
   const { id } = useParams();
   const [saveDialogState, setSaveDialogState] = useState(true);
   const [canSave, setCanSave] = useState(false);
-  const [name, setName] = useState(false);
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration|undefined>();
   const navigate = useNavigate();
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [openAttributeTest, setOpenAttributeTest] = useState(false);
   const [openIntegrationError, setOpenIntegrationError] = useState(false);
+  const [openIntegrationErrorText, setOpenIntegrationErrorText] = useState<string>('');
   
   const [isConfirmed, setConfirmed] = useState(false);
   const [isDisabled, setDisabled] = useState(false);
@@ -138,8 +138,14 @@ export default function IntegraatioMuokkaus() {
                 } 
               }
             } catch (error:any) {              
-              console.log('Integration error data:', error?.response?.data);
-              console.log('Integration error status:', error?.response?.status);
+              devLog('Integration error data:', error?.response?.data);
+              devLog('Integration error status:', error?.response?.status);
+              if(error?.response?.status===409) {
+                setOpenIntegrationErrorText(error?.response?.data?.message)
+              } else {
+                setOpenIntegrationErrorText('')
+              }
+              
               catchError=true;
               
             }
@@ -150,6 +156,7 @@ export default function IntegraatioMuokkaus() {
             setOpenConfirmation(false);
           } else {
             setOpenConfirmation(false);
+            setOpenIntegrationErrorText('')
             setOpenNotice(true);
           }
           
@@ -273,7 +280,35 @@ export default function IntegraatioMuokkaus() {
               >
                 
               <Alert severity="error"  onClose={()=>closeErrorNotice()}>
-                        <FormattedMessage defaultMessage="Muutosten tallenus epäonnistui" />
+                        
+
+                        
+                        {openIntegrationErrorText&&openIntegrationErrorText!==''&&
+                          
+                          <FormattedMessage
+                              defaultMessage="<title>Muutosten tallenus epäonnistui</title>{error} "
+                              values={{
+                                title: (chunks) => <AlertTitle>{chunks}</AlertTitle> ,
+                                error: openIntegrationErrorText                              
+                              }}
+                            />}
+                        {!(openIntegrationErrorText||openIntegrationErrorText!=='')&&
+                          <FormattedMessage
+                              defaultMessage="<title>Virhe</title>Ongelma näytettäessä tietoja. Ystävällisesti ole yhteydessä MPASSid-hallintapalvelun <link>ylläpitoon</link>."
+                              values={{
+                                title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
+                                link: ENV.SUPPORT_URI
+                                  ? (chunks) => (
+                                      <MuiLink color="error" href={ENV.SUPPORT_URI}>
+                                        {chunks}
+                                      </MuiLink>
+                                    )
+                                  : (chunks) => chunks,
+                              }}
+                            />
+                        }
+                        
+                        
               </Alert>
                   
               </Dialog>
