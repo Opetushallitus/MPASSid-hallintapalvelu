@@ -3,7 +3,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
-import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, Alert, AlertTitle, Link as MuiLink } from '@mui/material';
+import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, Alert, AlertTitle, Link as MuiLink, CircularProgress } from '@mui/material';
 import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -36,6 +36,7 @@ export default function IntegraatioMuokkaus() {
   const [openNotice, setOpenNotice] = useState(false);
   const [logo, setLogo] = useState<Blob>();
   const result = useRef<Components.Schemas.Integration>({});
+  const [loading, setLoading] = useState<boolean>(false);
   const intl = useIntl();
   
   useEffect(() => {
@@ -55,6 +56,14 @@ export default function IntegraatioMuokkaus() {
     horizontal: 'right',
   }
 
+  const getErrorId = () => {
+    if(newIntegration?.configurationEntity?.sp?.type) {
+      const id = openIntegrationErrorText;
+      return openIntegrationErrorText in intl.messages ? { id: id } : undefined;
+    }
+    return undefined
+    
+  }
   const closeNotice = () => {
       setOpenNotice(false)
       setOpenConfirmation(false);
@@ -115,6 +124,7 @@ export default function IntegraatioMuokkaus() {
             })
             
             try {
+              setLoading(true)
               if(id===0) {
                 result.current = (await createIntegrationRaw({},newIntegration)).data;   
               } else {
@@ -137,7 +147,9 @@ export default function IntegraatioMuokkaus() {
                   }                
                 } 
               }
-            } catch (error:any) {              
+              setLoading(false)
+            } catch (error:any) {   
+              setLoading(false)           
               devLog('Integration error data:', error?.response?.data);
               devLog('Integration error status:', error?.response?.status);
               if(error?.response?.status===409) {
@@ -245,10 +257,11 @@ export default function IntegraatioMuokkaus() {
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={()=>{setOpenConfirmation(false);setSaveDialogState(true);}} autoFocus>
-                    PERUUTA
+                  <FormattedMessage defaultMessage="PERUUTA" />
                   </Button>
-                  <Button onClick={saveIntegration} autoFocus>
-                    OK
+                  <Button onClick={saveIntegration} autoFocus disabled={loading}>
+                    {!loading&&<FormattedMessage defaultMessage="OK" />}
+                    {loading&&<CircularProgress />}
                   </Button>
                 </DialogActions>
               </Dialog>
@@ -289,7 +302,7 @@ export default function IntegraatioMuokkaus() {
                               defaultMessage="<title>Muutosten tallenus epäonnistui</title>{error} "
                               values={{
                                 title: (chunks) => <AlertTitle>{chunks}</AlertTitle> ,
-                                error: openIntegrationErrorText                              
+                                error: getErrorId() ? <FormattedMessage {...getErrorId()} /> : openIntegrationErrorText                 
                               }}
                             />}
                         {!(openIntegrationErrorText||openIntegrationErrorText!=='')&&
