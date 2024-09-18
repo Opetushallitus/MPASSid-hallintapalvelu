@@ -502,6 +502,24 @@ public class IntegrationService {
    * @throws EntityNotFoundException
    */
   public Integration updateIntegration(Long id, Integration integration) {
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+      if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
+        SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
+        if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
+          logger.error("No entityID given or entityID is already in use.");
+          throw new EntityUpdateException(
+              "Integration update failed, no entityID given or entityID is already in use.");
+        }
+      }
+      if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+        OidcServiceProvider oidcSP = ((OidcServiceProvider) integration.getConfigurationEntity().getSp());
+        if (oidcSP.getClientId() == null || !validateEntityId(oidcSP.getClientId())) {
+          logger.error("No entityID given or entityID is already in use.");
+          throw new EntityUpdateException(
+              "Integration update failed, no clientId given or clientId is already in use.");
+        }
+      }
+    }
 
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
