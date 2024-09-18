@@ -505,6 +505,7 @@ public class IntegrationService {
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+        // Check for duplicate entityIds and clientIds
         if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
           SamlServiceProvider samlSp = (SamlServiceProvider) integration.getConfigurationEntity().getSp();
           SamlServiceProvider existingSamlSP = (SamlServiceProvider) existingIntegration.getConfigurationEntity()
@@ -835,9 +836,6 @@ public class IntegrationService {
                 "Integration creation failed, no clientId given or clientId is already in use.");
           }
         }
-
-        String url = (String) integration.getConfigurationEntity().getSp().getMetadata()
-            .get("assertionConsumerServiceUrls");
 
         List<Long> availableSpIds = (integration.getDeploymentPhase() == 1)
             ? integrationRepository.getAvailableSpProdIntegrationIdentifier()
