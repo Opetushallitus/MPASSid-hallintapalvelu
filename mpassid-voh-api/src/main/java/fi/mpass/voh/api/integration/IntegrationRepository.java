@@ -70,8 +70,11 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
     @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null AND a.id >= 5000000 AND a.id < 6000000")
     List<Long> getAvailableSpTestIntegrationIdentifier();
 
-    @Query("SELECT service_provider.entity_id from service_provider where service_provider.entity_id is not null")
+    @Query("SELECT sp.entityId FROM ServiceProvider sp WHERE sp.entityId is not null")
     List<String> getAllEntityIds();
+
+    @Query("SELECT sp.clientId FROM ServiceProvider sp WHERE sp.clientId is not null")
+    List<String> getAllClientIds();
     
     List<Integration> findAllByOrganizationOid(String oid);
 

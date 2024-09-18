@@ -794,12 +794,20 @@ public class IntegrationService {
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         // Create SP
-        if (integration.getConfigurationEntity().getSp() != null && integration.getConfigurationEntity().getSp() instanceof SamlServiceProvider) {
+        if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
           SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
           if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
             logger.error("No entityID given or entityID is already in use.");
             throw new EntityCreationException(
                 "Integration creation failed, no entityID given or entityID is already in use.");
+          }
+        }
+        if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+          OidcServiceProvider oidcSP = ((OidcServiceProvider) integration.getConfigurationEntity().getSp());
+          if (oidcSP.getClientId() == null || !validateEntityId(oidcSP.getClientId())) {
+            logger.error("No entityID given or entityID is already in use.");
+            throw new EntityCreationException(
+                "Integration creation failed, no clientId given or clientId is already in use.");
           }
         }
 
@@ -875,6 +883,14 @@ public class IntegrationService {
   public Boolean validateEntityId(String id) {
     List<String> usedEntityIds = integrationRepository.getAllEntityIds();
     if (usedEntityIds.contains(id)) {
+      return false;
+    }
+    return true;
+  }
+
+  public Boolean validateClientId(String id) {
+    List<String> usedClientIds = integrationRepository.getAllClientIds();
+    if (usedClientIds.contains(id)) {
       return false;
     }
     return true;
