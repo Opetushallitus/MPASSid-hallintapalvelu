@@ -54,7 +54,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   }, [label, mandatory, reload, setCanSave]);
 
   const updateFormValue = () => {
-
+    devLog("InputForm (updateFormValue)",inputRef.current?.value)
     if(onValidate(inputRef.current?.value)) {
       setIsValid(true)
       if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
@@ -69,7 +69,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
         } else {
           onUpdate(type,"",attributeType);
         }
-        setUsedHelperText(<></>)
+        setUsedHelperText(helperText(inputRef.current?.value))
       }
       
     } else {

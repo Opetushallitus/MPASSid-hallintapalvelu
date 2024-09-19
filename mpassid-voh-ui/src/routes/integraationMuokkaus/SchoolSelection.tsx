@@ -269,26 +269,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
     };
 
-    /*
-    Näytetäänkö koulut (KYLLÄ/EI)
-      JOS näytetään koulut KYLLÄ 
-        Koulutustoimijan perusnimi näyttää oletuksena kentässä koulutustoimijan virallisen nimen OPH:n org-palvelussa
-        Mutta sallii myös vapaamuotoisen tekstin täyttämisen esim. Vantaan peruskoulu (Digione)
-      Include schools (käyttäjän omaan organisaation ja valittuihin oppilaitostyyppeihin liittyvät koulut haetaan/näytetään organisaatiopalvelusta)
-        Esim. Jos valittuna oppilaitostyyppi peruskoulut, käyttäjälle ei näytetä lukioita.
-      Exclude schools
-      Jos koulut näytetään niin koulutustoimijan näyttönimi on disabled (tooltipin infona, syy disaploitumiseen)
-        Jos näytetään koulut EI, niin näyttönimi aktivoituna 
-      Käyttäjä lisää "Oppilaitostyyppivalinnat" (Ei näytetä tätä kohtaa, jos ei tarvita tunnistuksenvälityspalvelun konfiguraatiossa, jos valittuna "kouluja ei näytetä" (CSC tarkistaa))
-        Hyödynnetään OPH:n koodistopalvelun MPASSid-koodistoa: 
-        Testi: https://virkailija.testiopintopolku.fi/koodisto-app/koodisto/view/mpassidnsallimatoppilaitostyypit/1
-        Tuotanto:https://virkailija.opintopolku.fi/koodisto-app/koodisto/view/mpassidnsallimatoppilaitostyypit/1
-        Alasvetovalikko/checkbox
-      Lisää logon, jota käytetään koulunvalintasivulla.
-        maksimikoko 125x36 px
-        huom! siirretään ui:ssa logo otsikon "Oppilaitoksen valintanäkymän tiedot"
-    */
-
     const updateDiscoveryInformation = (value:Components.Schemas.DiscoveryInformation) => {
         value.showSchools=showSchools.current
         setDiscoveryInformation(clone(value)) 
@@ -452,7 +432,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           
           {showSchools.current&&
             <>
-              {/*<Grid item xs={4}></Grid>*/}
               <Grid item xs={12}>
                 <Grid container spacing={1} mb={3}>
                   <Grid item xs={4}>

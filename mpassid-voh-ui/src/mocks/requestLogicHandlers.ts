@@ -87,12 +87,7 @@ export default {
   },
   getIntegrationDiscoveryInformation(request) {
     console.log("getIntegrationDiscoveryInformation: ",request);
-    if(discoveryInformation.value) {
-      discoveryInformation.value.existingExcluded = [
-        "1.2.246.562.10.93864526376"
-      ]
-    }
-    console.log("getIntegrationDiscoveryInformation (discoveryInformation): ",discoveryInformation);
+    
   },
   getBlankIntegration(request) {
     if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type).length>0) {
@@ -184,6 +179,9 @@ export default {
   getIntegration(request) {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);
+    if(id===999995&&integration.value?.configurationEntity?.idp){
+      integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
+    }
   },
   getIntegrationsSpecSearchPageable(request) {
     const page = Number(request.query.page ?? defaults.page);

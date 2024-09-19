@@ -37,10 +37,6 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     const label = id in intl.messages ? { id } : undefined;           
     const tooltipId = `työkaluvihje.${attribute.name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
-    /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
-                        dataConfiguration.find((c:UiConfiguration) => !c.oid && c.type===attribute.type&&c.name===attribute.name) || 
-                        defaultDataConfiguration;
-                        */
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
     
@@ -203,16 +199,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         devLog("deleteObjectItem (index)",index)
         devLog("deleteObjectItem (uiConfiguration)",uiConfiguration)
         devLog("deleteObjectItem (attribute)",attribute)
-        //console.log("*** currentObject.current: ",currentObject.current)
-        //TODO: MANDATORY CHECK for object values, if valid update ....
-        //onUpdate(attribute.name,currentObject.current)
-        /*
-        if(data.content) {
-            currentObject.current[name]=data.content;
-        } else {
-            currentObject.current[name]=data;
-        }
-            */
+        
         onDelete(attribute.name,index);
         devLog("deleteObjectItem (result)",currentObject.current)
         
@@ -223,8 +210,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         
         devLog("updateSwitchItem (attribute)",attribute)
         devLog("updateSwitchItem (currentObject)",currentObject.current)
-        //console.log("*** currentObject.current: ",currentObject.current)
-        //TODO: MANDATORY CHECK for object values, if valid update ....
+        
         onUpdate(name,value)
         //currentObject.current={}
     }
@@ -240,10 +226,6 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         
     }
 
-    /*const configuration=dataConfiguration.find((c:UiConfiguration) => c.oid===oid && c.type===attribute.type&&c.name===attribute.name) ||
-                        dataConfiguration.find((c:UiConfiguration) => !c.oid && c.type===attribute.type&&c.name===attribute.name) || 
-                        defaultDataConfiguration;
-                        */
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
     devLog("MetadataForm (configuration)",configuration)

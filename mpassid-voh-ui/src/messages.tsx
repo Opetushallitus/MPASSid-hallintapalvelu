@@ -295,3 +295,25 @@ defineMessage({
   id: "tyyppi.sp",
   description: "tyyppi",
 });
+
+//Backend error messages
+defineMessage({
+  defaultMessage: "entityID on jo käytössä",
+  id: "Integraation creation failed, no entityID given or entityID is already in use.",
+  description: "Error message",
+});
+defineMessage({
+  defaultMessage: "clientID on jo käytössä",
+  id: "Integration creation failed, no clientID given or clientID is already in use.",
+  description: "Error message",
+});
+defineMessage({
+  defaultMessage: "entityID on jo käytössä",
+  id: "Integraation update failed, no entityID given or entityID is already in use.",
+  description: "Error message",
+});
+defineMessage({
+  defaultMessage: "clientID on jo käytössä",
+  id: "Integration update failed, no clientID given or clientID is already in use.",
+  description: "Error message",
+});

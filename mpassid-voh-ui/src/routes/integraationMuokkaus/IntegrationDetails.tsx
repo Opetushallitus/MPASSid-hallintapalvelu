@@ -387,6 +387,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         <Typography variant="h2" gutterBottom>
           <FormattedMessage defaultMessage="Palvelun metadata tiedot" />
         </Typography>
+        <ErrorBoundary>
+
         <Metadata
           newConfigurationEntityData={newConfigurationEntityData}
           setNewConfigurationEntityData={setNewConfigurationEntityData}
@@ -399,6 +401,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           metadata={metadata}
           setMetadata={setMetadata}
         />
+        </ErrorBoundary>
         </>}
 
         {hasAttributes && newConfigurationEntityData &&(

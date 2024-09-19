@@ -555,7 +555,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: true,
-    validation: [ ],
+    validation: ['cert' ],
     integrationType: [
         {
             name: 'saml',
@@ -593,7 +593,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: true,
-    validation: [ ],
+    validation: [ 'cert'],
     integrationType: [
         {
             name: 'saml',
@@ -612,7 +612,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
-    validation: [ ],
+    validation: ['cert' ],
     environment: 1,
     integrationType: [
         {
