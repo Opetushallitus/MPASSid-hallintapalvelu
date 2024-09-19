@@ -927,4 +927,11 @@ public class IntegrationService {
     }
     return null;
   }
+
+  public String cleanCertificate(String cert) {
+    cert.replaceAll("-----BEGIN CERTIFICATE-----", cert);
+    cert.replaceAll("-----END CERTIFICATE-----", cert);
+    cert.replaceAll("\\s+", "");
+    return cert;
+  }
 }

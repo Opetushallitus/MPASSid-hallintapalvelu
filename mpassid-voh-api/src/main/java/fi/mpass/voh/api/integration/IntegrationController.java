@@ -249,4 +249,12 @@ public class IntegrationController {
 				// .contentLength()
 				.body(outputResource);
 	}
+
+	// @Operation(summary = "Parse the certificate", ignoreJsonView = true)
+	// @PreAuthorize("@authorize.hasPermission(#root, #id, 'KATSELIJA')")
+	// @PostMapping("/parsecertificate")
+	// // @JsonView(value = IntegrationView.Default.class)
+	// public Optional<Integration> parseCertificate(@RequestParam(required=true) String cert) {
+	// 	return integrationService.parseCertificate(cert);
+	// }
 }
