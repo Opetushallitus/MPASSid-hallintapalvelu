@@ -222,8 +222,8 @@ public abstract class ServiceProvider {
             if (this.metadataJson.get(certType) instanceof java.util.ArrayList) {
                 ArrayList<String> updatedCerts = new ArrayList<>();
                 for (String cert : (ArrayList<String>) this.metadataJson.get(certType)) {
-                    cert.replaceAll("-----BEGIN CERTIFICATE-----", cert);
-                    cert.replaceAll("-----END CERTIFICATE-----", cert);
+                    cert.replaceAll("-----BEGIN CERTIFICATE-----", "");
+                    cert.replaceAll("-----END CERTIFICATE-----", "");
                     cert.replaceAll("\\s+", "");
                     updatedCerts.add(cert);
                 }

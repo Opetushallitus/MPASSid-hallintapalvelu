@@ -526,6 +526,7 @@ public class IntegrationService {
             }
           }
         }
+        integration.getConfigurationEntity().getSp().cleanCertificate();
       }
       try {
         // TODO check that integration.getId() and id matches
