@@ -20,7 +20,8 @@ public class OPHPermissionEvaluator {
     private final IntegrationRepository integrationRepository;
     private final IntegrationServiceConfiguration integrationServiceConfiguration;
 
-    public OPHPermissionEvaluator(IntegrationRepository integrationRepository, IntegrationServiceConfiguration integrationServiceConfiguration) {
+    public OPHPermissionEvaluator(IntegrationRepository integrationRepository,
+            IntegrationServiceConfiguration integrationServiceConfiguration) {
         this.integrationRepository = integrationRepository;
         this.integrationServiceConfiguration = integrationServiceConfiguration;
     }
@@ -125,7 +126,19 @@ public class OPHPermissionEvaluator {
                                         // (3, 5) the granted authority must include the integration organization oid
                                         if (authorityElements[4]
                                                 .equals(existingIntegration.get().getOrganization().getOid())
-                                                || authorityElements[4].equals(this.integrationServiceConfiguration.getAdminOrganizationOid())) {
+                                                || authorityElements[4].equals(this.integrationServiceConfiguration
+                                                        .getAdminOrganizationOid())) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                                if (authorityElements.length > 4 && authorityElements[3].contains("PALVELU")
+                                        && authorityElements[4].contains("TALLENTAJA")) {
+                                    if (authorityElements.length > 5) {
+                                        if (authorityElements[5]
+                                                .equals(existingIntegration.get().getOrganization().getOid())
+                                                || authorityElements[4].equals(this.integrationServiceConfiguration
+                                                        .getAdminOrganizationOid())) {
                                             return true;
                                         }
                                     }
