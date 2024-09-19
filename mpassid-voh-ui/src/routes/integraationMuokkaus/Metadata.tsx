@@ -110,14 +110,6 @@ export default function Metadata({
       devLog("updateMultivalueMetadata (new metadata[name])",metadata[name])
     }
     setMetadata({...metadata} )
-    /*
-    devLog("validateMetadata (updateMultivalueMetadata)", validateMetadata())
-    if(validateMetadata()) {
-      setCanSave(true)
-    } else {
-      setCanSave(false)
-    }
-      */
     devLog("updateMultivalueMetadata (metadata)",metadata)
     
   }

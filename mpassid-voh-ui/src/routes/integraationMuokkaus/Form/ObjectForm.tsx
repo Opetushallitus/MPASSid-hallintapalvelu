@@ -172,16 +172,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     devLog("editObject (index) ",index)
     devLog("editObject (object) ",object)
     devLog("editObject (edited content) ",object.content[index])
-    /*
-    devLog("editObject (inputValue) ",inputValue.current)
-    if(!inputValue.current){
-      inputValue.current={}
-    }
-    inputValue.current[name]=clone(object.content[index]);
-    */
-    //onDelete(object.type,index);
     onEdit(object.type,object.content[index],index);
-    //devLog("editObject (inputValue) 2",inputValue.current)
     
   };
   

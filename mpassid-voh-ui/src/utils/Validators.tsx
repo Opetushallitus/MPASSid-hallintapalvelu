@@ -266,25 +266,3 @@ export const helperText = (validators:string[],value:string) => {
     
     return(helperText)
 }
-
-
-/*
-TODO: validator for certificate, e.g. using 
-
-https://github.com/PeculiarVentures/x509
-
-npm install @peculiar/x509
-
-import { X509Certificate } from '@peculiar/x509';
-import { CertificateInfo } from './CertificateParser';
-
-const cert = new X509Certificate(inputRef.current!.value);
-      const certDetails = {
-        subject: cert.subjectName,
-        issuer: cert.issuerName,
-        validFrom: cert.notBefore,
-        validTo: cert.notAfter,
-        serialNumber: cert.serialNumber,
-      };
-
-*/      
