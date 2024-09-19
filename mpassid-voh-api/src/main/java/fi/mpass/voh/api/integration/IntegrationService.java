@@ -24,10 +24,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import jakarta.persistence.OptimisticLockException;
-import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -38,7 +36,6 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.Revisions;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -66,9 +63,8 @@ import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.Valid;
 
 @Service
 public class IntegrationService {
@@ -820,6 +816,7 @@ public class IntegrationService {
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         // Create SP
+        // Check for duplicate entityId, clientId
         if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
           SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
           if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
@@ -874,6 +871,7 @@ public class IntegrationService {
               .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
           setIntegration.setOrganization(integration.getOrganization());
+          integration.getConfigurationEntity().getSp().cleanCertificate();
           integration.removeFromSets();
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
@@ -1067,12 +1065,5 @@ public class IntegrationService {
       }
     }
     return null;
-  }
-
-  public String cleanCertificate(String cert) {
-    cert.replaceAll("-----BEGIN CERTIFICATE-----", cert);
-    cert.replaceAll("-----END CERTIFICATE-----", cert);
-    cert.replaceAll("\\s+", "");
-    return cert;
   }
 }

@@ -215,4 +215,21 @@ public abstract class ServiceProvider {
             this.metadataJson = errorHashMap;
         }
     }
+
+    public void cleanCertificate() {
+        List<String> certificateTypes = List.of("encryptionCertificates", "signingCertificates");
+        for (String certType : certificateTypes) {
+            if (this.metadataJson.get(certType) instanceof java.util.ArrayList) {
+                ArrayList<String> updatedCerts = new ArrayList<>();
+                for (String cert : (ArrayList<String>) this.metadataJson.get(certType)) {
+                    cert.replaceAll("-----BEGIN CERTIFICATE-----", cert);
+                    cert.replaceAll("-----END CERTIFICATE-----", cert);
+                    cert.replaceAll("\\s+", "");
+                    updatedCerts.add(cert);
+                }
+                this.metadataJson.put(certType, updatedCerts);
+                updatedCerts.clear();
+            }
+        }
+    }
 }
