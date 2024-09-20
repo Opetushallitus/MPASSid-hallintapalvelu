@@ -60,6 +60,7 @@ import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
+import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
@@ -501,9 +502,35 @@ public class IntegrationService {
    * @throws EntityNotFoundException
    */
   public Integration updateIntegration(Long id, Integration integration) {
-
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
+      if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+        // Check for duplicate entityIds and clientIds
+        if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
+          SamlServiceProvider samlSp = (SamlServiceProvider) integration.getConfigurationEntity().getSp();
+          SamlServiceProvider existingSamlSP = (SamlServiceProvider) existingIntegration.getConfigurationEntity()
+              .getSp();
+          if (samlSp.getEntityId() == null || !validateEntityId(samlSp.getEntityId())) {
+            if (!existingSamlSP.getEntityId().equals(samlSp.getEntityId())) {
+              logger.error("No entityID given or entityID is already in use.");
+              throw new EntityUpdateException(
+                  "Integration update failed, no entityID given or entityID is already in use.");
+            }
+          }
+        }
+        if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+          OidcServiceProvider oidcSp = ((OidcServiceProvider) integration.getConfigurationEntity().getSp());
+          OidcServiceProvider existingOidcSp = ((OidcServiceProvider) existingIntegration.getConfigurationEntity()
+              .getSp());
+          if (oidcSp.getClientId() == null || !validateEntityId(oidcSp.getClientId())) {
+            if (!existingOidcSp.getClientId().equals(oidcSp.getClientId())) {
+              logger.error("No entityID given or entityID is already in use.");
+              throw new EntityUpdateException(
+                  "Integration update failed, no clientId given or clientId is already in use.");
+            }
+          }
+        }
+      }
       try {
         // TODO check that integration.getId() and id matches
         Integration updatedIntegration = loadingService.loadOne(integration);
@@ -736,6 +763,14 @@ public class IntegrationService {
         return new Integration(0L, null, configurationEntity, null, 0,
             discoveryInformation, organization, "");
       }
+      if (role.equals("set")) {
+        DiscoveryInformation discoveryInformation = new DiscoveryInformation();
+        ConfigurationEntity configurationEntity = new ConfigurationEntity();
+        IntegrationSet integrationSet = new IntegrationSet();
+        configurationEntity.setSet(integrationSet);
+        return new Integration(0L, null, configurationEntity, null, 0,
+            discoveryInformation, organization, "");
+      }
     }
     return new Integration();
   }
@@ -745,6 +780,15 @@ public class IntegrationService {
     Optional<Integration> integration = this.getIntegration(id);
 
     if (integration.isPresent()) {
+      integration.get().getIntegrationSets().iterator();
+      for (Iterator<Integration> integrationIterator = integration.get().getIntegrationSets()
+          .iterator(); integrationIterator.hasNext();) {
+        Integration setIntegration = integrationIterator.next();
+        if (setIntegration.getIntegrationSets().size() == 1) {
+          setIntegration.setStatus(1);
+        }
+      }
+      integration.get().removeFromSets();
       integration.get().setStatus(1);
       return integrationRepository.save(integration.get());
     } else {
@@ -756,29 +800,126 @@ public class IntegrationService {
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
       // TODO authz
-      List<Long> availableId = integrationRepository.getAvailableIdpIntegrationIdentifier();
-      if (availableId != null && !availableId.isEmpty()) {
-        integration.setId(availableId.get(0));
-        // set identity provider specific information, e.g. flowname
-        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+      if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+        // Create IDP
+        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1)
+            ? integrationRepository.getAvailableIdpProdIntegrationIdentifier()
+            : integrationRepository.getAvailableIdpTestIntegrationIdentifier();
+        if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
+          integration.setId(availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
-              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableId.get(0));
+              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
-              .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableId.get(0));
-        }
-        if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
-          logger.debug("Creating SAML Service Provider");
+              .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableIdpIds.get(0));
+        } else {
+          // TODO the case of the first integration without preloaded integrations
+          logger.error("Failed to find an available idp integration identifier");
+          throw new EntityCreationException("Integration creation failed");
         }
         return integrationRepository.save(integration);
-      } else {
-        // TODO the case of the first integration without preloaded integrations
-        logger.error("Failed to find an available integration identifier");
-        throw new EntityCreationException("Integration creation failed");
+      }
+      if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+        // Create SP
+        if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
+          SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
+          if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
+            logger.error("No entityID given or entityID is already in use.");
+            throw new EntityCreationException(
+                "Integration creation failed, no entityID given or entityID is already in use.");
+          }
+        }
+        if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+          OidcServiceProvider oidcSP = ((OidcServiceProvider) integration.getConfigurationEntity().getSp());
+          if (oidcSP.getClientId() == null || !validateEntityId(oidcSP.getClientId())) {
+            logger.error("No entityID given or entityID is already in use.");
+            throw new EntityCreationException(
+                "Integration creation failed, no clientId given or clientId is already in use.");
+          }
+        }
+
+        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1)
+            ? integrationRepository.getAvailableSpProdIntegrationIdentifier()
+            : integrationRepository.getAvailableSpTestIntegrationIdentifier();
+        if (availableSpIds != null && !availableSpIds.isEmpty()) {
+          integration.setId(availableSpIds.get(0));
+        } else {
+          logger.error("Failed to find an available sp integration identifier");
+          throw new EntityCreationException("Integration creation failed");
+        }
+
+        Long setId = 0L;
+        try {
+          setId = integration.getIntegrationSets().iterator().next().getId();
+        } catch (Exception e) {
+          logger.error("No integration set id found", e);
+        }
+
+        if (setId == 0) {
+          // No existing integration set, create new
+          List<Long> availableSetIds = (integration.getDeploymentPhase() == 1)
+              ? integrationRepository.getAvailableSetProdIntegrationIdentifier()
+              : integrationRepository.getAvailableSetTestIntegrationIdentifier();
+          if (availableSetIds != null && !availableSetIds.isEmpty()) {
+            setId = availableSetIds.get(0);
+          } else {
+            logger.error("Failed to find an available set integration identifier");
+            throw new EntityCreationException("Integration creation failed");
+          }
+          logger.debug("\nsetId set to " + setId);
+
+          Integration setIntegration = createBlankIntegration("set", "", "", null);
+          setIntegration.setId(setId);
+          setIntegration.getConfigurationEntity().getSet().setId(setId);
+          setIntegration.getConfigurationEntity().getSet()
+              .setName(integration.getConfigurationEntity().getSp().getName());
+          setIntegration.getConfigurationEntity().getSet().setType("sp");
+          setIntegration.setOrganization(integration.getOrganization());
+          integration.removeFromSets();
+          integrationRepository.save(setIntegration);
+          integrationRepository.save(integration);
+          integration.addToSet(setIntegration);
+          integrationRepository.save(setIntegration);
+          integration = integrationRepository.save(integration);
+          return integration;
+        } else {
+          // Add to existing integration set
+          Optional<Integration> optionalSet = getIntegration(setId);
+          if (optionalSet.isPresent()) {
+            integration = integrationRepository.saveAndFlush(integration);
+            integration.addToSet(optionalSet.get());
+            integrationRepository.saveAndFlush(optionalSet.get());
+            return integrationRepository.saveAndFlush(integration);
+          } else {
+            logger.error("No integration set with id {} found.", setId);
+            throw new EntityCreationException("Integration creation failed");
+          }
+        }
       }
     } else {
       logger.debug("Integration creation failed.");
     }
     return integration;
+  }
+
+  public Boolean validateAcsUrl(String url) {
+
+    return true;
+  }
+
+  public Boolean validateEntityId(String id) {
+    List<String> usedEntityIds = integrationRepository.getAllEntityIds();
+    if (usedEntityIds.contains(id)) {
+      return false;
+    }
+    return true;
+  }
+
+  public Boolean validateClientId(String id) {
+    List<String> usedClientIds = integrationRepository.getAllClientIds();
+    if (usedClientIds.contains(id)) {
+      return false;
+    }
+    return true;
   }
 
   /**
