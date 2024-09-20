@@ -1,5 +1,7 @@
 # MPASSid-hallinta
 
+## 2.4
+
 ## 2.3
 - Koulutustoimija voi lisätä ja poistaa Wilma-integraation ja muokata olemassa olevan Wilma-integraation tietoja.
 - Koulutustoimija voi määrittää MPASSid-koulunvalintasivulla näytettävät oppilaitokset Wilma-integraatiossa.
