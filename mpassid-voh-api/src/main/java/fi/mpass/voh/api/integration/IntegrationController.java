@@ -115,7 +115,7 @@ public class IntegrationController {
 	}
 
 	@Operation(summary = "Update the specific integration")
-	@PreAuthorize("@authorize.hasPermission(#root, #id, 'TALLENTAJA')")
+	@PreAuthorize("@authorize.hasPermission(#root, #id, 'TALLENTAJA') or @authorize.hasPermission(#root, #id, 'PALVELU_TALLENTAJA')")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Integration update successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
