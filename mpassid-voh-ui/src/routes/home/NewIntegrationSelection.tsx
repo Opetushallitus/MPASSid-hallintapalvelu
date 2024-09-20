@@ -21,6 +21,10 @@ export const defaults = {
     typesOKJ: [ "wilma" ]
   };
 
+  if(!ENV.PROD) {
+    defaults.typesPI.push("oidc")
+  }
+
   interface Props {
     open: boolean;
     setOpen: Dispatch<boolean>;

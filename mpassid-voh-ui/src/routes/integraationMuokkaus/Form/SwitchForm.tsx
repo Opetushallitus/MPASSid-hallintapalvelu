@@ -26,7 +26,7 @@ export default function SwitchForm({ object, type, isEditable=false, mandatory=f
 
   useEffect(() => {
       devLog("SwitchForm (object)",object?.content)      
-      setValue((object?.content)?!!object.content:false)
+      setValue((object.content!==undefined)?!!object.content:false)
   }, [object,setValue]);
 
 

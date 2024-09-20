@@ -39,6 +39,8 @@ export default function IntegraatioMuokkaus() {
   const [loading, setLoading] = useState<boolean>(false);
   const intl = useIntl();
   
+  
+
   useEffect(() => {
     if(me?.groups) {
       setGroups(me.groups)
@@ -132,8 +134,7 @@ export default function IntegraatioMuokkaus() {
                 if(newIntegration.integrationSets&&newIntegration.integrationSets.length>0) {
                   updateIntegration.integrationSets = newIntegration.integrationSets.map(i=> { return { id: i.id}})
                 }
-                await updateIntegrationRaw({ id },updateIntegration);            
-                result.current = newIntegration
+                result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;
               }
               devLog("Integration save result",result.current)
               if(logo){

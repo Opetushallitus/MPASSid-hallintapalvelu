@@ -21,6 +21,25 @@ export const katselijaOphGroup =
 
 export const mpassIdUserAttributeTestService = 3000001
 
+export const getRandom = () => {
+  return Math.random();
+}
+
+export async function calculateSHA1(message: string) {
+    // Convert the string to an array buffer (UTF-8 encoding)
+    const encoder = new TextEncoder();
+    const data: Uint8Array = encoder.encode(message);
+  
+    // Use SubtleCrypto API to hash the data using SHA-1
+    const hashBuffer: ArrayBuffer = await crypto.subtle.digest('SHA-1', data);
+  
+    // Convert the hash (ArrayBuffer) to a hex string
+    const hashArray: number[] = Array.from(new Uint8Array(hashBuffer));  // Convert buffer to byte array
+    const hashHex: string = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');  // Convert bytes to hex string
+  
+    return hashHex;
+  }
+
 export interface IntegrationType {
     name: string;
     editable: boolean;
@@ -37,6 +56,7 @@ export interface UiConfiguration {
   mandatory: boolean;
   multivalue?: boolean;
   object?: boolean;
+  trim?: string;
   enum?: any[]
   environment?: number;
   label?: string;
@@ -377,8 +397,9 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
+            editable: true,
             visible: true,
+            defaultValue: [ 'authorization_code' ]
         }
     ]
    },
@@ -422,8 +443,9 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
+            editable: true,
             visible: true,
+            defaultValue: 'openid profile'
         }
     ]
 },
@@ -436,8 +458,9 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
+            editable: true,
             visible: true,
+            index: 'randomsha1'            
         }
     ]
 },
@@ -450,8 +473,9 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
+            editable: true,
             visible: true,
+            index: 'name_randomsha1',
         }
     ]
 },
@@ -464,8 +488,9 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
+            editable: true,
             visible: true,
+            defaultValue: [ 'code' ]
         }
     ]
 },
@@ -482,25 +507,6 @@ export const dataConfiguration:UiConfiguration[] = [
             editable: true,
             visible: true,
             defaultValue: false
-        },
-        {
-            name: 'oidc',
-            editable: false,
-            visible: false,
-        }
-    ]
-  },
-  {
-    name: 'signingCertificates0NotAfter',
-    type: 'metadata',
-    mandatory: false,
-    multivalue: false,
-    validation: [ ],
-    integrationType: [
-        {
-            name: 'saml',
-            editable: false,
-            visible: true,
         },
         {
             name: 'oidc',
@@ -556,6 +562,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     multivalue: true,
     validation: ['cert' ],
+    trim: 'cert',
     integrationType: [
         {
             name: 'saml',
@@ -594,6 +601,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     multivalue: true,
     validation: [ 'cert'],
+    trim: 'cert',
     integrationType: [
         {
             name: 'saml',
@@ -613,6 +621,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     multivalue: true,
     validation: ['cert' ],
+    trim: 'cert',
     environment: 1,
     integrationType: [
         {
@@ -624,6 +633,39 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: false,
+        }
+    ]
+  },
+  {
+    name: 'token_endpoint_auth_method',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    enum: [ 'client_secret_basic', 'client_secret_post' ],
+    validation: [ ],
+    integrationType: [
+        
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+        }
+    ]
+  },
+  {
+    name: 'id_token_signed_response_alg',
+    type: 'metadata',
+    mandatory: true,
+    multivalue: false,
+    enum: [ ],
+    validation: [ ],
+    integrationType: [
+        
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+            defaultValue: "HS256"
         }
     ]
   },

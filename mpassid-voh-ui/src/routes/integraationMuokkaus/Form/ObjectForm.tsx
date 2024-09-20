@@ -4,8 +4,8 @@ import type { Dispatch} from "react";
 import { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { IntegrationType, UiConfiguration } from "@/config";
-import { dataConfiguration, defaultIntegrationType } from "@/config";
-import { helperText as vHelperText, validate } from "@/utils/Validators";
+import { calculateSHA1, dataConfiguration, defaultIntegrationType, getRandom } from "@/config";
+import { trimCertificate, helperText as vHelperText, validate } from "@/utils/Validators";
 import SwitchForm from "./SwitchForm";
 import ListForm from "./ListForm";
 import InputForm from "./InputForm";
@@ -147,9 +147,15 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
       }
       
     }
+    if(currentObjectConfiguration[0].trim&&currentObjectConfiguration[0].trim==='cert') {
+      const trimmeValue=trimCertificate(value);
+      currentObject.current[name]=trimmeValue;
+      onUpdate(name,trimmeValue)
+    } else {
+      currentObject.current[name]=value;
+      onUpdate(name,value)
+    }
     
-    currentObject.current[name]=value;
-    onUpdate(name,value)
   }
 
   const updateObjectSwitchFormValue = (name: string,value: string,type: string) => {
@@ -322,6 +328,18 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                       currentObject.current[configuration.name]=newIndex;
                       resetStat.current[configuration.name]=false
                     }
+
+                    if(roleConfiguration?.index&&roleConfiguration.index==='randomsha1') {
+                      devLog("ObjectForm (index init)",configuration.name)
+                      calculateSHA1(String(getRandom())).then(sha=>{
+                        attribute.content=String(sha);
+                        currentObject.current[configuration.name]=sha;
+                        resetStat.current[configuration.name]=false
+                      })
+                      
+                    
+                    
+                  }
 
                     if(inputValue.current&&inputValue.current.hasOwnProperty(configuration.name)){
                       devLog("ObjectForm (reset)",configuration.name)

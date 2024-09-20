@@ -228,8 +228,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
 
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
-    devLog("MetadataForm (configuration)",configuration)
-    devLog("MetadataForm (roleConfiguration)",roleConfiguration)
+    
     if(roleConfiguration.visible) {
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
