@@ -48,6 +48,7 @@ export interface IntegrationType {
     path?: string; 
     defaultValue?: any;
     index?: string;
+    generate?: string;
 }
 export interface UiConfiguration {
   name: string;
@@ -458,9 +459,10 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
-            index: 'randomsha1'            
+            index: 'randomsha1',
+            generate: 'randomsha1'            
         }
     ]
 },
@@ -473,9 +475,10 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
             index: 'name_randomsha1',
+            generate: 'name_randomsha1',
         }
     ]
 },

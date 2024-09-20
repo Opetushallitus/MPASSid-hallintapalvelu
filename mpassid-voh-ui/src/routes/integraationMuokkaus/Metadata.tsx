@@ -241,22 +241,6 @@ export default function Metadata({
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)                          
                         }
                       }
-
-                      if(roleConfiguration?.index&&roleConfiguration.index==='name_randomsha1') {
-                          if(newConfigurationEntityData.sp?.name) {
-                            attribute.content = calculateSHA1(String(getRandom()))
-                          } else {
-                            attribute.content = calculateSHA1(String(getRandom()))
-                          }
-                          
-                        
-                        
-                      }
-                      if(roleConfiguration?.index&&roleConfiguration.index==='randomsha1') {
-                          
-                            attribute.content = calculateSHA1(String(getRandom()))
-                          
-                      }
                       
                       //console.log("*** metadata (attribute): ",attribute);
                       const onUpdate = (name:string,value:string) => {
