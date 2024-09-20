@@ -64,6 +64,7 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
 }
 
 export function UniqueIdValue({ name, label, children }: DataRowProps) {
+  
     return (
       <>
         {(children as JSX.Element)?.props?.value ? children : "–"} (

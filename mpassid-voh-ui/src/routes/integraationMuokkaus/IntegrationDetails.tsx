@@ -164,20 +164,22 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           }
 
           if(type==='oidc') {
-            if(metadata.clientId&&newConfigurationEntityData.sp) {
+            
+            if(metadata.client_id&&newConfigurationEntityData.sp) {
               const oidcServiceProvider:Components.Schemas.OidcServiceProvider = cloneDeep(newConfigurationEntityData.sp)
-              oidcServiceProvider.clientId=metadata.clientId;
+              oidcServiceProvider.clientId=metadata.client_id;
+              
               if(name) {
                 devLog("newConfigurationEntityData (name)",name)
                 oidcServiceProvider.name=name;
               }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
               newConfiguration.sp=oidcServiceProvider;
-              setShowConfigurationEntityData(newConfigurationEntityData);
+              setShowConfigurationEntityData(newConfiguration);
             }
           }
           
-          if(!metadata.entityId&&!metadata.clientId) {
+          if(!metadata.entityId&&!metadata.client_id) {
             setShowConfigurationEntityData(newConfigurationEntityData);
           }
           

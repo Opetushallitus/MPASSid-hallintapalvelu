@@ -1,5 +1,5 @@
 import type { Components } from "@/api";
-import { Grid, Typography } from "@mui/material";
+import {  Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import { type Dispatch } from "react";
@@ -240,6 +240,26 @@ export default function Metadata({
                           //Initialize switch value
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)                          
                         }
+                      }
+                      //Initialize metadata
+                      if(metadata[configuration.name]!==attribute.content) {
+                        if(configuration.multivalue !== undefined) {
+                          if(configuration.multivalue) {
+                            if(attribute.content.length>0) {
+                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                            }
+                          } else {
+                            if(attribute.content&&attribute.content!=='') {
+                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                            }
+                          }
+                          
+                        } else {
+                          if(attribute.content&&attribute.content!=='') {
+                            updateMetadata(false,configuration.name,attribute.content)
+                          }
+                        }
+                        
                       }
                       
                       //console.log("*** metadata (attribute): ",attribute);

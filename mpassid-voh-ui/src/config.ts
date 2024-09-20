@@ -841,7 +841,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: false,
-            attribute: 'client_id'
+            attribute: 'clientId'
         }
       ]
   },
