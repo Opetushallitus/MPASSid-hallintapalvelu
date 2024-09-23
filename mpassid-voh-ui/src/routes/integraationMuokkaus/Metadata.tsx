@@ -4,7 +4,7 @@ import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import { type Dispatch } from "react";
 import type { IntegrationType} from '../../config';
-import { calculateSHA1, dataConfiguration, defaultIntegrationType, getRandom } from '../../config';
+import { dataConfiguration, defaultIntegrationType } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, trimCertificate, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
@@ -234,10 +234,10 @@ export default function Metadata({
                             attribute.content=configuration.enum[0];
                           }
                           
-                        }
-
+                        }                      
+                        
                         if(configuration.multivalue===false&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
-                          //Initialize switch value
+                          //Initialize switch value                    
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)                          
                         }
                       }

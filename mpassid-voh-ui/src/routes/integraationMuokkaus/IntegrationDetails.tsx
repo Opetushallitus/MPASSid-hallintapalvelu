@@ -53,6 +53,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [newEnvironment, setNewEnvironment] = useState(false);
     const [name, setName] = useState<string>('');
     const [metadata, setMetadata] = useState<any>((newConfigurationEntityData?.sp?.metadata&&newConfigurationEntityData?.sp?.metadata!==null)?newConfigurationEntityData.sp.metadata:{});
+    const [attributes, setAttributes] = useState<any>((newConfigurationEntityData?.attributes&&newConfigurationEntityData?.attributes!==undefined)?newConfigurationEntityData.attributes:[]);
     
     const { state } = useLocation();
     const integration: Components.Schemas.Integration = state;
@@ -119,6 +120,10 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             if(integration.configurationEntity.sp&&integration.configurationEntity.sp.metadata&&integration.configurationEntity.sp.metadata!==null) {
               setMetadata(integration.configurationEntity.sp.metadata)
             }
+            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {
+              setAttributes(integration.configurationEntity.attributes)
+            } 
+            
           }
         }
         
@@ -161,6 +166,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               newConfiguration.sp=samlServiceProvider;
               setShowConfigurationEntityData(newConfiguration)
             }
+            
           }
 
           if(type==='oidc') {
@@ -205,13 +211,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )
 
             setSaveDialogState(true);
-            //const metadataEqual=(role==='idp'||JSON.stringify(newConfigurationEntityData.sp?.metadata)===JSON.stringify(originalIntegration.current?.configurationEntity?.sp?.metadata))
-            const metadataEqual=(role==='idp'||isEqual(newConfigurationEntityData.sp?.metadata,originalIntegration.current?.configurationEntity?.sp?.metadata))
-            
-            devLog("IntegrationDetails (metadataEqual)",metadataEqual)
-            devLog("IntegrationDetails (metadataEqual)",isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity))
-            devLog("IntegrationDetails (metadataEqual)",newConfigurationEntityData.sp?.metadata)
-            devLog("IntegrationDetails (metadataEqual)",originalIntegration.current?.configurationEntity?.sp?.metadata)
             
             if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)){       
               if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK) {      
@@ -368,12 +367,13 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         
         <Role integration={integration} oid={oid} environment={environment.current} name={name} setName={setName} setCanSave={setIsValidRoleDetails}/>
 
-        {newConfigurationEntityData && <Grid mb={hasAttributes ? 3 : undefined}>
+        {newConfigurationEntityData&&attributes&& <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
             <Attributes
               newConfigurationEntityData={newConfigurationEntityData}
               setNewConfigurationEntityData={setNewConfigurationEntityData}  
-              attributes={newConfigurationEntityData?.attributes ?? []}
+              attributes={attributes}
+              setAttributes={setAttributes}
               attributeType="data"
               environment={environment.current}
               type={type}
@@ -384,7 +384,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           </ErrorBoundary>
         </Grid>}
         
-        {newConfigurationEntityData&&role==='sp'&&
+        {newConfigurationEntityData&&metadata&&role==='sp'&&
         <>
         <Typography variant="h2" gutterBottom>
           <FormattedMessage defaultMessage="Palvelun metadata tiedot" />
@@ -406,7 +406,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         </ErrorBoundary>
         </>}
 
-        {hasAttributes && newConfigurationEntityData &&(
+        {hasAttributes && attributes && newConfigurationEntityData &&(
           <>
             <Typography variant="h2" gutterBottom>
               <FormattedMessage defaultMessage="Attribuutit" />
@@ -415,7 +415,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               <Attributes
                 newConfigurationEntityData={newConfigurationEntityData}
                 setNewConfigurationEntityData={setNewConfigurationEntityData}  
-                attributes={newConfigurationEntityData?.attributes ?? []}
+                attributes={attributes}
+                setAttributes={setAttributes}
                 role={role}
                 attributeType="user"
                 environment={environment.current}

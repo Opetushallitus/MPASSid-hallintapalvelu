@@ -134,7 +134,7 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'clientKey',
       type: 'data',
-      mandatory: true,
+      mandatory: false,
       
       validation: [],
       integrationType: [
