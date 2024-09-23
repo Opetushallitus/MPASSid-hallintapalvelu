@@ -398,7 +398,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
             defaultValue: [ 'authorization_code' ]
         }
@@ -444,7 +444,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
             defaultValue: 'openid profile'
         }
@@ -491,7 +491,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
             defaultValue: [ 'code' ]
         }
@@ -650,7 +650,7 @@ export const dataConfiguration:UiConfiguration[] = [
         
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
         }
     ]
@@ -666,7 +666,7 @@ export const dataConfiguration:UiConfiguration[] = [
         
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
             defaultValue: "HS256"
         }

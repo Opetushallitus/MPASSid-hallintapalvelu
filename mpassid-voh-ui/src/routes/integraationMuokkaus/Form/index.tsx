@@ -390,7 +390,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     </Grid>
                                 </Grid>)
                                 }
-                            {configuration&&roleConfiguration&&roleConfiguration.generate&&
+                            {!ENV.PROD&&configuration&&roleConfiguration&&roleConfiguration.generate&&
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>
