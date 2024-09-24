@@ -375,21 +375,6 @@ export const dataConfiguration:UiConfiguration[] = [
       ]
   },
   {
-      name: 'post_logout_redirect_uris',
-      type: 'metadata',
-      mandatory: false,
-      multivalue: true,
-      validation: [ ],
-      integrationType: [
-          {
-              name: 'oidc',
-              editable: false,
-              visible: true,
-          }
-      ]
-  },
-  
-  {
     name: 'grant_types',
     type: 'metadata',
     mandatory: true,
@@ -636,23 +621,6 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: false,
-        }
-    ]
-  },
-  {
-    name: 'id_token_signed_response_alg',
-    type: 'metadata',
-    mandatory: true,
-    multivalue: false,
-    enum: [ ],
-    validation: [ ],
-    integrationType: [
-        
-        {
-            name: 'oidc',
-            editable: false,
-            visible: true,
-            defaultValue: "HS256"
         }
     ]
   },
