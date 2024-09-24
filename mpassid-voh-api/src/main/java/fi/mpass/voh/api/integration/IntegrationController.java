@@ -97,7 +97,7 @@ public class IntegrationController {
 	}
 
 	@Operation(summary = "Get the specific integration", ignoreJsonView = true)
-	@PreAuthorize("@authorize.hasPermission(#root, #id, 'KATSELIJA') or @authorize.hasPermission(#root, #id, 'TALLENTAJA')")
+	@PreAuthorize("@authorize.hasPermission(#root, #id, 'KATSELIJA') or @authorize.hasPermission(#root, #id, 'TALLENTAJA')  or @authorize.hasPermission(#root, 'Integration', 'PALVELU_KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_TALLENTAJA')")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
 					@ExampleObject(name = "integration", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
