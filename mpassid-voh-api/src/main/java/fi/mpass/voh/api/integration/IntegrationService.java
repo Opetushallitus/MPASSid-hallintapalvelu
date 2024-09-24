@@ -24,10 +24,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import jakarta.persistence.OptimisticLockException;
-import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -38,7 +36,6 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.Revisions;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -66,9 +63,8 @@ import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.Valid;
 
 @Service
 public class IntegrationService {
@@ -505,6 +501,11 @@ public class IntegrationService {
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+        if (!checkAuthority("ROLE_APP_MPASSID_PALVELU_TALLENTAJA") && !checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
+          logger.error("No authority to update SP.");
+          throw new EntityCreationException("Integration update failed, no authority to update SP.");
+        }
+
         // Check for duplicate entityIds and clientIds
         if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
           SamlServiceProvider samlSp = (SamlServiceProvider) integration.getConfigurationEntity().getSp();
@@ -529,6 +530,12 @@ public class IntegrationService {
                   "Integration update failed, no clientId given or clientId is already in use.");
             }
           }
+        }
+      }
+      if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+        if (!checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
+          logger.error("No authority to update IDP.");
+          throw new EntityCreationException("Integration update failed, no authority to update IDP.");
         }
       }
       try {
