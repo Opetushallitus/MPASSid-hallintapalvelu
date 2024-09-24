@@ -140,7 +140,7 @@ public class IntegrationController {
 	}
 
 	@Operation(summary = "Get a blank integration")
-	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
+	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'TALLENTAJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_TALLENTAJA')")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Integration creation successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "405", description = "Integration creation error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
