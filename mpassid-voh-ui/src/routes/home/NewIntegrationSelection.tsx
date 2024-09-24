@@ -166,6 +166,21 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         }
     }, [open]);
 
+    useEffect(() => {
+        
+        
+        if(integration==="sp") {
+            setType(defaults.typePI)
+            setTypes(defaults.typesPI)
+        } else {
+            setType(defaults.typeOKJ)
+            setTypes(defaults.typesOKJ)
+        }
+    }, [integration]);
+
+
+    
+
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
@@ -202,17 +217,19 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
       }; 
       
       const handleIntegration = (event: SelectChangeEvent) => {
+
+        devLog("handleIntegration (value)",String(event.target.value))
         const value = String(event.target.value);
-        
-        if(value==="sp") {
-            setType(defaults.typePI)
-            setTypes(defaults.typesPI)
-        } else {
-            setType(defaults.typeOKJ)
-            setTypes(defaults.typesOKJ)
-        }
         setIntegration(value)
+        
+        
     }; 
+
+    
+
+        
+        
+     
 
     const handleTypes = (event: SelectChangeEvent) => {
         const value = String(event.target.value);
@@ -267,7 +284,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         labelId="integraatio"
                         id="integraatio"
                         value={integration}
-                        onChange={handleIntegration}
+                        onChange={handleIntegration}                
                         variant="standard"
                         sx={{ marginRight: "auto"}}
                     >
