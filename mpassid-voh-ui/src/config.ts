@@ -640,22 +640,6 @@ export const dataConfiguration:UiConfiguration[] = [
     ]
   },
   {
-    name: 'token_endpoint_auth_method',
-    type: 'metadata',
-    mandatory: true,
-    multivalue: false,
-    enum: [ 'client_secret_basic', 'client_secret_post' ],
-    validation: [ ],
-    integrationType: [
-        
-        {
-            name: 'oidc',
-            editable: false,
-            visible: true,
-        }
-    ]
-  },
-  {
     name: 'id_token_signed_response_alg',
     type: 'metadata',
     mandatory: true,
