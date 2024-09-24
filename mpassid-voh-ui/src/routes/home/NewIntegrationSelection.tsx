@@ -167,8 +167,6 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     }, [open]);
 
     useEffect(() => {
-        
-        
         if(integration==="sp") {
             setType(defaults.typePI)
             setTypes(defaults.typesPI)
@@ -177,6 +175,14 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             setTypes(defaults.typesOKJ)
         }
     }, [integration]);
+
+    useEffect(() => {
+        if(possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0) {
+            setIntegration('idp')
+        } else {
+            setIntegration('sp')
+        }
+    }, [organization]);
 
 
     
