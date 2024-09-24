@@ -273,14 +273,6 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     attribute.content=configuration.enum[0];
                   }
                   
-                  //Initialize switchvalue currentObject  
-                  if(configuration.name==='isDefault') {
-                    devLog("ObjectForm (SwitchForm ehto 1)",configuration?.enum?.length===2)   
-                    devLog("ObjectForm (SwitchForm ehto 2)",configuration.multivalue===false)   
-                    devLog("ObjectForm (SwitchForm ehto 3)",!currentObject.current.hasOwnProperty(configuration.name))
-                    devLog("ObjectForm (SwitchForm ehto 3.1)",currentObject.current)              
-                  }
-                  
                   //if(configuration?.enum?.length===2&&configuration.multivalue===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
                   if(configuration?.enum?.length===2&&configuration.multivalue===false) {
                     devLog("ObjectForm (switch init)",configuration.name)

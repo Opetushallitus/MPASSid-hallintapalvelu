@@ -1,7 +1,7 @@
 
 import { devLog } from "@/utils/devLog";
 import { Box, Switch } from "@mui/material";
-import type { Dispatch, MutableRefObject} from "react";
+import type { Dispatch} from "react";
 import { useEffect, useState } from "react";
 
 interface Props {
