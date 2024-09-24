@@ -155,13 +155,13 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     
   }
 
-  const updateObjectSwitchFormValue = (name: string,value: string,type: string) => {
+  const updateObjectSwitchFormValue = (name: string,value: boolean,type: string) => {
     devLog("updateObjectSwitchFormValue (name)",name)
     devLog("updateObjectSwitchFormValue (value)",value)
     devLog("updateObjectSwitchFormValue (type)",type)
     currentObject.current[name]=value;
     devLog("updateObjectSwitchFormValue (currentObject.current)",currentObject.current)
-    onUpdate(name,value)
+    onUpdate(name,String(value))
     
   }
 

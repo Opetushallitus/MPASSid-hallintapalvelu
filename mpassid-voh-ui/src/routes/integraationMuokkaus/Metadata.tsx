@@ -8,7 +8,7 @@ import { dataConfiguration, defaultIntegrationType } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, trimCertificate, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
-import { clone, isEqual } from "lodash";
+import { clone, cloneDeep, isEqual } from "lodash";
 import { devLog } from "@/utils/devLog";
 
 
@@ -43,10 +43,15 @@ export default function Metadata({
   
   const createAttributeContent = (name:string,currentData: any,roleConfiguration:IntegrationType,multi: boolean|undefined) => {
     devLog("createAttributeContent (name)",name)
-    
+
     if(currentData&&currentData!== undefined) {
       devLog("createAttributeContent (currentData)",currentData)
       return currentData
+    }
+
+    if(newConfigurationEntityData&&newConfigurationEntityData?.sp&&newConfigurationEntityData.sp?.metadata&&newConfigurationEntityData.sp?.metadata[name]!== undefined) {
+      devLog("createAttributeContent (newConfigurationEntityData)",newConfigurationEntityData.sp?.metadata[name])
+      return newConfigurationEntityData.sp?.metadata[name]
     }
 
     if(roleConfiguration?.index&&roleConfiguration.index==='randomsha1') {
@@ -84,14 +89,16 @@ export default function Metadata({
   }
   const updateMetadata = (multivalue: boolean,name:string, value:any) => {  
     devLog("updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
-    devLog("updateMetadata 1",multivalue)
-    devLog("updateMetadata 2",name)
-    devLog("updateMetadata 3",value)
+    devLog("updateMetadata (multivalue)",multivalue)
+    devLog("updateMetadata ("+name+")",value)
+    
+    var newMetadata
     if(multivalue) {
-      updateMultivalueMetadata(name,value);
+      newMetadata=updateMultivalueMetadata(name,value);
     } else {
-      metadata[name]=value
-      setMetadata({...metadata})
+      newMetadata=cloneDeep(metadata)
+      newMetadata[name]=value
+      setMetadata(newMetadata)
     }
     
     
@@ -99,7 +106,7 @@ export default function Metadata({
       if(newConfigurationEntityData?.sp?.metadata === undefined){
         newConfigurationEntityData.sp.metadata={}
       }    
-      newConfigurationEntityData.sp.metadata=metadata
+      newConfigurationEntityData.sp.metadata=newMetadata
     }
     devLog("updateMetadata (validateMetadata)", validateMetadata())
     devLog("updateMetadata (isEqual)", isEqual(newConfigurationEntityData,configurationEntity))
@@ -130,6 +137,8 @@ export default function Metadata({
     }
     setMetadata({...metadata} )
     devLog("updateMultivalueMetadata (metadata)",metadata)
+    return metadata
+    
     
   }
 
@@ -204,7 +213,7 @@ export default function Metadata({
                                           //content: metadata[configuration.name]||roleConfiguration?.defaultValue||'',
                                           name: configuration.name,
                                           role: role}
-                      
+                                          
                       devLog("Metadata (attribute init)",attribute)
                       if(attribute.content === undefined) {
 
@@ -249,7 +258,10 @@ export default function Metadata({
                               updateMetadata(configuration.multivalue,configuration.name,attribute.content)
                             }
                           } else {
-                            if(attribute.content&&attribute.content!=='') {
+                            if(attribute.content&&attribute.content!==''&&!configuration.enum) {
+                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                            }
+                            if(!attribute.content&&attribute.content!==''&&configuration.enum&&configuration.enum.length>0) {
                               updateMetadata(configuration.multivalue,configuration.name,attribute.content)
                             }
                           }
@@ -263,7 +275,7 @@ export default function Metadata({
                       }
                       
                       //console.log("*** metadata (attribute): ",attribute);
-                      const onUpdate = (name:string,value:string) => {
+                      const onUpdate = (name:string,value:any) => {
                         devLog("MetadataForm onUpdate (name)",name)
                         devLog("MetadataForm onUpdate (value)",value)
                         var trimmeValue=value
@@ -272,10 +284,10 @@ export default function Metadata({
                         } 
                         if(configuration?.enum&&configuration.enum.length>0) {
                           devLog("MetadataForm onUpdate (attribute enum)",attribute)
-                          return updateMetadata(false,name,trimmeValue);
+                          return updateMetadata(false,name,value);
                         } else {
                           if(configuration.multivalue) {
-                            devLog("MetadataForm onUpdate (attribute multivalue)",attribute)                            
+                            devLog("MetadataForm onUpdate (attribute multivalue)",attribute)    
                             return updateMetadata(configuration.multivalue,name,trimmeValue);
                           } else {
                             devLog("MetadataForm onUpdate (attribute siglevalue)",attribute)
@@ -313,6 +325,7 @@ export default function Metadata({
 
                       devLog("Metadata (attribute post)",attribute)
                       devLog("Metadata (attribute post)",metadata)
+                      devLog("updateMeta (attribute post)",metadata)
 
                       setCanSave(validateMetadata())
 

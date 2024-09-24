@@ -124,6 +124,9 @@ export default function IntegraatioMuokkaus() {
             newIntegration.permissions?.forEach((permission)=>{
               delete permission.lastUpdatedOn;
             })
+            if(newIntegration?.configurationEntity&&newIntegration?.configurationEntity.attributes&&newIntegration?.configurationEntity.attributes.length>0) {
+              newIntegration.configurationEntity.attributes=newIntegration.configurationEntity.attributes.filter(a=>!(a.content===''&&a.type==='user'))
+            }
             
             try {
               setLoading(true)

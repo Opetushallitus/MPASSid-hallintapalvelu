@@ -43,26 +43,24 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   }
   
   const updateAttribute = (name:string, value:string, type:string ) => {  
-    devLog("Attributes (updateAttribute)",name) 
-    var attributeList=cloneDeep(attributes);
-    if(attributeList.map(a=>a.name).indexOf(name)>-1) {
-      attributeList.forEach(attribute=>{
-        if(attribute.name===name) {
-          attribute.content=value;
-        }
-      })
+    devLog("updateAttribute ("+name+")",value) 
+    const attributeList=cloneDeep(attributes);
+    const index=attributeList.map(a=>a.name).indexOf(name);
+    if(index>-1) {
+      attributeList[index].content=value;
     } else {
       if(type==='data'||type==='user') {
         attributeList.push({type: type, name: name,content: value }) 
       }
-      
-    }
-    if(type==='user') {
-      attributeList=attributes.filter(a=>a.content!=='')
     }
     
-    setAttributes(attributeList)
-    
+    if(newConfigurationEntityData.attributes !== undefined) {
+      const configurationEntity = cloneDeep(newConfigurationEntityData)
+      configurationEntity.attributes=cloneDeep(attributeList);
+      setAttributes(attributeList)
+      setNewConfigurationEntityData(configurationEntity)
+    }
+
     devLog("updateAttribute (validateAttributes)",validateAttributes())
     if(validateAttributes()) {
       setCanSave(true)
@@ -71,11 +69,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     }
 
     
-    if(newConfigurationEntityData.attributes !== undefined) {
-      const configurationEntity = cloneDeep(newConfigurationEntityData)
-      configurationEntity.attributes=cloneDeep(attributeList);
-      setNewConfigurationEntityData(configurationEntity)
-    }
   }
 
     return (
@@ -121,7 +114,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   if(attributes.find(a => a.name&&a.name === configuration.name)) {
                     //attiribute 
                     attributeExists=true
-                    useAttribute=attributes.find(a => a.name&&a.name === configuration.name)||{ type: attributeType, content: '', name: 'configurationError' }
+                    useAttribute=attributes.find(a => a.name&&a.name === configuration.name)||{ type: attributeType, content: '', name: 'configurationError' }                    
                   } else {
                     const testConfigurationEntity:any = clone(newConfigurationEntityData) 
                     
@@ -144,11 +137,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     }
                   }
                   devLog("Attributes (initialized attribute)",useAttribute)
-                  devLog("Attributes (init switch condition 1)",!attributeExists)
-                  devLog("Attributes (init switch condition 2)",configuration.multivalue===false)
-                  devLog("Attributes (init switch condition 3)",configuration.enum !== undefined)
-                  //devLog("Attributes (init switch condition 4)",configuration.enum.length===2||true)
-                  devLog("Attributes (init switch condition 5)",(useAttribute.content===undefined||useAttribute.content===''))
+          
                   if(!attributeExists&&configuration.multivalue===false&&configuration.enum&&configuration.enum.length===2&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize switch value        
                     devLog("Attributes (init switch content)",configuration.name)            
@@ -156,7 +145,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     if(roleConfiguration.defaultValue !== undefined) {
                       useAttribute={ type: attributeType, content: roleConfiguration.defaultValue, name: configuration.name }
                       attributes.push(useAttribute)
-                      setAttributes([ ...attributes])
+                      setAttributes([ ...attributes])                      
                       updateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
                     } else {
                       useAttribute={ type: attributeType, content: configuration.enum[0], name: configuration.name }
@@ -169,12 +158,11 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
                   //Initialize attributes
                   if(useAttribute.content&&newConfigurationEntityData?.attributes&&newConfigurationEntityData.attributes.map(a=>a.name).indexOf(configuration.name)<0){
+                    devLog("updateAttribute (roleConfiguration.defaultValue !== undefined)",3)
                     updateAttribute(configuration.name,String(useAttribute.content),type)
                   }
-                  
-                  
-                  devLog("Attributes (attribute post)",attributes)
-                  devLog("Attributes (attribute post)",useAttribute)
+                                    
+                  devLog("Attributes (attribute post)",attributes)                  
 
                   return (<AttributeForm 
                     key={configuration.name!}
