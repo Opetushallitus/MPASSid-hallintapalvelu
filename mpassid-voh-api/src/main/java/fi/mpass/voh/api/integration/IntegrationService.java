@@ -799,8 +799,12 @@ public class IntegrationService {
 
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
-      // TODO authz
+      // TODO Separate IDP and SP creation to own methods
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+        if (!checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
+          logger.error("No authority to create IDP.");
+          throw new EntityCreationException("Integration creation failed, no authority to create IDP.");
+        }
         // Create IDP
         List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1)
             ? integrationRepository.getAvailableIdpProdIntegrationIdentifier()
@@ -820,6 +824,10 @@ public class IntegrationService {
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         // Create SP
+        if (!checkAuthority("ROLE_APP_MPASSID_PALVELU_TALLENTAJA") && !checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
+          logger.error("No authority to create SP.");
+          throw new EntityCreationException("Integration creation failed, no authority to create SP.");
+        }
         if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
           SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
           if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
@@ -920,6 +928,26 @@ public class IntegrationService {
       return false;
     }
     return true;
+  }
+
+  /**
+   * 
+   * @param requiredAuthority * ROLE_APP_MPASSID
+   *                          ROLE_APP_MPASSID_TALLENTAJA
+   *                          ROLE_APP_MPASSID_PALVELU_TALLENTAJA
+   *                          ROLE_APP_MPASSID_KATSELIJA
+   *                          ROLE_APP_MPASSID_PALVELU_KATSELIJA
+   * @return Boolean
+   */
+
+  public Boolean checkAuthority(String requiredAuthority) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    for (GrantedAuthority grantedAuthority : auth.getAuthorities()) {
+      if (grantedAuthority.getAuthority().contains(requiredAuthority)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

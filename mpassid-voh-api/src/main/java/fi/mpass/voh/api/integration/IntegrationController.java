@@ -168,7 +168,7 @@ public class IntegrationController {
 	}
 
 	@Operation(summary = "Create an integration")
-	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
+	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'TALLENTAJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_TALLENTAJA')")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Integration creation successful", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
