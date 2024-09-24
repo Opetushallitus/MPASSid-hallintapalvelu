@@ -66,6 +66,12 @@ public class OPHPermissionEvaluator {
                             // (2, 3, 4, 5) The granted authority must include the required permission
                             if (authorityElements[3].contains(requiredPermission))
                                 return true;
+                            String[] requiredPermissionElements = requiredPermission.split("_");
+                            if (authorityElements.length > 4 && requiredPermissionElements.length == 2
+                                    && authorityElements[3].equals(requiredPermissionElements[0])
+                                    && authorityElements[4].equals(requiredPermissionElements[1])) {
+                                        return true;
+                            }
                         }
                     }
                 }
