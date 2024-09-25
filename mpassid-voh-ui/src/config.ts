@@ -504,6 +504,28 @@ export const dataConfiguration:UiConfiguration[] = [
     ]
   },
   {
+    name: 'wantAssertionsSigned',
+    type: 'metadata',
+    environment: 1,
+    mandatory: true,
+    multivalue: false,
+    enum: [ true, false ],
+    validation: [ ],
+    integrationType: [
+        {
+            name: 'saml',
+            editable: false,
+            visible: true,
+            defaultValue: true
+        },
+        {
+            name: 'oidc',
+            editable: false,
+            visible: false,
+        }
+    ]
+  },
+  {
     name: 'assertionConsumerServiceUrls',
     type: 'metadata',
     mandatory: true,
