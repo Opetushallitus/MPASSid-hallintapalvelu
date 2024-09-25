@@ -39,6 +39,8 @@ export default function IntegraatioMuokkaus() {
   const [loading, setLoading] = useState<boolean>(false);
   const intl = useIntl();
   
+  
+
   useEffect(() => {
     if(me?.groups) {
       setGroups(me.groups)
@@ -122,6 +124,9 @@ export default function IntegraatioMuokkaus() {
             newIntegration.permissions?.forEach((permission)=>{
               delete permission.lastUpdatedOn;
             })
+            if(newIntegration?.configurationEntity&&newIntegration?.configurationEntity.attributes&&newIntegration?.configurationEntity.attributes.length>0) {
+              newIntegration.configurationEntity.attributes=newIntegration.configurationEntity.attributes.filter(a=>!(a.content===''&&a.type==='user'))
+            }
             
             try {
               setLoading(true)
@@ -132,8 +137,7 @@ export default function IntegraatioMuokkaus() {
                 if(newIntegration.integrationSets&&newIntegration.integrationSets.length>0) {
                   updateIntegration.integrationSets = newIntegration.integrationSets.map(i=> { return { id: i.id}})
                 }
-                await updateIntegrationRaw({ id },updateIntegration);            
-                result.current = newIntegration
+                result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;
               }
               devLog("Integration save result",result.current)
               if(logo){
@@ -210,6 +214,9 @@ export default function IntegraatioMuokkaus() {
                                         </Box>}
         
       </TableContainer>
+      {newIntegration&&<>
+        <br/><br/><br/><br/>
+      </>}
       {newIntegration&&<Snackbar
             open={saveDialogState}
             anchorOrigin={snackbarLocation}>
@@ -277,6 +284,15 @@ export default function IntegraatioMuokkaus() {
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
                   <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
+                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&String(newIntegration.configurationEntity.sp.metadata.client_secret)!=='***'&&
+                  newIntegration?.configurationEntity?.sp?.type === "oidc"&&<>
+                    {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
+                    {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
+                    {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<FormattedMessage defaultMessage="Muista tallentaa client_secret:" />}                  
+                    {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
+                    {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<FormattedMessage defaultMessage="client_secret: {secret}" values={{secret: String(newIntegration.configurationEntity.sp.metadata.client_secret)}} />}
+                  </>}
+                  
                   </DialogContentText>
                 </DialogContent>
                 <DialogActions>

@@ -1,14 +1,14 @@
 import type { Components } from "@/api";
-import { Grid, Typography } from "@mui/material";
+import {  Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import { type Dispatch } from "react";
 import type { IntegrationType} from '../../config';
 import { dataConfiguration, defaultIntegrationType } from '../../config';
 import { useIntl } from 'react-intl';
-import { helperText, validate } from "@/utils/Validators";
+import { helperText, trimCertificate, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
-import { clone, isEqual } from "lodash";
+import { clone, cloneDeep, isEqual } from "lodash";
 import { devLog } from "@/utils/devLog";
 
 
@@ -41,11 +41,35 @@ export default function Metadata({
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
   
-  devLog("function Metadata (dataConfiguration)",dataConfiguration)
-  devLog("function Metadata (oid)",oid)
-  devLog("function Metadata (specialConfiguration)",specialConfiguration)
-  devLog("function Metadata (environment)",environment)
-  devLog("function Metadata (environmentConfiguration)",environmentConfiguration)
+  const createAttributeContent = (name:string,currentData: any,roleConfiguration:IntegrationType,multi: boolean|undefined) => {
+    devLog("createAttributeContent (name)",name)
+
+    if(currentData&&currentData!== undefined) {
+      devLog("createAttributeContent (currentData)",currentData)
+      return currentData
+    }
+
+    if(newConfigurationEntityData&&newConfigurationEntityData?.sp&&newConfigurationEntityData.sp?.metadata&&newConfigurationEntityData.sp?.metadata[name]!== undefined) {
+      devLog("createAttributeContent (newConfigurationEntityData)",newConfigurationEntityData.sp?.metadata[name])
+      return newConfigurationEntityData.sp?.metadata[name]
+    }
+
+    if(roleConfiguration?.index&&roleConfiguration.index==='randomsha1') {
+       return                  
+    } 
+
+    if(roleConfiguration?.defaultValue !== undefined) {
+      devLog("createAttributeContent (defaultValue)",roleConfiguration.defaultValue)
+      return roleConfiguration.defaultValue
+    }
+    devLog("createAttributeContent (empty)",'')
+    if(multi !== undefined && multi) {
+      return []
+    } else {
+      return ''
+    }
+    
+  }
 
   const validateMetadata = () => {
     var result=true;
@@ -65,14 +89,16 @@ export default function Metadata({
   }
   const updateMetadata = (multivalue: boolean,name:string, value:any) => {  
     devLog("updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
-    devLog("updateMetadata 1",multivalue)
-    devLog("updateMetadata 2",name)
-    devLog("updateMetadata 3",value)
+    devLog("updateMetadata (multivalue)",multivalue)
+    devLog("updateMetadata ("+name+")",value)
+    
+    var newMetadata
     if(multivalue) {
-      updateMultivalueMetadata(name,value);
+      newMetadata=updateMultivalueMetadata(name,value);
     } else {
-      metadata[name]=value
-      setMetadata({...metadata})
+      newMetadata=cloneDeep(metadata)
+      newMetadata[name]=value
+      setMetadata(newMetadata)
     }
     
     
@@ -80,7 +106,7 @@ export default function Metadata({
       if(newConfigurationEntityData?.sp?.metadata === undefined){
         newConfigurationEntityData.sp.metadata={}
       }    
-      newConfigurationEntityData.sp.metadata=metadata
+      newConfigurationEntityData.sp.metadata=newMetadata
     }
     devLog("updateMetadata (validateMetadata)", validateMetadata())
     devLog("updateMetadata (isEqual)", isEqual(newConfigurationEntityData,configurationEntity))
@@ -111,6 +137,8 @@ export default function Metadata({
     }
     setMetadata({...metadata} )
     devLog("updateMultivalueMetadata (metadata)",metadata)
+    return metadata
+    
     
   }
 
@@ -179,13 +207,15 @@ export default function Metadata({
                       }
 
                       const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
-                      
+                      devLog("Metadata (roleConfiguration)",roleConfiguration) 
                       var attribute = { type: 'metadata', 
-                                          content: metadata[configuration.name]||roleConfiguration?.defaultValue||'',
+                                          content: createAttributeContent(configuration.name,metadata[configuration.name],roleConfiguration,configuration.multivalue),
+                                          //content: metadata[configuration.name]||roleConfiguration?.defaultValue||'',
                                           name: configuration.name,
                                           role: role}
-                      
-                      if(metadata[configuration.name] === undefined) {
+                                          
+                      devLog("Metadata (attribute init)",attribute)
+                      if(attribute.content === undefined) {
 
                         if(configuration.multivalue) {
                           attribute.content=[];
@@ -201,23 +231,67 @@ export default function Metadata({
                         if(configuration?.enum?.length===2&&configuration.multivalue===false) {
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)
                         }
-                        
 
                       }
+                      
+                      if(configuration.enum&&configuration.enum.length===2) {
+                        
+                        if(attribute.content==='') {
+                          if(roleConfiguration.defaultValue !== undefined) {
+                            attribute.content=roleConfiguration.defaultValue
+                          } else {
+                            attribute.content=configuration.enum[0];
+                          }
+                          
+                        }                      
+                        
+                        if(configuration.multivalue===false&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
+                          //Initialize switch value                    
+                          updateMetadata(configuration.multivalue,configuration.name,attribute.content)                          
+                        }
+                      }
+                      //Initialize metadata
+                      if(metadata[configuration.name]!==attribute.content) {
+                        if(configuration.multivalue !== undefined) {
+                          if(configuration.multivalue) {
+                            if(attribute.content.length>0) {
+                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                            }
+                          } else {
+                            if(attribute.content&&attribute.content!==''&&!configuration.enum) {
+                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                            }
+                            if(!attribute.content&&attribute.content!==''&&configuration.enum&&configuration.enum.length>0) {
+                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                            }
+                          }
+                          
+                        } else {
+                          if(attribute.content&&attribute.content!=='') {
+                            updateMetadata(false,configuration.name,attribute.content)
+                          }
+                        }
+                        
+                      }
+                      
                       //console.log("*** metadata (attribute): ",attribute);
-                      const onUpdate = (name:string,value:string) => {
+                      const onUpdate = (name:string,value:any) => {
                         devLog("MetadataForm onUpdate (name)",name)
                         devLog("MetadataForm onUpdate (value)",value)
+                        var trimmeValue=value
+                        if(configuration.trim&&configuration.trim==='cert') {
+                           trimmeValue=trimCertificate(value);                          
+                        } 
                         if(configuration?.enum&&configuration.enum.length>0) {
                           devLog("MetadataForm onUpdate (attribute enum)",attribute)
                           return updateMetadata(false,name,value);
                         } else {
                           if(configuration.multivalue) {
-                            devLog("MetadataForm onUpdate (attribute multivalue)",attribute)                            
-                            return updateMetadata(configuration.multivalue,name,value);
+                            devLog("MetadataForm onUpdate (attribute multivalue)",attribute)    
+                            return updateMetadata(configuration.multivalue,name,trimmeValue);
                           } else {
                             devLog("MetadataForm onUpdate (attribute siglevalue)",attribute)
-                            return updateMetadata(false,name,value);
+                            return updateMetadata(false,name,trimmeValue);
                           }
                           
                         }
@@ -248,6 +322,10 @@ export default function Metadata({
                           name: name,
                           role: role}                                                                
                       }
+
+                      devLog("Metadata (attribute post)",attribute)
+                      devLog("Metadata (attribute post)",metadata)
+                      devLog("updateMeta (attribute post)",metadata)
 
                       setCanSave(validateMetadata())
 

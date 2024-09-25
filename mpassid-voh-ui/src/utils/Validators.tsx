@@ -56,9 +56,9 @@ const validateNoLocalhost = (value:string) => {
     
 }
 
-function trimCertificate(pem:string) {
+export function trimCertificate(pem:string) {
     const base64Cert = pem.replace(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\n| |\r/g, '').trim();
-    return base64Cert;
+    return base64Cert;    
 }
 
 const validateCert = (value:string) => {

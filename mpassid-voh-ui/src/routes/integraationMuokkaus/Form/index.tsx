@@ -13,9 +13,11 @@ import SwitchForm from "./SwitchForm";
 import ObjectForm from "./ObjectForm";
 import { IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
+import LockResetIcon from '@mui/icons-material/LockReset';
 import { devLog } from "@/utils/devLog";
 import type { oneEnum } from "./MultiSelectForm";
 import MultiSelectForm from "./MultiSelectForm";
+import { calculateSHA1, getRandom } from '@/config';
 
 interface AttributeProps {
     uiConfiguration: UiConfiguration;
@@ -40,6 +42,31 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
     
+    devLog("AttributeForm (attribute)",attribute)
+
+    const updateInputItem = (name: string,value: string,type: string) => {
+        devLog("updateInputItem (name)",name)
+        devLog("updateInputItem (checked)",value)
+        devLog("updateInputItem (type)",type)
+        
+        devLog("updateInputItem (attribute)",attribute)
+        
+        onUpdate(name,value,type)
+        //currentObject.current={}
+    }
+
+    const updateSwitchItem = (name: string,value: boolean,type: string) => {
+        devLog("updateSwitchItem (name)",name)
+        devLog("updateSwitchItem (checked)",value)
+        devLog("updateSwitchItem (type)",type)
+        
+        devLog("updateSwitchItem (attribute)",attribute)
+        
+        onUpdate(name,String(value),type)
+        //currentObject.current={}
+    }
+
+
     if(roleConfiguration.visible) {
         return (
             <Grid container >
@@ -77,7 +104,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 path="content" 
                                 type={attribute.name!} 
                                 isEditable={roleConfiguration.editable} 
-                                onUpdate={onUpdate} 
+                                onUpdate={updateInputItem} 
                                 onValidate={onValidate} 
                                 mandatory={configuration.mandatory}
                                 label={label?intl.formatMessage(label):attribute.name!}
@@ -92,7 +119,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 type={attribute.name!} 
                                 values={configuration.enum}
                                 isEditable={roleConfiguration.editable} 
-                                onUpdate={onUpdate} 
+                                onUpdate={updateSwitchItem} 
                                 onValidate={onValidate} 
                                 mandatory={configuration.mandatory}
                                 label={label?intl.formatMessage(label):attribute.name!}
@@ -120,7 +147,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     attribute: any;
     newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
     helperText: (data:string) => JSX.Element;
-    onUpdate: (name: string,value: string) => void;
+    onUpdate: (name: string,value: any) => void;
     onEdit: (name: string,value: string) => void;
     onDelete: (name: string,index: number) => void;
     onValidate: (data:string) => boolean;
@@ -204,9 +231,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         devLog("deleteObjectItem (result)",currentObject.current)
         
     }
-    const updateSwitchItem = (name:any,value:any) => {
-        devLog("updateSwitchItem (checked)",value)
-        devLog("updateSwitchItem (type)",name)
+    const updateSwitchItem = (name:any,value:boolean) => {
+        devLog("updateSwitchItem ("+name+")",value)
+        
         
         devLog("updateSwitchItem (attribute)",attribute)
         devLog("updateSwitchItem (currentObject)",currentObject.current)
@@ -228,8 +255,17 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
 
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
-    devLog("MetadataForm (configuration)",configuration)
-    devLog("MetadataForm (roleConfiguration)",roleConfiguration)
+    
+    if(roleConfiguration.generate&&attribute.content==='') {
+        
+        if(roleConfiguration.generate==='name_randomsha1'){
+            calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, 'id_'+value))
+        }
+        if(roleConfiguration.generate==='randomsha1'){
+            calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, value))
+        }
+    }
+    
     if(roleConfiguration.visible) {
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
@@ -379,6 +415,27 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     </Grid>
                                 </Grid>)
                                 }
+                            {!ENV.PROD&&configuration&&roleConfiguration&&roleConfiguration.generate&&
+                                (<Grid container spacing={2} >
+                                    <Grid item xs={10}></Grid>
+                                    <Grid item xs={2}>
+                                        <IconButton 
+                                            aria-label={intl.formatMessage({
+                                            defaultMessage: "lisää",
+                                            })}                                            
+                                            onClick={()=>{
+                                                    if(roleConfiguration.generate==='name_randomsha1'){
+                                                        calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, 'id_'+value))
+                                                    }
+                                                    if(roleConfiguration.generate==='randomsha1'){
+                                                        calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, value))
+                                                    }                                                
+                                                }} >
+                                            <LockResetIcon />
+                                        </IconButton>
+                                    </Grid>
+                                </Grid>)
+                                }    
                         </Typography>
                     </Grid>
                     </Grid>

@@ -5,7 +5,7 @@ import { getOrganisaatioNimet } from "@/api/organisaatio";
 import type { SelectChangeEvent} from "@mui/material";
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
 import type { Dispatch} from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
@@ -20,6 +20,10 @@ export const defaults = {
     //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
     typesOKJ: [ "wilma" ]
   };
+
+  if(!ENV.PROD) {
+    defaults.typesPI.push("oidc")
+  }
 
   interface Props {
     open: boolean;
@@ -40,24 +44,80 @@ export const defaults = {
 function NewIntegrationSelection({ open, setOpen}: Props) {
 
     const [organization, setOrganization] = useState('');
-    const [integration, setIntegration] = useState('idp');
-    const [type, setType] = useState(defaults.typeOKJ);
-    const [types, setTypes] = useState(defaults.typesOKJ);
+    const [integration, setIntegration] = useState('sp');
+    const [type, setType] = useState(defaults.typePI);
+    const [types, setTypes] = useState(defaults.typesPI);
     const [service, setService] = useState<serviceProps>();
     const me = useMe();
     const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
     const language = toLanguage(useIntl().locale).toLowerCase();
-
+    const possibleOrganizationsOidsIdp = useRef<string[]>([]);
+    const possibleOrganizationsOidsAll = useRef<string[]>([]);
+    
     const intl = useIntl();
-
+    useEffect(() => {
+        
+        
+        if(me?.groups) {
+            const organizationNames: Organization[] = [];
+            possibleOrganizationsOidsIdp.current=[];
+            possibleOrganizationsOidsAll.current=[];
+            me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).forEach(o=>{
+                possibleOrganizationsOidsIdp.current.push(o.replace('APP_MPASSID_TALLENTAJA_',''))
+                possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_TALLENTAJA_',''))
+            });
+            me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).forEach(o=>possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')));
+            
+            devLog("NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll.current)
+            possibleOrganizationsOidsAll.current.forEach(oid=>{
+                const newOrganizationName = { oid: oid, name: '' }
+                getOrganisaatioNimet(oid).then(response=>{
+                    var found=false;
+                    response.forEach(organisation=>{
+                        if(organisation?.oid===oid&&organisation?.nimi) {
+                            if(organisation?.nimi[language]) {
+                                newOrganizationName.name=organisation?.nimi[language];
+                            } else {
+                                newOrganizationName.name=oid;
+                            }
+                            found=true;
+                        }
+                    })
+                    if(!found) {
+                        newOrganizationName.name=oid;
+                    }
+                    organizationNames.push(newOrganizationName);
+                    if(possibleOrganizationsOidsAll.current.length===organizationNames.length) {
+                        setOrganizations(organizationNames)
+                        setOrganization(organizationNames[0].oid)
+                    }
+                })
+                .catch(error=>{
+                    const newOrganizationName = { oid: oid, name: oid }
+                    organizationNames.push(newOrganizationName)
+                    if(possibleOrganizationsOidsAll.current.length===organizationNames.length) {
+                        setOrganizations(organizationNames)
+                        setOrganization(organizationNames[0].oid)
+                    }
+                })
+                
+            })
+        
+            
+            
+            
+        }
+    }, [language, me]);
+    /*
     useEffect(() => {
         
         
         if(me?.groups) {
             const organizationNames: Organization[] = [];
             const possibleOrganizationsOids = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
-            
+            //possibleOrganizationsOids.concat(me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')) || []);
+            devLog("NewIntegrationSelection (possibleOrganizationsOids)",possibleOrganizationsOids)
             possibleOrganizationsOids.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
@@ -97,7 +157,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             
         }
     }, [language, me]);
-
+    */
     useEffect(() => {
         
         
@@ -105,6 +165,27 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             setService(undefined)
         }
     }, [open]);
+
+    useEffect(() => {
+        if(integration==="sp") {
+            setType(defaults.typePI)
+            setTypes(defaults.typesPI)
+        } else {
+            setType(defaults.typeOKJ)
+            setTypes(defaults.typesOKJ)
+        }
+    }, [integration]);
+
+    useEffect(() => {
+        if(possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0) {
+            setIntegration('idp')
+        } else {
+            setIntegration('sp')
+        }
+    }, [organization]);
+
+
+    
 
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
@@ -142,17 +223,19 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
       }; 
       
       const handleIntegration = (event: SelectChangeEvent) => {
+
+        devLog("handleIntegration (value)",String(event.target.value))
         const value = String(event.target.value);
-        
-        if(value==="sp") {
-            setType(defaults.typePI)
-            setTypes(defaults.typesPI)
-        } else {
-            setType(defaults.typeOKJ)
-            setTypes(defaults.typesOKJ)
-        }
         setIntegration(value)
+        
+        
     }; 
+
+    
+
+        
+        
+     
 
     const handleTypes = (event: SelectChangeEvent) => {
         const value = String(event.target.value);
@@ -207,13 +290,15 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         labelId="integraatio"
                         id="integraatio"
                         value={integration}
-                        onChange={handleIntegration}
+                        onChange={handleIntegration}                
                         variant="standard"
                         sx={{ marginRight: "auto"}}
                     >
-                        <MenuItem key={'koulutustoimija'} value={'idp'}>
-                            <FormattedMessage defaultMessage='Koulutustoimija'/>
-                        </MenuItem>
+
+                        {possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0&&
+                            <MenuItem key={'koulutustoimija'} value={'idp'}>
+                                <FormattedMessage defaultMessage='Koulutustoimija'/>
+                            </MenuItem>}
                         <MenuItem key={'palveluintegraatio'} value={'sp'}>
                             <FormattedMessage defaultMessage='Palveluintegraatio' />
                         </MenuItem>

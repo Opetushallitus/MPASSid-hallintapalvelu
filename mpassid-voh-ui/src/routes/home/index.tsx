@@ -73,7 +73,7 @@ export default function Home() {
 
   const writeAccess = () => {
     
-    if((groups?.includes("APP_MPASSID_TALLENTAJA"))||groups?.includes("APP_MPASSID_PALVELU_PÄÄKÄYTTÄJÄ")) {
+    if((groups?.includes("APP_MPASSID_TALLENTAJA"))||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA")) {
       return true;
     } else {
       return false;

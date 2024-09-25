@@ -4,8 +4,8 @@ import type { Dispatch} from "react";
 import { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { IntegrationType, UiConfiguration } from "@/config";
-import { dataConfiguration, defaultIntegrationType } from "@/config";
-import { helperText as vHelperText, validate } from "@/utils/Validators";
+import { calculateSHA1, dataConfiguration, defaultIntegrationType, getRandom } from "@/config";
+import { trimCertificate, helperText as vHelperText, validate } from "@/utils/Validators";
 import SwitchForm from "./SwitchForm";
 import ListForm from "./ListForm";
 import InputForm from "./InputForm";
@@ -51,7 +51,6 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   
   const [isValid, setIsValid] = useState(true);
   const [reload, setReload] = useState(true);
-  const resetStat = useRef<any>({});
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
   const inputValue = useRef<any>(null);
@@ -72,9 +71,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
 
       setReload(!reload)
       currentObject.current={}
-      resetStat.current={}
       setCanSave(validateObject())
-      devLog("ObjectForm (clean)",resetStat.current)
       devLog("ObjectForm (clean)",currentObject.current)
       
     },
@@ -147,18 +144,24 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
       }
       
     }
+    if(currentObjectConfiguration[0].trim&&currentObjectConfiguration[0].trim==='cert') {
+      const trimmeValue=trimCertificate(value);
+      currentObject.current[name]=trimmeValue;
+      onUpdate(name,trimmeValue)
+    } else {
+      currentObject.current[name]=value;
+      onUpdate(name,value)
+    }
     
-    currentObject.current[name]=value;
-    onUpdate(name,value)
   }
 
-  const updateObjectSwitchFormValue = (name: string,value: string,type: string) => {
+  const updateObjectSwitchFormValue = (name: string,value: boolean,type: string) => {
     devLog("updateObjectSwitchFormValue (name)",name)
     devLog("updateObjectSwitchFormValue (value)",value)
     devLog("updateObjectSwitchFormValue (type)",type)
     currentObject.current[name]=value;
     devLog("updateObjectSwitchFormValue (currentObject.current)",currentObject.current)
-    onUpdate(name,value)
+    onUpdate(name,String(value))
     
   }
 
@@ -224,7 +227,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
             (a, b) => (a.label ?? a.name!).localeCompare(b.label ?? b.name!)
           )
           .map((configuration) => {
-                                                     
+                  var resetSwitchValue=false;                
                   devLog("ObjectForm (configuration)",configuration)
 
                   if(configuration.mandatory) {
@@ -270,12 +273,13 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     attribute.content=configuration.enum[0];
                   }
                   
-                  //Initialize switchvalue currentObject                
-                  if(configuration?.enum?.length===2&&configuration.multivalue===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                  //if(configuration?.enum?.length===2&&configuration.multivalue===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                  if(configuration?.enum?.length===2&&configuration.multivalue===false) {
                     devLog("ObjectForm (switch init)",configuration.name)
                     devLog("ObjectForm (switch init)",attribute.content)
+                    devLog("ObjectForm (SwitchForm resetValue)",true)
                     currentObject.current[configuration.name]=attribute.content;
-                    resetStat.current[configuration.name]=false
+                    resetSwitchValue=true
                     //updateObjectSwitchFormValue(configuration.name,attribute.content,attribute.type)
                   }
                   
@@ -286,15 +290,12 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     if(configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
                         devLog("ObjectForm (multivalue init)",configuration.name)  
                         currentObject.current[configuration.name]=attribute.content||[];
-                        resetStat.current[configuration.name]=false
-                        
                     }
                     
                     //Initialize siglevalue currentObject
                     if(!configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
                         devLog("ObjectForm (siglevalue init)",configuration.name)                             
                         currentObject.current[configuration.name]=attribute.content||'';
-                        resetStat.current[configuration.name]=false
                     }    
 
                     
@@ -320,8 +321,18 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                       
                       attribute.content=String(newIndex);
                       currentObject.current[configuration.name]=newIndex;
-                      resetStat.current[configuration.name]=false
                     }
+
+                    if(roleConfiguration?.index&&roleConfiguration.index==='randomsha1') {
+                      devLog("ObjectForm (index init)",configuration.name)
+                      calculateSHA1(String(getRandom())).then(sha=>{
+                        attribute.content=String(sha);
+                        currentObject.current[configuration.name]=sha;
+                      })
+                      
+                    
+                    
+                  }
 
                     if(inputValue.current&&inputValue.current.hasOwnProperty(configuration.name)){
                       devLog("ObjectForm (reset)",configuration.name)
@@ -370,6 +381,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
                                         (<SwitchForm key={object.name}                                             
                                             object={attribute} 
+                                            resetValue={resetSwitchValue}
                                             path="content" 
                                             type={configuration.name!} 
                                             values={configuration.enum}
