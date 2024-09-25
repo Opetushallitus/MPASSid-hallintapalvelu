@@ -787,6 +787,21 @@ public class IntegrationService {
     Optional<Integration> integration = this.getIntegration(id);
 
     if (integration.isPresent()) {
+      if (integration.get().getConfigurationEntity() != null
+          && integration.get().getConfigurationEntity().getIdp() != null) {
+        if (!checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
+          logger.error("No authority to inactivate IDP.");
+          throw new EntityCreationException("Integration inactivation failed, no authority to inactivate IDP.");
+        }
+      }
+      if (integration.get().getConfigurationEntity() != null
+          && integration.get().getConfigurationEntity().getSp() != null) {
+        if (!checkAuthority("ROLE_APP_MPASSID_PALVELU_TALLENTAJA") && !checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
+          logger.error("No authority to inactivate SP.");
+          throw new EntityCreationException("Integration inactivation failed, no authority to inactivate SP.");
+        }
+      }
+
       integration.get().getIntegrationSets().iterator();
       for (Iterator<Integration> integrationIterator = integration.get().getIntegrationSets()
           .iterator(); integrationIterator.hasNext();) {
