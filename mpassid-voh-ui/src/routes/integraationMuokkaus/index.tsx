@@ -214,6 +214,9 @@ export default function IntegraatioMuokkaus() {
                                         </Box>}
         
       </TableContainer>
+      {newIntegration&&<>
+        <br/><br/><br/><br/>
+      </>}
       {newIntegration&&<Snackbar
             open={saveDialogState}
             anchorOrigin={snackbarLocation}>
