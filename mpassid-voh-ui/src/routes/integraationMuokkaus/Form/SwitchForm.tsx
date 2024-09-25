@@ -1,6 +1,6 @@
 
 import { devLog } from "@/utils/devLog";
-import { Box, Switch } from "@mui/material";
+import { Switch } from "@mui/material";
 import type { Dispatch} from "react";
 import { useEffect, useState } from "react";
 
@@ -53,12 +53,8 @@ export default function SwitchForm({ object, type, isEditable=false, mandatory=f
 
   } else {
     
-    return( <Box
-      sx={(theme) => ({
-        ...theme.typography.body1
-        
-      })}
-    >{value}</Box>)
+    return( <Switch sx={{ opacity: 0.4}} checked={value}
+       />)
   }
   
 }
