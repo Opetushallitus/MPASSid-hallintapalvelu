@@ -304,7 +304,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         variant="caption"
                         >
                             
-                            {configuration&&roleConfiguration&&configuration.object&&
+                            {configuration&&roleConfiguration&&configuration.object !== undefined&&
                             (<ObjectForm key={attribute.name+"_"+configuration.name} 
                                 integrationType={type}
                                 object={attribute} 
@@ -343,7 +343,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     //object={attribute} 
                                     //path="content" 
                                     //type={attribute.name!} 
-                                    values={configuration.enum}
+                                    values={attribute.content}
                                     isEditable={roleConfiguration.editable}
                                     //onUpdate={onUpdate} 
                                     onValidate={onValidate}
@@ -354,6 +354,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     setCanSave={setCanSaveItem} 
                                     attributeType={"data"} 
                                     enums={enumValues} 
+                                    multiple={configuration.multiselect}
                                     onUpdate={function (values: string[]): void {
                                         throw new Error("Function not implemented.");
                                     } }/>)

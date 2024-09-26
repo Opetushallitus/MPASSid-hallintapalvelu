@@ -341,7 +341,7 @@ export default function Metadata({
                         attribute={attribute}
                         type={type}
                         role={role} 
-                        helperText={helpGeneratorText}
+                        helperText={helpGeneratorText}                      
                         setCanSave={setCanSave}/>)
                     }
                 
