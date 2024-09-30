@@ -83,7 +83,7 @@ public class ProvisioningService {
                 List<Integration> integrationsSince = integrationService
                         .getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(provision.get().getLastTime(), i, "idp");
                 boolean changes = !integrationsSince.isEmpty();
-                logger.info("Number of changed integration permissions: " + integrationsSince.size() + " since "
+                logger.info("Number of changed integrations: " + integrationsSince.size() + " since "
                         + provision.get().getLastTime() + " in deployment phase " + i);
                 if (changes) {
                     // sort the integration's permissions by the last update time
