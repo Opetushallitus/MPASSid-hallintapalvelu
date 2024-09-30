@@ -66,8 +66,26 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         //currentObject.current={}
     }
 
+    const updateMultiSelectItem = (value: string[]) => {
+        devLog("updateMultiSelectItem (name)",attribute.name)
+        devLog("updateMultiSelectItem (checked)",value)
+        devLog("updateMultiSelectItem (type)",attribute.type)
+        
+        devLog("updateMultiSelectItem (attribute)",attribute)
+        
+        if(attribute.name !== undefined&&attribute.type) {
+            onUpdate(attribute.name,value[0],attribute.type)
+        }
+        
+        //currentObject.current={}
+    }
+
 
     if(roleConfiguration.visible) {
+        var enumValues: oneEnum[] = [];
+        if(configuration.enum) {
+            enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
+        }
         return (
             <Grid container >
                 
@@ -98,7 +116,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                         }}
                         variant="caption"
                         >
-                        {configuration&&roleConfiguration&&configuration?.enum?.length!==2&&
+                        {configuration&&roleConfiguration&&!configuration.enum&&
                             (<InputForm key={attribute.name} 
                                 object={attribute} 
                                 path="content" 
@@ -127,6 +145,22 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }
+                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
+                                (<MultiSelectForm key={attribute.name}                                    
+                                    values={(attribute.content)?[ attribute.content ]:[]}
+                                    isEditable={roleConfiguration.editable}
+                                    onUpdate={updateMultiSelectItem} 
+                                    onValidate={onValidate}
+                                    mandatory={configuration.mandatory}
+                                    label={label ? intl.formatMessage(label) : attribute.name!}
+                                    //attributeType={"metadata"}
+                                    helperText={helperText}
+                                    setCanSave={setCanSave} 
+                                    attributeType={"data"} 
+                                    enums={enumValues} 
+                                    multiple={false}
+                                    />)
+                            }
                         
                         
                         </Typography>

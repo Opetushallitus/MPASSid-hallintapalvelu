@@ -105,6 +105,9 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   const helpGeneratorText = (value:string) => {
                     return helperText(configuration.validation,value);
                   }
+                  const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
+                  devLog("Metadata (roleConfiguration)",roleConfiguration) 
+                  
                   var useAttribute:Components.Schemas.Attribute ={}
                   var attributeExists:boolean=false
 
@@ -129,7 +132,12 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     if(useAttribute.content === undefined) {
                       devLog("Attributes (init empty content)",configuration.name)
                       if(configuration.name) {
-                        useAttribute={ type: attributeType, content: '', name: configuration.name }
+                        if(roleConfiguration.defaultValue) {
+                          useAttribute={ type: attributeType, content: roleConfiguration.defaultValue, name: configuration.name }
+                        } else {
+                          useAttribute={ type: attributeType, content: '', name: configuration.name }
+                        }
+                        
                       } else {
                         useAttribute={ type: attributeType, content: '', name: 'configurationError' }
                       }
