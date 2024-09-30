@@ -226,11 +226,16 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
         devLog("updatObjectItem (mandatory)",uiConfiguration.mandatory)
-
+        
         if(data.content) {
-            currentObject.current[name]=data.content;
+            if(objectOnValidate(data.content)) {
+                currentObject.current[name]=data.content;    
+            }
+            
         } else {
-            currentObject.current[name]=data;
+            if(objectOnValidate(data)) {
+                currentObject.current[name]=data;    
+            }
         }
         devLog("updatObjectItem (result)",currentObject.current)
         
@@ -301,6 +306,11 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     }
     
     if(roleConfiguration.visible) {
+        var buttonColor:"default" | "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning"="default";
+        if(configuration.mandatory&&attribute.content&&attribute.content.length===0) {
+            devLog("MetadataForm (buttonColor)",attribute.content)
+            buttonColor="error"
+        }
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
             enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
@@ -411,14 +421,13 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             (<Grid container spacing={2} >
                                 <Grid item xs={10}></Grid>
                                 <Grid item xs={2}>
-                                    <IconButton 
-                                        aria-label={intl.formatMessage({
-                                        defaultMessage: "lisää",
-                                        })}
-                                        //disabled={listObjectValid}
-                                        onClick={updateListObject} >
-                                        <AddIcon />
-                                    </IconButton>
+                                        <IconButton 
+                                            size="small"
+                                            color={buttonColor}                                                                                        
+                                            onClick={updateListObject} >                                                
+                                            <AddIcon />     
+                                            <FormattedMessage defaultMessage="Lisää" />                           
+                                        </IconButton>            
                                 </Grid>
                             </Grid>)
                             }
@@ -441,11 +450,11 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>
                                         <IconButton 
-                                            aria-label={intl.formatMessage({
-                                            defaultMessage: "lisää",
-                                            })}                                            
+                                            size="small"
+                                            color={buttonColor}
                                             onClick={()=>pressButtonRef.current.pressEnter()} >
                                             <AddIcon />
+                                            <FormattedMessage defaultMessage="Lisää" />
                                         </IconButton>
                                     </Grid>
                                 </Grid>)
@@ -454,10 +463,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>
-                                        <IconButton 
-                                            aria-label={intl.formatMessage({
-                                            defaultMessage: "lisää",
-                                            })}                                            
+                                        <IconButton                                                                                       
                                             onClick={()=>{
                                                     if(roleConfiguration.generate==='name_randomsha1'){
                                                         calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, 'id_'+value))

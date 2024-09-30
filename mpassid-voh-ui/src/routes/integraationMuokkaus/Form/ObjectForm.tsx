@@ -42,7 +42,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   const objectConfiguration:UiConfiguration[] = dataConfiguration.filter(conf=>conf.type===object.name) || [];
   //const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   //const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
-  const mandatoryAttributes:string[] = [];
+  const allAttributes:string[] = [];
   
 
   
@@ -108,21 +108,22 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
 
   const validateObject = () => {
     var result=true;
-    mandatoryAttributes.forEach(ma=>{
-      
-      devLog("validateObject (mandatoryAttribute)",ma)
-      //devLog("validateObject (mandatoryAttribute)",object[ma])
-      //devLog("validateObject (mandatoryAttribute "+ma+")",currentObject.current)
-      devLog("validateObject (mandatoryAttribute "+ma+")",currentObject.current[ma])
-      
-      if(currentObject.current[ma] === undefined) {
-        result = false
-      }
-      if(currentObject.current[ma] !== undefined&&currentObject.current[ma].length===0) {
-        result = false
-      }
-      
+    
+    objectConfiguration.forEach(configuration=>{
+      const name=configuration.name
+      devLog("validateObject (attribute "+name+")",currentObject.current[name])
+    
+      if(configuration) {
+        if((currentObject.current[name] === undefined|| currentObject.current[name].length===0) && configuration.mandatory ){
+          result = false
+        } else {        
+          result = validate(configuration.validation,currentObject.current[name])         
+        }
+      } else {
+        result = true
+      }      
     })
+    
     devLog("validateObject (result)",result)
     return result
   }
@@ -228,11 +229,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
           )
           .map((configuration) => {
                   var resetSwitchValue=false;                
-                  devLog("ObjectForm (configuration)",configuration)
-
-                  if(configuration.mandatory) {
-                    mandatoryAttributes.push(configuration.name);
-                  }
+                  devLog("ObjectForm (configuration)",configuration)                  
 
                   const validator = (value:string) => {
                     devLog("validator ( configuration.name)", configuration.name)
@@ -346,9 +343,9 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                       //setReload(!reload)
                     }
                     
-                    setCanSave(validateObject())
+                    //setCanSave(validateObject())
                     devLog("ObjectForm (currentObject post)",currentObject.current)
-                    devLog("ObjectForm (attribute post)",attribute)
+                    devLog("ObjectForm (attribute post)",attribute)                                        
                   
                     if(roleConfiguration.visible) {
                       return (

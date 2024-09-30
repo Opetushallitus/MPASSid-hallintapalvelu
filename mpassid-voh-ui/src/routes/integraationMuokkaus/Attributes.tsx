@@ -113,6 +113,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
                   
                   devLog("Attributes (init attributes)",attributes);
+                  devLog("Attributes (init configuration)",configuration);   
                   devLog("Attributes (init)",attributes.find(a => a.name&&a.name === configuration.name));                  
                   if(attributes.find(a => a.name&&a.name === configuration.name)) {
                     //attiribute 
@@ -137,6 +138,8 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                         } else {
                           useAttribute={ type: attributeType, content: '', name: configuration.name }
                         }
+                        attributes.push(useAttribute)
+                        setAttributes([ ...attributes]) 
                         
                       } else {
                         useAttribute={ type: attributeType, content: '', name: 'configurationError' }
@@ -149,6 +152,24 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   if(!attributeExists&&configuration.multivalue===false&&configuration.enum&&configuration.enum.length===2&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize switch value        
                     devLog("Attributes (init switch content)",configuration.name)            
+                    const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
+                    if(roleConfiguration.defaultValue !== undefined) {
+                      useAttribute={ type: attributeType, content: roleConfiguration.defaultValue, name: configuration.name }
+                      attributes.push(useAttribute)
+                      setAttributes([ ...attributes])                      
+                      updateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
+                    } else {
+                      useAttribute={ type: attributeType, content: configuration.enum[0], name: configuration.name }
+                      attributes.push(useAttribute)
+                      setAttributes([ ...attributes])
+                      updateAttribute(configuration.name,String(configuration.enum[0]),type)                          
+                    }
+                    
+                  }
+                  devLog("************************ useAttribute.content",useAttribute)
+                  if(!attributeExists&&configuration.multivalue!==true&&configuration.enum&&configuration.enum.length>2&&(useAttribute.content===undefined||useAttribute.content==='')) {
+                    //Initialize multiselect value        
+                    devLog("Attributes (init multiselect content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                     if(roleConfiguration.defaultValue !== undefined) {
                       useAttribute={ type: attributeType, content: roleConfiguration.defaultValue, name: configuration.name }
