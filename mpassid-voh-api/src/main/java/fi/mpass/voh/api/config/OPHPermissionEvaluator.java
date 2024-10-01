@@ -2,6 +2,8 @@ package fi.mpass.voh.api.config;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,9 +11,6 @@ import org.springframework.stereotype.Component;
 
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationRepository;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component("authorize")
 public class OPHPermissionEvaluator {
@@ -67,6 +66,12 @@ public class OPHPermissionEvaluator {
                             // (2, 3, 4, 5) The granted authority must include the required permission
                             if (authorityElements[3].contains(requiredPermission))
                                 return true;
+                            String[] requiredPermissionElements = requiredPermission.split("_");
+                            if (authorityElements.length > 4 && requiredPermissionElements.length == 2
+                                    && authorityElements[3].equals(requiredPermissionElements[0])
+                                    && authorityElements[4].equals(requiredPermissionElements[1])) {
+                                        return true;
+                            }
                         }
                     }
                 }
@@ -132,18 +137,19 @@ public class OPHPermissionEvaluator {
                                         }
                                     }
                                 }
-                                if (authorityElements.length > 4 && authorityElements[3].contains("PALVELU")
-                                        && authorityElements[4].contains("TALLENTAJA")) {
+                                String[] requiredPermissionElements = requiredPermission.split("_");
+                                if (authorityElements.length > 4 && requiredPermissionElements.length == 2
+                                        && authorityElements[3].equals(requiredPermissionElements[0])
+                                        && authorityElements[4].equals(requiredPermissionElements[1])) {
                                     if (authorityElements.length > 5) {
                                         if (authorityElements[5]
                                                 .equals(existingIntegration.get().getOrganization().getOid())
-                                                || authorityElements[4].equals(this.integrationServiceConfiguration
+                                                || authorityElements[5].equals(this.integrationServiceConfiguration
                                                         .getAdminOrganizationOid())) {
                                             return true;
                                         }
                                     }
                                 }
-
                             }
                         }
                     }
