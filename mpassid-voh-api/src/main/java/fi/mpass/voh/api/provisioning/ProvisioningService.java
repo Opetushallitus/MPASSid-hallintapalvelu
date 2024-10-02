@@ -130,6 +130,7 @@ public class ProvisioningService {
                     i.getConfigurationEntity().getIdp().setFlowName(newFlowname);
                 }
             } catch (Exception e) {
+                logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
                 continue;
             }
         }
