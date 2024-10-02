@@ -81,7 +81,8 @@ public class ProvisioningService {
             Optional<Provisioning> provision = provisionRepository.findByDeploymentPhase(i);
             if (provision.isPresent()) {
                 List<Integration> integrationsSince = integrationService
-                        .getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(provision.get().getLastTime(), i, "idp");
+                        .getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(provision.get().getLastTime(), i,
+                                "idp");
                 boolean changes = !integrationsSince.isEmpty();
                 logger.info("Number of changed integrations: " + integrationsSince.size() + " since "
                         + provision.get().getLastTime() + " in deployment phase " + i);
@@ -116,5 +117,23 @@ public class ProvisioningService {
             }
         }
         return statuses;
+    }
+
+    public List<Integration> getIdentityProviders() {
+        // Get Idps but capitalize first letter of flowname
+        List<Integration> idps = integrationService.getIdentityProviders();
+        for (Integration i : idps) {
+            try {
+                String flowname = i.getConfigurationEntity().getIdp().getFlowName();
+                if (!Character.isUpperCase(flowname.charAt(0))) {
+                    String newFlowname = flowname.substring(0, 1).toUpperCase() + flowname.substring(1);
+                    i.getConfigurationEntity().getIdp().setFlowName(newFlowname);
+                }
+            } catch (Exception e) {
+                logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
+                continue;
+            }
+        }
+        return idps;
     }
 }
