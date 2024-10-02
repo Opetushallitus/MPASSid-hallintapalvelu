@@ -640,6 +640,11 @@ public class IntegrationService {
     return integrations;
   }
 
+  public List<Integration> getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(LocalDateTime timestamp, int deploymentPhase, String role) {
+    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhaseAndRole(timestamp, deploymentPhase, role);
+    return integrations;
+  }
+
   private List<Integration> getIntegrationsBy(String role) {
 
     IntegrationSpecificationsBuilder builder = new IntegrationSpecificationsBuilder();

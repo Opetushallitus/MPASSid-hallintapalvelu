@@ -49,6 +49,9 @@ public interface IntegrationRepository extends JpaRepository<Integration, Long>,
     List<Integration> findDistinctByPermissionsLastUpdatedOnAfterAndDeploymentPhase(LocalDateTime updateDateTime,
             int deploymentPhase);
 
+    @Query("SELECT i FROM Integration i LEFT OUTER JOIN ConfigurationEntity ce ON i.configurationEntity.id=ce.id WHERE i.lastUpdatedOn > :updateDateTime AND i.deploymentPhase=:deploymentPhase AND ce.role=:role ORDER BY i.lastUpdatedOn")
+    List<Integration> findAllByLastUpdatedOnAfterAndDeploymentPhaseAndRole(LocalDateTime updateDateTime, int deploymentPhase, String role);
+
     @Query("SELECT a.id+1 as avail FROM Integration a WHERE (SELECT b.id FROM Integration b WHERE b.id=a.id+1) is null")
     List<Long> getAvailableIntegrationIdentifier();
 
