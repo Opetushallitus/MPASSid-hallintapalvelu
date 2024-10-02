@@ -150,7 +150,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           setShowConfigurationEntityData(newConfigurationEntityData);
         }
         if(typeConf.attribute&&testNewConfigurationEntityData.sp){
-          const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.idp?.[typeConf.attribute]||''; 
+          const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.sp?.[typeConf.attribute]||''; 
           devLog("uniqueIdType",uniqueIdType)
           const updatedServiceProvider: any = testNewConfigurationEntityData.sp;
           updatedServiceProvider[typeConf.attribute]=uniqueIdType;

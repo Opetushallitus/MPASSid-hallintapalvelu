@@ -1,19 +1,12 @@
-import Clear from "@mui/icons-material/Clear";
-import RestoreIcon from '@mui/icons-material/Restore';
-import { IconButton, InputAdornment, TextField } from "@mui/material";
-import { Dispatch, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { IconButton, TextField } from "@mui/material";
+import type { Dispatch} from "react";
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import ClearIcon from '@mui/icons-material/Clear';
-import { devLog } from "@/utils/devLog";
-
-
-const SEARCH_PARAM_NANE = "hae";
-
 interface Props {
   object?: any;
   label: string;
@@ -33,7 +26,6 @@ interface Props {
 export default function ListForm({ object, type, isEditable=false, mandatory=false, index=0, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton, noErrors=false }: Props) {
   const intl = useIntl();
   const defaultValue = object;
-  const [isEmpty, setIsEmpty] = useState(!defaultValue);
   const [isDirty, setIsDirty] = useState(false);
   const [isValid, setIsValid] = useState(true);
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);

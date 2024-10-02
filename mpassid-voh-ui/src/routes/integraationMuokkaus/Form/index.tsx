@@ -66,8 +66,26 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         //currentObject.current={}
     }
 
+    const updateMultiSelectItem = (value: string[]) => {
+        devLog("updateMultiSelectItem (name)",attribute.name)
+        devLog("updateMultiSelectItem (checked)",value)
+        devLog("updateMultiSelectItem (type)",attribute.type)
+        
+        devLog("updateMultiSelectItem (attribute)",attribute)
+        
+        if(attribute.name !== undefined&&attribute.type) {
+            onUpdate(attribute.name,value[0],attribute.type)
+        }
+        
+        //currentObject.current={}
+    }
+
 
     if(roleConfiguration.visible) {
+        var enumValues: oneEnum[] = [];
+        if(configuration.enum) {
+            enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
+        }
         return (
             <Grid container >
                 
@@ -98,7 +116,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                         }}
                         variant="caption"
                         >
-                        {configuration&&roleConfiguration&&configuration?.enum?.length!==2&&
+                        {configuration&&roleConfiguration&&!configuration.enum&&
                             (<InputForm key={attribute.name} 
                                 object={attribute} 
                                 path="content" 
@@ -127,6 +145,22 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }
+                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
+                                (<MultiSelectForm key={attribute.name}                                    
+                                    values={(attribute.content)?[ attribute.content ]:[]}
+                                    isEditable={roleConfiguration.editable}
+                                    onUpdate={updateMultiSelectItem} 
+                                    onValidate={onValidate}
+                                    mandatory={configuration.mandatory}
+                                    label={label ? intl.formatMessage(label) : attribute.name!}
+                                    //attributeType={"metadata"}
+                                    helperText={helperText}
+                                    setCanSave={setCanSave} 
+                                    attributeType={"data"} 
+                                    enums={enumValues} 
+                                    multiple={false}
+                                    />)
+                            }
                         
                         
                         </Typography>
@@ -192,11 +226,16 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
         devLog("updatObjectItem (mandatory)",uiConfiguration.mandatory)
-
+        
         if(data.content) {
-            currentObject.current[name]=data.content;
+            if(objectOnValidate(data.content)) {
+                currentObject.current[name]=data.content;    
+            }
+            
         } else {
-            currentObject.current[name]=data;
+            if(objectOnValidate(data)) {
+                currentObject.current[name]=data;    
+            }
         }
         devLog("updatObjectItem (result)",currentObject.current)
         
@@ -267,6 +306,11 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     }
     
     if(roleConfiguration.visible) {
+        var buttonColor:"default" | "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning"="default";
+        if(configuration.mandatory&&attribute.content&&attribute.content.length===0) {
+            devLog("MetadataForm (buttonColor)",attribute.content)
+            buttonColor="error"
+        }
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
             enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
@@ -304,7 +348,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         variant="caption"
                         >
                             
-                            {configuration&&roleConfiguration&&configuration.object&&
+                            {configuration&&roleConfiguration&&configuration.object !== undefined&&
                             (<ObjectForm key={attribute.name+"_"+configuration.name} 
                                 integrationType={type}
                                 object={attribute} 
@@ -343,7 +387,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     //object={attribute} 
                                     //path="content" 
                                     //type={attribute.name!} 
-                                    values={configuration.enum}
+                                    values={attribute.content}
                                     isEditable={roleConfiguration.editable}
                                     //onUpdate={onUpdate} 
                                     onValidate={onValidate}
@@ -354,6 +398,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     setCanSave={setCanSaveItem} 
                                     attributeType={"data"} 
                                     enums={enumValues} 
+                                    multiple={configuration.multiselect}
                                     onUpdate={function (values: string[]): void {
                                         throw new Error("Function not implemented.");
                                     } }/>)
@@ -376,14 +421,13 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             (<Grid container spacing={2} >
                                 <Grid item xs={10}></Grid>
                                 <Grid item xs={2}>
-                                    <IconButton 
-                                        aria-label={intl.formatMessage({
-                                        defaultMessage: "lisää",
-                                        })}
-                                        //disabled={listObjectValid}
-                                        onClick={updateListObject} >
-                                        <AddIcon />
-                                    </IconButton>
+                                        <IconButton 
+                                            size="small"
+                                            color={buttonColor}                                                                                        
+                                            onClick={updateListObject} >                                                
+                                            <AddIcon />     
+                                            <FormattedMessage defaultMessage="Lisää" />                           
+                                        </IconButton>            
                                 </Grid>
                             </Grid>)
                             }
@@ -406,11 +450,11 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>
                                         <IconButton 
-                                            aria-label={intl.formatMessage({
-                                            defaultMessage: "lisää",
-                                            })}                                            
+                                            size="small"
+                                            color={buttonColor}
                                             onClick={()=>pressButtonRef.current.pressEnter()} >
                                             <AddIcon />
+                                            <FormattedMessage defaultMessage="Lisää" />
                                         </IconButton>
                                     </Grid>
                                 </Grid>)
@@ -419,10 +463,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>
-                                        <IconButton 
-                                            aria-label={intl.formatMessage({
-                                            defaultMessage: "lisää",
-                                            })}                                            
+                                        <IconButton                                                                                       
                                             onClick={()=>{
                                                     if(roleConfiguration.generate==='name_randomsha1'){
                                                         calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, 'id_'+value))

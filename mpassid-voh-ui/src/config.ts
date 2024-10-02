@@ -56,6 +56,7 @@ export interface UiConfiguration {
   oid?: string;
   mandatory: boolean;
   multivalue?: boolean;
+  multiselect?: boolean;
   object?: boolean;
   trim?: string;
   enum?: any[]
@@ -148,10 +149,29 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'datasource',
     type: 'data',
-    mandatory: true,
-    
+    mandatory: false,
+    enum: [ 'azurev4', 'wilma', 'opinsys', 'azureLuovi'],
     validation: [],
-    integrationType: []
+    integrationType: [
+        {
+            name: 'wilma',
+            editable: true,
+            visible: true,
+            defaultValue: 'wilma'
+        },
+        {
+            name: 'opinsys',
+            editable: false,
+            visible: true,
+            defaultValue: 'opinsys'
+        },
+        {
+            name: 'azure',
+            editable: false,
+            visible: true,
+            defaultValue: 'azurev4'
+        }
+    ]
   },
   {
     name: 'tenantId',
