@@ -81,9 +81,10 @@ public class ProvisioningService {
             Optional<Provisioning> provision = provisionRepository.findByDeploymentPhase(i);
             if (provision.isPresent()) {
                 List<Integration> integrationsSince = integrationService
-                        .getIntegrationsByPermissionUpdateTimeSince(provision.get().getLastTime(), i);
+                        .getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(provision.get().getLastTime(), i,
+                                "idp");
                 boolean changes = !integrationsSince.isEmpty();
-                logger.info("Number of changed integration permissions: " + integrationsSince.size() + " since "
+                logger.info("Number of changed integrations: " + integrationsSince.size() + " since "
                         + provision.get().getLastTime() + " in deployment phase " + i);
                 if (changes) {
                     // sort the integration's permissions by the last update time
@@ -91,23 +92,23 @@ public class ProvisioningService {
                     for (Integration integration : integrationsSince) {
                         integration.sortPermissionsByLastUpdatedOn();
                     }
-                    // should not end up here if no changes to permissions, yet check
-                    // permissions existence (index exception)
+                    // should not end up here if no changes, yet check
+                    // integrations existence (index exception)
                     try {
                         Collections.sort(integrationsSince,
-                                (o1, o2) -> o1.getPermissions().get(0).getLastUpdatedOn()
-                                        .compareTo(o2.getPermissions().get(0).getLastUpdatedOn()));
+                                (o1, o2) -> o1.getLastUpdatedOn()
+                                        .compareTo(o2.getLastUpdatedOn()));
                     } catch (Exception e) {
-                        logger.error("Error in getting the oldest integration by permission last update time.");
+                        logger.error("Error in getting the oldest integration by last update time.");
                         continue;
                     }
-                    logger.info("Oldest changed integration (by permission last update time) dated on "
-                            + integrationsSince.get(0).getPermissions().get(0).getLastUpdatedOn()
+                    logger.info("Oldest changed integration dated on "
+                            + integrationsSince.get(0).getLastUpdatedOn()
                             + " since " + provision.get().getLastTime() + " in deployment phase " + i);
                     statuses.add(new ConfigurationStatus(changes, provision.get().getLastTime(),
-                            integrationsSince.get(0).getPermissions().get(0).getLastUpdatedOn(), i));
+                            integrationsSince.get(0).getLastUpdatedOn(), i));
                 } else {
-                    logger.info("No changes (by permission last update time) since  " + provision.get().getLastTime()
+                    logger.info("No changes since  " + provision.get().getLastTime()
                             + " in deployment phase " + i);
                     statuses.add(new ConfigurationStatus(changes, provision.get().getLastTime(), null, i));
                 }
@@ -116,5 +117,23 @@ public class ProvisioningService {
             }
         }
         return statuses;
+    }
+
+    public List<Integration> getIdentityProviders() {
+        // Get Idps but capitalize first letter of flowname
+        List<Integration> idps = integrationService.getIdentityProviders();
+        for (Integration i : idps) {
+            try {
+                String flowname = i.getConfigurationEntity().getIdp().getFlowName();
+                if (!Character.isUpperCase(flowname.charAt(0))) {
+                    String newFlowname = flowname.substring(0, 1).toUpperCase() + flowname.substring(1);
+                    i.getConfigurationEntity().getIdp().setFlowName(newFlowname);
+                }
+            } catch (Exception e) {
+                logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
+                continue;
+            }
+        }
+        return idps;
     }
 }

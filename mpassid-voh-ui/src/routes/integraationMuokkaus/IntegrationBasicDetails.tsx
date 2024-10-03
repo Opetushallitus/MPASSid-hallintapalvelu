@@ -8,39 +8,22 @@ import {
     typeTooltips,
   } from "@/routes/home/IntegrationsTable";
 import UniqueId from "./UniqueId";
-import type { oneEnum } from "./Form/MultiSelectForm";
-import MultiSelectForm from "./Form/MultiSelectForm";
 import type { Dispatch, MutableRefObject} from "react";
-import { useState } from "react";
-
 
 interface Props {
     integration: Components.Schemas.Integration;
     environment: MutableRefObject<number>;
     newEnvironment: boolean;
     configurationEntity: Components.Schemas.ConfigurationEntity;
+    metadata?: any;
     setNewEnvironment: Dispatch<boolean>;
 }
   
-export default function IntegrationBasicDetails({ integration, configurationEntity, environment, setNewEnvironment, newEnvironment }: Props) {
+export default function IntegrationBasicDetails({ integration, configurationEntity }: Props) {
 
-    const [ values, setValues ] = useState<string[]>([String(environment.current)])
     const intl = useIntl();
     const role  = (configurationEntity?.idp) ? "idp" : "sp"
-
-    const environmentValues: oneEnum[]=[ { label: intl.formatMessage({defaultMessage: "Tuotanto-Testi"}), value: "2" }, { label:intl.formatMessage({defaultMessage: "Tuotanto"}), value: "1" },{ label:intl.formatMessage({defaultMessage: "Testi"}), value: "0" }]
     
-    const updateEnvironment = (valueList: string[]) => {
-      setNewEnvironment(!newEnvironment)
-      if(valueList&&valueList.length>0) {
-        setValues([ valueList[0] ])
-        environment.current=parseInt(valueList[0])
-      } else {
-        setValues([ "0" ])
-        environment.current=0
-      }
-    }
-
     return(
         <>
               <Typography variant="h2" gutterBottom>
@@ -59,40 +42,18 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
                 <Grid item xs={4}>
                   <FormattedMessage defaultMessage="Yksilöllinen tunniste" />
                 </Grid>
+                                
                 <Grid item xs={8}>
                   {configurationEntity&&<UniqueId
                     configurationEntity={configurationEntity!}
                     role={role}
                     ValueComponent={UniqueIdValue}
                   />}
-                </Grid>
-                {false&&values&&values.length>0&&(values[0]==='0'||values[0]==='1'||values[0]==='2')&&<>
-                  <Grid item xs={4}>
-                    <FormattedMessage defaultMessage="deploymentPhase" />
-                  </Grid>
-                  <Grid item xs={8} sx={{}}>
-                          <Typography
-                          sx={{
-                              whiteSpace: "pre-wrap",
-                              wordBreak: "break-all",
-                          }}
-                          variant="caption"
-                          />
-                          
-                          <MultiSelectForm label={""} attributeType={"data"} isEditable={true} multiple={false} createEmpty={false} mandatory={false} enums={environmentValues} values={values} helperText={function (data: string): JSX.Element {
-                              throw new Error("Function not implemented.");
-                            } } setCanSave={function (value: boolean): void {
-                              throw new Error("Function not implemented.");
-                            } } onUpdate={updateEnvironment} onValidate={function (data: string): boolean {
-                              throw new Error("Function not implemented.");
-                            } }  />
-                  </Grid>
-                </>}
-                  
-                  {role === "sp" && (
+                </Grid>  
+                  {role === "sp" && false && (
                       <DataRow
                       object={integration}
-                      path="integrationGroups"
+                      path="integrationSets"
                       type="service-list"
                     />
                   )}
@@ -103,6 +64,7 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
 }
 
 export function UniqueIdValue({ name, label, children }: DataRowProps) {
+  
     return (
       <>
         {(children as JSX.Element)?.props?.value ? children : "–"} (

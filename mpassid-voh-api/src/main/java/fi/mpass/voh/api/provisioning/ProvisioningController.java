@@ -69,7 +69,7 @@ public class ProvisioningController {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = IdentityProviders.class), mediaType = "application/json"))
     @GetMapping("/identityproviders")
     public IdentityProviders getIdentityProviders() {
-        return new IdentityProviders(integrationService.getIdentityProviders());
+        return new IdentityProviders(provisioningService.getIdentityProviders());
     }
 
     @Operation(summary = "Get all service providers")

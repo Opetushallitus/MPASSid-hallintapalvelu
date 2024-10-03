@@ -6,7 +6,7 @@
             "name": "EUPL Version 1.1",
             "url": "http://www.osor.eu/eupl/"
         },
-        "version": "2.3"
+        "version": "2.4"
     },
     "servers": [
         {
@@ -1144,7 +1144,7 @@
                                     "existingExcluded: given organization's integrations (identifiers) of which discovery information contains excluded schools (filtered by given institution types), existingIncluded: institution codes of the given organization's integrations' discovery information (filtered by given institution types)": {
                                         "description": "existingExcluded: given organization's integrations (identifiers) of which discovery information contains excluded schools (filtered by given institution types), existingIncluded: institution codes of the given organization's integrations' discovery information (filtered by given institution types)",
                                         "value": {
-                                            "existingIncluded": ["00836","30076"],
+                                            "existingIncluded": null,
                                             "existingExcluded": []
                                         }
                                     }

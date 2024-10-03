@@ -38,7 +38,7 @@ public class IdentityProviderController {
     }
 
     @Operation(summary = "Get a list of distinct IdentityProvider types")
-    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_TALLENTAJA')")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = String.class)), examples = { @ExampleObject(name = "types", value = "[\"adfs\", \"wilma\", \"gsuite\", \"azure\", \"opinsys\" ]" ) }))
     })
