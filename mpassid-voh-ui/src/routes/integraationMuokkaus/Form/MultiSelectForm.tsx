@@ -1,6 +1,6 @@
 
 import type { SelectChangeEvent } from "@mui/material";
-import { Box, Checkbox, Chip, FormControl, Input, ListItemText, MenuItem, Select } from "@mui/material";
+import { Box, Checkbox, Chip, FormControl, FormHelperText, Input, ListItemText, MenuItem, Select } from "@mui/material";
 import type { Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
@@ -120,6 +120,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                     </MenuItem>
                 )}
                 </Select>
+                <FormHelperText>{helperText("")}</FormHelperText>
             </FormControl>
             </div>
      

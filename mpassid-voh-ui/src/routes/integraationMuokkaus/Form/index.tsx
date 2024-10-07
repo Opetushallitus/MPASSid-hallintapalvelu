@@ -463,7 +463,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>
-                                        <IconButton                                                                                       
+                                        <IconButton    
+                                            key="generate"                                                                                   
                                             onClick={()=>{
                                                     if(roleConfiguration.generate==='name_randomsha1'){
                                                         calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, 'id_'+value))

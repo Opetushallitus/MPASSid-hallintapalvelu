@@ -166,7 +166,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     }
                     
                   }
-                  devLog("************************ useAttribute.content",useAttribute)
+                  
                   if(!attributeExists&&configuration.multivalue!==true&&configuration.enum&&configuration.enum.length>2&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize multiselect value        
                     devLog("Attributes (init multiselect content)",configuration.name)            

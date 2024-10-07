@@ -195,6 +195,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                         </Grid>
                         <Grid item xs={1}>
                             <IconButton 
+                                key="muokkaa"
                                 aria-label={intl.formatMessage({
                                 defaultMessage: "muokkaa",
                                 })}
@@ -202,6 +203,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                 <EditIcon />
                             </IconButton>
                             <IconButton 
+                                key="poista"
                                 aria-label={intl.formatMessage({
                                 defaultMessage: "poista",
                                 })}
@@ -349,7 +351,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   
                     if(roleConfiguration.visible) {
                       return (
-                        <Grid key={configuration.name} container >
+                        <Grid key={object.name+"."+configuration.name} container >
                             <Grid container spacing={2} mb={3} >
                                 <Grid item xs={4}>
                                     <Tooltip

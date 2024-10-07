@@ -75,7 +75,7 @@ export default function Metadata({
     var result=true;
     mandatoryAttributes.forEach(ma=>{
       
-      devLog("validateMetadata (mandatoryAttribute)",ma)
+
       devLog("validateMetadata (mandatoryAttribute "+ma+")",metadata[ma])
       if(metadata[ma] === undefined) {
         result = false

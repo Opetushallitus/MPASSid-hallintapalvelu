@@ -214,7 +214,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )
 
             setSaveDialogState(true);
-            
+            devLog("setCanSave (newConfigurationEntityData)",newConfigurationEntityData)
+            devLog("setCanSave (originalIntegration.current?.configurationEntity)",originalIntegration.current?.configurationEntity)
             if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)){   
               devLog("setCanSave - ",(newConfigurationEntityData !== undefined))
               devLog("setCanSave - ",(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)))  
@@ -283,7 +284,9 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
         )
         setSaveDialogState(true);
-        if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){     
+        devLog("setCanSave (newDiscoveryInformation)",newDiscoveryInformation)
+        devLog("setCanSave (originalIntegration.current?.discoveryInformation)",originalIntegration.current?.discoveryInformation)
+        if(isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)){     
           devLog("setCanSave - ",(newConfigurationEntityData !== undefined))
           devLog("setCanSave - ",newConfigurationEntityData)
           devLog("setCanSave - ",originalIntegration.current?.configurationEntity)
