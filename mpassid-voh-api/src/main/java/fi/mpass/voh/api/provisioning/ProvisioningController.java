@@ -77,7 +77,7 @@ public class ProvisioningController {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ServiceProviders.class), mediaType = "application/json"))
     @GetMapping("/serviceproviders")
     public ServiceProviders getServiceProviders() {
-        return new ServiceProviders(integrationService.getServiceProviders());
+        return new ServiceProviders(provisioningService.getServiceProviders());
     }
 
     @Operation(summary = "Get integration discovery information logo")
