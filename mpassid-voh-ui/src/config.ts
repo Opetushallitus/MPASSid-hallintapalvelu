@@ -57,6 +57,7 @@ export interface UiConfiguration {
   mandatory: boolean;
   multivalue?: boolean;
   multiselect?: boolean;
+  switch: boolean;
   object?: boolean;
   trim?: string;
   enum?: any[]
@@ -77,7 +78,7 @@ export const defaultDataConfiguration:UiConfiguration = {
   name: 'default',
   type: 'user',
   mandatory: false,
-  
+  switch: false,
   validation: [],
   integrationType: [
       {
@@ -122,7 +123,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'clientId',
       type: 'data',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
         {
@@ -136,7 +137,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'clientKey',
       type: 'data',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
         {
@@ -150,6 +151,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'datasource',
     type: 'data',
     mandatory: false,
+    switch: false,
     enum: [ 'azurev4', 'wilma', 'opinsys', 'azureLuovi'],
     validation: [ 'expert' ],
     integrationType: [
@@ -177,7 +179,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'tenantId',
     type: 'data',
     mandatory: true,
-    
+    switch: false,
     validation: [],
     integrationType: []
   },
@@ -185,7 +187,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'firstName',
       type: 'user',
       mandatory: true,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -199,7 +201,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'surname',
       type: 'user',
       mandatory: true,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -213,7 +215,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'groups',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -228,7 +230,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -242,7 +244,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'learningMaterialsCharges',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -256,7 +258,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'azureApplicationIdUri',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -270,7 +272,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'schoolIds',
       type: 'user',
       mandatory: true,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -284,6 +286,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'nickname',
       type: 'user',
       mandatory: false,
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -298,7 +301,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -313,7 +316,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -327,7 +330,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'groupLevels',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -342,7 +345,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -356,7 +359,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'username',
       type: 'user',
       mandatory: false,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -370,7 +373,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'learnerId',
       type: 'user',
       mandatory: true,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -384,7 +387,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'roles',
       type: 'user',
       mandatory: true,
-      
+      switch: false,
       validation: [],
       integrationType: [
           {
@@ -398,6 +401,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'post_logout_redirect_uris',
       type: 'metadata',
       mandatory: false,
+      switch: false,
       multivalue: true,
       validation: [ ],
       integrationType: [
@@ -414,6 +418,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
+    switch: false,
     validation: [ ],
     integrationType: [
         {
@@ -429,6 +434,7 @@ export const dataConfiguration:UiConfiguration[] = [
         type: 'metadata',
         mandatory: true,
         multivalue: true,
+        switch: false,
         validation: [ 'uri', 'nohash' ],
         //validation: [ ],
         integrationType: [
@@ -444,6 +450,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
+    switch: false,
     environment: 1,
     validation: [ 'uri', 'https', 'nolocalhost', 'nohash' ],
     //validation: [ ],
@@ -460,6 +467,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: false,
+    switch: false,
     validation: [],
     integrationType: [
         {
@@ -475,6 +483,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: false,
+    switch: false,
     validation: [],
     integrationType: [
         {
@@ -491,6 +500,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: false,
+    switch: false,
     validation: [],
     integrationType: [
         {
@@ -507,6 +517,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
+    switch: false,
     validation: [],
     integrationType: [
         {
@@ -522,6 +533,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: false,
+    switch: true,
     enum: [ true, false ],
     validation: [ ],
     integrationType: [
@@ -544,6 +556,7 @@ export const dataConfiguration:UiConfiguration[] = [
     environment: 1,
     mandatory: true,
     multivalue: false,
+    switch: true,
     enum: [ true, false ],
     validation: [ ],
     integrationType: [
@@ -565,6 +578,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
+    switch: false,
     object: true,
     validation: [ ],
     integrationType: [
@@ -585,6 +599,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: false,
+    switch: true,
     enum: [ true, false ],
     validation: [ ],
     integrationType: [
@@ -606,6 +621,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: true,
+    switch: false,
     validation: ['cert' ],
     trim: 'cert',
     integrationType: [
@@ -626,6 +642,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: false,
+    switch: false,
     validation: [ ],
     integrationType: [
         {
@@ -645,6 +662,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: true,
+    switch: false,
     validation: [ 'cert'],
     trim: 'cert',
     integrationType: [
@@ -665,6 +683,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
+    switch: false,
     validation: ['cert' ],
     trim: 'cert',
     environment: 1,
@@ -687,6 +706,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     multivalue: false,
     multiselect: false,
+    switch: false,
     enum: [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt' ],
     validation: [ ],
     integrationType: [
@@ -704,6 +724,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: false,
+    switch: false,
     validation: [ ],
     integrationType: [
         
@@ -720,6 +741,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'data',
     mandatory: false,
     multivalue: false,
+    switch: true,
     enum: [ true, false ],
     validation: [ ],
     integrationType: [
@@ -742,6 +764,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'integrationDetails',
     mandatory: true,
     multivalue: false,
+    switch: false,
     validation: [ 'notempty'],
     integrationType: [
         {
@@ -761,6 +784,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
+    switch: false,
     validation: [],
     integrationType: [
         {
@@ -776,6 +800,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
+    switch: false,
     validation: ['number'],
     integrationType: [
         {
@@ -791,6 +816,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
+    switch: true,
     enum: [ true, false ],
     validation: [ ],
     integrationType: [
@@ -807,6 +833,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
     multivalue: false,
+    switch: false,
     validation: [ 'uri', 'https' ],
     integrationType: [
         {
@@ -821,6 +848,7 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'data',
       mandatory: true,
       multivalue: true,
+      switch: false,
       validation: [ 'hostname' ],
       integrationType: [
           {
@@ -835,6 +863,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'data',
     mandatory: false,
     multivalue: false,
+    switch: false,
     validation: [ 'uri' ],
     integrationType: [
         {
@@ -854,6 +883,7 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'data',
       mandatory: false,
       multivalue: true,
+      switch: false,
       validation: [  ],
       integrationType: [
           {
@@ -893,6 +923,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'root',
     mandatory: false,
     multivalue: true,
+    switch: false,
     validation: [  ],
     integrationType: [
         {

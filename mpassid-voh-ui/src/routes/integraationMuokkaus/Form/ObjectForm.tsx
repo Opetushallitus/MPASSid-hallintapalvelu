@@ -267,13 +267,13 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   } 
 
                   //If not default value for switch, then take first enum
-                  if(configuration?.enum?.length===2&&attribute.content==='') {
+                  if(configuration.switch&&configuration?.enum?.length===2&&attribute.content==='') {
                     devLog("ObjectForm (SwitchForm init)",attribute.content)
                     attribute.content=configuration.enum[0];
                   }
                   
                   //if(configuration?.enum?.length===2&&configuration.multivalue===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                  if(configuration?.enum?.length===2&&configuration.multivalue===false) {
+                  if(configuration.switch&&configuration?.enum?.length===2&&configuration.multivalue===false) {
                     devLog("ObjectForm (switch init)",configuration.name)
                     devLog("ObjectForm (switch init)",attribute.content)
                     devLog("ObjectForm (SwitchForm resetValue)",true)
@@ -377,7 +377,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         }}
                                         variant="caption"
                                     >                                    
-                                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
+                                        {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&
                                         (<SwitchForm key={object.name}                                             
                                             object={attribute} 
                                             resetValue={resetSwitchValue}

@@ -130,7 +130,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }
-                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&attributeType==='data'&&
+                        {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&attributeType==='data'&&
                             (<SwitchForm key={attribute.name} 
                                 object={attribute} 
                                 path="content" 
@@ -145,7 +145,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }
-                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
+                        {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
                                 (<MultiSelectForm key={attribute.name}                                    
                                     values={(attribute.content)?[ attribute.content ]:[]}
                                     isEditable={roleConfiguration.editable}

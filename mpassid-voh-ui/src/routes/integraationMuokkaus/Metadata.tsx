@@ -224,17 +224,17 @@ export default function Metadata({
                           attribute.content='';
                         }
                         
-                        if(configuration?.enum?.length===2&&attribute.content==='') {
+                        if(configuration.switch&&configuration.enum&&configuration.enum.length>0&&attribute.content==='') {
                           attribute.content=configuration.enum[0];
                         }
 
-                        if(configuration?.enum?.length===2&&configuration.multivalue===false) {
+                        if(configuration.switch&&configuration.multivalue===false) {
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)
                         }
 
                       }
                       
-                      if(configuration.enum&&configuration.enum.length===2) {
+                      if(configuration.switch&&configuration.enum&&configuration.enum.length===2) {
                         
                         if(attribute.content==='') {
                           if(roleConfiguration.defaultValue !== undefined) {
@@ -245,7 +245,7 @@ export default function Metadata({
                           
                         }                      
                         
-                        if(configuration.multivalue===false&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
+                        if(configuration.multivalue===false&&configuration.switch&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize switch value                    
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)                          
                         }
