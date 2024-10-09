@@ -270,6 +270,31 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         devLog("deleteObjectItem (result)",currentObject.current)
         
     }
+
+    const updateMultiSelectItem = (configuration: UiConfiguration, value: string[]) => {
+        
+        devLog("updateSwitchItem ("+attribute.name+")",value)
+        devLog("updateMultiSelectItem (type)",attribute.type)        
+        devLog("updateMultiSelectItem (attribute)",attribute)
+        
+        if(configuration.multiselect !== undefined && configuration.multiselect) {
+            onUpdate(attribute.name,value)
+        } else {
+            if(value.length>0) {
+                if(value[0]==='null') {
+                    onUpdate(attribute.name,null)
+                } else {
+                    onUpdate(attribute.name,value[0])
+                }
+                
+            } else {
+                onUpdate(attribute.name,null)
+            }
+        }
+        
+
+    }
+
     const updateSwitchItem = (name:any,value:boolean) => {
         devLog("updateSwitchItem ("+name+")",value)
         
@@ -313,7 +338,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         }
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
-            enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
+            enumValues=configuration.enum.map(e=> {return ({label: (e===null||e==='null')?intl.formatMessage({
+                defaultMessage: "Ei arvoa",
+              }):String(e), value: String(e) })})
         }
         
         return (
@@ -367,7 +394,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 objectData={objectDataRef}
                                 currentObject={currentObject}/>)
                             }
-                            {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
+                            {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&
                                 (<SwitchForm key={attribute.name} 
                                     object={attribute} 
                                     path="content" 
@@ -382,7 +409,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     helperText={helperText}
                                     setCanSave={setCanSaveItem}/>)
                             }
-                            {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
+                            {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
                                 (<MultiSelectForm key={attribute.name}
                                     //object={attribute} 
                                     //path="content" 
@@ -398,10 +425,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     setCanSave={setCanSaveItem} 
                                     attributeType={"data"} 
                                     enums={enumValues} 
+                                    createEmpty={true}
                                     multiple={configuration.multiselect}
-                                    onUpdate={function (values: string[]): void {
-                                        throw new Error("Function not implemented.");
-                                    } }/>)
+                                    onUpdate={value=>updateMultiSelectItem(configuration,value)}/>)
                             }
                             {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
                                 (<InputForm key={attribute.name} 

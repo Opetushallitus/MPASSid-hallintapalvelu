@@ -93,13 +93,21 @@ export default function Metadata({
     devLog("updateMetadata ("+name+")",value)
     
     var newMetadata
-    if(multivalue) {
-      newMetadata=updateMultivalueMetadata(name,value);
+    if(value===null) {
+        newMetadata=cloneDeep(metadata)
+        delete newMetadata[name]
+        setMetadata(newMetadata)
     } else {
-      newMetadata=cloneDeep(metadata)
-      newMetadata[name]=value
-      setMetadata(newMetadata)
+      
+      if(multivalue) {
+        newMetadata=updateMultivalueMetadata(name,value);
+      } else {
+        newMetadata=cloneDeep(metadata)
+        newMetadata[name]=value
+        setMetadata(newMetadata)
+      }
     }
+    
     
     
     if(newConfigurationEntityData?.sp){
@@ -216,7 +224,7 @@ export default function Metadata({
                                           
                       devLog("Metadata (attribute init)",attribute)
                       if(attribute.content === undefined) {
-
+                        
                         if(configuration.multivalue) {
                           attribute.content=[];
                         }
@@ -226,7 +234,7 @@ export default function Metadata({
                         
                         if(configuration.switch&&configuration.enum&&configuration.enum.length>0&&attribute.content==='') {
                           attribute.content=configuration.enum[0];
-                        }
+                        }                        
 
                         if(configuration.switch&&configuration.multivalue===false) {
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)

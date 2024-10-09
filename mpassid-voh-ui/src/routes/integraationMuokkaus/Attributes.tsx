@@ -155,7 +155,17 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                         if(roleConfiguration.defaultValue) {
                           useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
                         } else {
-                          useAttribute={ type: attributeType, content: '', name: configuration.name }
+                          if(configuration.enum&&configuration.enum.length>0) {
+                            
+                            if(configuration.enum&&configuration.enum.length>0) {
+                              useAttribute={ type: attributeType, content: String(configuration.enum[0]), name: configuration.name }                          
+                            } else {
+                              useAttribute={ type: attributeType, content: "false", name: configuration.name }                          
+                            }
+                          } else {
+                            useAttribute={ type: attributeType, content: '', name: configuration.name }
+                          }
+                          
                         }
                         attributes.push(useAttribute)
                         setAttributes([ ...attributes]) 
@@ -220,7 +230,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   } else {
                     setCanSave(false)
                   }
-
+                  devLog("Attributes (useAttribute post)",useAttribute)
                   devLog("Attributes (attribute post)",attributes)                  
 
                   return (<AttributeForm 

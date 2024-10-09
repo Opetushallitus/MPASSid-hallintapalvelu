@@ -724,15 +724,16 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: false,
     multivalue: false,
+    multiselect: false,
     switch: false,
     validation: [ ],
+    enum: [ null, 'HS256' ],
     integrationType: [
         
         {
             name: 'oidc',
-            editable: false,
-            visible: true,
-            defaultValue: "HS256"
+            editable: true,
+            visible: true 
         }
     ]
   },

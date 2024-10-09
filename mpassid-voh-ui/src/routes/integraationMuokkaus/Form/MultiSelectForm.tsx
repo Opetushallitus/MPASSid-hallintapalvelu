@@ -5,6 +5,7 @@ import type { Dispatch} from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { Components } from '@/api';
+import { devLog } from "@/utils/devLog";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -56,18 +57,26 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
 
   const handleChange = (event: SelectChangeEvent<typeof selection>) => {
     
+    devLog("MultiSelectForm (handleChange event)",event )
     const {
       target: { value },
     } = event;
     
-
+    devLog("MultiSelectForm (handleChange value)",value )
     
 
-    setSelection(
-      // On autofill we get a stringified value.
-      typeof value === 'string' ? value.split(',') : value,
-    );
-    onUpdate(typeof value === 'string' ? value.split(',') : value);
+    
+    if(value===null||value==='null') {
+      setSelection(['null']);
+      onUpdate(['null']);
+    } else {
+      setSelection(
+        // On autofill we get a stringified value.
+        typeof value === 'string' ? value.split(',') : value,
+      );
+      onUpdate(typeof value === 'string' ? value.split(',') : value);
+    }
+    
   };
 
 
@@ -106,9 +115,11 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                     }}
                 MenuProps={MenuProps}
                 >
-                {enums&&enums.length>0&&enums.map((name) => (
-                    <MenuItem key={name.value} value={name.value}>
-                    <Checkbox checked={selection.indexOf(name.value) > -1} />
+                
+                {enums&&enums.filter(e=>e.value!=='').length>0&&enums.map((name,index) => (
+                  
+                    <MenuItem key={name.value+"_mi"+index} value={name.value}>
+                    <Checkbox checked={(selection.indexOf(name.value) > -1)} />
                     <ListItemText primary={name.label} />
                     </MenuItem>
                 ))}
