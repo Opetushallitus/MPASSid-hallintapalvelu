@@ -151,7 +151,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'data',
     mandatory: false,
     enum: [ 'azurev4', 'wilma', 'opinsys', 'azureLuovi'],
-    validation: [],
+    validation: [ 'expert' ],
     integrationType: [
         {
             name: 'wilma',
@@ -395,6 +395,21 @@ export const dataConfiguration:UiConfiguration[] = [
       ]
   },
   {
+      name: 'post_logout_redirect_uris',
+      type: 'metadata',
+      mandatory: false,
+      multivalue: true,
+      validation: [ ],
+      integrationType: [
+          {
+              name: 'oidc',
+              editable: true,
+              visible: true,
+          }
+      ]
+  },
+  
+  {
     name: 'grant_types',
     type: 'metadata',
     mandatory: true,
@@ -403,7 +418,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
+            editable: true,
             visible: true,
             defaultValue: [ 'authorization_code' ]
         }
@@ -443,14 +458,14 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'scope',
     type: 'metadata',
-    mandatory: true,
+    mandatory: false,
     multivalue: false,
     validation: [],
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
-            visible: true,
+            editable: true,
+            visible: false,
             defaultValue: 'openid profile'
         }
     ]
@@ -496,7 +511,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: false,
+            editable: true,
             visible: true,
             defaultValue: [ 'code' ]
         }
@@ -663,6 +678,40 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: false,
+        }
+    ]
+  },
+  {
+    name: 'token_endpoint_auth_method',
+    type: 'metadata',
+    mandatory: false,
+    multivalue: false,
+    multiselect: false,
+    enum: [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt' ],
+    validation: [ ],
+    integrationType: [
+        
+        {
+            name: 'oidc',
+            editable: true,
+            visible: true,
+            defaultValue: 'client_secret_basic'
+        }
+    ]
+  },
+  {
+    name: 'id_token_signed_response_alg',
+    type: 'metadata',
+    mandatory: false,
+    multivalue: false,
+    validation: [ ],
+    integrationType: [
+        
+        {
+            name: 'oidc',
+            editable: false,
+            visible: true,
+            defaultValue: "HS256"
         }
     ]
   },
