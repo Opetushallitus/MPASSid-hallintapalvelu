@@ -87,10 +87,10 @@ function PossibleServices({oid,handleService}: Props) {
                 <FormattedMessage defaultMessage="Valitse" />
             </MenuItem>
             <MenuItem key={'uusi_2'} value={-2} tabIndex={1}>
-                {addEnv(0)} - uusi
+                {addEnv(0)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
             <MenuItem key={'uusi_1'} value={-1} tabIndex={2}>
-                {addEnv(1)} - uusi
+                {addEnv(1)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
             {possibleServices.content.map((integration,index) => {          
                 return(<MenuItem key={"possibleServices_"+index} value={index} tabIndex={3+index}>

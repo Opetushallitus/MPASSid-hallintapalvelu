@@ -243,6 +243,58 @@ defineMessage({
   id: "työkaluvihje.extraSchoolsConfiguration",
   description: "attribuutin työkaluvihje",
 });
+defineMessage({
+  defaultMessage: "Lisä sääntöjä koulusivun valintaan",
+  id: "työkaluvihje.wantAssertionsSigned",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Entity-ID",
+  id: "työkaluvihje.Entity-ID",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "encryptionCertificates",
+  id: "työkaluvihje.encryptionCertificates",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "authnRequestsSigned",
+  id: "työkaluvihje.authnRequestsSigned",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "assertionConsumerServiceUrls",
+  id: "työkaluvihje.assertionConsumerServiceUrls",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "index",
+  id: "työkaluvihje.index",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "isDefault",
+  id: "työkaluvihje.isDefault",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "location",
+  id: "työkaluvihje.location",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "signingCertificates",
+  id: "työkaluvihje.signingCertificates",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "assertionConsumerServiceUrls.location",
+  id: "työkaluvihje.assertionConsumerServiceUrls.location",
+  description: "attribuutin työkaluvihje",
+});
+
+
 
 // Tyypit
 defineMessage({

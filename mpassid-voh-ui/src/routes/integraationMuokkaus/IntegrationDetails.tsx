@@ -120,7 +120,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             if(integration.configurationEntity.sp&&integration.configurationEntity.sp.metadata&&integration.configurationEntity.sp.metadata!==undefined) {
               setMetadata(integration.configurationEntity.sp.metadata)
             }
-            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {
+            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {              
               setAttributes(integration.configurationEntity.attributes)
             } 
             

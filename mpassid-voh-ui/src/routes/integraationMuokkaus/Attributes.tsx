@@ -1,9 +1,9 @@
 import type { Components } from "@/api";
-import type { IntegrationType } from "@/config";
+import type { IntegrationType, UiConfiguration } from "@/config";
 import { attributePreferredOrder, defaultIntegrationType } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
-import { useEffect, type Dispatch} from "react";
+import { useEffect, useRef, type Dispatch} from "react";
 import AttributeForm from "./Form";
 import { dataConfiguration } from '../../config';
 import { helperText, validate } from "@/utils/Validators";
@@ -123,18 +123,18 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     const testConfigurationEntity:any = clone(newConfigurationEntityData) 
                     
                     if(configuration?.name&&testConfigurationEntity?.idp?.[configuration.name]) {
-                      useAttribute={ type: attributeType, content: testConfigurationEntity.idp[configuration.name], name: configuration.name }
+                      useAttribute={ type: attributeType, content: String(testConfigurationEntity.idp[configuration.name]), name: configuration.name }
                     }
                     
                     if(configuration?.name&&testConfigurationEntity?.sp?.[configuration.name]) {
-                      useAttribute={ type: attributeType, content: testConfigurationEntity.sp[configuration.name], name: configuration.name }
+                      useAttribute={ type: attributeType, content: String(testConfigurationEntity.sp[configuration.name]), name: configuration.name }
                     }
                     
                     if(useAttribute.content === undefined) {
                       devLog("Attributes (init empty content)",configuration.name)
                       if(configuration.name) {
                         if(roleConfiguration.defaultValue) {
-                          useAttribute={ type: attributeType, content: roleConfiguration.defaultValue, name: configuration.name }
+                          useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
                         } else {
                           useAttribute={ type: attributeType, content: '', name: configuration.name }
                         }
@@ -154,14 +154,15 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     devLog("Attributes (init switch content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                     if(roleConfiguration.defaultValue !== undefined) {
-                      useAttribute={ type: attributeType, content: roleConfiguration.defaultValue, name: configuration.name }
-                      attributes.push(useAttribute)
-                      setAttributes([ ...attributes])                      
+                      //useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
+                      //attributes.push(useAttribute)
+                      //setAttributes([ ...attributes])         
+                                  
                       updateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
                     } else {
-                      useAttribute={ type: attributeType, content: configuration.enum[0], name: configuration.name }
-                      attributes.push(useAttribute)
-                      setAttributes([ ...attributes])
+                      //useAttribute={ type: attributeType, content: String(configuration.enum[0]), name: configuration.name }
+                      //attributes.push(useAttribute)
+                      //setAttributes([ ...attributes])
                       updateAttribute(configuration.name,String(configuration.enum[0]),type)                          
                     }
                     
@@ -172,14 +173,14 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     devLog("Attributes (init multiselect content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                     if(roleConfiguration.defaultValue !== undefined) {
-                      useAttribute={ type: attributeType, content: roleConfiguration.defaultValue, name: configuration.name }
-                      attributes.push(useAttribute)
-                      setAttributes([ ...attributes])                      
+                      //useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
+                      //attributes.push(useAttribute)
+                      //setAttributes([ ...attributes])                      
                       updateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
                     } else {
-                      useAttribute={ type: attributeType, content: configuration.enum[0], name: configuration.name }
-                      attributes.push(useAttribute)
-                      setAttributes([ ...attributes])
+                      //useAttribute={ type: attributeType, content: String(configuration.enum[0]), name: configuration.name }
+                      //attributes.push(useAttribute)
+                      //setAttributes([ ...attributes])
                       updateAttribute(configuration.name,String(configuration.enum[0]),type)                          
                     }
                     
