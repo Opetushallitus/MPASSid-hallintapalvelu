@@ -14,15 +14,16 @@ import PossibleServices from "./PossibleServices";
 
 export const defaults = {
     typePI: "saml",
-    //typesPI: [ "saml", "oidc" ],
-    typesPI: [ "saml"],
+    typesPI: [ "saml", "oidc" ],
+    //typesPI: [ "saml"],
     typeOKJ: "wilma",
-    //typesOKJ: [ "Opinsys", "Wilma", "Adfs", "Azure", "Google" ]
+    //typesOKJ: [ "opinsys", "wilma", "adfs", "azure", "google" ]
     typesOKJ: [ "wilma" ]
   };
 
   if(!ENV.PROD) {
-    defaults.typesPI.push("oidc")
+    //defaults.typesPI.push("oidc")
+    defaults.typesOKJ.push("opinsys")
   }
 
   interface Props {

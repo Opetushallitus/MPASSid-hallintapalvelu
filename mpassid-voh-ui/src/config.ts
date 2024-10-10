@@ -413,6 +413,7 @@ export const dataConfiguration:UiConfiguration[] = [
       ]
   },
   
+  
   {
     name: 'grant_types',
     type: 'metadata',
