@@ -273,13 +273,16 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
 
     const updateMultiSelectItem = (configuration: UiConfiguration, value: string[]) => {
         
-        devLog("updateSwitchItem ("+attribute.name+")",value)
+        devLog("updateMultiSelectItem ("+attribute.name+")",value)
         devLog("updateMultiSelectItem (type)",attribute.type)        
         devLog("updateMultiSelectItem (attribute)",attribute)
+        devLog("updateMultiSelectItem (configuration)",configuration)
         
         if(configuration.multiselect !== undefined && configuration.multiselect) {
+            devLog("updateMultiSelectItem (multiselect)",configuration.multiselect)
             onUpdate(attribute.name,value)
         } else {
+            devLog("updateMultiSelectItem (multiselect)","false")
             if(value.length>0) {
                 if(value[0]==='null') {
                     onUpdate(attribute.name,null)

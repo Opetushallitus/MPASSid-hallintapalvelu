@@ -190,42 +190,42 @@ defineMessage({
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisää token_endpoint_auth_method",
+  defaultMessage: "token_endpoint_auth_method",
   id: "attribuutti.token_endpoint_auth_method",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisää response_types",
+  defaultMessage: "response_types",
   id: "attribuutti.response_types",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisää redirect_uris",
+  defaultMessage: "redirect_uris",
   id: "attribuutti.redirect_uris",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisää post_logout_redirect_uris",
+  defaultMessage: "post_logout_redirect_uris",
   id: "attribuutti.post_logout_redirect_uris",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisää id_token_signed_response_alg",
+  defaultMessage: "id_token_signed_response_alg",
   id: "attribuutti.id_token_signed_response_alg",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisää grant_types",
+  defaultMessage: "grant_types",
   id: "attribuutti.grant_types",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Generoi client_secret",
+  defaultMessage: "client_secret",
   id: "attribuutti.client_secret",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Generoi client_id",
+  defaultMessage: "client_id",
   id: "attribuutti.client_id",
   description: "attribuutti",
 });

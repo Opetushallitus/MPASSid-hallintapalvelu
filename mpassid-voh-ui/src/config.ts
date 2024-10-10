@@ -408,7 +408,7 @@ export const dataConfiguration:UiConfiguration[] = [
           {
               name: 'oidc',
               editable: true,
-              visible: true,
+              visible: false,
           }
       ]
   },
@@ -419,14 +419,17 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
+    multiselect: true,
     switch: false,
     validation: [ ],
+    enum: [ "authorization_code",
+                "implicit"],
     integrationType: [
         {
             name: 'oidc',
             editable: true,
             visible: true,
-            defaultValue: [ 'authorization_code' ]
+            defaultValue: 'authorization_code'
         }
     ]
    },
@@ -518,14 +521,21 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     mandatory: true,
     multivalue: true,
+    multiselect: true,
     switch: false,
+    enum: [ "code",
+                "id_token",
+                "token id_token",
+                "code id_token",
+                "code token",
+                "code token id_token" ],
     validation: [],
     integrationType: [
         {
             name: 'oidc',
             editable: true,
             visible: true,
-            defaultValue: [ 'code' ]
+            defaultValue: 'code'
         }
     ]
 },
