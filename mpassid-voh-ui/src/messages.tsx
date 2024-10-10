@@ -185,13 +185,48 @@ defineMessage({
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Testioppijanumero sallittu",
-  id: "attribuutti.allowtestlearnerid",
+  defaultMessage: "Lisää kouluvalinta säännöt",
+  id: "attribuutti.extraSchoolsConfiguration",
   description: "attribuutti",
 });
 defineMessage({
-  defaultMessage: "Lisää kouluvalinta säännöt",
-  id: "attribuutti.extraSchoolsConfiguration",
+  defaultMessage: "Lisää token_endpoint_auth_method",
+  id: "attribuutti.token_endpoint_auth_method",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Lisää response_types",
+  id: "attribuutti.response_types",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Lisää redirect_uris",
+  id: "attribuutti.redirect_uris",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Lisää post_logout_redirect_uris",
+  id: "attribuutti.post_logout_redirect_uris",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Lisää id_token_signed_response_alg",
+  id: "attribuutti.id_token_signed_response_alg",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Lisää grant_types",
+  id: "attribuutti.grant_types",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Generoi client_secret",
+  id: "attribuutti.client_secret",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Generoi client_id",
+  id: "attribuutti.client_id",
   description: "attribuutti",
 });
 
@@ -250,7 +285,7 @@ defineMessage({
 });
 defineMessage({
   defaultMessage: "Entity-ID",
-  id: "työkaluvihje.Entity-ID",
+  id: "työkaluvihje.entityId",
   description: "attribuutin työkaluvihje",
 });
 defineMessage({
@@ -269,28 +304,63 @@ defineMessage({
   description: "attribuutin työkaluvihje",
 });
 defineMessage({
-  defaultMessage: "index",
-  id: "työkaluvihje.index",
-  description: "attribuutin työkaluvihje",
-});
-defineMessage({
-  defaultMessage: "isDefault",
-  id: "työkaluvihje.isDefault",
-  description: "attribuutin työkaluvihje",
-});
-defineMessage({
-  defaultMessage: "location",
-  id: "työkaluvihje.location",
-  description: "attribuutin työkaluvihje",
-});
-defineMessage({
   defaultMessage: "signingCertificates",
   id: "työkaluvihje.signingCertificates",
   description: "attribuutin työkaluvihje",
 });
 defineMessage({
+  defaultMessage: "assertionConsumerServiceUrls.index",
+  id: "työkaluvihje.assertionConsumerServiceUrls.index",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "assertionConsumerServiceUrls.isDefault",
+  id: "työkaluvihje.assertionConsumerServiceUrls.isDefault",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
   defaultMessage: "assertionConsumerServiceUrls.location",
   id: "työkaluvihje.assertionConsumerServiceUrls.location",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Lisää token_endpoint_auth_method",
+  id: "työkaluvihje.token_endpoint_auth_method",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Lisää response_types",
+  id: "työkaluvihje.response_types",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Lisää redirect_uris",
+  id: "työkaluvihje.redirect_uris",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Lisää post_logout_redirect_uris",
+  id: "työkaluvihje.post_logout_redirect_uris",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Lisää id_token_signed_response_alg",
+  id: "työkaluvihje.id_token_signed_response_alg",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Lisää grant_types",
+  id: "työkaluvihje.grant_types",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Generoi client_secret",
+  id: "työkaluvihje.client_secret",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Generoi client_id",
+  id: "työkaluvihje.client_id",
   description: "attribuutin työkaluvihje",
 });
 

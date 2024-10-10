@@ -36,9 +36,9 @@ interface Props {
 export default function ObjectForm({ object, type, isEditable=false, mandatory=false,helperText, path, onUpdate, onEdit, onDelete, onValidate, attributeType,setCanSave, currentObject, integrationType, objectData }: Props) {
   const intl = useIntl();
   const id = `attribuutti.${object.name}`;
-  const tooltipId = `työkaluvihje.${object.name}`;
+  //const tooltipId = `työkaluvihje.${object.name}`;
   const label = id in intl.messages ? { id } : undefined;
-  const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
+  //const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
   const objectConfiguration:UiConfiguration[] = dataConfiguration.filter(conf=>conf.type===object.name) || [];
   //const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   //const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
@@ -218,11 +218,14 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
           //.filter((configuration) => (environmentConfiguration.includes(configuration.name)&&configuration.environment===environment)||(!environmentConfiguration.includes(configuration.name)&&configuration.environment===undefined))
           //.filter((configuration) => (specialConfiguration.includes(configuration.name)&&configuration.oid===oid)||(!specialConfiguration.includes(configuration.name)&&!configuration.oid))
           .map((configuration) => {
-            const id = `attribuutti.${configuration.name}`;
+            const id = `attribuutti.${object.name}.${configuration.name}`;
             const label = id in intl.messages ? { id } : undefined;
+            const tooltipId = `työkaluvihje.${object.name}.${configuration.name}`;
+            const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
             return {
               ...configuration,
               label: label && intl.formatMessage(label),
+              tooltip: tooltip && intl.formatMessage(tooltip)
             };
           })
           .filter(({ name }) => name)
@@ -357,12 +360,12 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                     <Tooltip
                                         title={
                                             <>
-                                            {tooltip && (
+                                            {configuration.tooltip && (
                                                 <Box mb={1}>
-                                                <FormattedMessage {...tooltip} />
+                                                {configuration.tooltip}
                                                 </Box>
                                             )}
-                                            <code>{object.name+"."+configuration.name}</code>
+                                            <code>{configuration.name}</code>
                                             </>
                                         }
                                         >
