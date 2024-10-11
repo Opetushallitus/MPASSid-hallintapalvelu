@@ -142,7 +142,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
         ...theme.typography.body1
         
       })}
-    >--</Box>)
+    >{values}</Box>)
   }
   
 }

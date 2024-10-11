@@ -427,7 +427,7 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            editable: false,
             visible: true,
             defaultValue: 'authorization_code'
         }
@@ -476,8 +476,8 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
-            visible: false,
+            editable: false,
+            visible: true,
             defaultValue: 'openid profile'
         }
     ]
@@ -523,9 +523,7 @@ export const dataConfiguration:UiConfiguration[] = [
     multivalue: true,
     multiselect: true,
     switch: false,
-    enum: [ "code",
-                "id_token",
-                "id_token token",
+    enum: [ "code",                
                 "code id_token",
                 "code token",
                 "code id_token token" ],
@@ -761,13 +759,13 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: false
+            defaultValue: 'false'
         },
         {
             name: 'oidc',
             editable: true,
             visible: true,
-            defaultValue: false
+            defaultValue: 'false'
         }
     ]
   },
