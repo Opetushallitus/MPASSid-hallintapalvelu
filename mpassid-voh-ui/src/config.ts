@@ -525,10 +525,10 @@ export const dataConfiguration:UiConfiguration[] = [
     switch: false,
     enum: [ "code",
                 "id_token",
-                "token id_token",
+                "id_token token",
                 "code id_token",
                 "code token",
-                "code token id_token" ],
+                "code id_token token" ],
     validation: [],
     integrationType: [
         {
@@ -718,7 +718,7 @@ export const dataConfiguration:UiConfiguration[] = [
     multivalue: false,
     multiselect: false,
     switch: false,
-    enum: [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt' ],
+    enum: [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt' ],
     validation: [ ],
     integrationType: [
         
