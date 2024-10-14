@@ -130,7 +130,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }
-                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&attributeType==='data'&&
+                        {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&attributeType==='data'&&
                             (<SwitchForm key={attribute.name} 
                                 object={attribute} 
                                 path="content" 
@@ -145,7 +145,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 helperText={helperText}
                                 setCanSave={setCanSave}/>)
                         }
-                        {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
+                        {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
                                 (<MultiSelectForm key={attribute.name}                                    
                                     values={(attribute.content)?[ attribute.content ]:[]}
                                     isEditable={roleConfiguration.editable}
@@ -270,6 +270,34 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         devLog("deleteObjectItem (result)",currentObject.current)
         
     }
+
+    const updateMultiSelectItem = (configuration: UiConfiguration, value: string[]) => {
+        
+        devLog("updateMultiSelectItem ("+attribute.name+")",value)
+        devLog("updateMultiSelectItem (type)",attribute.type)        
+        devLog("updateMultiSelectItem (attribute)",attribute)
+        devLog("updateMultiSelectItem (configuration)",configuration)
+        
+        if(configuration.multiselect !== undefined && configuration.multiselect) {
+            devLog("updateMultiSelectItem (multiselect)",configuration.multiselect)
+            onUpdate(attribute.name,value)
+        } else {
+            devLog("updateMultiSelectItem (multiselect)","false")
+            if(value.length>0) {
+                if(value[0]==='null') {
+                    onUpdate(attribute.name,null)
+                } else {
+                    onUpdate(attribute.name,value[0])
+                }
+                
+            } else {
+                onUpdate(attribute.name,null)
+            }
+        }
+        
+
+    }
+
     const updateSwitchItem = (name:any,value:boolean) => {
         devLog("updateSwitchItem ("+name+")",value)
         
@@ -313,7 +341,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         }
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
-            enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
+            enumValues=configuration.enum.map(e=> {return ({label: (e===null||e==='null')?intl.formatMessage({
+                defaultMessage: "Ei arvoa",
+              }):String(e), value: String(e) })})
         }
         
         return (
@@ -367,7 +397,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 objectData={objectDataRef}
                                 currentObject={currentObject}/>)
                             }
-                            {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length===2&&
+                            {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&
                                 (<SwitchForm key={attribute.name} 
                                     object={attribute} 
                                     path="content" 
@@ -382,7 +412,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     helperText={helperText}
                                     setCanSave={setCanSaveItem}/>)
                             }
-                            {configuration&&roleConfiguration&&configuration.enum&&configuration.enum.length>2&&
+                            {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
                                 (<MultiSelectForm key={attribute.name}
                                     //object={attribute} 
                                     //path="content" 
@@ -398,10 +428,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     setCanSave={setCanSaveItem} 
                                     attributeType={"data"} 
                                     enums={enumValues} 
+                                    createEmpty={true}
                                     multiple={configuration.multiselect}
-                                    onUpdate={function (values: string[]): void {
-                                        throw new Error("Function not implemented.");
-                                    } }/>)
+                                    onUpdate={value=>updateMultiSelectItem(configuration,value)}/>)
                             }
                             {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
                                 (<InputForm key={attribute.name} 
@@ -459,11 +488,12 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     </Grid>
                                 </Grid>)
                                 }
-                            {!ENV.PROD&&configuration&&roleConfiguration&&roleConfiguration.generate&&
+                            {configuration&&roleConfiguration&&roleConfiguration.generate&&
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>
-                                        <IconButton                                                                                       
+                                        <IconButton    
+                                            key="generate"                                                                                   
                                             onClick={()=>{
                                                     if(roleConfiguration.generate==='name_randomsha1'){
                                                         calculateSHA1(String(getRandom())).then(value=>onUpdate(attribute.name, 'id_'+value))

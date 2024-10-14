@@ -181,6 +181,9 @@ let validateStatus:boolean=true;
                     break;
                 case "cert":
                     validateStatus=validateCert(value);
+                    break;
+                case "expert":
+                    validateStatus=true;
                     break;         
                 default:
                     validateStatus=false;
@@ -252,7 +255,10 @@ export const helperText = (validators:string[],value:string) => {
                     break;
                 case "cert":
                     helperText=validateCertText(value)                    
-                    break;       
+                    break;   
+                case "expert":
+                    helperText=<FormattedMessage defaultMessage="VAROITUS älä koske tähän jollei erikseen ohjeistettu!" />                    
+                    break;    
                 default:
                     validateStatus=false;
                     if(!validateStatus) {

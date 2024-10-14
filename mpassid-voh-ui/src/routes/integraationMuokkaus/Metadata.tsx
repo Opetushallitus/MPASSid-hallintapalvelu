@@ -75,7 +75,7 @@ export default function Metadata({
     var result=true;
     mandatoryAttributes.forEach(ma=>{
       
-      devLog("validateMetadata (mandatoryAttribute)",ma)
+
       devLog("validateMetadata (mandatoryAttribute "+ma+")",metadata[ma])
       if(metadata[ma] === undefined) {
         result = false
@@ -93,13 +93,21 @@ export default function Metadata({
     devLog("updateMetadata ("+name+")",value)
     
     var newMetadata
-    if(multivalue) {
-      newMetadata=updateMultivalueMetadata(name,value);
+    if(value===null) {
+        newMetadata=cloneDeep(metadata)
+        delete newMetadata[name]
+        setMetadata(newMetadata)
     } else {
-      newMetadata=cloneDeep(metadata)
-      newMetadata[name]=value
-      setMetadata(newMetadata)
+      
+      if(multivalue) {
+        newMetadata=updateMultivalueMetadata(name,value);
+      } else {
+        newMetadata=cloneDeep(metadata)
+        newMetadata[name]=value
+        setMetadata(newMetadata)
+      }
     }
+    
     
     
     if(newConfigurationEntityData?.sp){
@@ -216,7 +224,7 @@ export default function Metadata({
                                           
                       devLog("Metadata (attribute init)",attribute)
                       if(attribute.content === undefined) {
-
+                        
                         if(configuration.multivalue) {
                           attribute.content=[];
                         }
@@ -224,17 +232,17 @@ export default function Metadata({
                           attribute.content='';
                         }
                         
-                        if(configuration?.enum?.length===2&&attribute.content==='') {
+                        if(configuration.switch&&configuration.enum&&configuration.enum.length>0&&attribute.content==='') {
                           attribute.content=configuration.enum[0];
-                        }
+                        }                        
 
-                        if(configuration?.enum?.length===2&&configuration.multivalue===false) {
+                        if(configuration.switch&&configuration.multivalue===false) {
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)
                         }
 
                       }
                       
-                      if(configuration.enum&&configuration.enum.length===2) {
+                      if(configuration.switch&&configuration.enum&&configuration.enum.length===2) {
                         
                         if(attribute.content==='') {
                           if(roleConfiguration.defaultValue !== undefined) {
@@ -245,7 +253,7 @@ export default function Metadata({
                           
                         }                      
                         
-                        if(configuration.multivalue===false&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
+                        if(configuration.multivalue===false&&configuration.switch&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize switch value                    
                           updateMetadata(configuration.multivalue,configuration.name,attribute.content)                          
                         }
