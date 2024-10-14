@@ -245,30 +245,30 @@ export default function Metadata({
                         }
 
                       }
-                      /*
+                      
                       if(configuration.enum&&configuration.enum.length>0) {
-                        
-                        if(attribute.content==='') {
-                          if(roleConfiguration.defaultValue !== undefined) {
-                            attribute.content=roleConfiguration.defaultValue
-                          } else {
-                            attribute.content=configuration.enum[0];
-                          } 
-                        }                      
                         
                         if(configuration.array===false&&configuration.switch&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize switch value                    
-                          updateMetadata(configuration.array,configuration.name,attribute.content)                          
+                          updateMetadata(configuration.array,configuration.name,!!attribute.content)                          
                         }
 
                         if(configuration.array===true&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize array value                    
                           updateMetadata(configuration.array,configuration.name,attribute.content)                          
                         }
+                        
                       }
-                        */
+                        
+
+                      if(configuration.name==='authnRequestsSigned') {
+                        devLog("Metadata validateMeta(metadata[configuration.name])",metadata[configuration.name])
+                        devLog("Metadata validateMeta(attribute.content)",attribute.content)
+                      }
+                      
                       //Initialize metadata
                       if(metadata[configuration.name]!==attribute.content) {
+                          
                           if(configuration.array||(configuration.multiselect!==undefined&&configuration.multiselect===true)) {
                             if(attribute.content.length>0) {
                               updateMetadata(configuration.array,configuration.name,attribute.content)
