@@ -1,4 +1,5 @@
 import type { Components } from "@/api";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Tooltip from "@mui/material/Tooltip";
@@ -117,7 +118,8 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                         variant="caption"
                         >
                         {configuration&&roleConfiguration&&!configuration.enum&&
-                            (<InputForm key={attribute.name} 
+                            (<ErrorBoundary>
+                                <InputForm key={attribute.name} 
                                 object={attribute} 
                                 path="content" 
                                 type={attribute.name!} 
@@ -128,38 +130,43 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 label={label?intl.formatMessage(label):attribute.name!}
                                 attributeType={attributeType}
                                 helperText={helperText}
-                                setCanSave={setCanSave}/>)
+                                setCanSave={setCanSave}/>
+                            </ErrorBoundary>)
                         }
                         {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&attributeType==='data'&&
-                            (<SwitchForm key={attribute.name} 
-                                object={attribute} 
-                                path="content" 
-                                type={attribute.name!} 
-                                values={configuration.enum}
-                                isEditable={roleConfiguration.editable} 
-                                onUpdate={updateSwitchItem} 
-                                onValidate={onValidate} 
-                                mandatory={configuration.mandatory}
-                                label={label?intl.formatMessage(label):attribute.name!}
-                                attributeType={"data"}
-                                helperText={helperText}
-                                setCanSave={setCanSave}/>)
+                            (<ErrorBoundary>
+                                <SwitchForm key={attribute.name} 
+                                    object={attribute} 
+                                    path="content" 
+                                    type={attribute.name!} 
+                                    values={configuration.enum}
+                                    isEditable={roleConfiguration.editable} 
+                                    onUpdate={updateSwitchItem} 
+                                    onValidate={onValidate} 
+                                    mandatory={configuration.mandatory}
+                                    label={label?intl.formatMessage(label):attribute.name!}
+                                    attributeType={"data"}
+                                    helperText={helperText}
+                                    setCanSave={setCanSave}/>
+                            </ErrorBoundary>)
                         }
                         {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
-                                (<MultiSelectForm key={attribute.name}                                    
-                                    values={(attribute.content)?[ attribute.content ]:[]}
-                                    isEditable={roleConfiguration.editable}
-                                    onUpdate={updateMultiSelectItem} 
-                                    onValidate={onValidate}
-                                    mandatory={configuration.mandatory}
-                                    label={label ? intl.formatMessage(label) : attribute.name!}
-                                    //attributeType={"metadata"}
-                                    helperText={helperText}
-                                    setCanSave={setCanSave} 
-                                    attributeType={"data"} 
-                                    enums={enumValues} 
-                                    multiple={false}
-                                    />)
+                                (<ErrorBoundary>
+                                    <MultiSelectForm key={attribute.name}                                    
+                                        values={(attribute.content)?[ attribute.content ]:[]}
+                                        isEditable={roleConfiguration.editable}
+                                        onUpdate={updateMultiSelectItem} 
+                                        onValidate={onValidate}
+                                        mandatory={configuration.mandatory}
+                                        label={label ? intl.formatMessage(label) : attribute.name!}
+                                        //attributeType={"metadata"}
+                                        helperText={helperText}
+                                        setCanSave={setCanSave} 
+                                        attributeType={"data"} 
+                                        enums={enumValues} 
+                                        multiple={false}
+                                        />
+                                </ErrorBoundary>)
                             }
                         
                         
@@ -338,12 +345,13 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         if(configuration.mandatory&&attribute.content&&attribute.content.length===0) {
             devLog("MetadataForm (buttonColor)",attribute.content)
             buttonColor="error"
-        }
+        } 
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
-            enumValues=configuration.enum.map(e=> {return ({label: (e===null||e==='null')?intl.formatMessage({
-                defaultMessage: "Ei arvoa",
-              }):String(e), value: String(e) })})
+            enumValues=configuration.enum.map(e=> {return (
+                                    {label: (e===null||e==='null')?intl.formatMessage({defaultMessage: "Ei arvoa" }):String(e), 
+                                     value: String(e) }
+                                    )})
         }
         
         return (
@@ -379,7 +387,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         >
                             
                             {configuration&&roleConfiguration&&configuration.object !== undefined&&
-                            (<ObjectForm key={attribute.name+"_"+configuration.name} 
+                            (<ErrorBoundary>
+                            <ObjectForm key={attribute.name+"_"+configuration.name} 
                                 integrationType={type}
                                 object={attribute} 
                                 path="content" 
@@ -395,10 +404,11 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 helperText={helperText}
                                 setCanSave={setCanSaveItem}
                                 objectData={objectDataRef}
-                                currentObject={currentObject}/>)
+                                currentObject={currentObject}/>
+                                </ErrorBoundary>)
                             }
                             {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&
-                                (<SwitchForm key={attribute.name} 
+                                (<ErrorBoundary><SwitchForm key={attribute.name} 
                                     object={attribute} 
                                     path="content" 
                                     type={attribute.name!} 
@@ -410,10 +420,10 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     label={label?intl.formatMessage(label):attribute.name!}
                                     attributeType={"metadata"}
                                     helperText={helperText}
-                                    setCanSave={setCanSaveItem}/>)
+                                    setCanSave={setCanSaveItem}/></ErrorBoundary>)
                             }
                             {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
-                                (<MultiSelectForm key={attribute.name}
+                                (<ErrorBoundary><MultiSelectForm key={attribute.name}
                                     //object={attribute} 
                                     //path="content" 
                                     //type={attribute.name!} 
@@ -430,9 +440,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     enums={enumValues} 
                                     createEmpty={true}
                                     multiple={configuration.multiselect}
-                                    onUpdate={value=>updateMultiSelectItem(configuration,value)}/>)
+                                    onUpdate={value=>updateMultiSelectItem(configuration,value)}/></ErrorBoundary>)
                             }
-                            {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
+                            {configuration&&roleConfiguration&&!configuration.array&&!configuration.enum&&
                                 (<InputForm key={attribute.name} 
                                     object={attribute} 
                                     path="content" 
@@ -446,7 +456,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     helperText={helperText}
                                     setCanSave={setCanSaveItem}/>)
                             }
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&configuration.object&&roleConfiguration.editable&&
+                            {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&configuration.object&&roleConfiguration.editable&&
                             (<Grid container spacing={2} >
                                 <Grid item xs={10}></Grid>
                                 <Grid item xs={2}>
@@ -460,7 +470,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 </Grid>
                             </Grid>)
                             }
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
+                            {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&!configuration.object&&
                                 (<ListForm key={attribute.name}
                                 object={attribute}
                                 noErrors={true}
@@ -474,7 +484,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 onUpdate={onUpdate} 
                                 pressButton={pressButtonRef}
                                 setCanSave={setCanSaveItem}/>)}        
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&roleConfiguration.editable&&
+                            {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&!configuration.object&&roleConfiguration.editable&&
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>

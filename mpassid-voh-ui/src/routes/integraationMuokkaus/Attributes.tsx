@@ -178,7 +178,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   }
                   devLog("Attributes (initialized attribute)",useAttribute)
           
-                  if(!attributeExists&&configuration.multivalue===false&&configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
+                  if(!attributeExists&&configuration.array===false&&configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize switch value        
                     devLog("Attributes (init switch content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
@@ -202,7 +202,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     
                   }
                   
-                  if(!attributeExists&&configuration.multivalue!==true&&configuration.enum&&configuration.enum.length>0&&!configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
+                  if(!attributeExists&&configuration.array!==true&&configuration.enum&&configuration.enum.length>0&&!configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize multiselect value        
                     devLog("Attributes (init multiselect content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;

@@ -41,7 +41,7 @@ export default function Metadata({
   const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
   
-  const createAttributeContent = (name:string,currentData: any,roleConfiguration:IntegrationType,multi: boolean|undefined) => {
+  const createAttributeContent = (name:string,currentData: any,roleConfiguration:IntegrationType,array:boolean,multiselect: boolean|undefined) => {
     devLog("createAttributeContent (name)",name)
 
     if(currentData&&currentData!== undefined) {
@@ -54,16 +54,21 @@ export default function Metadata({
       return newConfigurationEntityData.sp?.metadata[name]
     }
 
-    if(roleConfiguration?.index&&roleConfiguration.index==='randomsha1') {
+    if(roleConfiguration?.index&&(roleConfiguration.index==='randomsha1'||roleConfiguration.index==='name_randomsha1')) {
        return                  
     } 
 
     if(roleConfiguration?.defaultValue !== undefined) {
       devLog("createAttributeContent (defaultValue)",roleConfiguration.defaultValue)
-      return roleConfiguration.defaultValue
+      if(multiselect!==undefined&&multiselect===true) {
+        return [ roleConfiguration.defaultValue ]
+      } else {
+        return roleConfiguration.defaultValue
+      }
+      
     }
     devLog("createAttributeContent (empty)",'')
-    if(multi !== undefined && multi) {
+    if(array) {
       return []
     } else {
       return ''
@@ -87,9 +92,9 @@ export default function Metadata({
     })
     return result
   }
-  const updateMetadata = (multivalue: boolean,name:string, value:any) => {  
-    devLog("updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
-    devLog("updateMetadata (multivalue)",multivalue)
+  const updateMetadata = (array: boolean,name:string, value:any) => {  
+    devLog("updateArrayMetadata (mandatoryAttributes)",mandatoryAttributes)
+    devLog("updateMetadata (array)",array)
     devLog("updateMetadata ("+name+")",value)
     
     var newMetadata
@@ -99,7 +104,7 @@ export default function Metadata({
         setMetadata(newMetadata)
     } else {
       
-      if(multivalue) {
+      if(array) {
         newMetadata=updateMultivalueMetadata(name,value);
       } else {
         newMetadata=cloneDeep(metadata)
@@ -217,69 +222,65 @@ export default function Metadata({
                       const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                       devLog("Metadata (roleConfiguration)",roleConfiguration) 
                       var attribute = { type: 'metadata', 
-                                          content: createAttributeContent(configuration.name,metadata[configuration.name],roleConfiguration,configuration.multivalue),
-                                          //content: metadata[configuration.name]||roleConfiguration?.defaultValue||'',
+                                          content: createAttributeContent(configuration.name,metadata[configuration.name],roleConfiguration,configuration.array,configuration.multiselect),                                          
                                           name: configuration.name,
                                           role: role}
                                           
                       devLog("Metadata (attribute init)",attribute)
                       if(attribute.content === undefined) {
                         
-                        if(configuration.multivalue) {
+                        if(configuration.array) {
                           attribute.content=[];
                         }
-                        if(!configuration.multivalue) {
+                        if(!configuration.array) {
                           attribute.content='';
                         }
                         
-                        if(configuration.switch&&configuration.enum&&configuration.enum.length>0&&attribute.content==='') {
+                        if(configuration.switch&&configuration.enum&&configuration.enum.length>0) {
                           attribute.content=configuration.enum[0];
                         }                        
 
-                        if(configuration.switch&&configuration.multivalue===false) {
-                          updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                        if(configuration.switch&&configuration.array===false) {
+                          updateMetadata(configuration.array,configuration.name,attribute.content)
                         }
 
                       }
-                      
-                      if(configuration.switch&&configuration.enum&&configuration.enum.length===2) {
+                      /*
+                      if(configuration.enum&&configuration.enum.length>0) {
                         
                         if(attribute.content==='') {
                           if(roleConfiguration.defaultValue !== undefined) {
                             attribute.content=roleConfiguration.defaultValue
                           } else {
                             attribute.content=configuration.enum[0];
-                          }
-                          
+                          } 
                         }                      
                         
-                        if(configuration.multivalue===false&&configuration.switch&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
+                        if(configuration.array===false&&configuration.switch&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize switch value                    
-                          updateMetadata(configuration.multivalue,configuration.name,attribute.content)                          
+                          updateMetadata(configuration.array,configuration.name,attribute.content)                          
+                        }
+
+                        if(configuration.array===true&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
+                          //Initialize array value                    
+                          updateMetadata(configuration.array,configuration.name,attribute.content)                          
                         }
                       }
+                        */
                       //Initialize metadata
                       if(metadata[configuration.name]!==attribute.content) {
-                        if(configuration.multivalue !== undefined) {
-                          if(configuration.multivalue) {
+                          if(configuration.array||(configuration.multiselect!==undefined&&configuration.multiselect===true)) {
                             if(attribute.content.length>0) {
-                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                              updateMetadata(configuration.array,configuration.name,attribute.content)
                             }
                           } else {
                             if(attribute.content&&attribute.content!==''&&!configuration.enum) {
-                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                              updateMetadata(configuration.array,configuration.name,attribute.content)
                             }
                             if(!attribute.content&&attribute.content!==''&&configuration.enum&&configuration.enum.length>0) {
-                              updateMetadata(configuration.multivalue,configuration.name,attribute.content)
+                              updateMetadata(configuration.array,configuration.name,attribute.content)
                             }
                           }
-                          
-                        } else {
-                          if(attribute.content&&attribute.content!=='') {
-                            updateMetadata(false,configuration.name,attribute.content)
-                          }
-                        }
-                        
                       }
                       
                       //console.log("*** metadata (attribute): ",attribute);
@@ -294,9 +295,9 @@ export default function Metadata({
                           devLog("MetadataForm onUpdate (attribute enum)",attribute)
                           return updateMetadata(false,name,value);
                         } else {
-                          if(configuration.multivalue) {
-                            devLog("MetadataForm onUpdate (attribute multivalue)",attribute)    
-                            return updateMetadata(configuration.multivalue,name,trimmeValue);
+                          if(configuration.array) {
+                            devLog("MetadataForm onUpdate (attribute array)",attribute)    
+                            return updateMetadata(configuration.array,name,trimmeValue);
                           } else {
                             devLog("MetadataForm onUpdate (attribute siglevalue)",attribute)
                             return updateMetadata(false,name,trimmeValue);

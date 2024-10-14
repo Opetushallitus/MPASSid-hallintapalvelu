@@ -275,8 +275,8 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     attribute.content=configuration.enum[0];
                   }
                   
-                  //if(configuration?.enum?.length===2&&configuration.multivalue===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                  if(configuration.switch&&configuration?.enum?.length===2&&configuration.multivalue===false) {
+                  //if(configuration?.enum?.length===2&&configuration.array===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                  if(configuration.switch&&configuration?.enum?.length===2&&configuration.array===false) {
                     devLog("ObjectForm (switch init)",configuration.name)
                     devLog("ObjectForm (switch init)",attribute.content)
                     devLog("ObjectForm (SwitchForm resetValue)",true)
@@ -288,14 +288,14 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   devLog("ObjectForm (attribute init)",attribute)  
                   devLog("ObjectForm (currentObject.current)",currentObject.current)  
                     
-                    //Initialize multivalue currentObject
-                    if(configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                        devLog("ObjectForm (multivalue init)",configuration.name)  
+                    //Initialize array currentObject
+                    if(configuration.array&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                        devLog("ObjectForm (array init)",configuration.name)  
                         currentObject.current[configuration.name]=attribute.content||[];
                     }
                     
                     //Initialize siglevalue currentObject
-                    if(!configuration.multivalue&&!currentObject.current.hasOwnProperty(configuration.name)) {
+                    if(!configuration.array&&!currentObject.current.hasOwnProperty(configuration.name)) {
                         devLog("ObjectForm (siglevalue init)",configuration.name)                             
                         currentObject.current[configuration.name]=attribute.content||'';
                     }    
@@ -396,7 +396,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                             helperText={helperText}
                                             setCanSave={setCanSave}/>)
                                         }                                    
-                                        {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
+                                        {configuration&&roleConfiguration&&!configuration.array&&!configuration.enum&&
                                         (<InputForm key={object.name} 
                                             reload={reload}
                                             object={attribute} 
@@ -413,7 +413,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                             setCanSave={setCanSave}/>)
                                         }    
                                         
-                                        {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&
+                                        {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&
                                         (<ListForm key={object.name}
                                           object={attribute}
                                           type={object.name!}
