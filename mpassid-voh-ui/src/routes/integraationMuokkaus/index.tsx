@@ -139,7 +139,7 @@ export default function IntegraatioMuokkaus() {
                 }
                 result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;
               }
-              devLog("Integration save result",result.current)
+              devLog("DEBUG","Integration save result",result.current)
               if(logo){
                 const formData = new FormData();
                 formData.append("file", logo);
@@ -154,8 +154,8 @@ export default function IntegraatioMuokkaus() {
               setLoading(false)
             } catch (error:any) {   
               setLoading(false)           
-              devLog('Integration error data:', error?.response?.data);
-              devLog('Integration error status:', error?.response?.status);
+              devLog('DEBUG','Integration error data:', error?.response?.data);
+              devLog('DEBUG','Integration error status:', error?.response?.status);
               if(error?.response?.status===409) {
                 setOpenIntegrationErrorText(error?.response?.data?.message)
               } else {

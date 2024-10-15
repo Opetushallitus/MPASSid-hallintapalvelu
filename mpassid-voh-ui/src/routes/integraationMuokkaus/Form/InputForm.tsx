@@ -54,12 +54,12 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   }, [label, mandatory, reload, setCanSave]);
 
   const updateFormValue = () => {
-    devLog("updateFormValue (value)",inputRef.current?.value)
-    devLog("updateFormValue (onValidate )",onValidate(inputRef.current?.value))
+    devLog("DEBUG","updateFormValue (value)",inputRef.current?.value)
+    devLog("DEBUG","updateFormValue (onValidate )",onValidate(inputRef.current?.value))
     if(onValidate(inputRef.current?.value)) {
       
       setIsValid(true)
-      devLog("updateFormValue (mandatory)",mandatory)
+      devLog("DEBUG","updateFormValue (mandatory)",mandatory)
       if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
         setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
         setIsValid(false)

@@ -65,7 +65,7 @@ const validateCert = (value:string) => {
     
     if(value||value!=='') {
         try {
-            devLog("trimmed cert",trimCertificate(value))
+            devLog("DEBUG","trimmed cert",trimCertificate(value))
             const cert = new X509Certificate(trimCertificate(value));
         
             const certDetails = {
@@ -75,20 +75,20 @@ const validateCert = (value:string) => {
                 validTo: cert.notAfter,
                 serialNumber: cert.serialNumber,
             };
-            devLog("certDetails",certDetails)
+            devLog("DEBUG","certDetails",certDetails)
             const currentDate = new Date();
             const futureDate = new Date();
             futureDate.setMonth(currentDate.getMonth() + 6);
             if(currentDate  < certDetails.validFrom) {
-                devLog("Cert is not yet valid",certDetails.validFrom)
+                devLog("DEBUG","Cert is not yet valid",certDetails.validFrom)
             } 
             if(currentDate  > certDetails.validTo) {
-                devLog("Cert is not valid",certDetails.validTo)
+                devLog("DEBUG","Cert is not valid",certDetails.validTo)
             } else {
                 if(certDetails.validTo < futureDate) {
-                    devLog("Cert is valid less than 6kk",certDetails.validTo)
+                    devLog("DEBUG","Cert is valid less than 6kk",certDetails.validTo)
                 } else {
-                devLog("Cert is valid more than 6kk",certDetails.validTo)
+                devLog("DEBUG","Cert is valid more than 6kk",certDetails.validTo)
                 }
             }
             
@@ -108,7 +108,7 @@ const validateCertText = (value:string) => {
     
     if(value||value!=='') {
         try {
-            devLog("trimmed cert",trimCertificate(value))
+            devLog("DEBUG","trimmed cert",trimCertificate(value))
             const cert = new X509Certificate(trimCertificate(value));
                 
             const certDetails = {
@@ -118,7 +118,7 @@ const validateCertText = (value:string) => {
                 validTo: cert.notAfter,
                 serialNumber: cert.serialNumber,
             };
-            devLog("certDetails",certDetails)
+            devLog("DEBUG","certDetails",certDetails)
             const currentDate = new Date();
             const futureDate = new Date();
             futureDate.setMonth(currentDate.getMonth() + 6);
@@ -161,8 +161,8 @@ let validateStatus:boolean=true;
                     break;
                 case "uri":
                         validateStatus=validateUri(value);
-                        devLog("validate uri",value)
-                        devLog("validate uri",validateStatus)
+                        devLog("DEBUG","validate uri",value)
+                        devLog("DEBUG","validate uri",validateStatus)
                     break;    
                 case "ip":
                     validateStatus=validateIpAddress(value);

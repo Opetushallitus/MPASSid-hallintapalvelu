@@ -42,9 +42,9 @@ interface Props {
 export default function MultiSelectForm({ values, isEditable=false, mandatory=false, multiple=true, createEmpty=true, helperText, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
   const intl = useIntl();
 
-  devLog("MultiSelectForm (label)",label)
-  devLog("MultiSelectForm (values)",values)
-  devLog("MultiSelectForm (enums)",enums)
+  devLog("DEBUG","MultiSelectForm (label)",label)
+  devLog("DEBUG","MultiSelectForm (values)",values)
+  devLog("DEBUG","MultiSelectForm (enums)",enums)
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 
@@ -59,12 +59,12 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
 
   const handleChange = (event: SelectChangeEvent<typeof selection>) => {
     
-    devLog("MultiSelectForm (handleChange event)",event )
+    devLog("DEBUG","MultiSelectForm (handleChange event)",event )
     const {
       target: { value },
     } = event;
     
-    devLog("MultiSelectForm (handleChange value)",value )
+    devLog("DEBUG","MultiSelectForm (handleChange value)",value )
     
 
     
