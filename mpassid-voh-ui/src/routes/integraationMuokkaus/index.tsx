@@ -284,7 +284,7 @@ export default function IntegraatioMuokkaus() {
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
                   <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
-                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&String(newIntegration.configurationEntity.sp.metadata.client_secret)!=='***'&&
+                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&!String(newIntegration.configurationEntity.sp.metadata.client_secret).includes("*********")&&
                   newIntegration?.configurationEntity?.sp?.type === "oidc"&&<>
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
