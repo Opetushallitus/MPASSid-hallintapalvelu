@@ -570,7 +570,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: false
+            defaultValue: 'false'
         },
         {
             name: 'oidc',
@@ -593,7 +593,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: false,
             visible: true,
-            defaultValue: true
+            defaultValue: 'true'
         },
         {
             name: 'oidc',
@@ -636,7 +636,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: true
+            defaultValue: 'true'
         },
         {
             name: 'oidc',
