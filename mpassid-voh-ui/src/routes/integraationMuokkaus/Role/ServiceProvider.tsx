@@ -26,26 +26,26 @@ export default function ServiceProvider({ integration, setName, setCanSave, name
   const isEditable = (integration.integrationSets&&integration.integrationSets.length>0&&integration.integrationSets[0].id&&integration.integrationSets[0].id!==0)?false:true;
 
   const updateName = (name: string,value: string,type: string) => {
-    devLog("ServiceProvider (updateName)",value)
+    devLog("DEBUG","ServiceProvider (updateName)",value)
     setName(value)
   }
 
   const canSave = (data:boolean) => {
-    devLog("ServiceProvider (canSave)",data)
+    devLog("DEBUG","ServiceProvider (canSave)",data)
     setCanSave(data)
   }
 
   const validator = (value:string) => {
-    devLog("ServiceProvider validator ( configuration.name)", configuration.name)
-    devLog("ServiceProvider validator (configuration)",configuration)
-    devLog("ServiceProvider validator (value)",value)
+    devLog("DEBUG","ServiceProvider validator ( configuration.name)", configuration.name)
+    devLog("DEBUG","ServiceProvider validator (configuration)",configuration)
+    devLog("DEBUG","ServiceProvider validator (value)",value)
     return validate(configuration.validation,value);
   }
 
   const helpGeneratorText = (value:string) => {
-    devLog("helpGeneratorText ( configuration.name)", configuration.name)
-    devLog("helpGeneratorText (configuration)",configuration)
-    devLog("helpGeneratorText (value)",value)
+    devLog("DEBUG","helpGeneratorText ( configuration.name)", configuration.name)
+    devLog("DEBUG","helpGeneratorText (configuration)",configuration)
+    devLog("DEBUG","helpGeneratorText (value)",value)
     
     return helperText(configuration.validation,value)
   }

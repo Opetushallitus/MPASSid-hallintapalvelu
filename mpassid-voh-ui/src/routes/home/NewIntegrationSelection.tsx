@@ -70,7 +70,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             });
             me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).forEach(o=>possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')));
             
-            devLog("NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll.current)
+            devLog("DEBUG","NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll.current)
             possibleOrganizationsOidsAll.current.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
@@ -118,7 +118,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             const organizationNames: Organization[] = [];
             const possibleOrganizationsOids = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
             //possibleOrganizationsOids.concat(me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')) || []);
-            devLog("NewIntegrationSelection (possibleOrganizationsOids)",possibleOrganizationsOids)
+            devLog("DEBUG","NewIntegrationSelection (possibleOrganizationsOids)",possibleOrganizationsOids)
             possibleOrganizationsOids.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
@@ -191,10 +191,10 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
-                devLog("createIntegration (result)",result)
+                devLog("DEBUG","createIntegration (result)",result)
                 result.id=0;
                 if(result?.configurationEntity?.sp) {
-                    devLog("createIntegration (oldSet)",service)
+                    devLog("DEBUG","createIntegration (oldSet)",service)
                     if(service!==undefined) {
                         result.configurationEntity.sp.name=service.name
                         result.deploymentPhase=service.environment                        
@@ -202,8 +202,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         result.integrationSets.push( { id: service.setId })
 
                         
-                        devLog("createIntegration (type service.environment)",(typeof service.environment))
-                        devLog("createIntegration (service.environment)",service.environment)
+                        devLog("DEBUG","createIntegration (type service.environment)",(typeof service.environment))
+                        devLog("DEBUG","createIntegration (service.environment)",service.environment)
                     }
                     
                 }
@@ -213,7 +213,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                 if(result?.configurationEntity?.sp&&result.configurationEntity.sp.metadata===null) {
                     result.configurationEntity.sp.metadata={}
                 }
-                devLog("createIntegration (integration)",result)
+                devLog("DEBUG","createIntegration (integration)",result)
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
             })       
       };
@@ -225,7 +225,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
       
       const handleIntegration = (event: SelectChangeEvent) => {
 
-        devLog("handleIntegration (value)",String(event.target.value))
+        devLog("DEBUG","handleIntegration (value)",String(event.target.value))
         const value = String(event.target.value);
         setIntegration(value)
         
@@ -244,7 +244,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     }; 
 
     const handleService = (value: serviceProps) => {
-        devLog("handleService",value)
+        devLog("DEBUG","handleService",value)
         setService(value)
     }; 
     

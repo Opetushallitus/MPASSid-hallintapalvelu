@@ -19,6 +19,7 @@ declare global {
     PROD: boolean;
     RAAMIT_PATH: string;
     SUPPORT_URI?: string;
+    LOG_LEVEL?: "DEBUG"|"INFO";
   };
 }
 
@@ -30,6 +31,8 @@ if (ENV.API_BASE_URL) {
     ? ENV.API_BASE_URL
     : window.location.origin + ENV.API_BASE_URL;
 }
+
+
 
 async function main() {
   if (ENV.MOCK === "msw") {
