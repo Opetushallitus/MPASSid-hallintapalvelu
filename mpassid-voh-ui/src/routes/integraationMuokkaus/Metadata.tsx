@@ -94,7 +94,7 @@ export default function Metadata({
   }
   const updateMetadata = (array: boolean,name:string, value:any) => {  
     devLog("DEBUG","updateArrayMetadata (mandatoryAttributes)",mandatoryAttributes)
-    devLog("DEBUG","updateMetadata (array)",array)
+    devLog("DEBUG","updateMetadata ("+name+" array)",array)
     devLog("DEBUG","updateMetadata ("+name+")",value)
     
     var newMetadata
@@ -228,7 +228,7 @@ export default function Metadata({
                                           
                       devLog("DEBUG","Metadata (attribute init)",attribute)
                       if(attribute.content === undefined) {
-                        
+                        devLog("DEBUG","Metadata (attribute init content undefined)",attribute)
                         if(configuration.array) {
                           attribute.content=[];
                         }
@@ -249,8 +249,14 @@ export default function Metadata({
                       if(configuration.enum&&configuration.enum.length>0) {
                         
                         if(configuration.array===false&&configuration.switch&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
-                          //Initialize switch value                    
-                          updateMetadata(configuration.array,configuration.name,!!attribute.content)                          
+                          //Initialize switch value                
+                          devLog("DEBUG","Metadata (attribute init switch content "+configuration.name+")",attribute.content)                              
+                          if(attribute.content==='true') {
+                            updateMetadata(configuration.array,configuration.name,true)                          
+                          } else {
+                            updateMetadata(configuration.array,configuration.name,false)                          
+                          } 
+                          
                         }
 
                         if(configuration.array===true&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
