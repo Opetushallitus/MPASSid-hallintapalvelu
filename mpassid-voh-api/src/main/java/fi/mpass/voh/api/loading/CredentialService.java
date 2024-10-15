@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,11 @@ public class CredentialService {
     private static final Logger logger = LoggerFactory.getLogger(CredentialService.class);
 
     private ParameterStoreService parameterStoreService;
+
+    @Value("${application.metadata.credential.name.field:client_id}")
+    protected String credentialMetadataNameField = "client_id";
+    @Value("${application.metadata.credential.value.field:client_secret}")
+    protected String credentialMetadataValueField = "client_secret";
 
     public CredentialService(ParameterStoreService parameterStoreService) {
         this.parameterStoreService = parameterStoreService;
@@ -34,6 +40,14 @@ public class CredentialService {
                 // TODO check the first and the second not null and size > 1 ?
                 boolean success = parameterStoreService.put(path, (String) name, (String) value);
                 if (success) {
+                    if (name.equals(credentialMetadataNameField)) {
+                        integration.getConfigurationEntity().getSp().getMetadata().put((String) name,
+                        ((String) value).substring(0, 6) + "******");
+                    }
+                    if (name.equals(credentialMetadataValueField)) {
+                        integration.getConfigurationEntity().getSp().getMetadata().put((String) name,
+                        ((String) value).substring(0, 3) + "*********");
+                    }
                     logger.debug("Integration #{} Finished credential processing", integration.getId());
                 } else {
                     logger.error("Integration #{} Failed credential processing", integration.getId());
