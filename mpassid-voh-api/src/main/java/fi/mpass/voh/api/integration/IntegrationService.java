@@ -26,6 +26,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -60,6 +61,7 @@ import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
+import fi.mpass.voh.api.loading.CredentialService;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -74,13 +76,19 @@ public class IntegrationService {
   private final OrganizationService organizationService;
   private final LoadingService loadingService;
   private final IntegrationServiceConfiguration configuration;
+  private final CredentialService credentialService;
+
+  @Value("${application.metadata.credential.value.field:client_secret}")
+  protected String credentialMetadataValueField = "client_secret";
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
-      LoadingService loadingService, IntegrationServiceConfiguration configuration) {
+      LoadingService loadingService, IntegrationServiceConfiguration configuration,
+      CredentialService credentialService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
     this.configuration = configuration;
+    this.credentialService = credentialService;
   }
 
   public List<Integration> getIntegrations() {
@@ -640,8 +648,10 @@ public class IntegrationService {
     return integrations;
   }
 
-  public List<Integration> getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(LocalDateTime timestamp, int deploymentPhase, String role) {
-    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhaseAndRole(timestamp, deploymentPhase, role);
+  public List<Integration> getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(LocalDateTime timestamp,
+      int deploymentPhase, String role) {
+    List<Integration> integrations = integrationRepository
+        .findAllByLastUpdatedOnAfterAndDeploymentPhaseAndRole(timestamp, deploymentPhase, role);
     return integrations;
   }
 
@@ -910,6 +920,17 @@ public class IntegrationService {
           setIntegration.getConfigurationEntity().getSet().setType("sp");
           setIntegration.setOrganization(integration.getOrganization());
           integration.removeFromSets();
+
+          if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+            // Save client secret to aws parameter store
+            boolean success = credentialService.updateCredential(integration, credentialMetadataValueField,
+                integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
+            if (!success) {
+              logger.error("Failed to save secret to aws parameter store.");
+              throw new EntityCreationException("Integration creation failed");
+            }
+          }
+
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
           integration.addToSet(setIntegration);

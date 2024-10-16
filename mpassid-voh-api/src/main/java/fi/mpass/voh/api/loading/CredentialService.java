@@ -40,13 +40,9 @@ public class CredentialService {
                 // TODO check the first and the second not null and size > 1 ?
                 boolean success = parameterStoreService.put(path, (String) name, (String) value);
                 if (success) {
-                    if (name.equals(credentialMetadataNameField)) {
-                        integration.getConfigurationEntity().getSp().getMetadata().put((String) name,
-                        ((String) value).substring(0, 6) + "******");
-                    }
                     if (name.equals(credentialMetadataValueField)) {
                         integration.getConfigurationEntity().getSp().getMetadata().put((String) name,
-                        ((String) value).substring(0, 3) + "*********");
+                                ((String) value).substring(0, 3) + "*********");
                     }
                     logger.debug("Integration #{} Finished credential processing", integration.getId());
                 } else {
