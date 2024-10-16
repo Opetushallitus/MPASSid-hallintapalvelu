@@ -41,6 +41,7 @@ import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
 import fi.mpass.voh.api.integration.sp.ServiceProvider;
+import fi.mpass.voh.api.loading.CredentialService;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -73,8 +74,12 @@ class IntegrationServiceTests {
     @Mock
     private LoadingService loadingService;
 
+    @Mock
+    private CredentialService credentialService;
+
     private IntegrationService underTest;
     private IntegrationServiceConfiguration configuration;
+
 
     private Integration integration;
     private Integration integrationSp;
@@ -93,7 +98,7 @@ class IntegrationServiceTests {
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
                 "/logos");
 
-        underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration);
+        underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration, credentialService);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);

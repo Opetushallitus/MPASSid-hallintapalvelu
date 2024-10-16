@@ -82,8 +82,7 @@ public class IntegrationService {
   protected String credentialMetadataValueField = "client_secret";
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
-      LoadingService loadingService, IntegrationServiceConfiguration configuration,
-      CredentialService credentialService) {
+      LoadingService loadingService, IntegrationServiceConfiguration configuration, CredentialService credentialService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
