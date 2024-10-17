@@ -82,7 +82,8 @@ public class IntegrationService {
   protected String credentialMetadataValueField = "client_secret";
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
-      LoadingService loadingService, IntegrationServiceConfiguration configuration, CredentialService credentialService) {
+      LoadingService loadingService, IntegrationServiceConfiguration configuration,
+      CredentialService credentialService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
@@ -940,6 +941,16 @@ public class IntegrationService {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
           if (optionalSet.isPresent()) {
+            if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+              // Save client secret to aws parameter store
+              boolean success = credentialService.updateCredential(integration, credentialMetadataValueField,
+                  integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
+              if (!success) {
+                logger.error("Failed to save secret to aws parameter store.");
+                throw new EntityCreationException("Integration creation failed");
+              }
+            }
+
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
             integrationRepository.saveAndFlush(optionalSet.get());
