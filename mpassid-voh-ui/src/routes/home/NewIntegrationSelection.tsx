@@ -18,12 +18,12 @@ export const defaults = {
     //typesPI: [ "saml"],
     typeOKJ: "wilma",
     //typesOKJ: [ "opinsys", "wilma", "adfs", "azure", "google" ]
-    typesOKJ: [ "wilma" ]
+    typesOKJ: [ "wilma", "opinsys" ]
   };
 
   if(!ENV.PROD) {
     //defaults.typesPI.push("oidc")
-    defaults.typesOKJ.push("opinsys")
+    //defaults.typesOKJ.push("opinsys")
   }
 
   interface Props {

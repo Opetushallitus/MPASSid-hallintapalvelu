@@ -8,7 +8,8 @@ import type { Dispatch} from "react";
 import { useRef } from "react";
 import { devLog } from "@/utils/devLog";
 import { helperText, validate } from "@/utils/Validators";
-import { dataConfiguration, defaultDataConfiguration, UiConfiguration } from "@/config";
+import type { UiConfiguration } from "@/config";
+import { dataConfiguration, defaultDataConfiguration } from "@/config";
 
 interface Props {
   integration: Components.Schemas.Integration;

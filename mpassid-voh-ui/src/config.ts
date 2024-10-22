@@ -123,18 +123,33 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'clientId',
       type: 'data',
-      mandatory: false,
+      mandatory: true,
       array: false,
       switch: false,
-      validation: [],
-      integrationType: [
+      validation: [ 'binddn' ],
+      integrationType: [        
         {
-            name: 'azure',
-            editable: false,
+            name: 'opinsys',
+            editable: true,
             visible: true,
         }
       ]
   },
+  {
+    name: 'clientId',
+    type: 'data',
+    mandatory: false,
+    array: false,
+    switch: false,
+    validation: [ ],
+    integrationType: [
+      {
+          name: 'azure',
+          editable: false,
+          visible: true,
+      }
+    ]
+},
   {
       name: 'clientKey',
       type: 'data',
@@ -146,6 +161,11 @@ export const dataConfiguration:UiConfiguration[] = [
         {
             name: 'azure',
             editable: false,
+            visible: true,
+        },
+        {
+            name: 'opinsys',
+            editable: true,
             visible: true,
         }
       ]
@@ -167,7 +187,7 @@ export const dataConfiguration:UiConfiguration[] = [
         },
         {
             name: 'opinsys',
-            editable: false,
+            editable: true,
             visible: true,
             defaultValue: 'opinsys'
         },
@@ -186,7 +206,13 @@ export const dataConfiguration:UiConfiguration[] = [
     array: false,
     switch: false,
     validation: [],
-    integrationType: []
+    integrationType: [
+        {
+            name: 'opinsys',
+            editable: true,
+            visible: true
+        }
+    ]
   },
   {
       name: 'firstName',

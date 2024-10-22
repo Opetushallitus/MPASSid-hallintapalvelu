@@ -3,7 +3,7 @@ import {  Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import { type Dispatch } from "react";
-import type { IntegrationType} from '../../config';
+import type { IntegrationType, UiConfiguration} from '../../config';
 import { dataConfiguration, defaultIntegrationType } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, trimCertificate, validate } from "@/utils/Validators";
@@ -37,8 +37,9 @@ export default function Metadata({
 }) {
   
   const intl = useIntl();
-  const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
-  const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
+  const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===type).length>0)
+  const specialConfiguration:string[] = configurations.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
+  const environmentConfiguration:string[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
   
   const createAttributeContent = (name:string,currentData: any,roleConfiguration:IntegrationType,array:boolean,multiselect: boolean|undefined) => {
@@ -184,7 +185,7 @@ export default function Metadata({
 
         if(type==="saml"||type==="oidc") {
           return (<Grid container >
-            {dataConfiguration
+            {configurations
               .filter((configuration) => configuration.type === 'metadata')
               //.filter((configuration) => configuration.environment===undefined||configuration.environment==environment )
               .filter((configuration) => (environmentConfiguration.includes(configuration.name)&&configuration.environment===environment)||(!environmentConfiguration.includes(configuration.name)&&configuration.environment===undefined))
