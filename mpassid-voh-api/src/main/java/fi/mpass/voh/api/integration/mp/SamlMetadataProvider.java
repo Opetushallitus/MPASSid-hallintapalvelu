@@ -102,6 +102,7 @@ public class SamlMetadataProvider {
             // TODO size sanity check
             metadata = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
+            logger.error(e.getMessage());
             metadata = null;
         }
 
