@@ -76,6 +76,7 @@ public class SamlMetadataProvider {
                     .retrieve()
                     .body(String.class);
         } catch (Exception ex) {
+            logger.error(ex.getMessage());
             metadata = null;
         }
 
