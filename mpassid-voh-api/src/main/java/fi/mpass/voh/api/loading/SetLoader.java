@@ -89,7 +89,7 @@ public class SetLoader extends Loader {
                 rootNode = (objectMapper.readTree(actualInputStream)).path("integrationGroups");
 
             } catch (StreamReadException e) {
-                logger.error("{} contains invalid content.", setInput);
+                logger.error("{} contains invalid content. {}", setInput, e.getMessage());
                 loading.addError(Long.valueOf(0),
                         setInput + " contains invalid content");
                 inputStream = null;

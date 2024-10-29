@@ -99,7 +99,7 @@ public class ProvisioningService {
                                 (o1, o2) -> o1.getLastUpdatedOn()
                                         .compareTo(o2.getLastUpdatedOn()));
                     } catch (Exception e) {
-                        logger.error("Error in getting the oldest integration by last update time.");
+                        logger.error("Error in getting the oldest integration by last update time." + e.getMessage());
                         continue;
                     }
                     logger.info("Oldest changed integration dated on "
