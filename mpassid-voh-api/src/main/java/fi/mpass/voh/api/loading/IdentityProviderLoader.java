@@ -101,7 +101,7 @@ public class IdentityProviderLoader extends Loader {
                 rootNode = (objectMapper.readTree(actualInputStream)).path("identityProviders");
 
             } catch (StreamReadException e) {
-                logger.error("{} contains invalid content.", idpInput);
+                logger.error("{} contains invalid content. {}", idpInput, e.getMessage());
                 loading.addError(Long.valueOf(0),
                         idpInput + " contains invalid content");
                 inputStream = null;

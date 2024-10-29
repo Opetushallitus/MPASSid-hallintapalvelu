@@ -549,6 +549,7 @@ public class IntegrationService {
 
         integration = integrationRepository.saveAndFlush(existingIntegration);
       } catch (OptimisticLockException ole) {
+        logger.error(ole.getMessage());
         throw new EntityUpdateException(
             "Integration #" + existingIntegration.getId() + " update not successful. Please re-update.");
       }
@@ -725,9 +726,11 @@ public class IntegrationService {
             if (organization != null) {
               organizationService.saveOrganization(organization);
             } else {
+              logger.error("Organization is null.");
               throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
             }
           } catch (JsonProcessingException e) {
+            logger.error(e.getMessage());
             throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
           }
         }

@@ -8,6 +8,8 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +36,8 @@ public class ProvisioningController {
 
     private final ProvisioningService provisioningService;
     private final IntegrationService integrationService;
+
+    private static final Logger logger = LoggerFactory.getLogger(ProvisioningController.class);
 
     public ProvisioningController(ProvisioningService provisionService, IntegrationService integrationService) {
         this.provisioningService = provisionService;
@@ -82,38 +86,40 @@ public class ProvisioningController {
 
     @Operation(summary = "Get integration discovery information logo")
     @PreAuthorize("@authorize.hasPermission(#root, 'Provisioning', 'ADMIN')")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ResponseEntity.class), mediaType = "application/octet-stream")),
-			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
-			@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
-	})
-	@GetMapping("/integration/discoveryinformation/logo/{id}")
-	// @JsonView(value = IntegrationView.Default.class)
-	public ResponseEntity<Resource> getIntegrationDiscoveryInformationLogo(@PathVariable Long id) {
-		InputStreamResource resource = integrationService.getDiscoveryInformationLogo(id);
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ResponseEntity.class), mediaType = "application/octet-stream")),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
+    })
+    @GetMapping("/integration/discoveryinformation/logo/{id}")
+    // @JsonView(value = IntegrationView.Default.class)
+    public ResponseEntity<Resource> getIntegrationDiscoveryInformationLogo(@PathVariable Long id) {
+        InputStreamResource resource = integrationService.getDiscoveryInformationLogo(id);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			resource.getInputStream().transferTo(baos);
-		} catch (IllegalStateException e) {
-			throw new EntityNotFoundException("Logo retrieval failed.");
-		} catch (IOException e) {
-			throw new EntityNotFoundException("Logo retrieval failed.");
-		}
-		InputStream imageHeaderStream = new ByteArrayInputStream(baos.toByteArray());
-		InputStream imageOutputStream = new ByteArrayInputStream(baos.toByteArray());
-		InputStreamResource outputResource = new InputStreamResource(imageOutputStream);
-		String logoContentType = integrationService.getDiscoveryInformationLogoContentType(imageHeaderStream);
+        try {
+            resource.getInputStream().transferTo(baos);
+        } catch (IllegalStateException e) {
+            logger.error(e.getMessage());
+            throw new EntityNotFoundException("Logo retrieval failed.");
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            throw new EntityNotFoundException("Logo retrieval failed.");
+        }
+        InputStream imageHeaderStream = new ByteArrayInputStream(baos.toByteArray());
+        InputStream imageOutputStream = new ByteArrayInputStream(baos.toByteArray());
+        InputStreamResource outputResource = new InputStreamResource(imageOutputStream);
+        String logoContentType = integrationService.getDiscoveryInformationLogoContentType(imageHeaderStream);
 
-		HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, logoContentType);
-		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + Long.toString(id));
-		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-		headers.add("Pragma", "no-cache");
-		headers.add("Expires", "0");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + Long.toString(id));
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
 
-		return ResponseEntity.ok()
-				.headers(headers)
-				.body(outputResource);
-	}
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(outputResource);
+    }
 }

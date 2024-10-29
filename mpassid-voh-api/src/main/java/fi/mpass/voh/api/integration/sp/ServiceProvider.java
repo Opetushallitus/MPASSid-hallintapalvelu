@@ -214,6 +214,7 @@ public abstract class ServiceProvider {
             Map<String, Object> errorHashMap = new HashMap<>();
             errorHashMap.put("Error", e.getMessage());
             this.metadataJson = errorHashMap;
+            logger.error(e.getMessage());
         }
     }
 
