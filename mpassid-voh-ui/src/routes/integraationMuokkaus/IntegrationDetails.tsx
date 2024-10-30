@@ -347,7 +347,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
         </Grid>
-        {role === "idp" && type === "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && (type === "wilma" || type === "opinsys") && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
@@ -361,7 +361,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 isEditable={true}/>
               )
           }
-        {role === "idp" && type !== "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && type !== "wilma" && type !== "opinsys" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 

@@ -2,6 +2,12 @@ import { FormattedMessage } from 'react-intl';
 import { devLog } from './devLog';
 import { X509Certificate } from '@peculiar/x509';
 
+const validateDn = (value:string) => {
+
+    var regExpPattern = new RegExp('^((UID|uid=([^,]*)),)?((CN=([^,]*)),)?((((?:CN|OU|cn|ou)=[^,]+,?)+),)?((?:DC|dc=[^,]+,?)+)$')
+    return !!regExpPattern.test(value);
+
+}
 
 const validateUri = (value:string) => {
     
@@ -167,6 +173,9 @@ let validateStatus:boolean=true;
                 case "ip":
                     validateStatus=validateIpAddress(value);
                     break;
+                case "binddn":
+                    validateStatus=validateDn(value);
+                    break;
                 case "number":
                     validateStatus=validateNumber(value);
                     break; 
@@ -221,6 +230,12 @@ export const helperText = (validators:string[],value:string) => {
                     validateStatus=validateUri(value);
                     if(!validateStatus) {
                         helperText=<FormattedMessage defaultMessage="uri ei ole validi!" />
+                    }
+                    break;
+                case "binddn":
+                    validateStatus=validateDn(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="bind dn ei ole validi!" />
                     }
                     break;
                 case "ip":

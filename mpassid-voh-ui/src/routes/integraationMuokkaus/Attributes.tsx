@@ -25,8 +25,9 @@ interface Props {
 
 export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid,environment, setCanSave, setAttributes }: Props) {
   const intl = useIntl();
-  const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
-  const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
+  const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===type).length>0)
+  const specialConfiguration:string[] = configurations.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
+  const environmentConfiguration:string[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const attributeConfiguration=useRef<UiConfiguration[]>([]);
   const allAttributes:string[] = [];
 
@@ -90,7 +91,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
     return (
       <Grid container >
-        {dataConfiguration
+        {configurations
           .filter((configuration) => configuration.type === attributeType)
           //.filter((configuration) => configuration.environment===undefined||configuration.environment==environment )
           .filter((configuration) => (environmentConfiguration.includes(configuration.name)&&configuration.environment===environment)||(!environmentConfiguration.includes(configuration.name)&&configuration.environment===undefined))
