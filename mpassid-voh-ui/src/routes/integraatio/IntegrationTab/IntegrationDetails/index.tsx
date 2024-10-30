@@ -20,6 +20,19 @@ import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
 import { tallentajaOphGroup } from '../../../../config';
 import { useEffect, useState } from "react";
+import { fixPackage } from '@/config';
+import { defaults } from "@/routes/home/NewIntegrationSelection";
+import { clone } from "lodash";
+
+export const integrationTypes = clone(defaults);
+
+if(fixPackage) {
+  integrationTypes.typesPI = [ "saml", "oidc" ];
+  integrationTypes.typesOKJ = [ "wilma", "azure" ];
+} else {
+  //Note: Currently only azure can be modified, but new azure integration cannot be created
+  integrationTypes.typesOKJ.push("azure")
+}
 interface Props {
   integration: Components.Schemas.Integration;
 }
@@ -27,6 +40,8 @@ interface Props {
 export default function IntegrationDetails({ integration }: Props) {
   const me = useMe();
   const [groups, setGroups] = useState<string[]>();
+  
+  
 
   useEffect(() => {
     if(me?.groups) {
@@ -36,7 +51,14 @@ export default function IntegrationDetails({ integration }: Props) {
   
   const writeAccess = () => {
     
-    //Tuki ainoastaan azure palveluille 
+    if(integration?.configurationEntity?.idp?.type && integration?.configurationEntity?.idp?.type!=="" && integrationTypes.typesOKJ.indexOf(integration?.configurationEntity?.idp?.type)>-1  && integration.organization?.oid!=null && (groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+      return true;
+    } else {
+      if(integration?.configurationEntity?.sp?.type && integration?.configurationEntity?.sp?.type !== "" && integrationTypes.typesPI.indexOf(integration?.configurationEntity?.sp?.type) && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+        return true
+      }
+    }
+    /* 
     if((integration?.configurationEntity?.idp?.type === "azure" ||  integration?.configurationEntity?.idp?.type === "wilma" ||  integration?.configurationEntity?.idp?.type === "opinsys") && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
       return true;
     } else {
@@ -44,6 +66,7 @@ export default function IntegrationDetails({ integration }: Props) {
         return true
       }
     }
+    */
     return false;
   }
 
