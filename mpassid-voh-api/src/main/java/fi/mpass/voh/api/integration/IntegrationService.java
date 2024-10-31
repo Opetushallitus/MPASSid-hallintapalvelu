@@ -1069,6 +1069,12 @@ public class IntegrationService {
           throw new EntityCreationException("Failed to save image.");
         }
         try (InputStream inputStream = file.getInputStream()) {
+          String logoContentType = getDiscoveryInformationLogoContentType(inputStream);
+          if (logoContentType != null && logoContentType.contains("image/")) {
+            logoContentType.replaceFirst("image/", "");
+            destinationFile.resolve("." + logoContentType);
+            url += "." + logoContentType;
+          }
           Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
           if (integration.get().getConfigurationEntity() != null
               && integration.get().getConfigurationEntity().getIdp() != null) {
