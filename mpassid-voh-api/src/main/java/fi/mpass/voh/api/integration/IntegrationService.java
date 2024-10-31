@@ -1071,7 +1071,7 @@ public class IntegrationService {
         try (InputStream inputStream = file.getInputStream()) {
           String logoContentType = getDiscoveryInformationLogoContentType(inputStream);
           if (logoContentType != null && logoContentType.contains("image/")) {
-            logoContentType.replaceFirst("image/", "");
+            logoContentType = logoContentType.replaceFirst("image/", "");
             destinationFile.resolve("." + logoContentType);
             url += "." + logoContentType;
           }
