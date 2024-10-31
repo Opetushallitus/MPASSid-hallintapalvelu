@@ -176,7 +176,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     array: false,
     switch: false,
-    enum: [ 'azurev4', 'wilma', 'opinsys', 'azureLuovi'],
+    enum: [ 'azurev4', 'wilma', 'wilmav2', 'opinsys', 'azureLuovi'],
     validation: [ 'expert' ],
     integrationType: [
         {
