@@ -1,4 +1,4 @@
-import { validate } from './utils/Validators';
+export const fixPackage = true;
 export const roles = ["idp", "sp", "set"] as const;
 export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
@@ -176,7 +176,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     array: false,
     switch: false,
-    enum: [ 'azurev4', 'wilma', 'opinsys', 'azureLuovi'],
+    enum: [ 'azurev4', 'wilma', 'wilmav2', 'opinsys', 'azureLuovi'],
     validation: [ 'expert' ],
     integrationType: [
         {
@@ -540,8 +540,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            index: 'randomsha1',
-            generate: 'randomsha1'            
+            //index: 'randomsha1',
+            //generate: 'randomsha1'            
         }
     ]
 },
@@ -557,8 +557,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            index: 'name_randomsha1',
-            generate: 'name_randomsha1',
+            //index: 'name_randomsha1',
+            //generate: 'name_randomsha1',
         }
     ]
 },
@@ -577,7 +577,8 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false, //fix 2.4.1
             visible: true,
             defaultValue: 'code'
         }
@@ -768,7 +769,8 @@ export const dataConfiguration:UiConfiguration[] = [
         
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false,//fix 2.4.1
             visible: true,
             defaultValue: 'client_secret_basic'
         }
@@ -787,7 +789,8 @@ export const dataConfiguration:UiConfiguration[] = [
         
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false, //fix 2.4.1
             visible: true 
         }
     ]
@@ -809,7 +812,8 @@ export const dataConfiguration:UiConfiguration[] = [
         },
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false, //fix 2.4.1
             visible: true,
             defaultValue: 'false'
         }

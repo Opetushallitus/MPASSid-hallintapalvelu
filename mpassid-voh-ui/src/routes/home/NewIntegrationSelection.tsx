@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 import { devLog } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
+import { fixPackage } from "@/config";
 
 export const defaults = {
     typePI: "saml",
@@ -24,6 +25,11 @@ export const defaults = {
   if(!ENV.PROD) {
     //defaults.typesPI.push("oidc")
     //defaults.typesOKJ.push("opinsys")
+  }
+
+  if(fixPackage) {
+    defaults.typesPI = [ "saml" ];
+    defaults.typesOKJ = [ "wilma" ];
   }
 
   interface Props {
