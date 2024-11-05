@@ -456,7 +456,7 @@ public class IntegrationService {
 
   private Optional<Integration> changeLogoUrl(Optional<Integration> integration) {
     if (integration.isPresent()) {
-      String logoUrl = "https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo"
+      String logoUrl = this.configuration.getImageBaseUrlUi()
           + "/" + integration.get().getId();
       if (integration.get().getConfigurationEntity().getIdp() instanceof IdentityProvider) {
         integration.get().getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
@@ -1102,6 +1102,7 @@ public class IntegrationService {
             integration.get().getConfigurationEntity().getIdp().setLogoUrl(url);
             integrationRepository.save(integration.get());
           }
+          url = this.configuration.getImageBaseUrlUi() + "/" + id;
           return url;
         }
       } catch (IOException e) {
