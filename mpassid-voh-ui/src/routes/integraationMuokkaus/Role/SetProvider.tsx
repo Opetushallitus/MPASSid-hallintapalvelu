@@ -8,6 +8,7 @@ interface Props {
   integration: Components.Schemas.Integration;
   name?: string;
   tenantId?: string;
+  metadataUrl?: string;
   setName?: Dispatch<string>;
   setCanSave?: Dispatch<boolean>;
   setEnvironment: Dispatch<number>;

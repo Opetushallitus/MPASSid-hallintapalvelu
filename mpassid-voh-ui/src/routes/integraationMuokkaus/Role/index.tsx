@@ -14,6 +14,7 @@ interface Props {
   environment: MutableRefObject<number>;
   name: string;
   attributes?: Components.Schemas.Attribute[];
+  metadataUrl: string;
   setName: Dispatch<string>;
   setCanSave: Dispatch<boolean>;
   setEnvironment: Dispatch<number>;
@@ -26,7 +27,7 @@ const roleComponents = {
   set: SetProvider
 };
 
-export default function Role({ integration, oid, environment, setName, setCanSave, name, attributes,setEnvironment,setMetadataUrl }: Props) {
+export default function Role({ integration, oid, environment, setName, setCanSave, name, attributes,setEnvironment,setMetadataUrl,metadataUrl }: Props) {
   const role = getRole(integration);
 
   const Component = roleComponents[role];
@@ -41,7 +42,7 @@ export default function Role({ integration, oid, environment, setName, setCanSav
 
   return (
     <>
-      <Component integration={integration} oid={oid} environment={environment} setEnvironment={setEnvironment} setName={setName} setCanSave={canSave} name={name} tenantId={tenantId?.content || ''} setMetadataUrl={setMetadataUrl}/>
+      <Component integration={integration} oid={oid} environment={environment} setEnvironment={setEnvironment} setName={setName} setCanSave={canSave} name={name} tenantId={tenantId?.content || ''} setMetadataUrl={setMetadataUrl} metadataUrl={metadataUrl}/>
     </>
   );
 }

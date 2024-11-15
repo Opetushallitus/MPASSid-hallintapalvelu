@@ -239,6 +239,16 @@ defineMessage({
   id: "attribuutti.metadataUrl",
   description: "attribuutti",
 });
+defineMessage({
+  defaultMessage: "Metadatan lataus",
+  id: "attribuutti.metadataFileUpload",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Metadatan url",
+  id: "attribuutti.metadataUrlUpload",
+  description: "attribuutti",
+});
 
 // Attribuuttien työkaluvihjeet
 defineMessage({
@@ -371,6 +381,16 @@ defineMessage({
 defineMessage({
   defaultMessage: "Generoi client_id",
   id: "työkaluvihje.client_id",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Metadatan lataus",
+  id: "työkaluvihje.metadataFileUpload",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Metadatan Urlin lisäys",
+  id: "työkaluvihje.metadataUrlUpload",
   description: "attribuutin työkaluvihje",
 });
 

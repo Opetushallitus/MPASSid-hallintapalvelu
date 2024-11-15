@@ -1,12 +1,12 @@
 import { useParams } from "react-router-dom";
 import type { Components } from "@/api";
 import { azureMetadataUrlTemplate, dataConfiguration, environments, testLink, UiConfiguration } from "@/config";
-import { Box, Grid, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Grid, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../integraatio/IntegrationTab/DataRow"
 import LinkValue from "../LinkValue";
 import Type from "./Type";
-import type { Dispatch, MutableRefObject } from "react";
+import { useEffect, useRef, type Dispatch, type MutableRefObject } from "react";
 import type { oneEnum } from "../Form/MultiSelectForm";
 import MultiSelectForm from "../Form/MultiSelectForm";
 import { useIntl } from 'react-intl';
@@ -15,26 +15,34 @@ import { devLog } from "@/utils/devLog";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InputForm from "../Form/InputForm";
 import { helperText, validate } from "@/utils/Validators";
+import { last, toPath } from "lodash";
 
 interface Props {
   integration: Components.Schemas.Integration;
   name?: string;
   tenantId?: string;
   environment: MutableRefObject<number>;
+  metadataUrl: string;
   setName?: Dispatch<string>;
   setCanSave?: Dispatch<boolean>;
   setEnvironment: Dispatch<number>;
   setMetadataUrl: Dispatch<string>;
 }
 
-export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl }: Props) {
+export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl,metadataUrl }: Props) {
     const { role } = useParams();
     const intl = useIntl();
     const identityProvider: Components.Schemas.Integration|Components.Schemas.Azure= integration.configurationEntity!.idp!;
     const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===identityProvider.type).length>0)
     const environmentConfiguration:UiConfiguration[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment.current) || [];
-    var metadataUrlEdit=(identityProvider.metadataUrl)?true:false
     
+    useEffect(() => {
+      if(identityProvider.metadataUrl&&identityProvider.type==='azure') {
+        setMetadataUrl(identityProvider.metadataUrl)
+      }
+      
+    },[identityProvider, setMetadataUrl])
+
     const testLinkHref =
       // eslint-disable-next-line no-new-func
       new Function("flowName", `return \`${testLink}\``)(
@@ -43,8 +51,8 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
     
     const metadataUrlTemplate =
       // eslint-disable-next-line no-new-func
-        new Function("tenantId","metadataUrlEdit", `return (tenantId!==''&&!metadataUrlEdit)?\`${azureMetadataUrlTemplate}\`:''`)(
-          tenantId,metadataUrlEdit
+        new Function("tenantId", `return (tenantId!=='')?\`${azureMetadataUrlTemplate}\`:''`)(
+          tenantId
         );
     
     
@@ -52,13 +60,14 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
       devLog("DEBUG","canSave (name)",name)
       devLog("DEBUG","canSave (value)",value)
     }
+    
     const updateMetadataUrl = (name: string, value: string, type: string) => {
 
-      setMetadataUrl(value);
-      metadataUrlEdit=true
+      
       devLog("DEBUG","updateMetadataUrl (name)",name)
       devLog("DEBUG","updateMetadataUrl (value)",value)
       devLog("DEBUG","updateMetadataUrl (type)",type)
+      setMetadataUrl(value);
     }      
 
     const updateEnvironment = (values: String[]) => {
@@ -76,30 +85,9 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
           )
       });
 
-      const metadataUrlForm = (metadataUrl:string|undefined) => {        
-        const id = `attribuutti.metadataUrl`;
-        const label = id in intl.messages ? { id: id } : undefined;           
-        const tooltipId = `työkaluvihje.metadataUrl`;
-        const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
+      const metadataUrlForm = (metadataUrl:string) => {        
         if(identityProvider.type==='azure') {
           return (<>                
-          <Grid item xs={4}>
-            <Tooltip
-              title={
-                  <>
-                  {tooltip && (
-                      <Box mb={1}>
-                      <FormattedMessage {...tooltip} />
-                      </Box>
-                  )}
-                  <code>metadataUrl</code>
-                  </>
-              }
-              >
-              <span>{label ? <FormattedMessage {...label} /> : 'metadataUrl'}</span>
-            </Tooltip>
-          </Grid>
-          <Grid item xs={8} sx={{}}>
               <Typography
                 sx={{
                     whiteSpace: "pre-wrap",
@@ -111,7 +99,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                 <InputForm key={"metadataUrl"}
                   object={{
                     type: "idp",
-                    content: metadataUrl||'',
+                    content: metadataUrl,
                     name: "metadataUrl"
                   }}
                   path="content"
@@ -128,8 +116,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
               
               
               </Typography>
-          </Grid>
-      
+        
       
       </>)} else {
         return(<></>)
@@ -146,25 +133,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
               </Typography>
         
               <Grid container spacing={2} mb={2}>                
-                  
-                    {!true&&environment.current<0&&
-
-                    (<>
-                    <Grid item xs={4}>
-                    <FormattedMessage defaultMessage="Palveluympäristö" />
-                  </Grid>
-                    <Grid item xs={8}>
-                      <FormattedMessage
-                        defaultMessage={`{deploymentPhase, select,
-                          0 {Testi}
-                          1 {Tuotanto}
-                          2 {Tuotanto-Testi}
-                          other {Tuntematon}
-                        }`}
-                        values={{ deploymentPhase: integration.deploymentPhase }}
-                      />
-                    </Grid>
-                    </>)}
+                                      
                     {environment.current>-1&&
                     (<>
                       <Grid item xs={4}>
@@ -196,7 +165,32 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                     </>)}
                 <DataRow object={identityProvider} path="type" type={Type} />
                 
-                {metadataUrlForm(identityProvider.metadataUrl)}
+                
+                {(metadataUrl&&identityProvider.type==='azure')&&
+                  <>
+                    <DataRowTitle path={'metadataUrl'}/>              
+                    <DataRowValue>
+                        {metadataUrlForm(metadataUrl)}
+                    </DataRowValue>                                        
+                  </>
+                }
+                                        
+                {(identityProvider.type==='adfs'||identityProvider.type==='gsuite')&&
+                  <>
+                    <DataRowTitle path={'metadataFileUpload'}/>              
+                    <DataRowValue>
+                    <Alert severity="error">Tähän adfs/gsuite metadata file lataus </Alert>
+                    </DataRowValue>                                        
+                  </>
+                }
+                {(identityProvider.type==='adfs'||identityProvider.type==='gsuite')&&
+                  <>
+                    <DataRowTitle path={'metadataUrlUpload'}/>              
+                    <DataRowValue>
+                    <Alert severity="error">Tähän adfs/gsuite metadata url formi</Alert>
+                    </DataRowValue>                                        
+                  </>
+                }
                         
                 {identityProvider.flowName&&(
                   <>
@@ -215,5 +209,51 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
         return(<></>)
     }
     
+}
+
+export type DataRowProps = {
+  path?: string;
+  children?: React.ReactNode
+};
+
+function DataRowTitle({path}:DataRowProps) {
+
+  const name = last(toPath(path));
+  const intl = useIntl();
+  const id = `attribuutti.${name}`;
+  const tooltipId = `työkaluvihje.${name}`;
+  const label = id in intl.messages ? { id } : undefined;
+  const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
+
+  return (
+    <>
+      <Grid item xs={4}>
+        <Tooltip
+          title={
+            <>
+              {tooltip && (
+                <Box mb={1}>
+                  <FormattedMessage {...tooltip} />
+                </Box>
+              )}
+              <code>{name}</code>
+            </>
+          }
+        >
+          <span>{label ? <FormattedMessage {...label} /> : name}</span>
+        </Tooltip>
+      </Grid>
+      
+    </>
+  );
+}
+
+function DataRowValue({children}:DataRowProps) {
+
+  return (
+      <Grid item xs={8}>
+        {children}
+      </Grid>
+  );
 }
 

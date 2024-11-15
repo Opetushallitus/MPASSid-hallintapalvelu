@@ -412,7 +412,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )}    
         
         {newIntegration&&
-        <Role integration={newIntegration} oid={oid} environment={environment} setEnvironment={setIntegrationEnvironment} setMetadataUrl={setMetadataUrl} name={name} setName={setName} setCanSave={setIsValidRoleDetails} attributes={attributes}/>}
+        <Role integration={newIntegration} oid={oid} environment={environment} setEnvironment={setIntegrationEnvironment} setMetadataUrl={setMetadataUrl} metadataUrl={metadataUrl} name={name} setName={setName} setCanSave={setIsValidRoleDetails} attributes={attributes}/>}
 
         {newConfigurationEntityData&&attributes&& <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
