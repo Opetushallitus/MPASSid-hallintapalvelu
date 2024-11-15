@@ -1,4 +1,4 @@
-import { inactivateIntegration, type Components, uploadLogo, createIntegrationRaw, updateIntegrationRaw } from "@/api";
+import { inactivateIntegration, type Components, uploadLogo, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
@@ -90,6 +90,9 @@ export default function IntegraatioMuokkaus() {
 
   const writeAccess = () => {
 
+    devLog("DEBUG","writeAccess (type)",newIntegration?.configurationEntity?.idp?.type)
+    devLog("DEBUG","writeAccess (oid)",newIntegration?.organization?.oid)
+    devLog("DEBUG","writeAccess (groups)",groups)
     if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma" ||  newIntegration?.configurationEntity?.idp?.type === "opinsys") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
       return true;
     } else {
@@ -182,6 +185,28 @@ export default function IntegraatioMuokkaus() {
 
   }
 
+  const testAzureAccess = () => {
+    
+    if (openConfirmation&&newIntegration?.configurationEntity&&newIntegration.configurationEntity.idp?.type==='azure') {
+      const clientKey=newIntegration.configurationEntity.attributes?.find(a=>a.name==='clientKey')
+      if(clientKey !== undefined && !clientKey?.content?.includes("***")) {
+        const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
+                    authRequest.id=123;
+                    authRequest.clientId="clientId";
+                    authRequest.clientSecret="clientSecret";
+                    
+                    testAttributesAuthorization({},authRequest).then(result=>{ 
+                          devLog("DEBUG","testAttributesAuthorization",result) 
+                        }).catch(error=>{
+                          return (<Alert severity="error">TBD: azure tunnisteiden toimivuus testi!!!</Alert>)
+                        })
+                    
+        return (<Alert severity="error">TBD: azure tunnisteiden toimivuus testi!!!</Alert>)
+      } 
+    } 
+    return (<></>)
+  }
+
   return (
     <>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
@@ -257,6 +282,8 @@ export default function IntegraatioMuokkaus() {
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
+                    {testAzureAccess()}
+                    
                   {!isDisabled&&<FormattedMessage defaultMessage="Haluatko varmasti tallentaa?" />}
                     {isDisabled&&<FormattedMessage defaultMessage="Haluatko varmasti poistaa?" />}
                   
@@ -284,7 +311,7 @@ export default function IntegraatioMuokkaus() {
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
                   <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
-                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&!String(newIntegration.configurationEntity.sp.metadata.client_secret).includes("*********")&&
+                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&!String(newIntegration.configurationEntity.sp.metadata.client_secret).includes("***")&&
                   newIntegration?.configurationEntity?.sp?.type === "oidc"&&<>
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}

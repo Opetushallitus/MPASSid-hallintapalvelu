@@ -461,9 +461,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     helperText={helpGeneratorText} 
                     onUpdate={handleTitleChange} 
                     onValidate={validator} 
-                    setNewConfigurationEntityData={function (value: Components.Schemas.ConfigurationEntity): void {
-                      throw new Error("Function not implemented.");
-                    } } 
                     setCanSave={setCanSave}/>}
 
                   { configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
@@ -609,8 +606,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               newConfigurationEntityData={configurationEntity} 
               helperText={helpGeneratorText} 
               onUpdate={handleCustomDisplayNameChange} 
-              onValidate={validator} 
-              setNewConfigurationEntityData={setConfigurationEntity} 
+              onValidate={validator}               
               setCanSave={setCanSave}/>
           </Grid>}
       </>)

@@ -3,7 +3,7 @@ import type { IntegrationType, UiConfiguration } from "@/config";
 import { attributePreferredOrder, defaultIntegrationType } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
-import { useEffect, useRef, type Dispatch} from "react";
+import { useRef, type Dispatch} from "react";
 import AttributeForm from "./Form";
 import { dataConfiguration } from '../../config';
 import { helperText, validate } from "@/utils/Validators";
@@ -35,32 +35,37 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     var result=true;
     
     attributeConfiguration.current.forEach(configuration=>{
-      const name=configuration.name
-      devLog("DEBUG","validateAttributes (name)",name)
-      const currentAttribute=attributes.find(a=>a.name===name)
-    
-      if(configuration&&currentAttribute) {
-        if((currentAttribute.content === undefined|| currentAttribute.content.length===0) && configuration.mandatory ){
-          result = false
-        } else {      
-          if(result) {  
+      if(result) {
+
+        const name=configuration.name                  
+        const currentAttribute=attributes.find(a=>a.name===name)
+
+        if(currentAttribute) {
+          if((currentAttribute.content === undefined || currentAttribute.content === ''|| currentAttribute.content.length===0) && configuration.mandatory ){
+            result = false
+          } else {                     
             if(currentAttribute.content) {
               result = validate(configuration.validation,currentAttribute.content)
             } else {
-              result = validate(configuration.validation,'')         
+              //result = validate(configuration.validation,'')         
+              result=true
             }
-          }
-        }
-      } else {
-        result = true
-      }
-            
+          } 
+        } else {
+          if(configuration.mandatory){
+            result = false
+          } else {                      
+            //result = validate(configuration.validation,'')                                                 
+            result=true
+          } 
+        }     
+        //devLog("DEBUG","validateAttributes ("+name+")",result)             
+      }      
     })
     
-    devLog("DEBUG","validateAttributes (result)",result)
     return result
   }
-  
+
   const updateAttribute = (name:string, value:string, type:string ) => {  
     devLog("DEBUG","updateAttribute ("+name+")",value) 
     const attributeList=cloneDeep(attributes);
@@ -81,8 +86,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     }
 
     if(validateAttributes()) {
+      devLog("DEBUG","updateAttribute (validateAttribute "+name+")",true)
       setCanSave(true)
     } else {
+      devLog("DEBUG","updateAttribute (validateAttribute "+name+")",false)
       setCanSave(false)
     }
 
@@ -105,6 +112,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
             };
           })
           .filter(({ name }) => name)
+          /*
           .sort(
             (a, b) =>
               2 *
@@ -112,15 +120,41 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   attributePreferredOrder.indexOf(a.name!)) -
               (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
           )
+          */
           .filter((configuration) => configuration.integrationType.filter(it=>it.name===type&&it.visible).length>0)
           .map((configuration) => {
-                  attributeConfiguration.current.push(configuration)
-                  allAttributes.push(configuration.name);
+                  if(attributeConfiguration.current.find(a => a.name&&a.name === configuration.name) === undefined) {
+                    attributeConfiguration.current.push(configuration)
+                  }
+                  if(allAttributes.find(name => name === configuration.name) === undefined) {
+                    allAttributes.push(configuration.name);
+                  }
+                  
                   const validator = (value:string) => {
-                    return validate(configuration.validation,value);
+                    if(configuration.mandatory) {
+                      return validate(configuration.validation,value);
+                    } else {
+                      if(value!=='') {
+                        return validate(configuration.validation,value);;
+                      } else {
+                        return true  
+                      }
+                      
+                    }
+                    
                   }
                   const helpGeneratorText = (value:string) => {
-                    return helperText(configuration.validation,value);
+                    if(configuration.mandatory) {
+                      return helperText(configuration.validation,value);
+                    } else {
+                      if(value!=='') {
+                        return helperText(configuration.validation,value);
+                      } else {
+                        return (<></>)  
+                      }
+                      
+                    }
+                    
                   }
                   const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                   devLog("DEBUG","Metadata (roleConfiguration)",roleConfiguration) 
@@ -169,8 +203,8 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                           }
                           
                         }
-                        attributes.push(useAttribute)
-                        setAttributes([ ...attributes]) 
+                        attributes.push(useAttribute)                      
+                        setAttributes(attributes) 
                         
                       } else {
                         useAttribute={ type: attributeType, content: '', name: 'configurationError' }
@@ -228,10 +262,13 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   }
                        
                   if(validateAttributes()) {
+                    devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",true)
                     setCanSave(true)
                   } else {
+                    devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",false)
                     setCanSave(false)
-                  }
+                  } 
+                              
                   devLog("DEBUG","Attributes (useAttribute post)",useAttribute)
                   devLog("DEBUG","Attributes (attribute post)",attributes)                  
 
@@ -240,7 +277,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     onUpdate={updateAttribute}
                     onValidate={validator}
                     newConfigurationEntityData={newConfigurationEntityData}
-                    setNewConfigurationEntityData={setNewConfigurationEntityData}
                     uiConfiguration={configuration}
                     attribute={useAttribute}
                     attributeType={attributeType!}

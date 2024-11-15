@@ -42,9 +42,12 @@ interface Props {
 export default function MultiSelectForm({ values, isEditable=false, mandatory=false, multiple=true, createEmpty=true, helperText, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
   const intl = useIntl();
 
-  devLog("DEBUG","MultiSelectForm (label)",label)
-  devLog("DEBUG","MultiSelectForm (values)",values)
-  devLog("DEBUG","MultiSelectForm (enums)",enums)
+  if(label==='Data source') {
+    devLog("DEBUG","Attributes (***label)",label)
+    devLog("DEBUG","Attributes (***values)",values)
+    devLog("DEBUG","Attributes (***enums)",enums)
+  }
+  
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 

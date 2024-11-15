@@ -30,11 +30,10 @@ interface AttributeProps {
     helperText: (data:string) => JSX.Element;
     onUpdate: (name: string,value: string,type: string) => void;
     onValidate: (data:string) => boolean;
-    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
 }
 
-export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: AttributeProps) {
+export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: AttributeProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -192,11 +191,10 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     onEdit: (name: string,value: string) => void;
     onDelete: (name: string,index: number) => void;
     onValidate: (data:string) => boolean;
-    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
 }
 
-export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave }: MetadataProps) {
+export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave }: MetadataProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -538,11 +536,10 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     helperText: (data:string) => JSX.Element;
     onUpdate: Dispatch<string>;
     onValidate: (data:string) => boolean;
-    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
  }
 
- export function SchoolForm({ name, value, isVisible, isEditable, isMandatory, helperText, newConfigurationEntityData, setNewConfigurationEntityData,onUpdate,onValidate,setCanSave }: SchoolProps) {
+ export function SchoolForm({ name, value, isVisible, isEditable, isMandatory, helperText, newConfigurationEntityData,onUpdate,onValidate,setCanSave }: SchoolProps) {
 
     const intl = useIntl();
     const id = `attribuutti.${name}`;

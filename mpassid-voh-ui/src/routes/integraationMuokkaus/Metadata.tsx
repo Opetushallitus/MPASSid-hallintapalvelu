@@ -352,7 +352,6 @@ export default function Metadata({
                         onDelete={onDelete}
                         onValidate={validator}
                         newConfigurationEntityData={newConfigurationEntityData}
-                        setNewConfigurationEntityData={setNewConfigurationEntityData}  
                         uiConfiguration={configuration}
                         attribute={attribute}
                         type={type}

@@ -229,6 +229,16 @@ defineMessage({
   id: "attribuutti.client_id",
   description: "attribuutti",
 });
+defineMessage({
+  defaultMessage: "Client Keyn voimassaolo",
+  id: "attribuutti.clientKeyValidUntil",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Metatiedot",
+  id: "attribuutti.metadataUrl",
+  description: "attribuutti",
+});
 
 // Attribuuttien työkaluvihjeet
 defineMessage({

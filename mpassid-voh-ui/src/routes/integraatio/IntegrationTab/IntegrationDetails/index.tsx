@@ -18,21 +18,17 @@ import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
-import { tallentajaOphGroup } from '../../../../config';
+import { integrationTypesDefault, tallentajaOphGroup } from '../../../../config';
 import { useEffect, useState } from "react";
 import { fixPackage } from '@/config';
-import { defaults } from "@/routes/home/NewIntegrationSelection";
 import { clone } from "lodash";
 
-export const integrationTypes = clone(defaults);
+export const integrationTypes = clone(integrationTypesDefault);
 
 if(fixPackage) {
   integrationTypes.typesPI = [ "saml", "oidc" ];
   integrationTypes.typesOKJ = [ "wilma", "azure" ];
-} else {
-  //Note: Currently only azure can be modified, but new azure integration cannot be created
-  integrationTypes.typesOKJ.push("azure")
-}
+} 
 interface Props {
   integration: Components.Schemas.Integration;
 }
@@ -65,7 +61,7 @@ export default function IntegrationDetails({ integration }: Props) {
 
   const hasAttributes =
     role === "idp" &&
-    !["opinsys", "wilma"].includes(
+    !["opinsys", "wilma", "adfs", "gsuite" ].includes(
       integration.configurationEntity?.[role]?.type!
     );
 

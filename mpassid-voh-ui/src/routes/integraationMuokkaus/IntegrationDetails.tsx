@@ -19,9 +19,17 @@ import Metadata from "./Metadata";
 import Attributes from "./Attributes";
 import IntegrationBasicDetails from "./IntegrationBasicDetails";
 import type { IntegrationType, UiConfiguration } from '../../config';
-import { dataConfiguration, defaultDataConfiguration, defaultIntegrationType } from '../../config';
+import { dataConfiguration, defaultDataConfiguration, defaultIntegrationType, fixPackage, integrationTypesDefault } from '../../config';
 import SchoolSelection from "./SchoolSelection";
 import { devLog } from "@/utils/devLog";
+
+
+const integrationTypes = clone(integrationTypesDefault);
+
+if(fixPackage) {
+  integrationTypes.typesPI = [ "saml", "oidc" ];
+  integrationTypes.typesOKJ = [ "wilma", "azure" ];
+} 
 
 interface Props {
   id: number;
@@ -36,6 +44,8 @@ interface Props {
 
 export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo }: Props) {
     
+    const { state } = useLocation();
+    const integration: Components.Schemas.Integration = state;
     const [isValidSchoolSelection, setIsValidSchoolSelection] = useState(true);
     const [isValidDataAttribute, setIsValidDataAttribute] = useState(true);
     const [isValidUserAttribute, setIsValidUserAttribute] = useState(true);
@@ -45,34 +55,60 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const [canSaveConfigurationEntity, setCanSaveConfigurationEntity] = useState(true);
     const [canSaveDiscoveryInformation, setCanSaveDiscoveryInformation] = useState(true);
+    const [environmentChanged, setEnvironmentChanged] = useState(true);
     const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
     const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
-    const environment = useRef<number>(-5);
+    const environment = useRef<number>((state?.deploymentPhase)?state.deploymentPhase:-5);
     const originalEnvironment = useRef<number>(-5);
     const originalIntegration = useRef<Components.Schemas.Integration>();
-    const [newEnvironment, setNewEnvironment] = useState(false);
+    const [ integrationEnvironment, setIntegrationEnvironment] = useState<number>((state?.deploymentPhase)?state.deploymentPhase:-5);
     const [name, setName] = useState<string>('');
+    const [metadataUrl, setMetadataUrl] = useState<string>('');
     const [metadata, setMetadata] = useState<any>((newConfigurationEntityData?.sp?.metadata&&newConfigurationEntityData?.sp?.metadata!==undefined)?newConfigurationEntityData.sp.metadata:{});
-    const [attributes, setAttributes] = useState<any>((newConfigurationEntityData?.attributes&&newConfigurationEntityData?.attributes!==undefined)?newConfigurationEntityData.attributes:[]);
+    const [attributes, setAttributes] = useState<Components.Schemas.Attribute[]>((newConfigurationEntityData?.attributes&&newConfigurationEntityData?.attributes!==undefined)?newConfigurationEntityData.attributes:[]);
     
-    const { state } = useLocation();
-    const integration: Components.Schemas.Integration = state;
     const role  = (integration.configurationEntity?.idp) ? "idp" : "sp"
     const type = integration.configurationEntity?.idp?.type! || integration.configurationEntity?.sp?.type! || "unknown"
     const oid: string = integration?.organization?.oid || "0"
     
     const uniqueIdConfiguration:UiConfiguration = dataConfiguration.filter(conf=>conf.name&&conf.name==='uniqueId')[0] || defaultDataConfiguration;
-    const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType; 
+    const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType;     
     
+    useEffect(() => {
+      devLog("DEBUG","IntegrationDetails (integrationEnvironment)",integrationEnvironment)      
+      environment.current=integrationEnvironment   
+      if(environment.current!==originalEnvironment.current&&environment.current>=0&&originalEnvironment.current>=0) {
+        setEnvironmentChanged(true) 
+      } else {
+        setEnvironmentChanged(false) 
+      }
+    }, [integrationEnvironment]);
+
+    useEffect(() => {          
+      if(newConfigurationEntityData?.idp&&metadataUrl!=='') {        
+        const changedIdp:Components.Schemas.Integration|Components.Schemas.Azure=clone(newConfigurationEntityData.idp);
+        if(changedIdp.metadataUrl&&changedIdp.metadataUrl!==metadataUrl) {
+          devLog("DEBUG","IntegrationDetails (metadataUrl)",metadataUrl)  
+          changedIdp.metadataUrl=metadataUrl
+          const changedConfigurationEntityData=clone(newConfigurationEntityData)
+          changedConfigurationEntityData.idp=changedIdp;      
+          setNewConfigurationEntityData(changedConfigurationEntityData)
+        }        
+      }      
+    }, [metadataUrl, newConfigurationEntityData]);
+
     useEffect(() => {
       devLog("DEBUG","IntegrationDetails (integration)",integration)
       if(integration?.configurationEntity?.sp?.name) {
         setName(integration.configurationEntity.sp.name)
       }
-      if(integration.deploymentPhase) {
-        environment.current=integration.deploymentPhase
+      if(integration?.deploymentPhase!==undefined&&integration.deploymentPhase>=0) {
+        if(environment.current===-5) {
+          devLog("DEBUG","IntegrationDetails (init environment)",integration.deploymentPhase)
+          environment.current=integration.deploymentPhase
+        }        
         if(originalEnvironment.current===-5) {
-          devLog("DEBUG","IntegrationDetails (originalEnvironment)",integration.deploymentPhase)
+          devLog("DEBUG","IntegrationDetails (init originalEnvironment)",integration.deploymentPhase)
           originalEnvironment.current=integration.deploymentPhase
         }
       } 
@@ -84,15 +120,9 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     }, [integration]);
 
     useEffect(() => {
-      devLog("DEBUG","ServiceProvider (name)",name)
-      devLog("DEBUG","ServiceProvider (isValidRoleDetails)",isValidRoleDetails)
-      
-    }, [name,isValidRoleDetails]);
-
-    useEffect(() => {
       devLog("DEBUG","IntegrationDetails (canSaveConfigurationEntity)",canSaveConfigurationEntity)
       devLog("DEBUG","IntegrationDetails (canSaveDiscoveryInformation)",canSaveDiscoveryInformation)
-      if(canSaveConfigurationEntity&&canSaveDiscoveryInformation) {
+      if((canSaveConfigurationEntity&&canSaveDiscoveryInformation)) {
         setCanSave(true)
       } else {
         setCanSave(false)
@@ -121,7 +151,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setMetadata(integration.configurationEntity.sp.metadata)
             }
             if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {              
-              setAttributes(integration.configurationEntity.attributes)
+              setAttributes(integration.configurationEntity.attributes)              
             } 
             
           }
@@ -130,10 +160,9 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         
       }
       
-    }, [role, integration, newIntegration, setNewIntegration,newEnvironment, setMetadata]);
+    }, [role, integration, newIntegration, setNewIntegration, setMetadata]);
     
     useEffect(() => {
-
       //Update showConfigurationEntityData
       if(newConfigurationEntityData&&type!=='unknown') {
         
@@ -198,7 +227,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
 
     useEffect(() => {
-
         //Update newConfigurationEntityData
           if(newConfigurationEntityData) {
             const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
@@ -224,7 +252,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               devLog("DEBUG","setCanSave - ",isValid)    
               devLog("DEBUG","setCanSave - ",logoOK)    
               devLog("DEBUG","setCanSave - ",(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK)    
-              if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK) {      
+              if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)||newLogo||environmentChanged)&&isValid&&logoOK) {      
                 devLog("DEBUG","setCanSave","1")
                 setCanSaveConfigurationEntity(true)
               } else {
@@ -258,14 +286,18 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                     changedIntegration.discoveryInformation.title=changedIntegration?.organization?.name;
                   }
                 }
-                setNewIntegration(changedIntegration)
+                
+                if(!isEqual(changedIntegration,newIntegration)) {
+                  setNewIntegration(changedIntegration)
+                }
+                
               }
             }
           } else {
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSaveConfigurationEntity, setSaveDialogState, isValidDataAttribute,isValidUserAttribute,isValidMetadata,isValidSchoolSelection,isValidRoleDetails, setNewIntegration, newLogo, role, newDiscoveryInformation, newEnvironment,metadata,name]);
+    }, [newConfigurationEntityData, integration, setCanSaveConfigurationEntity, setSaveDialogState, environmentChanged, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidSchoolSelection, isValidRoleDetails, setNewIntegration, newLogo, role, newDiscoveryInformation, metadata, name, newIntegration]);
 
     useEffect(() => {
       
@@ -291,7 +323,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           devLog("DEBUG","setCanSave - ",newConfigurationEntityData)
           devLog("DEBUG","setCanSave - ",originalIntegration.current?.configurationEntity)
           devLog("DEBUG","setCanSave - ",(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)))
-          if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||(originalEnvironment.current!==environment.current))&&logoOK&&isValid) {
+          if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||environmentChanged)&&logoOK&&isValid) {
             devLog("DEBUG","setCanSave","5")
             setCanSaveDiscoveryInformation(true)
           } else {
@@ -327,16 +359,15 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           
       }
     
-}, [newDiscoveryInformation, integration, setCanSaveDiscoveryInformation, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, newLogo, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidRoleDetails,newEnvironment]);
+}, [newDiscoveryInformation, integration, setCanSaveDiscoveryInformation, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, environmentChanged, newLogo, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidRoleDetails]);
 
     var hasAttributes =
                 role === "idp" &&
-                !["opinsys", "wilma"].includes(
+                !["opinsys", "wilma", "adfs", "gsuite"].includes(
                   integration.configurationEntity?.[role]?.type!
                 );
 
     if(integration) {
-      
       return(<>
       
         <Typography component={"div"} variant="h2" gutterBottom >
@@ -347,7 +378,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
         </Grid>
-        {role === "idp" && (type === "wilma" || type === "opinsys") && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
@@ -361,7 +392,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 isEditable={true}/>
               )
           }
-        {role === "idp" && type !== "wilma" && type !== "opinsys" && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && !integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
@@ -377,10 +408,11 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           }
 
         {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData &&(
-          <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} environment={environment} setNewEnvironment={setNewEnvironment} newEnvironment={newEnvironment} metadata={metadata}/>
+          <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} environment={environment} metadata={metadata}/>
         )}    
         
-        <Role integration={integration} oid={oid} environment={environment.current} name={name} setName={setName} setCanSave={setIsValidRoleDetails}/>
+        {newIntegration&&
+        <Role integration={newIntegration} oid={oid} environment={environment} setEnvironment={setIntegrationEnvironment} setMetadataUrl={setMetadataUrl} name={name} setName={setName} setCanSave={setIsValidRoleDetails} attributes={attributes}/>}
 
         {newConfigurationEntityData&&attributes&& <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
@@ -444,7 +476,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           </>
         )}
         
-      </>)
+      </>)      
     } else {
       return (
         <Alert severity="error">

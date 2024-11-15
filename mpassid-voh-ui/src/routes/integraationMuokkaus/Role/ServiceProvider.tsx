@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
 import InputForm from "../Form/InputForm";
-import type { Dispatch} from "react";
+import type { Dispatch, MutableRefObject} from "react";
 import { useRef } from "react";
 import { devLog } from "@/utils/devLog";
 import { helperText, validate } from "@/utils/Validators";
@@ -14,10 +14,13 @@ import { dataConfiguration, defaultDataConfiguration } from "@/config";
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
-  environment: number;
+  environment: MutableRefObject<number>;
   name: string;
+  tenantId?: string;
   setName: Dispatch<string>;
   setCanSave: Dispatch<boolean>;
+  setEnvironment: Dispatch<number>;
+  setMetadataUrl: Dispatch<string>;
 }
 
 export default function ServiceProvider({ integration, setName, setCanSave, name }: Props) {

@@ -7,8 +7,11 @@ import type { Dispatch } from "react";
 interface Props {
   integration: Components.Schemas.Integration;
   name?: string;
+  tenantId?: string;
   setName?: Dispatch<string>;
   setCanSave?: Dispatch<boolean>;
+  setEnvironment: Dispatch<number>;
+  setMetadataUrl: Dispatch<string>;
 }
 
 export default function SetProvider({ integration }: Props) {
