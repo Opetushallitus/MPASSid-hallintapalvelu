@@ -162,7 +162,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   }
 
   const copyFormDataToURLSearchParams = (formData: FormData) => (searchParams: URLSearchParams) => {
-    (formData as URLSearchParams).forEach((value, key) => {
+    (formData as unknown as URLSearchParams).forEach((value, key) => {
       if (value) {
         searchParams.set(key, value);
       } else {
@@ -308,7 +308,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
              
               <Stack direction="row" alignItems="center">
                 <Box flex={1} sx={{ mr: 2 }}>
-                  <SearchForm formData={searchParams} onSearch={handleSearch} />
+                  <SearchForm formData={searchParams as unknown as FormData} onSearch={handleSearch} />
                 </Box>
                 <RowsPerPage />
               </Stack>
