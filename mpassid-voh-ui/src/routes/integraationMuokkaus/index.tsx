@@ -16,6 +16,7 @@ import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { devLog } from "@/utils/devLog";
 import { cloneDeep } from "lodash";
+import { integrationTypesDefault } from '@/config';
 
 export default function IntegraatioMuokkaus() {
   const { type } = useParams();
@@ -35,6 +36,7 @@ export default function IntegraatioMuokkaus() {
   const [groups, setGroups] = useState<string[]>();
   const [openNotice, setOpenNotice] = useState(false);
   const [logo, setLogo] = useState<Blob>();
+  const [ metadataFile, setMetadataFile ] = useState<File[]>([]);
   const result = useRef<Components.Schemas.Integration>({});
   const [loading, setLoading] = useState<boolean>(false);
   const intl = useIntl();
@@ -93,7 +95,8 @@ export default function IntegraatioMuokkaus() {
     devLog("DEBUG","writeAccess (type)",newIntegration?.configurationEntity?.idp?.type)
     devLog("DEBUG","writeAccess (oid)",newIntegration?.organization?.oid)
     devLog("DEBUG","writeAccess (groups)",groups)
-    if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma" ||  newIntegration?.configurationEntity?.idp?.type === "opinsys") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    //if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma" ||  newIntegration?.configurationEntity?.idp?.type === "opinsys") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    if((newIntegration?.configurationEntity?.idp?.type && integrationTypesDefault.typesOKJ.includes(newIntegration.configurationEntity.idp.type)) && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
       return true;
     } else {
       if((newIntegration?.configurationEntity?.sp?.type === "saml" ||  newIntegration?.configurationEntity?.sp?.type === "oidc") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
@@ -153,6 +156,9 @@ export default function IntegraatioMuokkaus() {
                     result.current.configurationEntity.idp.logoUrl=logoResult
                   }                
                 } 
+              }
+              if(metadataFile.length===1){
+                alert("TALLENNA METADATA FILE BACKENDILLE!!!!") 
               }
               setLoading(false)
             } catch (error:any) {   
@@ -223,7 +229,7 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo}/>
+            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile}/>
           </ErrorBoundary>
           
         </Suspense>

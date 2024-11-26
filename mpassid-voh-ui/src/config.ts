@@ -1034,8 +1034,18 @@ export const dataConfiguration:UiConfiguration[] = [
         validation: [ ],
         integrationType: [
           {
+              name: 'adfs',
+              editable: true,
+              visible: true,
+          },
+          {
               name: 'azure',
               editable: true,
+              visible: true,
+          },
+          {
+              name: 'gsuite',
+              editable: true,    
               visible: true,
           }
         ]

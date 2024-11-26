@@ -8,7 +8,7 @@ export default function LinkValue({ href }: { href: string }) {
       rel="noreferrer"
       sx={{
         display: "inline-block",
-        maxWidth: 400,
+        maxWidth: 600,
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",

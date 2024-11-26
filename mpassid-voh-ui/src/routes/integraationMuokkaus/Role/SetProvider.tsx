@@ -9,10 +9,12 @@ interface Props {
   name?: string;
   tenantId?: string;
   metadataUrl?: string;
+  metadataFile?: File[];
   setName?: Dispatch<string>;
   setCanSave?: Dispatch<boolean>;
   setEnvironment: Dispatch<number>;
   setMetadataUrl: Dispatch<string>;
+  setMetadataFile?: Dispatch<File[]>;
 }
 
 export default function SetProvider({ integration }: Props) {

@@ -240,6 +240,11 @@ defineMessage({
   description: "attribuutti",
 });
 defineMessage({
+  defaultMessage: "metadata url",
+  id: "attribuutti.metadataUrlField",
+  description: "attribuutti",
+});
+defineMessage({
   defaultMessage: "Metadatan lataus",
   id: "attribuutti.metadataFileUpload",
   description: "attribuutti",

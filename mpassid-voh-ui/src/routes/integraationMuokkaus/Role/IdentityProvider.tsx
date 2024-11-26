@@ -1,12 +1,12 @@
 import { useParams } from "react-router-dom";
 import type { Components } from "@/api";
 import { azureMetadataUrlTemplate, dataConfiguration, environments, testLink, UiConfiguration } from "@/config";
-import { Alert, Box, Grid, Tooltip, Typography } from "@mui/material";
+import { Box, Grid, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../integraatio/IntegrationTab/DataRow"
 import LinkValue from "../LinkValue";
 import Type from "./Type";
-import { useEffect, useRef, type Dispatch, type MutableRefObject } from "react";
+import { useState, type Dispatch, type MutableRefObject } from "react";
 import type { oneEnum } from "../Form/MultiSelectForm";
 import MultiSelectForm from "../Form/MultiSelectForm";
 import { useIntl } from 'react-intl';
@@ -16,6 +16,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import InputForm from "../Form/InputForm";
 import { helperText, validate } from "@/utils/Validators";
 import { last, toPath } from "lodash";
+import FileUploader from "../Form/DragAndDropForm";
 
 interface Props {
   integration: Components.Schemas.Integration;
@@ -23,26 +24,21 @@ interface Props {
   tenantId?: string;
   environment: MutableRefObject<number>;
   metadataUrl: string;
+  metadataFile: File[];
   setName?: Dispatch<string>;
   setCanSave?: Dispatch<boolean>;
   setEnvironment: Dispatch<number>;
   setMetadataUrl: Dispatch<string>;
+  setMetadataFile: Dispatch<File[]>;
 }
 
-export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl,metadataUrl }: Props) {
+export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl,metadataUrl="",metadataFile, setMetadataFile }: Props) {
     const { role } = useParams();
     const intl = useIntl();
-    const identityProvider: Components.Schemas.Integration|Components.Schemas.Azure= integration.configurationEntity!.idp!;
+    const identityProvider: Components.Schemas.Integration|Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite= integration.configurationEntity!.idp!;
     const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===identityProvider.type).length>0)
     const environmentConfiguration:UiConfiguration[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment.current) || [];
     
-    useEffect(() => {
-      if(identityProvider.metadataUrl&&identityProvider.type==='azure') {
-        setMetadataUrl(identityProvider.metadataUrl)
-      }
-      
-    },[identityProvider, setMetadataUrl])
-
     const testLinkHref =
       // eslint-disable-next-line no-new-func
       new Function("flowName", `return \`${testLink}\``)(
@@ -60,7 +56,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
       devLog("DEBUG","canSave (name)",name)
       devLog("DEBUG","canSave (value)",value)
     }
-    
+
     const updateMetadataUrl = (name: string, value: string, type: string) => {
 
       
@@ -68,6 +64,10 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
       devLog("DEBUG","updateMetadataUrl (value)",value)
       devLog("DEBUG","updateMetadataUrl (type)",type)
       setMetadataUrl(value);
+      if(value!== undefined && value !== "") {
+        setMetadataFile([])
+      }
+      
     }      
 
     const updateEnvironment = (values: String[]) => {
@@ -84,9 +84,51 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
             value: String(env) }
           )
       });
-
-      const metadataUrlForm = (metadataUrl:string) => {        
-        if(identityProvider.type==='azure') {
+      /*
+      const loadFile = (event:ChangeEvent<HTMLInputElement>) => {
+            
+        const img:HTMLImageElement = document.getElementById('integratio-logo-preview') as HTMLImageElement;
+        
+        if(event&&event.target&&event.target.files&&event.target.files.length>0) {
+            devLog("DEBUG", "File loaded",event.target.files[0])
+            return(<span>Uploaded</span>)
+         
+        } else {
+          return(<span>Not uploaded</span>)
+        }
+        
+      };
+      
+      const metadataFileUpload = () => {
+        return (<form >
+          <input
+            accept="image/*"
+            hidden
+            id="contained-button-file"
+            multiple
+            type="file"
+            onChange={e=>loadFile(e)}
+          />
+          <label htmlFor="contained-button-file">
+          {(identityProvider.metadataUrl)&&<><IconButton color="primary" component="span">
+            <UploadFileRoundedIcon />
+          </IconButton><FormattedMessage defaultMessage="Valitse"  /></>}
+          {!(identityProvider.metadataUrl)&&<><IconButton color="error" component="span">
+            <UploadFileRoundedIcon />
+          </IconButton><span >{intl.formatMessage({
+              defaultMessage: "Valitse, metadata on pakollinen",
+            })}</span></>}
+            
+          </label>   
+        </form>)
+      }
+      */
+      const metadataUrlForm = (metadataUrl:string,metadataFiles:number) => {    
+        
+          const id = `attribuutti.metadataUrlField`;        
+          const label = id in intl.messages ? { id } : undefined;
+          const metadataUrlMandatory=(metadataFiles!==1||(metadataUrl!==undefined && metadataUrl !== ""))?true:false
+          
           return (<>                
               <Typography
                 sx={{
@@ -105,9 +147,9 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                   path="content"
                   type={"idp"}
                   isEditable={true}
-                  mandatory={true}
+                  mandatory={metadataUrlMandatory}
                   attributeType={"data"} 
-                  label={""} 
+                  label={label?intl.formatMessage(label):"metadataUrlField"} 
                   helperText={(data: string)=>helperText([],data)} 
                   setCanSave={canSave} 
                   onUpdate={updateMetadataUrl} 
@@ -118,9 +160,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
               </Typography>
         
       
-      </>)} else {
-        return(<></>)
-      }
+      </>)
     
     }
         
@@ -163,34 +203,51 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                       </ErrorBoundary>
                     </Grid>
                     </>)}
-                <DataRow object={identityProvider} path="type" type={Type} />
-                
-                
-                {(metadataUrl&&identityProvider.type==='azure')&&
+                <DataRow object={identityProvider} path="type" type={Type} />                                                
+                {integration&&metadataFile&&(identityProvider.type==='azure'||identityProvider.type==='adfs')&&
                   <>
                     <DataRowTitle path={'metadataUrl'}/>              
                     <DataRowValue>
-                        {metadataUrlForm(metadataUrl)}
+                        {metadataUrlForm(metadataUrl,metadataFile.length)}
                     </DataRowValue>                                        
                   </>
                 }
-                                        
-                {(identityProvider.type==='adfs'||identityProvider.type==='gsuite')&&
+                {(identityProvider.type==='adfs')&&
                   <>
-                    <DataRowTitle path={'metadataFileUpload'}/>              
+                    <DataRowTitle/>              
                     <DataRowValue>
-                    <Alert severity="error">Tähän adfs/gsuite metadata file lataus </Alert>
+                      <FormattedMessage defaultMessage={"tai"} />
                     </DataRowValue>                                        
                   </>
-                }
-                {(identityProvider.type==='adfs'||identityProvider.type==='gsuite')&&
+                }                        
+                {(identityProvider.type==='adfs')&&
                   <>
-                    <DataRowTitle path={'metadataUrlUpload'}/>              
+                    <DataRowTitle/>              
                     <DataRowValue>
-                    <Alert severity="error">Tähän adfs/gsuite metadata url formi</Alert>
+                      <FileUploader  
+                          fileExist={ ( metadataUrl !== undefined && metadataUrl !== "" ) || metadataFile.length === 1 }
+                          emptyFiles={metadataFile.length === 1}
+                          onDelete={()=>setMetadataFile([])}
+                          onFilesDrop={(e) => {setMetadataFile(e);setMetadataUrl("")}} 
+                        />
                     </DataRowValue>                                        
                   </>
                 }
+                {(identityProvider.type==='gsuite')&&
+                  <>
+                    <DataRowTitle path={'metadataUrl'}/>              
+                    <DataRowValue>
+                      <FileUploader     
+                          fileExist={ ( metadataUrl !== undefined && metadataUrl !== "" ) || metadataFile.length === 1 }   
+                          emptyFiles={metadataFile.length === 1}   
+                          onDelete={()=>setMetadataFile([])}                                                                 
+                          onFilesDrop={(e) => setMetadataFile(e)} 
+                        />
+                    </DataRowValue>                                        
+                  </>
+                }
+                
+                
                         
                 {identityProvider.flowName&&(
                   <>
