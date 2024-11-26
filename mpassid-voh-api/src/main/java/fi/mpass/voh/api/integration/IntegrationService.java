@@ -757,7 +757,7 @@ public class IntegrationService {
           Adfs adfs = new Adfs();
           configurationEntity.setIdp(adfs);
         }
-        if (type.equals("adfs")) {
+        if (type.equals("azure")) {
           Azure azure = new Azure();
           configurationEntity.setIdp(azure);
         }
