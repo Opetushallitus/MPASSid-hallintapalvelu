@@ -141,7 +141,7 @@ public class ProvisioningService {
 
     public List<Integration> getServiceProviders() {
         // Get Sps but filter out empty attributes
-        List<Integration> sps = integrationService.getIdentityProviders();
+        List<Integration> sps = integrationService.getServiceProviders();
         for (Integration i : sps) {
             try {
                 i.getConfigurationEntity().getAttributes().removeIf(a -> a.getContent().isEmpty());
