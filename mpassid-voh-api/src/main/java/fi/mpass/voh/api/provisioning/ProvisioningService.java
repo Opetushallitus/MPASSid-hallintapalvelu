@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import fi.mpass.voh.api.integration.IntegrationService;
+import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.Integration;
 
 import org.slf4j.Logger;
@@ -120,7 +121,7 @@ public class ProvisioningService {
     }
 
     public List<Integration> getIdentityProviders() {
-        // Get Idps but capitalize first letter of flowname
+        // Get Idps but capitalize first letter of flowname and filter out empty attributes
         List<Integration> idps = integrationService.getIdentityProviders();
         for (Integration i : idps) {
             try {
@@ -129,11 +130,26 @@ public class ProvisioningService {
                     String newFlowname = flowname.substring(0, 1).toUpperCase() + flowname.substring(1);
                     i.getConfigurationEntity().getIdp().setFlowName(newFlowname);
                 }
+                i.getConfigurationEntity().getAttributes().removeIf(a -> a.getContent().isEmpty());
             } catch (Exception e) {
                 logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
                 continue;
             }
         }
         return idps;
+    }
+
+    public List<Integration> getServiceProviders() {
+        // Get Sps but filter out empty attributes
+        List<Integration> sps = integrationService.getIdentityProviders();
+        for (Integration i : sps) {
+            try {
+                i.getConfigurationEntity().getAttributes().removeIf(a -> a.getContent().isEmpty());
+            } catch (Exception e) {
+                logger.debug("Exception in retrieving integration attributes. {}", e.getMessage());
+                continue;
+            }
+        }
+        return sps;
     }
 }
