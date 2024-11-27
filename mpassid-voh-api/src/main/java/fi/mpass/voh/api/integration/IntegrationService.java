@@ -1126,7 +1126,11 @@ public class IntegrationService {
     boolean found = false;
     if (imageFiles != null) {
       for (File imageFile : imageFiles) {
-        if (imageFile.getName().startsWith(Long.toString(id))) {
+        String filenameRegex = "(^" + id + "\\..*$|^" + id + "$)";
+        Pattern p = Pattern.compile(filenameRegex);
+        Matcher m = p.matcher(imageFile.getName());
+        boolean b = m.matches();
+        if (b) {
           sourceFileName = imageFile.getAbsolutePath();
           found = true;
         }
@@ -1158,11 +1162,15 @@ public class IntegrationService {
     File[] imageFiles = rootLocation.toFile().listFiles();
     if (imageFiles != null) {
       for (File imageFile : imageFiles) {
-        if (imageFile.getName().startsWith(Long.toString(id))) {
+        String filenameRegex = "(^" + id + "\\..*$|^" + id + "$)";
+        Pattern p = Pattern.compile(filenameRegex);
+        Matcher m = p.matcher(imageFile.getName());
+        boolean b = m.matches();
+        if (b) {
           try {
             imageFile.delete();
           } catch (SecurityException e) {
-            logger.error("Delete access to the file denied.");
+            logger.error("Delete access to the file denied.", e.getMessage());
           }
         }
       }
