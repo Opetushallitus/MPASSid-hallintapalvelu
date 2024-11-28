@@ -58,6 +58,16 @@ public class AttributeService {
     }
 
     public boolean testAttributesAuthorization(AttributeTestAuthorizationRequestBody requestBody) {
+        if (requestBody.getId() != null && requestBody.getClientId() != null && requestBody.getClientSecret() != null) {
+            return testAttributesAuthorizationWithId(requestBody);
+        } else if (requestBody.getTenantId() != null && requestBody.getClientId() != null
+                && requestBody.getClientSecret() != null) {
+            return testAttributesAuthorizationWithTenantId(requestBody);
+        }
+        return false;
+    }
+
+    private boolean testAttributesAuthorizationWithId(AttributeTestAuthorizationRequestBody requestBody) {
 
         logger.debug("Integration #{}, clientId: {}", requestBody.getId(), requestBody.getClientId());
 
@@ -96,6 +106,28 @@ public class AttributeService {
                     this.token.setToken(accessToken);
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    private boolean testAttributesAuthorizationWithTenantId(AttributeTestAuthorizationRequestBody requestBody) {
+        logger.debug("tenantId #{}, clientId: {}", requestBody.getTenantId(), requestBody.getClientId());
+        if (requestBody.getTenantId() != null && requestBody.getClientId() != null
+                && requestBody.getClientSecret() != null) {
+            String accessToken;
+            try {
+                accessToken = attributeValidator.getToken(requestBody.getClientId(),
+                        requestBody.getClientSecret(),
+                        requestBody.getTenantId());
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
+                throw new EntityNotFoundException("Authorization not successful");
+            }
+
+            if (accessToken != null) {
+                this.token.setToken(accessToken);
+                return true;
             }
         }
         return false;

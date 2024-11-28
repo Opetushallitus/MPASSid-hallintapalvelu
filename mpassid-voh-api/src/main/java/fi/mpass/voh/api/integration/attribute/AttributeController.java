@@ -78,4 +78,15 @@ public class AttributeController {
     public boolean testAttributesAuthorization(@Valid @RequestBody AttributeTestAuthorizationRequestBody requestBody) {
         return this.attributeService.testAttributesAuthorization(requestBody);
     }
+
+    @Operation(summary = "Test attributes authorization with tenant id")
+    @PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "403", description = "Forbidden operation")
+    })
+    @PostMapping("/test/authorization/tenant")
+    public boolean testAttributesAuthorizationWithTenantId(@Valid @RequestBody AttributeTestAuthorizationRequestBody requestBody) {
+        return this.attributeService.testAttributesAuthorization(requestBody);
+    }
 }
