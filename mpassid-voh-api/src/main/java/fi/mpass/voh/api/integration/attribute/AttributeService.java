@@ -59,10 +59,20 @@ public class AttributeService {
 
     public boolean testAttributesAuthorization(AttributeTestAuthorizationRequestBody requestBody) {
         if (requestBody.getId() != null && requestBody.getClientId() != null && requestBody.getClientSecret() != null) {
-            return testAttributesAuthorizationWithId(requestBody);
+            try {
+                return testAttributesAuthorizationWithId(requestBody);
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
+                throw new EntityNotFoundException("Authorization not successful");
+            }
         } else if (requestBody.getTenantId() != null && requestBody.getClientId() != null
                 && requestBody.getClientSecret() != null) {
-            return testAttributesAuthorizationWithTenantId(requestBody);
+            try {
+                return testAttributesAuthorizationWithTenantId(requestBody);
+            } catch (Exception e) {
+                logger.debug(e.getMessage());
+                throw new EntityNotFoundException("Authorization not successful");
+            }
         }
         return false;
     }
