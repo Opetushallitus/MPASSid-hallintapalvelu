@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,6 +25,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
+import org.hibernate.boot.jaxb.internal.FileXmlSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -415,7 +417,9 @@ public class IntegrationService {
         organizationService.saveOrganization(organization);
         integration.get().setOrganization(organization);
       }
-      return extendPermissions(integration);
+      integration = extendPermissions(integration);
+      integration = changeLogoUrl(integration);
+      return integration;
     } else {
       throw new EntityNotFoundException("Authentication not successful");
     }
@@ -446,6 +450,18 @@ public class IntegrationService {
           return integration;
         }
       }
+    }
+    return integration;
+  }
+
+  private Optional<Integration> changeLogoUrl(Optional<Integration> integration) {
+    if (integration.isPresent()) {
+      String logoUrl = this.configuration.getImageBaseUrlUi()
+          + "/" + integration.get().getId();
+      if (integration.get().getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+        integration.get().getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
+      }
+
     }
     return integration;
   }
@@ -549,6 +565,7 @@ public class IntegrationService {
 
         integration = integrationRepository.saveAndFlush(existingIntegration);
       } catch (OptimisticLockException ole) {
+        logger.error(ole.getMessage());
         throw new EntityUpdateException(
             "Integration #" + existingIntegration.getId() + " update not successful. Please re-update.");
       }
@@ -640,8 +657,10 @@ public class IntegrationService {
     return integrations;
   }
 
-  public List<Integration> getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(LocalDateTime timestamp, int deploymentPhase, String role) {
-    List<Integration> integrations = integrationRepository.findAllByLastUpdatedOnAfterAndDeploymentPhaseAndRole(timestamp, deploymentPhase, role);
+  public List<Integration> getIntegrationsByByUpdateTimeSinceAndDeploymentPhaseAndRole(LocalDateTime timestamp,
+      int deploymentPhase, String role) {
+    List<Integration> integrations = integrationRepository
+        .findAllByLastUpdatedOnAfterAndDeploymentPhaseAndRole(timestamp, deploymentPhase, role);
     return integrations;
   }
 
@@ -725,9 +744,11 @@ public class IntegrationService {
             if (organization != null) {
               organizationService.saveOrganization(organization);
             } else {
+              logger.error("Organization is null.");
               throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
             }
           } catch (JsonProcessingException e) {
+            logger.error(e.getMessage());
             throw new EntityCreationException("Integration creation failed due to organization retrieval error.");
           }
         }
@@ -754,7 +775,7 @@ public class IntegrationService {
           Adfs adfs = new Adfs();
           configurationEntity.setIdp(adfs);
         }
-        if (type.equals("adfs")) {
+        if (type.equals("azure")) {
           Azure azure = new Azure();
           configurationEntity.setIdp(azure);
         }
@@ -1060,12 +1081,20 @@ public class IntegrationService {
           throw new EntityCreationException("Failed to save image.");
         }
 
-        Path destinationFile = rootLocation.resolve(Paths.get(Long.toString(id))).normalize().toAbsolutePath();
-        if (!destinationFile.getParent().equals(rootLocation.toAbsolutePath())) {
-          logger.error("Cannot store file outside configured directory: {}", destinationFile);
-          throw new EntityCreationException("Failed to save image.");
-        }
-        try (InputStream inputStream = file.getInputStream()) {
+        try (InputStream inputStream = file.getInputStream(); InputStream contentStream = file.getInputStream()) {
+          String logoContentType = getDiscoveryInformationLogoContentType(contentStream);
+          if (logoContentType != null && logoContentType.contains("image/")) {
+            logoContentType = logoContentType.replace("image/", "");
+          }
+          url += "." + logoContentType;
+          Path destinationFile = rootLocation.resolve(Paths.get(Long.toString(id) + "." + logoContentType)).normalize()
+              .toAbsolutePath();
+          logger.debug("\n" + destinationFile.toString() + "\n");
+          if (!destinationFile.getParent().equals(rootLocation.toAbsolutePath())) {
+            logger.error("Cannot store file outside configured directory: {}", destinationFile);
+            throw new EntityCreationException("Failed to save image.");
+          }
+          deleteDiscoveryInformationLogo(id);
           Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
           if (integration.get().getConfigurationEntity() != null
               && integration.get().getConfigurationEntity().getIdp() != null) {
@@ -1073,6 +1102,7 @@ public class IntegrationService {
             integration.get().getConfigurationEntity().getIdp().setLogoUrl(url);
             integrationRepository.save(integration.get());
           }
+          url = this.configuration.getImageBaseUrlUi() + "/" + id;
           return url;
         }
       } catch (IOException e) {
@@ -1091,13 +1121,59 @@ public class IntegrationService {
       throw new EntityNotFoundException("Logo not found.");
     }
     Path rootLocation = Paths.get(configuration.getImageBasePath());
-    Path sourceFile = rootLocation.resolve(Paths.get(Long.toString(id))).normalize().toAbsolutePath();
+    String sourceFileName = "";
+    File[] imageFiles = rootLocation.toFile().listFiles();
+    boolean found = false;
+    if (imageFiles != null) {
+      for (File imageFile : imageFiles) {
+        String filenameRegex = "(^" + id + "\\..*$|^" + id + "$)";
+        Pattern p = Pattern.compile(filenameRegex);
+        Matcher m = p.matcher(imageFile.getName());
+        boolean b = m.matches();
+        if (b) {
+          sourceFileName = imageFile.getAbsolutePath();
+          found = true;
+        }
+      }
+    } else {
+      logger.error("Logo not found: {}", id);
+      throw new EntityNotFoundException("Logo not found.");
+    }
+
+    if (!found) {
+      logger.error("Logo not found: {}", id);
+      throw new EntityNotFoundException("Logo not found.");
+    }
 
     try {
-      return new InputStreamResource(new FileInputStream(sourceFile.toString()));
+      return new InputStreamResource(new FileInputStream(sourceFileName));
     } catch (FileNotFoundException e) {
-      logger.error("Logo not found: {}", sourceFile);
+      logger.error("Logo not found: {}", sourceFileName);
       throw new EntityNotFoundException("Logo not found.");
+    }
+  }
+
+  private void deleteDiscoveryInformationLogo(Long id) {
+    if (configuration.getImageBasePath() == null) {
+      logger.error("Logo not found: {}", id);
+      throw new EntityNotFoundException("Logo not found.");
+    }
+    Path rootLocation = Paths.get(configuration.getImageBasePath());
+    File[] imageFiles = rootLocation.toFile().listFiles();
+    if (imageFiles != null) {
+      for (File imageFile : imageFiles) {
+        String filenameRegex = "(^" + id + "\\..*$|^" + id + "$)";
+        Pattern p = Pattern.compile(filenameRegex);
+        Matcher m = p.matcher(imageFile.getName());
+        boolean b = m.matches();
+        if (b) {
+          try {
+            imageFile.delete();
+          } catch (SecurityException e) {
+            logger.error("Delete access to the file denied.", e.getMessage());
+          }
+        }
+      }
     }
   }
 

@@ -90,7 +90,7 @@ export default function IntegraatioMuokkaus() {
 
   const writeAccess = () => {
 
-    if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma" ||  newIntegration?.configurationEntity?.idp?.type === "opinsys") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
       return true;
     } else {
       if((newIntegration?.configurationEntity?.sp?.type === "saml" ||  newIntegration?.configurationEntity?.sp?.type === "oidc") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
@@ -139,7 +139,7 @@ export default function IntegraatioMuokkaus() {
                 }
                 result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;
               }
-              devLog("Integration save result",result.current)
+              devLog("DEBUG","Integration save result",result.current)
               if(logo){
                 const formData = new FormData();
                 formData.append("file", logo);
@@ -154,8 +154,8 @@ export default function IntegraatioMuokkaus() {
               setLoading(false)
             } catch (error:any) {   
               setLoading(false)           
-              devLog('Integration error data:', error?.response?.data);
-              devLog('Integration error status:', error?.response?.status);
+              devLog('DEBUG','Integration error data:', error?.response?.data);
+              devLog('DEBUG','Integration error status:', error?.response?.status);
               if(error?.response?.status===409) {
                 setOpenIntegrationErrorText(error?.response?.data?.message)
               } else {
@@ -284,7 +284,7 @@ export default function IntegraatioMuokkaus() {
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
                   <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
-                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&String(newIntegration.configurationEntity.sp.metadata.client_secret)!=='***'&&
+                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&!String(newIntegration.configurationEntity.sp.metadata.client_secret).includes("*********")&&
                   newIntegration?.configurationEntity?.sp?.type === "oidc"&&<>
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}

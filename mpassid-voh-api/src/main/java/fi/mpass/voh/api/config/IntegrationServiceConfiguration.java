@@ -12,15 +12,18 @@ public class IntegrationServiceConfiguration {
 
     private String adminOrganizationOid;
     private Long defaultTestServiceIntegrationId;
+
+    private String imageBaseUrlUi;
     private String imageBaseUrl;
     @NotBlank
     private String imageBasePath;
 
     @ConstructorBinding
-    public IntegrationServiceConfiguration(String adminOrganizationOid, Long defaultTestServiceIntegrationId,
+    public IntegrationServiceConfiguration(String adminOrganizationOid, Long defaultTestServiceIntegrationId, String imageBaseUrlUi,
             String imageBaseUrl, String imageBasePath) {
         this.adminOrganizationOid = adminOrganizationOid;
         this.defaultTestServiceIntegrationId = defaultTestServiceIntegrationId;
+        this.imageBaseUrlUi = imageBaseUrlUi;
         this.imageBaseUrl = imageBaseUrl;
         this.imageBasePath = imageBasePath;
     }
@@ -39,6 +42,12 @@ public class IntegrationServiceConfiguration {
     }
     public void setDefaultTestServiceIntegrationId(Long defaultTestServiceIntegrationId) {
         this.defaultTestServiceIntegrationId = defaultTestServiceIntegrationId;
+    }
+    public String getImageBaseUrlUi() {
+        return imageBaseUrlUi;
+    }
+    public void setImageBaseUrlUi(String imageBaseUrlUi) {
+        this.imageBaseUrlUi = imageBaseUrlUi;
     }
     public String getImageBaseUrl() {
         return imageBaseUrl;

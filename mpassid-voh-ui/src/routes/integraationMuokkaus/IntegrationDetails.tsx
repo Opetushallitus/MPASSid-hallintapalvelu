@@ -65,33 +65,33 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType; 
     
     useEffect(() => {
-      devLog("IntegrationDetails (integration)",integration)
+      devLog("DEBUG","IntegrationDetails (integration)",integration)
       if(integration?.configurationEntity?.sp?.name) {
         setName(integration.configurationEntity.sp.name)
       }
       if(integration.deploymentPhase) {
         environment.current=integration.deploymentPhase
         if(originalEnvironment.current===-5) {
-          devLog("IntegrationDetails (originalEnvironment)",integration.deploymentPhase)
+          devLog("DEBUG","IntegrationDetails (originalEnvironment)",integration.deploymentPhase)
           originalEnvironment.current=integration.deploymentPhase
         }
       } 
       if(!originalIntegration.current) {
-        devLog("IntegrationDetails (originalIntegration)",integration)
+        devLog("DEBUG","IntegrationDetails (originalIntegration)",integration)
         originalIntegration.current=cloneDeep(integration)
       }
       
     }, [integration]);
 
     useEffect(() => {
-      devLog("ServiceProvider (name)",name)
-      devLog("ServiceProvider (isValidRoleDetails)",isValidRoleDetails)
+      devLog("DEBUG","ServiceProvider (name)",name)
+      devLog("DEBUG","ServiceProvider (isValidRoleDetails)",isValidRoleDetails)
       
     }, [name,isValidRoleDetails]);
 
     useEffect(() => {
-      devLog("IntegrationDetails (canSaveConfigurationEntity)",canSaveConfigurationEntity)
-      devLog("IntegrationDetails (canSaveDiscoveryInformation)",canSaveDiscoveryInformation)
+      devLog("DEBUG","IntegrationDetails (canSaveConfigurationEntity)",canSaveConfigurationEntity)
+      devLog("DEBUG","IntegrationDetails (canSaveDiscoveryInformation)",canSaveDiscoveryInformation)
       if(canSaveConfigurationEntity&&canSaveDiscoveryInformation) {
         setCanSave(true)
       } else {
@@ -103,8 +103,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
       
       if(role !== undefined) {
-        devLog("IntegrationDetails (deploymentPhase)",integration.deploymentPhase)
-        devLog("IntegrationDetails (environment)",environment.current)
+        devLog("DEBUG","IntegrationDetails (deploymentPhase)",integration.deploymentPhase)
+        devLog("DEBUG","IntegrationDetails (environment)",environment.current)
         if(environment.current>=0) {
           integration.deploymentPhase=environment.current
         }
@@ -120,7 +120,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             if(integration.configurationEntity.sp&&integration.configurationEntity.sp.metadata&&integration.configurationEntity.sp.metadata!==undefined) {
               setMetadata(integration.configurationEntity.sp.metadata)
             }
-            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {
+            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {              
               setAttributes(integration.configurationEntity.attributes)
             } 
             
@@ -141,17 +141,17 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         
         if(typeConf.attribute&&testNewConfigurationEntityData.idp){
           const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.idp?.[typeConf.attribute]||''; 
-          devLog("uniqueIdType",uniqueIdType)
+          devLog("DEBUG","uniqueIdType",uniqueIdType)
           const updatedIdentityProvider: any = testNewConfigurationEntityData.idp;
-          devLog('updatedIdentityProvider[typeConf.attribute]',updatedIdentityProvider[typeConf.attribute])
+          devLog('DEBUG','updatedIdentityProvider[typeConf.attribute]',updatedIdentityProvider[typeConf.attribute])
           updatedIdentityProvider[typeConf.attribute]=uniqueIdType;
           newConfigurationEntityData.idp=updatedIdentityProvider;
-          devLog("newConfigurationEntityData for show",newConfigurationEntityData)
+          devLog("DEBUG","newConfigurationEntityData for show",newConfigurationEntityData)
           setShowConfigurationEntityData(newConfigurationEntityData);
         }
         if(typeConf.attribute&&testNewConfigurationEntityData.sp){
           const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.sp?.[typeConf.attribute]||''; 
-          devLog("uniqueIdType",uniqueIdType)
+          devLog("DEBUG","uniqueIdType",uniqueIdType)
           const updatedServiceProvider: any = testNewConfigurationEntityData.sp;
           updatedServiceProvider[typeConf.attribute]=uniqueIdType;
           newConfigurationEntityData.sp=updatedServiceProvider;
@@ -161,7 +161,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               const samlServiceProvider:Components.Schemas.SamlServiceProvider = cloneDeep(newConfigurationEntityData.sp)
               samlServiceProvider.entityId=metadata.entityId;
               if(name) {
-                devLog("newConfigurationEntityData (name)",name)
+                devLog("DEBUG","newConfigurationEntityData (name)",name)
                 samlServiceProvider.name=name;
               }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
@@ -178,7 +178,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               oidcServiceProvider.clientId=metadata.client_id;
               
               if(name) {
-                devLog("newConfigurationEntityData (name)",name)
+                devLog("DEBUG","newConfigurationEntityData (name)",name)
                 oidcServiceProvider.name=name;
               }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
@@ -202,11 +202,11 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         //Update newConfigurationEntityData
           if(newConfigurationEntityData) {
             const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
-            devLog("isvalid newConfigurationEntityData (isValidDataAttribute)",isValidDataAttribute)
-            devLog("isvalid newConfigurationEntityData (isValidUserAttribute)",isValidUserAttribute)
-            devLog("isvalid newConfigurationEntityData (isValidMetadata)",isValidMetadata)
-            devLog("isvalid newConfigurationEntityData (isValidSchoolSelection)",isValidSchoolSelection)
-            devLog("isvalid newConfigurationEntityData (isValidRoleDetails)",isValidRoleDetails)
+            devLog("DEBUG","isvalid newConfigurationEntityData (isValidDataAttribute)",isValidDataAttribute)
+            devLog("DEBUG","isvalid newConfigurationEntityData (isValidUserAttribute)",isValidUserAttribute)
+            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata)",isValidMetadata)
+            devLog("DEBUG","isvalid newConfigurationEntityData (isValidSchoolSelection)",isValidSchoolSelection)
+            devLog("DEBUG","isvalid newConfigurationEntityData (isValidRoleDetails)",isValidRoleDetails)
             
             const logoOK=(role==='sp'||
                           newLogo||
@@ -214,28 +214,29 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )
 
             setSaveDialogState(true);
-            
+            devLog("DEBUG","setCanSave (newConfigurationEntityData)",newConfigurationEntityData)
+            devLog("DEBUG","setCanSave (originalIntegration.current?.configurationEntity)",originalIntegration.current?.configurationEntity)
             if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)){   
-              devLog("setCanSave - ",(newConfigurationEntityData !== undefined))
-              devLog("setCanSave - ",(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)))  
-              devLog("setCanSave - ",((newLogo)))    
-              devLog("setCanSave - ",((originalEnvironment.current!==environment.current)))    
-              devLog("setCanSave - ",isValid)    
-              devLog("setCanSave - ",logoOK)    
-              devLog("setCanSave - ",(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK)    
+              devLog("DEBUG","setCanSave - ",(newConfigurationEntityData !== undefined))
+              devLog("DEBUG","setCanSave - ",(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)))  
+              devLog("DEBUG","setCanSave - ",((newLogo)))    
+              devLog("DEBUG","setCanSave - ",((originalEnvironment.current!==environment.current)))    
+              devLog("DEBUG","setCanSave - ",isValid)    
+              devLog("DEBUG","setCanSave - ",logoOK)    
+              devLog("DEBUG","setCanSave - ",(!isEqual(newDiscoveryInformation,integration?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK)    
               if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)||newLogo||(originalEnvironment.current!==environment.current))&&isValid&&logoOK) {      
-                devLog("setCanSave","1")
+                devLog("DEBUG","setCanSave","1")
                 setCanSaveConfigurationEntity(true)
               } else {
-                devLog("setCanSave","2")
+                devLog("DEBUG","setCanSave","2")
                 setCanSaveConfigurationEntity(false)
               }       
             } else {                      
               if(isValid&&logoOK) {         
-                devLog("setCanSave","3")
+                devLog("DEBUG","setCanSave","3")
                 setCanSaveConfigurationEntity(true)
               } else {
-                devLog("setCanSave","4")
+                devLog("DEBUG","setCanSave","4")
                 setCanSaveConfigurationEntity(false)
               }
               if(integration) {            
@@ -271,11 +272,11 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
       //Update newDiscoveryInformation
       if(newDiscoveryInformation !== undefined) {
         const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
-        devLog("isvalid newDiscoveryInformation (isValidDataAttribute)",isValidDataAttribute)
-        devLog("isvalid newDiscoveryInformation (isValidUserAttribute)",isValidUserAttribute)
-        devLog("isvalid newDiscoveryInformation (isValidMetadata)",isValidMetadata)
-        devLog("isvalid newDiscoveryInformation (isValidSchoolSelection)",isValidSchoolSelection)
-        devLog("isvalid newDiscoveryInformation (isValidRoleDetails)",isValidRoleDetails)
+        devLog("DEBUG","isvalid newDiscoveryInformation (isValidDataAttribute)",isValidDataAttribute)
+        devLog("DEBUG","isvalid newDiscoveryInformation (isValidUserAttribute)",isValidUserAttribute)
+        devLog("DEBUG","isvalid newDiscoveryInformation (isValidMetadata)",isValidMetadata)
+        devLog("DEBUG","isvalid newDiscoveryInformation (isValidSchoolSelection)",isValidSchoolSelection)
+        devLog("DEBUG","isvalid newDiscoveryInformation (isValidRoleDetails)",isValidRoleDetails)
             
         
         const logoOK=(role==='sp'||
@@ -283,24 +284,26 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
         )
         setSaveDialogState(true);
-        if(isEqual(newDiscoveryInformation,integration?.discoveryInformation)){     
-          devLog("setCanSave - ",(newConfigurationEntityData !== undefined))
-          devLog("setCanSave - ",newConfigurationEntityData)
-          devLog("setCanSave - ",originalIntegration.current?.configurationEntity)
-          devLog("setCanSave - ",(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)))
+        devLog("DEBUG","setCanSave (newDiscoveryInformation)",newDiscoveryInformation)
+        devLog("DEBUG","setCanSave (originalIntegration.current?.discoveryInformation)",originalIntegration.current?.discoveryInformation)
+        if(isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)){     
+          devLog("DEBUG","setCanSave - ",(newConfigurationEntityData !== undefined))
+          devLog("DEBUG","setCanSave - ",newConfigurationEntityData)
+          devLog("DEBUG","setCanSave - ",originalIntegration.current?.configurationEntity)
+          devLog("DEBUG","setCanSave - ",(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)))
           if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||(originalEnvironment.current!==environment.current))&&logoOK&&isValid) {
-            devLog("setCanSave","5")
+            devLog("DEBUG","setCanSave","5")
             setCanSaveDiscoveryInformation(true)
           } else {
-            devLog("setCanSave","6")
+            devLog("DEBUG","setCanSave","6")
             setCanSaveDiscoveryInformation(false)
           }  
         } else {               
           if(isValid) {                
-            devLog("setCanSave","7")
+            devLog("DEBUG","setCanSave","7")
             setCanSaveDiscoveryInformation(true)
           } else {
-            devLog("setCanSave","8")
+            devLog("DEBUG","setCanSave","8")
             setCanSaveDiscoveryInformation(false)
           }
           if(integration) {            
@@ -344,7 +347,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
         </Grid>
-        {role === "idp" && type === "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && (type === "wilma" || type === "opinsys") && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 
@@ -358,7 +361,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 isEditable={true}/>
               )
           }
-        {role === "idp" && type !== "wilma" && newConfigurationEntityData && newDiscoveryInformation &&
+        {role === "idp" && type !== "wilma" && type !== "opinsys" && newConfigurationEntityData && newDiscoveryInformation &&
             (<SchoolSelection 
                 integration={integration} 
                 setConfigurationEntity={setNewConfigurationEntityData} 

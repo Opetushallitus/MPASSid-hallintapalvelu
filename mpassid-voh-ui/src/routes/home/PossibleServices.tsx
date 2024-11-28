@@ -24,7 +24,7 @@ function PossibleServices({oid,handleService}: Props) {
 
     const handleServiceView = (event: SelectChangeEvent) => {
         
-        devLog('handleServiceView',event.target.value)
+        devLog('DEBUG','handleServiceView',event.target.value)
         if(Number(event.target.value)===-2) {
             handleService({environment: 0, name: 'uusi', setId: 0})
             setServiceIndex(Number(event.target.value))
@@ -34,7 +34,7 @@ function PossibleServices({oid,handleService}: Props) {
             setServiceIndex(Number(event.target.value))
         }
         if(Number(event.target.value)>-1&&possibleServices.content&&possibleServices.content.length>0) {
-            devLog('handleServiceView (possibleService)',possibleServices.content[Number(event.target.value)])
+            devLog('DEBUG','handleServiceView (possibleService)',possibleServices.content[Number(event.target.value)])
             const integration=possibleServices.content[Number(event.target.value)]
             if(integration.deploymentPhase!==undefined&&integration?.configurationEntity?.set?.name&&integration.id!==undefined) {
                 handleService({environment: integration.deploymentPhase, name: integration.configurationEntity.set.name, setId: integration.id})
@@ -74,7 +74,7 @@ function PossibleServices({oid,handleService}: Props) {
     );
 
     if(possibleServices.content) {
-        devLog("possibleServices (content)",possibleServices.content)
+        devLog("DEBUG","possibleServices (content)",possibleServices.content)
         return (<Select
             labelId="palvelu"
             id="palvelu"
@@ -87,10 +87,10 @@ function PossibleServices({oid,handleService}: Props) {
                 <FormattedMessage defaultMessage="Valitse" />
             </MenuItem>
             <MenuItem key={'uusi_2'} value={-2} tabIndex={1}>
-                {addEnv(0)} - uusi
+                {addEnv(0)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
             <MenuItem key={'uusi_1'} value={-1} tabIndex={2}>
-                {addEnv(1)} - uusi
+                {addEnv(1)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
             {possibleServices.content.map((integration,index) => {          
                 return(<MenuItem key={"possibleServices_"+index} value={index} tabIndex={3+index}>
