@@ -6,6 +6,10 @@ public class AttributeTestAuthorizationRequestBody {
     private String tenantId;
     private String clientId;
     private String clientSecret;
+
+    public AttributeTestAuthorizationRequestBody() {
+        
+    }
      
     public AttributeTestAuthorizationRequestBody(Long id, String clientId, String clientSecret) {
         this.id = id;
