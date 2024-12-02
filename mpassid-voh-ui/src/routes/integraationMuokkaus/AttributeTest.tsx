@@ -13,12 +13,13 @@ interface Props {
     attributes: Components.Schemas.Attribute[];
     open: boolean;
     oid: string;
+    tenantId: string| undefined;
     environment: number;
     setOpen: Dispatch<boolean>;
   }
 
 
-export default function AttributeTest({ id,attributes, open, setOpen, oid, environment }: Props){
+export default function AttributeTest({ id,attributes, open, setOpen, oid, environment,tenantId }: Props){
     const intl = useIntl();
     const [isValidPrincipal, setIsValidPrincipal] = useState(true);
     const [isKnown, setIsKnown] = useState(true);
@@ -155,6 +156,9 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                 if(!sessionAuthenticated){
                     const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
                     authRequest.id=parseInt(id);
+                    if(id==='0'&&tenantId&&tenantId!=="") {
+                        authRequest.tenantId=tenantId;
+                    }
                     authRequest.clientId=clientId;
                     authRequest.clientSecret=clientSecret;
                     

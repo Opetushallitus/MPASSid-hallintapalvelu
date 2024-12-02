@@ -2043,6 +2043,7 @@
                         "type": "integer",
                         "format": "int64"
                     },
+                    "tenantId": { "type": "string" },
                     "clientId": {
                         "type": "string"
                     },

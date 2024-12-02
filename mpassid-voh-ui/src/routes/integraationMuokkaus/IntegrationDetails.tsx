@@ -68,6 +68,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [metadataUrl, setMetadataUrl] = useState<string>('');
     const [metadata, setMetadata] = useState<any>((newConfigurationEntityData?.sp?.metadata&&newConfigurationEntityData?.sp?.metadata!==undefined)?newConfigurationEntityData.sp.metadata:{});
     const [attributes, setAttributes] = useState<Components.Schemas.Attribute[]>((newConfigurationEntityData?.attributes&&newConfigurationEntityData?.attributes!==undefined)?newConfigurationEntityData.attributes:[]);
+    const [initUserAttributes, setInitUserAttributes] = useState<string[]>([]);
+    const [initDataAttributes, setInitDataAttributes] = useState<string[]>([]);
     
     const role  = (integration.configurationEntity?.idp) ? "idp" : "sp"
     const type = integration.configurationEntity?.idp?.type! || integration.configurationEntity?.sp?.type! || "unknown"
@@ -158,7 +160,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setMetadataUrl(idp.metadataUrl)
               }        
             }
-            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {              
+            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {                  
               setAttributes(integration.configurationEntity.attributes)              
             } 
             
@@ -376,6 +378,20 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                   integration.configurationEntity?.[role]?.type!
                 );
 
+    const addInitAttributes = (initAttr:Components.Schemas.Attribute) => {
+      if(initAttr.type==='user') {
+        if(initAttr.name&&initAttr.name!=='') {
+          initUserAttributes.push(initAttr.name)
+          setInitUserAttributes(initUserAttributes)
+        }        
+        
+      } else {
+        if(initAttr.name&&initAttr.name!=='') {
+          initDataAttributes.push(initAttr.name)
+          setInitDataAttributes(initDataAttributes)
+        }
+      }      
+    }
     if(integration) {
       return(<>
       
@@ -430,6 +446,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setNewConfigurationEntityData={setNewConfigurationEntityData}  
               attributes={attributes}
               setAttributes={setAttributes}
+              initAttributes={initDataAttributes}
+              addInitAttributes={addInitAttributes}              
               attributeType="data"
               environment={environment.current}
               type={type}
@@ -473,6 +491,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setNewConfigurationEntityData={setNewConfigurationEntityData}  
                 attributes={attributes}
                 setAttributes={setAttributes}
+                initAttributes={initUserAttributes}
+                addInitAttributes={addInitAttributes}              
                 role={role}
                 attributeType="user"
                 environment={environment.current}

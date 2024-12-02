@@ -84,45 +84,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
             value: String(env) }
           )
       });
-      /*
-      const loadFile = (event:ChangeEvent<HTMLInputElement>) => {
-            
-        const img:HTMLImageElement = document.getElementById('integratio-logo-preview') as HTMLImageElement;
-        
-        if(event&&event.target&&event.target.files&&event.target.files.length>0) {
-            devLog("DEBUG", "File loaded",event.target.files[0])
-            return(<span>Uploaded</span>)
-         
-        } else {
-          return(<span>Not uploaded</span>)
-        }
-        
-      };
-      
-      const metadataFileUpload = () => {
-        return (<form >
-          <input
-            accept="image/*"
-            hidden
-            id="contained-button-file"
-            multiple
-            type="file"
-            onChange={e=>loadFile(e)}
-          />
-          <label htmlFor="contained-button-file">
-          {(identityProvider.metadataUrl)&&<><IconButton color="primary" component="span">
-            <UploadFileRoundedIcon />
-          </IconButton><FormattedMessage defaultMessage="Valitse"  /></>}
-          {!(identityProvider.metadataUrl)&&<><IconButton color="error" component="span">
-            <UploadFileRoundedIcon />
-          </IconButton><span >{intl.formatMessage({
-              defaultMessage: "Valitse, metadata on pakollinen",
-            })}</span></>}
-            
-          </label>   
-        </form>)
-      }
-      */
+
       const metadataUrlForm = (metadataUrl:string,metadataFiles:number) => {    
         
           const id = `attribuutti.metadataUrlField`;        

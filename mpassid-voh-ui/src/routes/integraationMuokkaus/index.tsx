@@ -23,6 +23,7 @@ export default function IntegraatioMuokkaus() {
   const { id } = useParams();
   const [saveDialogState, setSaveDialogState] = useState(true);
   const [canSave, setCanSave] = useState(false);
+  const [azureTestDone, setAzureTestDone] = useState(true);
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration|undefined>();
   const navigate = useNavigate();
   const [openConfirmation, setOpenConfirmation] = useState(false);
@@ -193,21 +194,27 @@ export default function IntegraatioMuokkaus() {
 
   const testAzureAccess = () => {
     
-    if (openConfirmation&&newIntegration?.configurationEntity&&newIntegration.configurationEntity.idp?.type==='azure') {
-      const clientKey=newIntegration.configurationEntity.attributes?.find(a=>a.name==='clientKey')
-      if(clientKey !== undefined && !clientKey?.content?.includes("***")) {
+    if (!azureTestDone&&openConfirmation&&newIntegration?.configurationEntity&&newIntegration?.configurationEntity.attributes&&newIntegration.configurationEntity.idp?.type==='azure') {
+      const clientId=newIntegration.configurationEntity.attributes?.find(a=>a.name==='clientId')?.content
+      const clientKey=newIntegration.configurationEntity.attributes?.find(a=>a.name==='clientKey')?.content
+      if(clientKey !== undefined && !clientKey.includes("***") && id !== undefined) {
+        setAzureTestDone(true)
         const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
-                    authRequest.id=123;
-                    authRequest.clientId="clientId";
-                    authRequest.clientSecret="clientSecret";
+                    authRequest.id=parseInt(id);
+                    if(id!=='0'&&newIntegration.configurationEntity.attributes.find(a=>a.name==='tenantId'&&a.type==='data')) {
+                      authRequest.tenantId=newIntegration.configurationEntity.attributes.find(a=>a.name==='tenantId'&&a.type==='data')?.content
+                    }
+                    authRequest.clientId=clientId;
+                    authRequest.clientSecret=clientKey;
                     
                     testAttributesAuthorization({},authRequest).then(result=>{ 
-                          devLog("DEBUG","testAttributesAuthorization",result) 
+                          devLog("DEBUG","testAttributesAuthorization",result)                           
                         }).catch(error=>{
-                          return (<Alert severity="error">TBD: azure tunnisteiden toimivuus testi!!!</Alert>)
+                          return (<Alert severity="error"><FormattedMessage defaultMessage="Testi valtuutus epäonnistui nykyisillä arvoilla!"/></Alert>)
+                          
                         })
                     
-        return (<Alert severity="error">TBD: azure tunnisteiden toimivuus testi!!!</Alert>)
+        //return (<Alert severity="error">TBD: azure tunnisteiden toimivuus testi!!!</Alert>)
       } 
     } 
     return (<></>)
@@ -259,7 +266,7 @@ export default function IntegraatioMuokkaus() {
                       <FormattedMessage defaultMessage="Tallenna muutokset" />
                   </Typography>
                   
-                  {isEntraId()&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
+                  {isEntraId()&&canSave&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
                                       <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
                                   </Button></>}
                   
@@ -268,7 +275,7 @@ export default function IntegraatioMuokkaus() {
                       {id==='0'&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
                       {(!canSave&&!isDisabled)&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {(canSave&&!isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {(canSave&&!isDisabled)&&<Button onClick={()=>{setAzureTestDone(false);setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
                       {(isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Poista" /></Button>}                    
                   </Box>
                   <br></br>
@@ -374,7 +381,7 @@ export default function IntegraatioMuokkaus() {
               </Alert>
                   
               </Dialog>
-              <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
+              <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} tenantId={newIntegration?.configurationEntity?.attributes?.find(a=>a.type==='data'&&a.name==='tenantId')?.content } attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
       </>
   );
 }

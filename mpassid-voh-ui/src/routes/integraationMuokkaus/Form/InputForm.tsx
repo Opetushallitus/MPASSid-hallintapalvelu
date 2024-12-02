@@ -53,15 +53,17 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
     if(!mandatory) {
       setIsValid(onValidate(inputRef.current?.value))
       setCanSave(true) 
+      /*
         if(inputRef.current?.value) {
           onUpdate(type,inputRef.current.value,attributeType);  
         } else {
           onUpdate(type,"",attributeType);
         }
+          */
         setUsedHelperText(helperText(inputRef.current?.value))
     }
     
-  }, [label, mandatory, reload, setCanSave]);
+  }, [attributeType, helperText, label, mandatory, onUpdate, onValidate, reload, setCanSave, type]);  
 
   const updateFormValue = () => {
     devLog("DEBUG","updateFormValue (value)",inputRef.current?.value)
@@ -97,6 +99,7 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
     return (
      
         <TextField
+          key={label}
           sx={{ width: '80%'}}
           variant="standard"
           placeholder={intl.formatMessage({

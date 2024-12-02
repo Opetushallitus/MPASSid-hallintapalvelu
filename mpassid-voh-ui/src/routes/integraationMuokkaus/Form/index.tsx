@@ -49,8 +49,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         devLog("DEBUG","updateInputItem (checked)",value)
         devLog("DEBUG","updateInputItem (type)",type)
         
-        devLog("DEBUG","updateInputItem (attribute)",attribute)
-        
+        devLog("DEBUG","updateInputItem (attribute)",attribute)        
         onUpdate(name,value,type)
         //currentObject.current={}
     }
@@ -61,7 +60,6 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         devLog("DEBUG","updateSwitchItem (type)",type)
         
         devLog("DEBUG","updateSwitchItem (attribute)",attribute)
-        
         onUpdate(name,String(value),type)
         //currentObject.current={}
     }
@@ -72,7 +70,6 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         devLog("DEBUG","updateMultiSelectItem (type)",attribute.type)
         
         devLog("DEBUG","updateMultiSelectItem (attribute)",attribute)
-        
         if(attribute.name !== undefined&&attribute.type) {
             onUpdate(attribute.name,value[0],attribute.type)
         }
@@ -86,6 +83,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         if(configuration.enum) {
             enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
         }
+        
         return (
             <Grid container >
                 
