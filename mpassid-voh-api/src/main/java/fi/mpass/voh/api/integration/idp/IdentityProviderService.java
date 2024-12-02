@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Base64;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +22,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
+import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.mp.SamlMetadataProvider;
 
 @Service
 public class IdentityProviderService {
     private static final Logger logger = LoggerFactory.getLogger(IdentityProviderService.class);
 
+    private final IntegrationService integrationService;
+
     private String metadataPathBase;
 
-    public IdentityProviderService(@Value("${application.metadata.base.path:metadata}") String metadataPathBase) {
+    public IdentityProviderService(@Value("${application.metadata.base.path:metadata}") String metadataPathBase,
+            IntegrationService integrationService) {
         this.metadataPathBase = metadataPathBase;
+        this.integrationService = integrationService;
     }
 
     public String saveMetadata(MultipartFile file) {
@@ -59,8 +66,27 @@ public class IdentityProviderService {
         SamlMetadataProvider mp = new SamlMetadataProvider(entityIdStream);
         String entityId = mp.getEntityId();
         String encodedEntityId = Base64.getEncoder().encodeToString(entityId.getBytes());
+        String flowname = null;
 
-        // use the second stream to save the metadata using the base64 as filename
+        List<Integration> idps = integrationService.getIdentityProviders();
+        for (Integration i : idps) {
+            try {
+                String entityIdExisting = i.getConfigurationEntity().getIdp().entityId;
+                if (entityIdExisting.equals(entityId)) {
+                    flowname = i.getConfigurationEntity().getIdp().getFlowName();
+                }
+            } catch (Exception e) {
+                logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
+                continue;
+            }
+        }
+
+        if (flowname == null) {
+            logger.error("No flowname found.");
+            throw new EntityCreationException("Failed to save metadata.");
+        }
+
+        // use the second stream to save the metadata
         Path rootLocation = Paths.get(this.metadataPathBase);
         try {
             if (file.isEmpty()) {
@@ -68,7 +94,7 @@ public class IdentityProviderService {
                 throw new EntityCreationException("Empty metadata.");
             }
 
-            Path destinationFile = rootLocation.resolve(Paths.get(encodedEntityId)).normalize().toAbsolutePath();
+            Path destinationFile = rootLocation.resolve(Paths.get(flowname + ".xml")).normalize().toAbsolutePath();
             if (!destinationFile.getParent().equals(rootLocation.toAbsolutePath())) {
                 logger.error("Cannot store file outside configured directory: {}",
                         destinationFile);
