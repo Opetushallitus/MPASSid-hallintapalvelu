@@ -51,7 +51,6 @@ public class IdentityProviderService {
             throw new EntityNotFoundException("Failed to save metadata.");
         }
 
-        // duplicate the stream
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             inputStream.transferTo(baos);
@@ -66,17 +65,16 @@ public class IdentityProviderService {
         String metadataUrl = null;
 
         Optional<Integration> i = integrationService.getIntegration(id);
-        if (!i.isPresent()) {
+        if (i.isPresent()) {
             try {
                 if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                     flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Adfs) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
-                }
-                else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
+
+                } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                     flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
-                }
-                else {
+                } else {
                     logger.debug("Given id is not Adfs or Gsuite");
                 }
             } catch (Exception e) {
@@ -115,6 +113,7 @@ public class IdentityProviderService {
     }
 
     public InputStreamResource getSAMLMetadata(String entityId) {
+        //Deprecated
         Path rootLocation = Paths.get(metadataPathBase);
         Path sourceFile = rootLocation.resolve(Paths.get(entityId)).normalize().toAbsolutePath();
 
@@ -127,24 +126,22 @@ public class IdentityProviderService {
     }
 
     public InputStreamResource getSAMLMetadata(Long id) {
+        // TODO: Unit tests
         String flowname = null;
-
         Optional<Integration> i = integrationService.getIntegration(id);
-        if (!i.isPresent()) {
+        if (i.isPresent()) {
             try {
                 if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                     flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
-                }
-                else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
+                } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                     flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
-                }
-                else {
+                } else {
                     logger.debug("Given id is not Adfs or Gsuite");
                 }
             } catch (Exception e) {
                 logger.error("Exception in retrieving integration. {}", e.getMessage());
             }
-            
+
             if (flowname == null) {
                 logger.error("No flowname.");
                 throw new EntityCreationException("Failed to get metadata.");
