@@ -55,9 +55,9 @@ public class IdentityProviderController {
 			@ApiResponse(responseCode = "405", description = "SAML metadata update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
 	})
 	@PostMapping(path = "/saml/metadata", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-	public String uploadSAMLMetadata(@RequestParam("file") MultipartFile file) {
-        // return SAML metadata entity id
-		return identityProviderService.saveMetadata(file);
+	public String uploadSAMLMetadata(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        // return metadata url
+		return identityProviderService.saveMetadata(id, file);
 	}
 
 	@Operation(summary = "Get SAML metadata")

@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class IdentityProviderService {
         this.integrationService = integrationService;
     }
 
-    public String saveMetadata(MultipartFile file) {
+    public String saveMetadata(Long id, MultipartFile file) {
 
         InputStream inputStream;
         try {
@@ -59,34 +60,36 @@ public class IdentityProviderService {
             throw new EntityNotFoundException("Failed to save metadata.");
         }
 
-        InputStream entityIdStream = new ByteArrayInputStream(baos.toByteArray());
         InputStream metadataOutputStream = new ByteArrayInputStream(baos.toByteArray());
 
-        // use the first stream to read the entityId and encode as a base64 filename
-        SamlMetadataProvider mp = new SamlMetadataProvider(entityIdStream);
-        String entityId = mp.getEntityId();
-        String encodedEntityId = Base64.getEncoder().encodeToString(entityId.getBytes());
         String flowname = null;
+        String metadataUrl = null;
 
-        List<Integration> idps = integrationService.getIdentityProviders();
-        for (Integration i : idps) {
+        Optional<Integration> i = integrationService.getIntegration(id);
+        if (!i.isPresent()) {
             try {
-                String entityIdExisting = i.getConfigurationEntity().getIdp().entityId;
-                if (entityIdExisting.equals(entityId)) {
-                    flowname = i.getConfigurationEntity().getIdp().getFlowName();
+                if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
+                    flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
+                    metadataUrl = ((Adfs) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
+                }
+                else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
+                    flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
+                    metadataUrl = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
+                }
+                else {
+                    logger.debug("Given id is not Adfs or Gsuite");
                 }
             } catch (Exception e) {
-                logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
-                continue;
+                logger.error("Exception in retrieving integration. {}", e.getMessage());
             }
         }
 
-        if (flowname == null) {
-            logger.error("No flowname found.");
+        if (flowname == null || metadataUrl == null) {
+            logger.error("No flowname or metadataUrlfound.");
             throw new EntityCreationException("Failed to save metadata.");
         }
 
-        // use the second stream to save the metadata
+        // use the stream to save the metadata
         Path rootLocation = Paths.get(this.metadataPathBase);
         try {
             if (file.isEmpty()) {
@@ -103,7 +106,7 @@ public class IdentityProviderService {
 
             Files.copy(metadataOutputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 
-            return encodedEntityId;
+            return metadataUrl;
 
         } catch (IOException e) {
             logger.error("Exception in saving metadata", e);
@@ -114,6 +117,42 @@ public class IdentityProviderService {
     public InputStreamResource getSAMLMetadata(String entityId) {
         Path rootLocation = Paths.get(metadataPathBase);
         Path sourceFile = rootLocation.resolve(Paths.get(entityId)).normalize().toAbsolutePath();
+
+        try {
+            return new InputStreamResource(new FileInputStream(sourceFile.toString()));
+        } catch (FileNotFoundException e) {
+            logger.error("Metadata not found: {}", sourceFile);
+            throw new EntityNotFoundException("Metadata not found.");
+        }
+    }
+
+    public InputStreamResource getSAMLMetadata(Long id) {
+        String flowname = null;
+
+        Optional<Integration> i = integrationService.getIntegration(id);
+        if (!i.isPresent()) {
+            try {
+                if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
+                    flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
+                }
+                else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
+                    flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
+                }
+                else {
+                    logger.debug("Given id is not Adfs or Gsuite");
+                }
+            } catch (Exception e) {
+                logger.error("Exception in retrieving integration. {}", e.getMessage());
+            }
+            
+            if (flowname == null) {
+                logger.error("No flowname.");
+                throw new EntityCreationException("Failed to get metadata.");
+            }
+        }
+
+        Path rootLocation = Paths.get(metadataPathBase);
+        Path sourceFile = rootLocation.resolve(Paths.get(flowname + ".xml")).normalize().toAbsolutePath();
 
         try {
             return new InputStreamResource(new FileInputStream(sourceFile.toString()));
