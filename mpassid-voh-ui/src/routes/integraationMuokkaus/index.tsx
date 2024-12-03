@@ -1,4 +1,4 @@
-import { inactivateIntegration, type Components, uploadLogo, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization } from "@/api";
+import { inactivateIntegration, type Components, uploadLogo, uploadSamlMetadata, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
@@ -15,7 +15,7 @@ import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { devLog } from "@/utils/devLog";
-import { cloneDeep } from "lodash";
+import { cloneDeep, clone } from 'lodash';
 import { integrationTypesDefault } from '@/config';
 
 export default function IntegraatioMuokkaus() {
@@ -159,7 +159,18 @@ export default function IntegraatioMuokkaus() {
                 } 
               }
               if(metadataFile.length===1){
+                const formData = new FormData();
+                formData.append("file", metadataFile[0]);
+                const metadataId:number = result.current.id||0;
                 alert("TALLENNA METADATA FILE BACKENDILLE!!!!") 
+                const metadataResult= await uploadSamlMetadata({ id: metadataId },formData as any);
+                
+                if(result.current.configurationEntity?.idp) {
+                  var idpProvider:Components.Schemas.Adfs|Components.Schemas.Gsuite = {}
+                  idpProvider = clone(result.current.configurationEntity.idp)
+                  idpProvider.metadataUrl=metadataResult;
+                  result.current.configurationEntity.idp = idpProvider;
+                }
               }
               setLoading(false)
             } catch (error:any) {   

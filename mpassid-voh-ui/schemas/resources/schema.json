@@ -1217,6 +1217,50 @@
                 }
             }
         },
+        "/api/v2/idp/saml/metadata": {
+            "post": {
+                "tags": ["identity-provider-controller"],
+                "summary": "Update SAML metadata",
+                "operationId": "uploadSAMLMetadata",
+                "requestBody": {
+                "content": {
+                    "multipart/form-data": {
+                    "schema": {
+                        "required": ["file"],
+                        "type": "object",
+                        "properties": {
+                        "file": { "type": "string", "format": "binary" }
+                        }
+                    }
+                    }
+                }
+                },
+                "responses": {
+                "405": {
+                    "description": "SAML metadata update error",
+                    "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/IntegrationError" }
+                    }
+                    }
+                },
+                "200": {
+                    "description": "SAML metadata update successful",
+                    "content": {
+                    "application/json": { "schema": { "type": "string" } }
+                    }
+                },
+                "403": {
+                    "description": "Forbidden",
+                    "content": {
+                    "application/json": {
+                        "schema": { "$ref": "#/components/schemas/IntegrationError" }
+                    }
+                    }
+                }
+                }
+            }
+        },
         "/api/v2/idp/types": {
             "get": {
                 "tags": [
