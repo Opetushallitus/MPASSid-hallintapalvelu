@@ -54,7 +54,7 @@ public class IdentityProviderController {
 			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "405", description = "SAML metadata update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
 	})
-	@PostMapping(path = "/saml/metadata", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	@PostMapping(path = "/saml/metadata/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	public String uploadSAMLMetadata(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
         // return metadata url
 		return identityProviderService.saveMetadata(id, file);
@@ -67,12 +67,12 @@ public class IdentityProviderController {
 			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json")),
 			@ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
 	})
-	@GetMapping("/saml/metadata/{entityId}")
-	public ResponseEntity<Resource> getSAMLMetadata(@PathVariable String entityId) {
-		InputStreamResource resource = identityProviderService.getSAMLMetadata(entityId);
+	@GetMapping("/saml/metadata/{id}")
+	public ResponseEntity<Resource> getSAMLMetadata(@PathVariable Long id) {
+		InputStreamResource resource = identityProviderService.getSAMLMetadata(id);
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + entityId);
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + id);
 		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
 		headers.add("Pragma", "no-cache");
 		headers.add("Expires", "0");
