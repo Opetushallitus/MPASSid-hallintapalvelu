@@ -64,10 +64,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           ((discoveryInformation?.schools&&discoveryInformation?.schools?.length>0)||
           (discoveryInformation?.excludedSchools&&discoveryInformation?.excludedSchools?.length>0))||
           false);
-    const [title, setTitle] = useState<string>(discoveryInformation?.title||integration?.organization?.name||'');
+    const [title, setTitle] = useState<string|undefined>((showSchools)?(discoveryInformation?.title||integration?.organization?.name||''):undefined);
     const [institutionTypeList, setInstitutionTypeList] = useState<number[]>(integration?.configurationEntity?.idp?.institutionTypes||[]);
     //const [earlyEducationProvides, setEarlyEducationProvides] = useState<boolean>(discoveryInformation?.earlyEducationProvides||false);
-    const [customDisplayName, setCustomDisplayName] = useState<string>(discoveryInformation?.customDisplayName||integration?.organization?.name||'');
+    const [customDisplayName, setCustomDisplayName] = useState<string|undefined>((showSchools)?discoveryInformation?.customDisplayName||undefined:(discoveryInformation?.customDisplayName||integration?.organization?.name||''));
     const institutionTypes = useKoodisByKoodisto(
         "mpassidnsallimatoppilaitostyypit"
       );
@@ -485,7 +485,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     isEditable={true} 
                     isMandatory={false} 
                     name="title"
-                    value={title} 
+                    value={title||''} 
                     newConfigurationEntityData={configurationEntity} 
                     helperText={helpGeneratorText} 
                     onUpdate={handleTitleChange} 
