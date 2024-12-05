@@ -79,6 +79,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
 
 
   useEffect(() => {
+    devLog("DEBUG","MultiSelectForm (mandatory)",inputRef?.current?.value)
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
       setCanSave(false)  
@@ -96,6 +97,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                 id="multiselectForm-checkbox"
                 multiple={multiple}
                 multiline
+                error={mandatory}
                 value={selection}
                 onChange={handleChange}
                 input={<Input id="select-multiple-chip"  />}
@@ -129,8 +131,10 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                     </MenuItem>
                 )}
                 </Select>
-                <FormHelperText>{helperText("")}</FormHelperText>
+                
             </FormControl>
+            <FormHelperText error={mandatory}>{helperText("")}</FormHelperText>
+            
             </div>
      
     );

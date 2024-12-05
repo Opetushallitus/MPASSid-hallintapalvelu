@@ -13,6 +13,7 @@ import { helperText, validate } from "@/utils/Validators";
 import { SchoolForm } from "./Form";
 import { clone, last, toPath } from "lodash";
 import { PhotoCamera } from "@mui/icons-material";
+import { devLog } from "@/utils/devLog";
 
 interface Props {
     newLogo: boolean;
@@ -80,9 +81,15 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const [exampleSchool, setExampleSchool] = useState<string>(possibleSchools.current?.filter(p=>excludeSchools.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu');
     const [schoolData, setSchoolData] = useState<SchoolData>(kouluData);
     const [showLogo, setShowLogo] = useState<boolean>(false);
+    const [localCanSave, setLocalCanSave] = useState<boolean>(true);
     const extraSchoolConfigurationNeeded = useRef<boolean>(false)
     const disableExtraSchoolConfiguration = useRef<boolean>(false);
     const intl = useIntl();
+
+    useEffect(() => {
+      devLog("DEBUG","SchoolSelection (localCanSave)",localCanSave)
+      setCanSave(localCanSave)
+    }, [localCanSave, setCanSave]);
 
     useEffect(() => {
       if(integration.organization?.children) {
@@ -140,7 +147,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const saveCheck = (value:boolean,showLogo:boolean,showSchools:boolean) => {
 
-      
       if(integration?.configurationEntity?.idp) {
         
         if(value&&
@@ -153,24 +159,37 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
            )
         ) {
           setCanSave(true)  
+          devLog("DEBUG","SchoolSelection (saveCheck 1)",true)
         } else {
           setCanSave(false)
+          devLog("DEBUG","SchoolSelection (saveCheck 2)",false)
         }
 
       } else {
         setCanSave(false)
+        devLog("DEBUG","SchoolSelection (saveCheck 3)",true)
       }
 
     }
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
 
+      //handleCustomDisplayNameChange(value);
+      //integration.discoveryInformation.customDisplayName
+      //discoveryInformation.customDisplayName=value;
       showSchools.current=checked
        discoveryInformation.showSchools=checked;
       if(checked) {
-        delete discoveryInformation.customDisplayName;
+        if(customDisplayName&&customDisplayName===integration?.organization?.name){
+          handleCustomDisplayNameChange('')
+        }
+        //delete discoveryInformation.customDisplayName;
         getExtraSchoolsConfiguration(institutionTypeList)
+        handleTitleChange(integration?.organization?.name||'')        
       } else {
+        if(!customDisplayName){
+          handleCustomDisplayNameChange(integration.discoveryInformation?.customDisplayName||integration?.organization?.name||'')
+        }
         handleTitleChange('')
         updateInstitutionTypes([])
         updateExcludeSchools([])
@@ -259,7 +278,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
       if(value===undefined||value==="") {
         setTitle('');
-        discoveryInformation.title=integration?.organization?.name||''
+        delete discoveryInformation.title;
       } else {
         setTitle(value);
         discoveryInformation.title=value;
@@ -319,7 +338,17 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       const helpGeneratorText = (value:string) => {
         return helperText([],value);
       }
-      
+      const mandatoryinstitutionTypesText = (value:string) => {
+        
+        if(configurationEntity?.idp?.institutionTypes?.length===0&&value==="") {
+          return (<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: intl.formatMessage({
+            defaultMessage: "Oppilaitostyypit",
+          })}} />);
+        } else {
+          return(<></>)
+        }
+        
+      }      
       
       function resizeImage(file:File, maxWidth:number, maxHeight:number):Promise<Blob> {
         return new Promise((resolve, reject) => {
@@ -443,11 +472,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                               label={"Oppilaitostyypit"}
                               attributeType={"data"}
                               isEditable={true}
-                              mandatory={false}                    
-                              helperText={helpGeneratorText}
+                              mandatory={configurationEntity?.idp?.institutionTypes?.length===0}                    
+                              helperText={mandatoryinstitutionTypesText}
                               enums={enums}
                               onValidate={validator} 
-                              setCanSave={setCanSave} 
+                              setCanSave={setLocalCanSave} 
                               onUpdate={updateInstitutionTypes}/>}
                   </Grid>
                   {showSchools.current&&configurationEntity&&
@@ -461,7 +490,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                     helperText={helpGeneratorText} 
                     onUpdate={handleTitleChange} 
                     onValidate={validator} 
-                    setCanSave={setCanSave}/>}
+                    setCanSave={setLocalCanSave}/>}
 
                   { configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
                     <>
@@ -500,7 +529,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                   helperText={helpGeneratorText}
                                   enums={possibleSchools.current}
                                   onValidate={validator} 
-                                  setCanSave={setCanSave} 
+                                  setCanSave={setLocalCanSave} 
                                   onUpdate={updateSchools}/>
                         </Grid>
                       </>} 
@@ -520,7 +549,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                   helperText={helpGeneratorText}
                                   enums={possibleSchools.current}
                                   onValidate={validator} 
-                                  setCanSave={setCanSave} 
+                                  setCanSave={setLocalCanSave} 
                                   onUpdate={updateExcludeSchools}/>
                         </Grid>
                       </>}
@@ -595,7 +624,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
         </Grid>
         
-        {!showSchools.current&&configurationEntity&&
+        {configurationEntity&&
           <Grid container spacing={2} mb={3}>    
               <SchoolForm 
               isVisible={true} 

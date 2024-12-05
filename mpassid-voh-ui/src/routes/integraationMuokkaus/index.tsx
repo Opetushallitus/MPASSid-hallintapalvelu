@@ -161,8 +161,7 @@ export default function IntegraatioMuokkaus() {
               if(metadataFile.length===1){
                 const formData = new FormData();
                 formData.append("file", metadataFile[0]);
-                const metadataId:number = result.current.id||0;
-                alert("TALLENNA METADATA FILE BACKENDILLE!!!!") 
+                const metadataId:number = result.current.id||0;                
                 const metadataResult= await uploadSamlMetadata({ id: metadataId },formData as any);
                 
                 if(result.current.configurationEntity?.idp) {
