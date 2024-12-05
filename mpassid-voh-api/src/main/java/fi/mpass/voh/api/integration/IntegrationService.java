@@ -554,7 +554,10 @@ public class IntegrationService {
           logger.error("No authority to update IDP.");
           throw new EntityCreationException("Integration update failed, no authority to update IDP.");
         }
-        integration = addRedirectUri(integration);
+
+        if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+          integration = addRedirectUri(integration);
+        }
       }
       try {
         // TODO check that integration.getId() and id matches
@@ -865,7 +868,9 @@ public class IntegrationService {
               .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
               .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableIdpIds.get(0));
-          integration = addRedirectUri(integration);
+          if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+            integration = addRedirectUri(integration);
+          }
         } else {
           // TODO the case of the first integration without preloaded integrations
           logger.error("Failed to find an available idp integration identifier");
@@ -1207,8 +1212,7 @@ public class IntegrationService {
     try {
       Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
       attributes.add(attribute);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       logger.debug("Error in handling integration attributes");
       throw new EntityCreationException("Integration creation failed");
     }
@@ -1219,7 +1223,8 @@ public class IntegrationService {
     Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
     boolean found = false;
     for (Attribute a : attributes) {
-      if (a.getName().equals(configuration.getRedirectUriReference()) && a.getName().equals(configuration.getRedirectUriReferenceValue())) {
+      if (a.getName().equals(configuration.getRedirectUriReference())
+          && a.getName().equals(configuration.getRedirectUriReferenceValue())) {
         Attribute newAttribute = new Attribute("data", "redirectUri", configuration.getRedirectUriValue1());
         integration = addAttribute(integration, newAttribute);
         found = true;
