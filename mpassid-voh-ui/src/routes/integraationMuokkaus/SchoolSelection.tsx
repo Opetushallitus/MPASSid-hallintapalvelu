@@ -159,15 +159,15 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
            )
         ) {
           setCanSave(true)  
-          devLog("DEBUG","SchoolSelection (saveCheck 1)",true)
+          devLog("DEBUG","SchoolSelection (saveCheck ready)",true)
         } else {
           setCanSave(false)
-          devLog("DEBUG","SchoolSelection (saveCheck 2)",false)
+          devLog("DEBUG","SchoolSelection (saveCheck not ready)",false)
         }
 
       } else {
         setCanSave(false)
-        devLog("DEBUG","SchoolSelection (saveCheck 3)",true)
+        devLog("DEBUG","SchoolSelection (saveCheck not idp)",true)
       }
 
     }
