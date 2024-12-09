@@ -25,7 +25,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import org.hibernate.boot.jaxb.internal.FileXmlSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -1211,9 +1210,16 @@ public class IntegrationService {
   private Integration addAttribute(Integration integration, Attribute attribute) {
     try {
       Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
+      for (Iterator<Attribute> i = attributes.iterator(); i.hasNext();) {
+        Attribute a = i.next();
+        if (a.getName().equals(attribute.getName())) {
+          i.remove();
+        }
+      }
+      attribute.setConfigurationEntity(integration.getConfigurationEntity());
       attributes.add(attribute);
     } catch (Exception e) {
-      logger.debug("Error in handling integration attributes");
+      logger.error("Error in handling integration attributes: ", e);
       throw new EntityCreationException("Integration creation failed");
     }
     return integration;
