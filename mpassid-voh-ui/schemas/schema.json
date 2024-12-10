@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "@api.baseurl@"
+            "url": "https://virkailija.opintopolku.fi/mpassid"
         }
     ],
     "paths": {
@@ -1165,58 +1165,6 @@
                 }
             }
         },
-        "/api/v2/integration/discoveryinformation/logo/{id}": {
-            "get": {
-                "tags": [
-                    "integration-controller"
-                ],
-                "summary": "Get integration discovery information logo",
-                "operationId": "getIntegrationDiscoveryInformationLogo_1",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/octet-stream": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IntegrationError"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Resource not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IntegrationError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/v2/idp/saml/metadata/{id}": {
             "post": {
                 "tags": ["identity-provider-controller"],
@@ -1269,6 +1217,58 @@
                     }
                     }
                 }
+                }
+            }
+        },
+        "/api/v2/integration/discoveryinformation/logo/{id}": {
+            "get": {
+                "tags": [
+                    "integration-controller"
+                ],
+                "summary": "Get integration discovery information logo",
+                "operationId": "getIntegrationDiscoveryInformationLogo_1",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
