@@ -33,11 +33,14 @@ public class IdentityProviderService {
 
     private final IntegrationService integrationService;
 
-    private String metadataPathBase;
+    private String metadataBasePath;
+    private String metadataBaseUrl;
 
-    public IdentityProviderService(@Value("${application.metadata.base.path:metadata}") String metadataPathBase,
+    public IdentityProviderService(@Value("${application.metadata.base.path:metadata}") String metadataBasePath,
+            @Value("${application.metadata.base.path:metadata}") String metadataBaseUrl,
             IntegrationService integrationService) {
-        this.metadataPathBase = metadataPathBase;
+        this.metadataBasePath = metadataBasePath;
+        this.metadataBaseUrl = metadataBaseUrl;
         this.integrationService = integrationService;
     }
 
@@ -82,13 +85,18 @@ public class IdentityProviderService {
             }
         }
 
-        if (flowname == null || metadataUrl == null) {
-            logger.error("No flowname or metadataUrlfound.");
+        if (flowname == null) {
+            logger.error("No flowname found.");
             throw new EntityCreationException("Failed to save metadata.");
         }
 
+        if (metadataUrl == null) {
+            logger.debug("No metadataUrl found.");
+            metadataUrl = this.metadataBaseUrl + "/" + id.toString();
+        }
+
         // use the stream to save the metadata
-        Path rootLocation = Paths.get(this.metadataPathBase);
+        Path rootLocation = Paths.get(this.metadataBasePath);
         try {
             if (file.isEmpty()) {
                 logger.error("Empty file {}", file);
@@ -113,8 +121,8 @@ public class IdentityProviderService {
     }
 
     public InputStreamResource getSAMLMetadata(String entityId) {
-        //Deprecated
-        Path rootLocation = Paths.get(metadataPathBase);
+        // Deprecated
+        Path rootLocation = Paths.get(metadataBasePath);
         Path sourceFile = rootLocation.resolve(Paths.get(entityId)).normalize().toAbsolutePath();
 
         try {
@@ -148,7 +156,7 @@ public class IdentityProviderService {
             }
         }
 
-        Path rootLocation = Paths.get(metadataPathBase);
+        Path rootLocation = Paths.get(metadataBasePath);
         Path sourceFile = rootLocation.resolve(Paths.get(flowname + ".xml")).normalize().toAbsolutePath();
 
         try {
