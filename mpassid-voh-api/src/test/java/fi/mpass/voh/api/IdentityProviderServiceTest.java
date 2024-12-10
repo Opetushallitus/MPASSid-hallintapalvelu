@@ -23,7 +23,7 @@ class IdentityProviderServiceTest {
     @BeforeEach
     void setUp() {
         // This path is relative to mpassid-voh-api module
-        underTest = new IdentityProviderService("src/test/resources/metadata", integrationService);
+        underTest = new IdentityProviderService("src/test/resources/metadata", "test.com/metadata", integrationService);
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
