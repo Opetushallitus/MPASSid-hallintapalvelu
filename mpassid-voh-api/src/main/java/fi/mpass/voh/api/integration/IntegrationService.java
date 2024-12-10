@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.AttributedCharacterIterator.Attribute;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -930,7 +931,6 @@ public class IntegrationService {
               throw new EntityCreationException("Integration creation failed");
             }
           }
-          // TODO muut kuin oidc:if (integration.getConfigurationEntity().getSp().getType().equals("opinsys")) {
 
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
@@ -1155,4 +1155,27 @@ public class IntegrationService {
     }
     return null;
   }
+
+  private Integration handleSecrets(Integration integration) {
+    if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+
+    } else if (integration.getConfigurationEntity().getSp().getType().equals("azure")) {
+
+    } else if (integration.getConfigurationEntity().getSp().getType().equals("gsuite")) {
+
+    } else if (integration.getConfigurationEntity().getSp().getType().equals("opinsys")) {
+      // Save secret to aws parameter store
+      Set<Attribute> attributes 
+      boolean success = credentialService.updateCredential(integration, credentialMetadataValueField, asd);
+      if (!success) {
+        logger.error("Failed to save secret to aws parameter store.");
+        throw new EntityCreationException("Integration creation failed");
+      }
+
+    } else if (integration.getConfigurationEntity().getSp().getType().equals("wilma")) {
+
+    }
+
+  }
+
 }
