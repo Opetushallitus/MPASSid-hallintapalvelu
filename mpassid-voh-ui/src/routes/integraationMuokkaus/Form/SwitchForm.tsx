@@ -26,25 +26,25 @@ export default function SwitchForm({ object, type, isEditable=false, mandatory=f
 
 
   useEffect(() => {
-      devLog("SwitchForm (object)",object)
-      devLog("SwitchForm (resetValue)",resetValue)    
+      devLog("DEBUG","SwitchForm (object)",object)
+      devLog("DEBUG","SwitchForm (resetValue)",resetValue)    
       if(resetValue) {
         setValue((object.content!==undefined)?JSON.parse(object.content):false)
-        devLog("SwitchForm (value)",(object.content!==undefined)?JSON.parse(object.content):false)        
+        devLog("DEBUG","SwitchForm (value)",(object.content!==undefined)?JSON.parse(object.content):false)        
       }  
   }, [object, resetValue, setValue]);
 
 
   const updateFormValue = (event: any) => {
     
-        devLog("SwitchForm (event.target.checked)",event.target.checked)   
+        devLog("DEBUG","SwitchForm (event.target.checked)",event.target.checked)   
         setCanSave(true) 
         onUpdate(type,event.target.checked,attributeType);
         setValue(JSON.parse(event.target.checked))
       
   };
-  devLog("SwitchForm (value for "+object.name+")",object)
-  devLog("SwitchForm (value for "+object.name+")",value)
+  devLog("DEBUG","SwitchForm (value for "+object.name+")",object)
+  devLog("DEBUG","SwitchForm (value for "+object.name+")",value)
   if(isEditable) {
     return (
         <Switch checked={value}

@@ -93,7 +93,7 @@ public class ServiceProviderLoader extends Loader {
                 rootNode = (objectMapper.readTree(actualInputStream)).path("services");
 
             } catch (StreamReadException e) {
-                logger.error("{} contains invalid content.", spInput);
+                logger.error("{} contains invalid content. {}", spInput, e.getMessage());
                 loading.addError(Long.valueOf(0), spInput + " contains invalid content");
                 inputStream = null;
                 break;

@@ -76,6 +76,7 @@ public class SamlMetadataProvider {
                     .retrieve()
                     .body(String.class);
         } catch (Exception ex) {
+            logger.error(ex.getMessage());
             metadata = null;
         }
 
@@ -101,6 +102,7 @@ public class SamlMetadataProvider {
             // TODO size sanity check
             metadata = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
+            logger.error(e.getMessage());
             metadata = null;
         }
 

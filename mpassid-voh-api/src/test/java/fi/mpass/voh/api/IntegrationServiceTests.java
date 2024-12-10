@@ -96,6 +96,7 @@ class IntegrationServiceTests {
     void setUp() {
         configuration = new IntegrationServiceConfiguration("1.2.246.562.10.00000000001", 3000001L,
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
+                "http://localhost/mpassid/integration/discoveryinformation/logo",
                 "/logos");
 
         underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration, credentialService);
@@ -120,7 +121,6 @@ class IntegrationServiceTests {
         ConfigurationEntity configurationEntitySp = new ConfigurationEntity();
         configurationEntitySp.setSp(new SamlServiceProvider());
         configurationEntitySp.getSp().setName("Testipalvelu");
-
 
         // Integration sets
         integrationSets = new ArrayList<Integration>();
@@ -175,7 +175,7 @@ class IntegrationServiceTests {
                 "zap@bar");
 
         inactiveIntegration.setStatus(1);
-        
+
         updatedIntegrations = new ArrayList<Integration>();
         updatedIntegration.setServiceContactAddress("zyx@domain");
         updatedIntegrations.add(updatedIntegration);
@@ -477,10 +477,13 @@ class IntegrationServiceTests {
 
         // // then
         // assertEquals(5000001L, resultIntegration.getId());
-        // assertEquals(6000001L, resultIntegration.getConfigurationEntity().getSet().getId());
-        // assertEquals("Testipalvelu", resultIntegration.getConfigurationEntity().getSet().getName());
+        // assertEquals(6000001L,
+        // resultIntegration.getConfigurationEntity().getSet().getId());
+        // assertEquals("Testipalvelu",
+        // resultIntegration.getConfigurationEntity().getSet().getName());
         // assertNotNull(resultIntegration.getConfigurationEntity().getSp());
-        // assertEquals("1.2.3.4.5.6.7.8", resultIntegration.getOrganization().getOid());
+        // assertEquals("1.2.3.4.5.6.7.8",
+        // resultIntegration.getOrganization().getOid());
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
@@ -577,8 +580,9 @@ class IntegrationServiceTests {
         // then
         assertTrue(dto.getExistingIncluded() == null);
         assertTrue(dto.getExistingExcluded() == null);
-    
-}
+
+    }
+
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
     @Test
     void testGetDiscoveryInformationEmpty() throws JsonMappingException, JsonProcessingException {

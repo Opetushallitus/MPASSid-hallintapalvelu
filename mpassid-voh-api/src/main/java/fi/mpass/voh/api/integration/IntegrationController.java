@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -45,6 +47,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping(path = "api/v2/integration")
 public class IntegrationController {
+	private static final Logger logger = LoggerFactory.getLogger(IntegrationController.class);
 
 	private final IntegrationService integrationService;
 
@@ -91,6 +94,7 @@ public class IntegrationController {
 						pageable);
 			}
 		} catch (PropertyReferenceException exc) {
+			logger.error(exc.getMessage());
 			throw new ResponseStatusException(
 					HttpStatus.SC_NOT_FOUND, "Integration Not Found", exc);
 		}
@@ -224,8 +228,10 @@ public class IntegrationController {
 		try {
 			resource.getInputStream().transferTo(baos);
 		} catch (IllegalStateException e) {
+			logger.error(e.getMessage());
 			throw new EntityNotFoundException("Logo retrieval failed.");
 		} catch (IOException e) {
+			logger.error(e.getMessage());
 			throw new EntityNotFoundException("Logo retrieval failed.");
 		}
 		InputStream imageHeaderStream = new ByteArrayInputStream(baos.toByteArray());

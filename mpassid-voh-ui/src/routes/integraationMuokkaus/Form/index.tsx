@@ -1,4 +1,5 @@
 import type { Components } from "@/api";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Tooltip from "@mui/material/Tooltip";
@@ -42,36 +43,36 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
     
-    devLog("AttributeForm (attribute)",attribute)
+    devLog("DEBUG","AttributeForm (attribute)",attribute)
 
     const updateInputItem = (name: string,value: string,type: string) => {
-        devLog("updateInputItem (name)",name)
-        devLog("updateInputItem (checked)",value)
-        devLog("updateInputItem (type)",type)
+        devLog("DEBUG","updateInputItem (name)",name)
+        devLog("DEBUG","updateInputItem (checked)",value)
+        devLog("DEBUG","updateInputItem (type)",type)
         
-        devLog("updateInputItem (attribute)",attribute)
+        devLog("DEBUG","updateInputItem (attribute)",attribute)
         
         onUpdate(name,value,type)
         //currentObject.current={}
     }
 
     const updateSwitchItem = (name: string,value: boolean,type: string) => {
-        devLog("updateSwitchItem (name)",name)
-        devLog("updateSwitchItem (checked)",value)
-        devLog("updateSwitchItem (type)",type)
+        devLog("DEBUG","updateSwitchItem (name)",name)
+        devLog("DEBUG","updateSwitchItem (checked)",value)
+        devLog("DEBUG","updateSwitchItem (type)",type)
         
-        devLog("updateSwitchItem (attribute)",attribute)
+        devLog("DEBUG","updateSwitchItem (attribute)",attribute)
         
         onUpdate(name,String(value),type)
         //currentObject.current={}
     }
 
     const updateMultiSelectItem = (value: string[]) => {
-        devLog("updateMultiSelectItem (name)",attribute.name)
-        devLog("updateMultiSelectItem (checked)",value)
-        devLog("updateMultiSelectItem (type)",attribute.type)
+        devLog("DEBUG","updateMultiSelectItem (name)",attribute.name)
+        devLog("DEBUG","updateMultiSelectItem (checked)",value)
+        devLog("DEBUG","updateMultiSelectItem (type)",attribute.type)
         
-        devLog("updateMultiSelectItem (attribute)",attribute)
+        devLog("DEBUG","updateMultiSelectItem (attribute)",attribute)
         
         if(attribute.name !== undefined&&attribute.type) {
             onUpdate(attribute.name,value[0],attribute.type)
@@ -117,7 +118,8 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                         variant="caption"
                         >
                         {configuration&&roleConfiguration&&!configuration.enum&&
-                            (<InputForm key={attribute.name} 
+                            (<ErrorBoundary>
+                                <InputForm key={attribute.name} 
                                 object={attribute} 
                                 path="content" 
                                 type={attribute.name!} 
@@ -128,38 +130,43 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                                 label={label?intl.formatMessage(label):attribute.name!}
                                 attributeType={attributeType}
                                 helperText={helperText}
-                                setCanSave={setCanSave}/>)
+                                setCanSave={setCanSave}/>
+                            </ErrorBoundary>)
                         }
                         {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&attributeType==='data'&&
-                            (<SwitchForm key={attribute.name} 
-                                object={attribute} 
-                                path="content" 
-                                type={attribute.name!} 
-                                values={configuration.enum}
-                                isEditable={roleConfiguration.editable} 
-                                onUpdate={updateSwitchItem} 
-                                onValidate={onValidate} 
-                                mandatory={configuration.mandatory}
-                                label={label?intl.formatMessage(label):attribute.name!}
-                                attributeType={"data"}
-                                helperText={helperText}
-                                setCanSave={setCanSave}/>)
+                            (<ErrorBoundary>
+                                <SwitchForm key={attribute.name} 
+                                    object={attribute} 
+                                    path="content" 
+                                    type={attribute.name!} 
+                                    values={configuration.enum}
+                                    isEditable={roleConfiguration.editable} 
+                                    onUpdate={updateSwitchItem} 
+                                    onValidate={onValidate} 
+                                    mandatory={configuration.mandatory}
+                                    label={label?intl.formatMessage(label):attribute.name!}
+                                    attributeType={"data"}
+                                    helperText={helperText}
+                                    setCanSave={setCanSave}/>
+                            </ErrorBoundary>)
                         }
                         {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
-                                (<MultiSelectForm key={attribute.name}                                    
-                                    values={(attribute.content)?[ attribute.content ]:[]}
-                                    isEditable={roleConfiguration.editable}
-                                    onUpdate={updateMultiSelectItem} 
-                                    onValidate={onValidate}
-                                    mandatory={configuration.mandatory}
-                                    label={label ? intl.formatMessage(label) : attribute.name!}
-                                    //attributeType={"metadata"}
-                                    helperText={helperText}
-                                    setCanSave={setCanSave} 
-                                    attributeType={"data"} 
-                                    enums={enumValues} 
-                                    multiple={false}
-                                    />)
+                                (<ErrorBoundary>
+                                    <MultiSelectForm key={attribute.name}                                    
+                                        values={(attribute.content)?[ attribute.content ]:[]}
+                                        isEditable={roleConfiguration.editable}
+                                        onUpdate={updateMultiSelectItem} 
+                                        onValidate={onValidate}
+                                        mandatory={configuration.mandatory}
+                                        label={label ? intl.formatMessage(label) : attribute.name!}
+                                        //attributeType={"metadata"}
+                                        helperText={helperText}
+                                        setCanSave={setCanSave} 
+                                        attributeType={"data"} 
+                                        enums={enumValues} 
+                                        multiple={false}
+                                        />
+                                </ErrorBoundary>)
                             }
                         
                         
@@ -202,30 +209,30 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     //const [ object, setObject ] = useState<any>(attribute)
 
     useEffect(() => {
-        devLog("MetadataForm (canSaveItem)",canSaveItem)
+        devLog("DEBUG","MetadataForm (canSaveItem)",canSaveItem)
     }, [canSaveItem]);
 
     const objectOnValidate  = (data:string) => {
-        devLog("objectOnValidate (data)",data)
-        devLog("objectOnValidate (canSaveItem)",canSaveItem)
+        devLog("DEBUG","objectOnValidate (data)",data)
+        devLog("DEBUG","objectOnValidate (canSaveItem)",canSaveItem)
         return onValidate(data);
     }
 
     const listOnValidate  = (data:string) => {
-        devLog("listOnValidate (data)",data)
-        devLog("listOnValidate (canSaveItem)",canSaveItem)
+        devLog("DEBUG","listOnValidate (data)",data)
+        devLog("DEBUG","listOnValidate (canSaveItem)",canSaveItem)
         return onValidate(data);
     }
     
     const updatObjectItem  = (name: string, data:any) => {
         
-        devLog("updatObjectItem (name)",name)
-        devLog("updatObjectItem (data)",data)
-        devLog("updatObjectItem (uiConfiguration)",uiConfiguration)
+        devLog("DEBUG","updatObjectItem (name)",name)
+        devLog("DEBUG","updatObjectItem (data)",data)
+        devLog("DEBUG","updatObjectItem (uiConfiguration)",uiConfiguration)
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
-        devLog("updatObjectItem (mandatory)",uiConfiguration.mandatory)
+        devLog("DEBUG","updatObjectItem (mandatory)",uiConfiguration.mandatory)
         
         if(data.content) {
             if(objectOnValidate(data.content)) {
@@ -237,16 +244,16 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                 currentObject.current[name]=data;    
             }
         }
-        devLog("updatObjectItem (result)",currentObject.current)
+        devLog("DEBUG","updatObjectItem (result)",currentObject.current)
         
     }
 
     const editObject  = (name: string, data:any, index:number) => {
         
-        devLog("editObject (name)",name)
-        devLog("editObject (data)",data)
-        devLog("editObject (uiConfiguration)",uiConfiguration)
-        devLog("editObject (attribute)",attribute)
+        devLog("DEBUG","editObject (name)",name)
+        devLog("DEBUG","editObject (data)",data)
+        devLog("DEBUG","editObject (uiConfiguration)",uiConfiguration)
+        devLog("DEBUG","editObject (attribute)",attribute)
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
@@ -261,28 +268,28 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
 
     const deleteObjectItem  = (name: string, index:number) => {
         
-        devLog("deleteObjectItem (name)",name)
-        devLog("deleteObjectItem (index)",index)
-        devLog("deleteObjectItem (uiConfiguration)",uiConfiguration)
-        devLog("deleteObjectItem (attribute)",attribute)
+        devLog("DEBUG","deleteObjectItem (name)",name)
+        devLog("DEBUG","deleteObjectItem (index)",index)
+        devLog("DEBUG","deleteObjectItem (uiConfiguration)",uiConfiguration)
+        devLog("DEBUG","deleteObjectItem (attribute)",attribute)
         
         onDelete(attribute.name,index);
-        devLog("deleteObjectItem (result)",currentObject.current)
+        devLog("DEBUG","deleteObjectItem (result)",currentObject.current)
         
     }
 
     const updateMultiSelectItem = (configuration: UiConfiguration, value: string[]) => {
         
-        devLog("updateMultiSelectItem ("+attribute.name+")",value)
-        devLog("updateMultiSelectItem (type)",attribute.type)        
-        devLog("updateMultiSelectItem (attribute)",attribute)
-        devLog("updateMultiSelectItem (configuration)",configuration)
+        devLog("DEBUG","updateMultiSelectItem ("+attribute.name+")",value)
+        devLog("DEBUG","updateMultiSelectItem (type)",attribute.type)        
+        devLog("DEBUG","updateMultiSelectItem (attribute)",attribute)
+        devLog("DEBUG","updateMultiSelectItem (configuration)",configuration)
         
         if(configuration.multiselect !== undefined && configuration.multiselect) {
-            devLog("updateMultiSelectItem (multiselect)",configuration.multiselect)
+            devLog("DEBUG","updateMultiSelectItem (multiselect)",configuration.multiselect)
             onUpdate(attribute.name,value)
         } else {
-            devLog("updateMultiSelectItem (multiselect)","false")
+            devLog("DEBUG","updateMultiSelectItem (multiselect)","false")
             if(value.length>0) {
                 if(value[0]==='null') {
                     onUpdate(attribute.name,null)
@@ -299,19 +306,19 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     }
 
     const updateSwitchItem = (name:any,value:boolean) => {
-        devLog("updateSwitchItem ("+name+")",value)
+        devLog("DEBUG","updateSwitchItem ("+name+")",value)
         
         
-        devLog("updateSwitchItem (attribute)",attribute)
-        devLog("updateSwitchItem (currentObject)",currentObject.current)
+        devLog("DEBUG","updateSwitchItem (attribute)",attribute)
+        devLog("DEBUG","updateSwitchItem (currentObject)",currentObject.current)
         
         onUpdate(name,value)
         //currentObject.current={}
     }
     const updateListObject = () => {
         
-        devLog("updateListObject (attribute)",attribute)
-        devLog("updateListObject (currentObject)",currentObject.current)
+        devLog("DEBUG","updateListObject (attribute)",attribute)
+        devLog("DEBUG","updateListObject (currentObject)",currentObject.current)
         
         if(objectDataRef.current.validate()) {
             onUpdate(attribute.name,currentObject.current)
@@ -336,14 +343,15 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     if(roleConfiguration.visible) {
         var buttonColor:"default" | "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning"="default";
         if(configuration.mandatory&&attribute.content&&attribute.content.length===0) {
-            devLog("MetadataForm (buttonColor)",attribute.content)
+            devLog("DEBUG","MetadataForm (buttonColor)",attribute.content)
             buttonColor="error"
-        }
+        } 
         var enumValues: oneEnum[] = [];
         if(configuration.enum) {
-            enumValues=configuration.enum.map(e=> {return ({label: (e===null||e==='null')?intl.formatMessage({
-                defaultMessage: "Ei arvoa",
-              }):String(e), value: String(e) })})
+            enumValues=configuration.enum.map(e=> {return (
+                                    {label: (e===null||e==='null')?intl.formatMessage({defaultMessage: "Ei arvoa" }):String(e), 
+                                     value: String(e) }
+                                    )})
         }
         
         return (
@@ -379,7 +387,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         >
                             
                             {configuration&&roleConfiguration&&configuration.object !== undefined&&
-                            (<ObjectForm key={attribute.name+"_"+configuration.name} 
+                            (<ErrorBoundary>
+                            <ObjectForm key={attribute.name+"_"+configuration.name} 
                                 integrationType={type}
                                 object={attribute} 
                                 path="content" 
@@ -395,10 +404,11 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 helperText={helperText}
                                 setCanSave={setCanSaveItem}
                                 objectData={objectDataRef}
-                                currentObject={currentObject}/>)
+                                currentObject={currentObject}/>
+                                </ErrorBoundary>)
                             }
                             {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&
-                                (<SwitchForm key={attribute.name} 
+                                (<ErrorBoundary><SwitchForm key={attribute.name} 
                                     object={attribute} 
                                     path="content" 
                                     type={attribute.name!} 
@@ -410,10 +420,10 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     label={label?intl.formatMessage(label):attribute.name!}
                                     attributeType={"metadata"}
                                     helperText={helperText}
-                                    setCanSave={setCanSaveItem}/>)
+                                    setCanSave={setCanSaveItem}/></ErrorBoundary>)
                             }
                             {configuration&&roleConfiguration&&!configuration.switch&&configuration.enum&&configuration.enum.length>0&&
-                                (<MultiSelectForm key={attribute.name}
+                                (<ErrorBoundary><MultiSelectForm key={attribute.name}
                                     //object={attribute} 
                                     //path="content" 
                                     //type={attribute.name!} 
@@ -430,9 +440,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     enums={enumValues} 
                                     createEmpty={true}
                                     multiple={configuration.multiselect}
-                                    onUpdate={value=>updateMultiSelectItem(configuration,value)}/>)
+                                    onUpdate={value=>updateMultiSelectItem(configuration,value)}/></ErrorBoundary>)
                             }
-                            {configuration&&roleConfiguration&&!configuration.multivalue&&!configuration.enum&&
+                            {configuration&&roleConfiguration&&!configuration.array&&!configuration.enum&&
                                 (<InputForm key={attribute.name} 
                                     object={attribute} 
                                     path="content" 
@@ -446,7 +456,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     helperText={helperText}
                                     setCanSave={setCanSaveItem}/>)
                             }
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&configuration.object&&roleConfiguration.editable&&
+                            {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&configuration.object&&roleConfiguration.editable&&
                             (<Grid container spacing={2} >
                                 <Grid item xs={10}></Grid>
                                 <Grid item xs={2}>
@@ -460,7 +470,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 </Grid>
                             </Grid>)
                             }
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&
+                            {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&!configuration.object&&
                                 (<ListForm key={attribute.name}
                                 object={attribute}
                                 noErrors={true}
@@ -474,7 +484,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 onUpdate={onUpdate} 
                                 pressButton={pressButtonRef}
                                 setCanSave={setCanSaveItem}/>)}        
-                            {configuration&&roleConfiguration&&configuration.multivalue&&!configuration.enum&&!configuration.object&&roleConfiguration.editable&&
+                            {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&!configuration.object&&roleConfiguration.editable&&
                                 (<Grid container spacing={2} >
                                     <Grid item xs={10}></Grid>
                                     <Grid item xs={2}>

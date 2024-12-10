@@ -1,4 +1,4 @@
-import { validate } from './utils/Validators';
+export const fixPackage = true;
 export const roles = ["idp", "sp", "set"] as const;
 export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
@@ -55,7 +55,7 @@ export interface UiConfiguration {
   type: string;
   oid?: string;
   mandatory: boolean;
-  multivalue?: boolean;
+  array: boolean;
   multiselect?: boolean;
   switch: boolean;
   object?: boolean;
@@ -78,6 +78,7 @@ export const defaultDataConfiguration:UiConfiguration = {
   name: 'default',
   type: 'user',
   mandatory: false,
+  array: false,
   switch: false,
   validation: [],
   integrationType: [
@@ -122,7 +123,38 @@ export const dataConfiguration:UiConfiguration[] = [
   {
       name: 'clientId',
       type: 'data',
+      mandatory: true,
+      array: false,
+      switch: false,
+      validation: [ 'binddn' ],
+      integrationType: [        
+        {
+            name: 'opinsys',
+            editable: true,
+            visible: true,
+        }
+      ]
+  },
+  {
+    name: 'clientId',
+    type: 'data',
+    mandatory: false,
+    array: false,
+    switch: false,
+    validation: [ ],
+    integrationType: [
+      {
+          name: 'azure',
+          editable: false,
+          visible: true,
+      }
+    ]
+},
+  {
+      name: 'clientKey',
+      type: 'data',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -130,19 +162,10 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'azure',
             editable: false,
             visible: true,
-        }
-      ]
-  },
-  {
-      name: 'clientKey',
-      type: 'data',
-      mandatory: false,
-      switch: false,
-      validation: [],
-      integrationType: [
+        },
         {
-            name: 'azure',
-            editable: false,
+            name: 'opinsys',
+            editable: true,
             visible: true,
         }
       ]
@@ -151,8 +174,9 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'datasource',
     type: 'data',
     mandatory: false,
+    array: false,
     switch: false,
-    enum: [ 'azurev4', 'wilma', 'opinsys', 'azureLuovi'],
+    enum: [ 'azurev4', 'wilma', 'wilmav2', 'opinsys', 'azureLuovi'],
     validation: [ 'expert' ],
     integrationType: [
         {
@@ -163,7 +187,7 @@ export const dataConfiguration:UiConfiguration[] = [
         },
         {
             name: 'opinsys',
-            editable: false,
+            editable: true,
             visible: true,
             defaultValue: 'opinsys'
         },
@@ -179,14 +203,22 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'tenantId',
     type: 'data',
     mandatory: true,
+    array: false,
     switch: false,
     validation: [],
-    integrationType: []
+    integrationType: [
+        {
+            name: 'opinsys',
+            editable: true,
+            visible: true
+        }
+    ]
   },
   {
       name: 'firstName',
       type: 'user',
       mandatory: true,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -201,6 +233,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'surname',
       type: 'user',
       mandatory: true,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -215,6 +248,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'groups',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -230,6 +264,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -244,6 +279,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'learningMaterialsCharges',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -258,6 +294,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'azureApplicationIdUri',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -272,6 +309,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'schoolIds',
       type: 'user',
       mandatory: true,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -286,6 +324,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'nickname',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -301,6 +340,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -316,6 +356,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -330,6 +371,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'groupLevels',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -345,6 +387,7 @@ export const dataConfiguration:UiConfiguration[] = [
       oid: '1.2.246.562.10.21199106507',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -359,6 +402,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'username',
       type: 'user',
       mandatory: false,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -373,6 +417,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'learnerId',
       type: 'user',
       mandatory: true,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -387,6 +432,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'roles',
       type: 'user',
       mandatory: true,
+      array: false,
       switch: false,
       validation: [],
       integrationType: [
@@ -402,7 +448,7 @@ export const dataConfiguration:UiConfiguration[] = [
       type: 'metadata',
       mandatory: false,
       switch: false,
-      multivalue: true,
+      array: true,
       validation: [ ],
       integrationType: [
           {
@@ -418,7 +464,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'grant_types',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
+    array: false,
     multiselect: true,
     switch: false,
     validation: [ ],
@@ -437,7 +483,7 @@ export const dataConfiguration:UiConfiguration[] = [
         name: 'redirect_uris',
         type: 'metadata',
         mandatory: true,
-        multivalue: true,
+        array: true,
         switch: false,
         validation: [ 'uri', 'nohash' ],
         //validation: [ ],
@@ -453,7 +499,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'redirect_uris',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
+    array: true,
     switch: false,
     environment: 1,
     validation: [ 'uri', 'https', 'nolocalhost', 'nohash' ],
@@ -470,7 +516,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'scope',
     type: 'metadata',
     mandatory: false,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [],
     integrationType: [
@@ -486,7 +532,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'client_secret',
     type: 'metadata',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [],
     integrationType: [
@@ -494,8 +540,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            index: 'randomsha1',
-            generate: 'randomsha1'            
+            //index: 'randomsha1',
+            //generate: 'randomsha1'            
         }
     ]
 },
@@ -503,7 +549,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'client_id',
     type: 'metadata',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [],
     integrationType: [
@@ -511,8 +557,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            index: 'name_randomsha1',
-            generate: 'name_randomsha1',
+            //index: 'name_randomsha1',
+            //generate: 'name_randomsha1',
         }
     ]
 },
@@ -520,7 +566,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'response_types',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
+    array: false,
     multiselect: true,
     switch: false,
     enum: [ "code",                
@@ -531,7 +577,8 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false, //fix 2.4.1
             visible: true,
             defaultValue: 'code'
         }
@@ -541,7 +588,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'wantAssertionsSigned',
     type: 'metadata',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: true,
     enum: [ true, false ],
     validation: [ ],
@@ -550,7 +597,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: false
+            defaultValue: 'false'
         },
         {
             name: 'oidc',
@@ -564,7 +611,7 @@ export const dataConfiguration:UiConfiguration[] = [
     type: 'metadata',
     environment: 1,
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: true,
     enum: [ true, false ],
     validation: [ ],
@@ -573,7 +620,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: false,
             visible: true,
-            defaultValue: true
+            defaultValue: 'true'
         },
         {
             name: 'oidc',
@@ -586,7 +633,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'assertionConsumerServiceUrls',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
+    array: true,
     switch: false,
     object: true,
     validation: [ ],
@@ -607,7 +654,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'authnRequestsSigned',
     type: 'metadata',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: true,
     enum: [ true, false ],
     validation: [ ],
@@ -616,7 +663,7 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: true
+            defaultValue: 'true'
         },
         {
             name: 'oidc',
@@ -629,7 +676,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'encryptionCertificates',
     type: 'metadata',
     mandatory: false,
-    multivalue: true,
+    array: true,
     switch: false,
     validation: ['cert' ],
     trim: 'cert',
@@ -650,7 +697,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'entityId',
     type: 'metadata',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [ ],
     integrationType: [
@@ -670,7 +717,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'signingCertificates',
     type: 'metadata',
     mandatory: false,
-    multivalue: true,
+    array: true,
     switch: false,
     validation: [ 'cert'],
     trim: 'cert',
@@ -691,7 +738,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'signingCertificates',
     type: 'metadata',
     mandatory: true,
-    multivalue: true,
+    array: true,
     switch: false,
     validation: ['cert' ],
     trim: 'cert',
@@ -713,7 +760,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'token_endpoint_auth_method',
     type: 'metadata',
     mandatory: false,
-    multivalue: false,
+    array: false,
     multiselect: false,
     switch: false,
     enum: [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt' ],
@@ -722,7 +769,8 @@ export const dataConfiguration:UiConfiguration[] = [
         
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false,//fix 2.4.1
             visible: true,
             defaultValue: 'client_secret_basic'
         }
@@ -732,16 +780,17 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'id_token_signed_response_alg',
     type: 'metadata',
     mandatory: false,
-    multivalue: false,
+    array: false,
     multiselect: false,
     switch: false,
     validation: [ ],
-    enum: [ null, 'HS256' ],
+    enum: [ 'null', 'HS256' ],
     integrationType: [
         
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false, //fix 2.4.1
             visible: true 
         }
     ]
@@ -750,7 +799,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'allowtestlearnerid',
     type: 'data',
     mandatory: false,
-    multivalue: false,
+    array: false,
     switch: true,
     enum: [ true, false ],
     validation: [ ],
@@ -763,7 +812,8 @@ export const dataConfiguration:UiConfiguration[] = [
         },
         {
             name: 'oidc',
-            editable: true,
+            //editable: true,
+            editable: false, //fix 2.4.1
             visible: true,
             defaultValue: 'false'
         }
@@ -773,7 +823,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'serviceName',
     type: 'integrationDetails',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [ 'notempty'],
     integrationType: [
@@ -793,7 +843,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'bindings',
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [],
     integrationType: [
@@ -809,7 +859,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'index',
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: ['number'],
     integrationType: [
@@ -825,7 +875,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'isDefault',
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: true,
     enum: [ true, false ],
     validation: [ ],
@@ -842,7 +892,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'location',
     type: 'assertionConsumerServiceUrls',
     mandatory: true,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [ 'uri', 'https' ],
     integrationType: [
@@ -857,7 +907,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'hostname',
       type: 'data',
       mandatory: true,
-      multivalue: true,
+      array: true,
       switch: false,
       validation: [ 'hostname' ],
       integrationType: [
@@ -872,7 +922,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'entityId',
     type: 'data',
     mandatory: false,
-    multivalue: false,
+    array: false,
     switch: false,
     validation: [ 'uri' ],
     integrationType: [
@@ -892,7 +942,7 @@ export const dataConfiguration:UiConfiguration[] = [
       name: 'uniqueId',
       type: 'data',
       mandatory: false,
-      multivalue: true,
+      array: true,
       switch: false,
       validation: [  ],
       integrationType: [
@@ -932,7 +982,7 @@ export const dataConfiguration:UiConfiguration[] = [
     name: 'deploymentPhase',
     type: 'root',
     mandatory: false,
-    multivalue: true,
+    array: true,
     switch: false,
     validation: [  ],
     integrationType: [

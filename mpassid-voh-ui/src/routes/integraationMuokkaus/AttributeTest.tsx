@@ -1,9 +1,12 @@
-import { Components, testAttributes, testAttributesAuthorization } from '@/api';
-import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import { ChangeEventHandler, Dispatch, useEffect, useRef, useState } from 'react';
+import type { Components} from '@/api';
+import { testAttributes, testAttributesAuthorization } from '@/api';
+import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import type { Dispatch} from 'react';
+import { useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { attributePreferredOrder, dataConfiguration, UiConfiguration } from '@/config';
+import type { UiConfiguration } from '@/config';
+import { attributePreferredOrder, dataConfiguration } from '@/config';
 
 interface Props {
     id: string;

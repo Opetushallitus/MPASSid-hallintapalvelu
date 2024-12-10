@@ -190,6 +190,7 @@ public abstract class ServiceProvider {
         try {
             if (this instanceof SamlServiceProvider) {
                 logger.info("SAML entityId: {}", hashMap.get("entityId"));
+                removeNotAfterDates(hashMap);
                 List<String> certificateTypes = List.of("encryptionCertificates", "signingCertificates");
                 for (String certType : certificateTypes) {
                     if (hashMap.get(certType) instanceof java.util.ArrayList) {
@@ -213,6 +214,16 @@ public abstract class ServiceProvider {
             Map<String, Object> errorHashMap = new HashMap<>();
             errorHashMap.put("Error", e.getMessage());
             this.metadataJson = errorHashMap;
+            logger.error(e.getMessage());
+        }
+    }
+
+    private void removeNotAfterDates(Map<String, Object> hashMap) {
+        List<String> certificateTypes = List.of("encryptionCertificates", "signingCertificates");
+        for (String certType : certificateTypes) {
+            for (int certificateCount = 0; hashMap.containsKey(certType + certificateCount + "NotAfter"); certificateCount++) {
+                hashMap.remove(certType + certificateCount + "NotAfter");
+            }
         }
     }
 }

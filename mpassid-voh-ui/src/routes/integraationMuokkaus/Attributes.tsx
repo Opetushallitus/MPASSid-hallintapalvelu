@@ -25,8 +25,9 @@ interface Props {
 
 export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid,environment, setCanSave, setAttributes }: Props) {
   const intl = useIntl();
-  const specialConfiguration:string[] = dataConfiguration.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
-  const environmentConfiguration:string[] = dataConfiguration.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
+  const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===type).length>0)
+  const specialConfiguration:string[] = configurations.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
+  const environmentConfiguration:string[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const attributeConfiguration=useRef<UiConfiguration[]>([]);
   const allAttributes:string[] = [];
 
@@ -35,19 +36,20 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     
     attributeConfiguration.current.forEach(configuration=>{
       const name=configuration.name
-      devLog("validateAttributes (name)",name)
+      devLog("DEBUG","validateAttributes (name)",name)
       const currentAttribute=attributes.find(a=>a.name===name)
     
       if(configuration&&currentAttribute) {
         if((currentAttribute.content === undefined|| currentAttribute.content.length===0) && configuration.mandatory ){
           result = false
-        } else {        
-          if(currentAttribute.content) {
-            result = validate(configuration.validation,currentAttribute.content)
-          } else {
-            result = validate(configuration.validation,'')         
+        } else {      
+          if(result) {  
+            if(currentAttribute.content) {
+              result = validate(configuration.validation,currentAttribute.content)
+            } else {
+              result = validate(configuration.validation,'')         
+            }
           }
-          
         }
       } else {
         result = true
@@ -55,12 +57,12 @@ export default function Attributes({ attributes, role, type, attributeType, newC
             
     })
     
-    devLog("validateAttributes (result)",result)
+    devLog("DEBUG","validateAttributes (result)",result)
     return result
   }
   
   const updateAttribute = (name:string, value:string, type:string ) => {  
-    devLog("updateAttribute ("+name+")",value) 
+    devLog("DEBUG","updateAttribute ("+name+")",value) 
     const attributeList=cloneDeep(attributes);
     const index=attributeList.map(a=>a.name).indexOf(name);
     if(index>-1) {
@@ -89,7 +91,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
     return (
       <Grid container >
-        {dataConfiguration
+        {configurations
           .filter((configuration) => configuration.type === attributeType)
           //.filter((configuration) => configuration.environment===undefined||configuration.environment==environment )
           .filter((configuration) => (environmentConfiguration.includes(configuration.name)&&configuration.environment===environment)||(!environmentConfiguration.includes(configuration.name)&&configuration.environment===undefined))
@@ -121,19 +123,19 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     return helperText(configuration.validation,value);
                   }
                   const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
-                  devLog("Metadata (roleConfiguration)",roleConfiguration) 
+                  devLog("DEBUG","Metadata (roleConfiguration)",roleConfiguration) 
                   
                   var useAttribute:Components.Schemas.Attribute ={}
                   var attributeExists:boolean=false
 
                   
-                  devLog("Attributes (init attribute)",configuration.name);                    
+                  devLog("DEBUG","Attributes (init attribute)",configuration.name);                    
                                    
                   if(attributes.find(a => a.name&&a.name === configuration.name)) {
                     //attiribute already exists
                     attributeExists=true
                     useAttribute=attributes.find(a => a.name&&a.name === configuration.name)||{ type: attributeType, content: '', name: 'configurationError' }                    
-                    devLog("Attributes (init using existing attribute)",useAttribute);
+                    devLog("DEBUG","Attributes (init using existing attribute)",useAttribute);
                   } else {
                     //attiribute not exists
                     
@@ -141,16 +143,16 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     
                     if(configuration?.name&&testConfigurationEntity?.idp?.[configuration.name]) {
                       useAttribute={ type: attributeType, content: String(testConfigurationEntity.idp[configuration.name]), name: configuration.name }
-                      devLog("Attributes (init using configurationEntity.idp)",useAttribute);
+                      devLog("DEBUG","Attributes (init using configurationEntity.idp)",useAttribute);
                     }
                     
                     if(configuration?.name&&testConfigurationEntity?.sp?.[configuration.name]) {
                       useAttribute={ type: attributeType, content: String(testConfigurationEntity.sp[configuration.name]), name: configuration.name }
-                      devLog("Attributes (init using configurationEntity.sp)",useAttribute);
+                      devLog("DEBUG","Attributes (init using configurationEntity.sp)",useAttribute);
                     }
                     
                     if(useAttribute.content === undefined) {
-                      devLog("Attributes (init empty content)",configuration.name)
+                      devLog("DEBUG","Attributes (init empty content)",configuration.name)
                       if(configuration.name) {
                         if(roleConfiguration.defaultValue) {
                           useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
@@ -176,11 +178,11 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                       
                     }
                   }
-                  devLog("Attributes (initialized attribute)",useAttribute)
+                  devLog("DEBUG","Attributes (initialized attribute)",useAttribute)
           
-                  if(!attributeExists&&configuration.multivalue===false&&configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
+                  if(!attributeExists&&configuration.array===false&&configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize switch value        
-                    devLog("Attributes (init switch content)",configuration.name)            
+                    devLog("DEBUG","Attributes (init switch content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                     if(roleConfiguration.defaultValue !== undefined) {
                       //useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
@@ -202,9 +204,9 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     
                   }
                   
-                  if(!attributeExists&&configuration.multivalue!==true&&configuration.enum&&configuration.enum.length>0&&!configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
+                  if(!attributeExists&&configuration.array!==true&&configuration.enum&&configuration.enum.length>0&&!configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize multiselect value        
-                    devLog("Attributes (init multiselect content)",configuration.name)            
+                    devLog("DEBUG","Attributes (init multiselect content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                     if(roleConfiguration.defaultValue !== undefined) {
                       //useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
@@ -230,8 +232,8 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                   } else {
                     setCanSave(false)
                   }
-                  devLog("Attributes (useAttribute post)",useAttribute)
-                  devLog("Attributes (attribute post)",attributes)                  
+                  devLog("DEBUG","Attributes (useAttribute post)",useAttribute)
+                  devLog("DEBUG","Attributes (attribute post)",attributes)                  
 
                   return (<AttributeForm 
                     key={configuration.name!}
