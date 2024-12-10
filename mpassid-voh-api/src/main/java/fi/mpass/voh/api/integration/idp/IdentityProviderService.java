@@ -34,13 +34,10 @@ public class IdentityProviderService {
     private final IntegrationService integrationService;
 
     private String metadataBasePath;
-    private String metadataBaseUrl;
 
-    public IdentityProviderService(@Value("${application.metadata.base.path:metadata}") String metadataBasePath,
-            @Value("${application.metadata.base.path:metadata}") String metadataBaseUrl,
+    public IdentityProviderService(@Value("${application.integrationservice.metadataBasePath:metadata}") String metadataBasePath,
             IntegrationService integrationService) {
         this.metadataBasePath = metadataBasePath;
-        this.metadataBaseUrl = metadataBaseUrl;
         this.integrationService = integrationService;
     }
 
@@ -92,7 +89,7 @@ public class IdentityProviderService {
 
         if (metadataUrl == null) {
             logger.debug("No metadataUrl found.");
-            metadataUrl = this.metadataBaseUrl + "/" + id.toString();
+            throw new EntityCreationException("Failed to save metadata.");
         }
 
         // use the stream to save the metadata

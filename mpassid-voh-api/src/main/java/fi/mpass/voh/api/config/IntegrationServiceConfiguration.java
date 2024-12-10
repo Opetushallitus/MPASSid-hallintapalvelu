@@ -18,14 +18,19 @@ public class IntegrationServiceConfiguration {
     @NotBlank
     private String imageBasePath;
 
+    private String metadataBaseUrl;
+    private String metadataBasePath;
+
     @ConstructorBinding
     public IntegrationServiceConfiguration(String adminOrganizationOid, Long defaultTestServiceIntegrationId, String imageBaseUrlUi,
-            String imageBaseUrl, String imageBasePath) {
+            String imageBaseUrl, String imageBasePath, String metadataBaseUrl, String metadataBasePath) {
         this.adminOrganizationOid = adminOrganizationOid;
         this.defaultTestServiceIntegrationId = defaultTestServiceIntegrationId;
         this.imageBaseUrlUi = imageBaseUrlUi;
         this.imageBaseUrl = imageBaseUrl;
         this.imageBasePath = imageBasePath;
+        this.metadataBaseUrl = metadataBaseUrl;
+        this.metadataBasePath = metadataBasePath;
     }
 
     public IntegrationServiceConfiguration() {
@@ -61,5 +66,16 @@ public class IntegrationServiceConfiguration {
     public void setImageBasePath(String imageBasePath) {
         this.imageBasePath = imageBasePath;
     }
-    
+    public String getMetadataBaseUrl() {
+        return metadataBaseUrl;
+    }
+    public void setMetadataBaseUrl(String metadataBaseUrl) {
+        this.metadataBaseUrl = metadataBaseUrl;
+    }
+    public String getMetadataBasePath() {
+        return metadataBasePath;
+    }
+    public void setMetadataBasePath(String metadataBasePath) {
+        this.metadataBasePath = metadataBasePath;
+    }
 }

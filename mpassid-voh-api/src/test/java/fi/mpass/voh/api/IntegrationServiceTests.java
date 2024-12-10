@@ -92,7 +92,9 @@ class IntegrationServiceTests {
         configuration = new IntegrationServiceConfiguration("1.2.246.562.10.00000000001", 3000001L,
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
-                "/logos");
+                "/logos",
+                "http://localhost/test/metadata",
+                "/metadata");
 
         underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration);
 
