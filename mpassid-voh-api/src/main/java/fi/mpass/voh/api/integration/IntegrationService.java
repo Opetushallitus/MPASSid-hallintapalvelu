@@ -930,6 +930,7 @@ public class IntegrationService {
               throw new EntityCreationException("Integration creation failed");
             }
           }
+          // TODO muut kuin oidc:if (integration.getConfigurationEntity().getSp().getType().equals("opinsys")) {
 
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
