@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.AttributedCharacterIterator.Attribute;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +51,7 @@ import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
+import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.idp.Adfs;
 import fi.mpass.voh.api.integration.idp.Azure;
@@ -858,6 +858,7 @@ public class IntegrationService {
           logger.error("Failed to find an available idp integration identifier");
           throw new EntityCreationException("Integration creation failed");
         }
+        integration = handleSecrets(integration);
         return integrationRepository.save(integration);
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
@@ -924,7 +925,7 @@ public class IntegrationService {
 
           if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
             // Save client secret to aws parameter store
-            boolean success = credentialService.updateCredential(integration, credentialMetadataValueField,
+            boolean success = credentialService.updateOidcCredential(integration, credentialMetadataValueField,
                 integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
             if (!success) {
               logger.error("Failed to save secret to aws parameter store.");
@@ -944,7 +945,7 @@ public class IntegrationService {
           if (optionalSet.isPresent()) {
             if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
               // Save client secret to aws parameter store
-              boolean success = credentialService.updateCredential(integration, credentialMetadataValueField,
+              boolean success = credentialService.updateOidcCredential(integration, credentialMetadataValueField,
                   integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
               if (!success) {
                 logger.error("Failed to save secret to aws parameter store.");
@@ -1157,25 +1158,12 @@ public class IntegrationService {
   }
 
   private Integration handleSecrets(Integration integration) {
-    if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+    if (integration.getConfigurationEntity().getIdp().getType().equals("azure")) {
+      credentialService.updateIdpCredential(integration);
 
-    } else if (integration.getConfigurationEntity().getSp().getType().equals("azure")) {
-
-    } else if (integration.getConfigurationEntity().getSp().getType().equals("gsuite")) {
-
-    } else if (integration.getConfigurationEntity().getSp().getType().equals("opinsys")) {
-      // Save secret to aws parameter store
-      Set<Attribute> attributes 
-      boolean success = credentialService.updateCredential(integration, credentialMetadataValueField, asd);
-      if (!success) {
-        logger.error("Failed to save secret to aws parameter store.");
-        throw new EntityCreationException("Integration creation failed");
-      }
-
-    } else if (integration.getConfigurationEntity().getSp().getType().equals("wilma")) {
-
+    } else if (integration.getConfigurationEntity().getIdp().getType().equals("opinsys")) {
+      credentialService.updateIdpCredential(integration);
     }
-
+    return integration;
   }
-
 }

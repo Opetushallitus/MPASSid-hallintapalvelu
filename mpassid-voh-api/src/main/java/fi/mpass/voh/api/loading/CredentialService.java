@@ -3,6 +3,7 @@ package fi.mpass.voh.api.loading;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.integration.Integration;
+import fi.mpass.voh.api.integration.attribute.Attribute;
 
 @Service
 public class CredentialService {
@@ -32,7 +35,7 @@ public class CredentialService {
     // e.g. [ (client_id, 12345), (client_s, 54321) ]
     Map<Long, List<Pair<String, String>>> credentials = new HashMap<>();
 
-    public boolean updateCredential(Integration integration, Object name, Object value) {
+    public boolean updateOidcCredential(Integration integration, Object name, Object value) {
         if (integration != null) {
             String organizationOid = integration.getOrganization().getOid();
             if (organizationOid != null) {
@@ -49,6 +52,31 @@ public class CredentialService {
                     logger.error("Integration #{} Failed credential processing", integration.getId());
                 }
                 return success;
+            }
+        }
+        return false;
+    }
+
+    public boolean updateIdpCredential(Integration integration) {
+        String credentialValueField = "clientKey";
+        if (integration != null) {
+            String organizationOid = integration.getOrganization().getOid();
+            if (organizationOid != null) {
+                String path = organizationOid + "/" + integration.getId();
+                Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
+                for (Attribute attribute : attributes) {
+                    if (attribute.getName().equals(credentialValueField)) {
+                        boolean success = parameterStoreService.put(path, credentialValueField, attribute.getContent());
+                        if (success) {
+                            attribute.setContent(attribute.getContent().substring(0, 3) + "*********");
+                            logger.debug("Integration #{} Finished credential processing", integration.getId());
+                            return success;
+                        } else {
+                            logger.error("Failed to save secret to aws parameter store.");
+                        }
+                        break;
+                    }
+                }
             }
         }
         return false;
