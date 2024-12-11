@@ -869,17 +869,7 @@ public class IntegrationService {
           throw new EntityCreationException("Integration creation failed");
         }
 
-        if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
-          Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
-          if (adfsIdp.getMetadataUrl() == null || adfsIdp.getMetadataUrl().isEmpty()) {
-            adfsIdp.setMetadataUrl(configuration.getMetadataBaseUrl() + "/" + integration.getId());
-          }
-        } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
-          Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
-          if (gsuiteIdp.getMetadataUrl() == null || gsuiteIdp.getMetadataUrl().isEmpty()) {
-            gsuiteIdp.setMetadataUrl(configuration.getMetadataBaseUrl() + "/" + integration.getId());
-          }
-        }
+        integration = addMetadataUrl(integration);
 
         return integrationRepository.save(integration);
       }
@@ -1211,5 +1201,20 @@ public class IntegrationService {
       }
     }
     return null;
+  }
+
+  private Integration addMetadataUrl(Integration integration) {
+    if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+      Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
+      if (adfsIdp.getMetadataUrl() == null || adfsIdp.getMetadataUrl().isEmpty()) {
+        adfsIdp.setMetadataUrl(configuration.getMetadataBaseUrl() + "/" + integration.getId());
+      }
+    } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
+      Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
+      if (gsuiteIdp.getMetadataUrl() == null || gsuiteIdp.getMetadataUrl().isEmpty()) {
+        gsuiteIdp.setMetadataUrl(configuration.getMetadataBaseUrl() + "/" + integration.getId());
+      }
+    }
+    return integration;
   }
 }
