@@ -557,8 +557,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            //index: 'randomsha1',
-            //generate: 'randomsha1'            
+            index: 'randomsha1',
+            generate: 'randomsha1'            
         }
     ]
 },
@@ -574,8 +574,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            //index: 'name_randomsha1',
-            //generate: 'name_randomsha1',
+            index: 'name_randomsha1',
+            generate: 'name_randomsha1',
         }
     ]
 },
