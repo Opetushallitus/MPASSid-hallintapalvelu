@@ -180,7 +180,7 @@ export default {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);
     if(id===999995&&integration.value?.configurationEntity?.idp){
-      integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
+      integration.value.configurationEntity.idp.logoUrl="https://virkailija.testiopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
     }
   },
   getIntegrationsSpecSearchPageable(request) {
