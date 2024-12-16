@@ -10,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -25,7 +23,6 @@ import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationService;
-import fi.mpass.voh.api.integration.mp.SamlMetadataProvider;
 
 @Service
 public class IdentityProviderService {
@@ -35,7 +32,8 @@ public class IdentityProviderService {
 
     private String metadataBasePath;
 
-    public IdentityProviderService(@Value("${application.integrationservice.metadataBasePath:metadata}") String metadataBasePath,
+    public IdentityProviderService(
+            @Value("${application.integrationservice.metadataBasePath:metadata}") String metadataBasePath,
             IntegrationService integrationService) {
         this.metadataBasePath = metadataBasePath;
         this.integrationService = integrationService;
@@ -107,7 +105,29 @@ public class IdentityProviderService {
                 throw new EntityCreationException("Failed to save metadata.");
             }
 
+            // Save metadata file to disk
             Files.copy(metadataOutputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+
+            // Set validUntil dates
+            if (i.isPresent()) {
+                try {
+                    if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
+                        Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
+                        metadataUrl = adfsIdp.getMetadataUrl();
+                        adfsIdp.setMetadataUrl(metadataUrl);
+                        integrationService.updateIntegration(id, i.get());
+                    } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
+                        Adfs gsuiteIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
+                        metadataUrl = gsuiteIdp.getMetadataUrl();
+                        gsuiteIdp.setMetadataUrl(metadataUrl);
+                        integrationService.updateIntegration(id, i.get());
+                    } else {
+                        logger.debug("Given id is not Adfs or Gsuite");
+                    }
+                } catch (Exception e) {
+                    logger.error("Exception in retrieving integration. {}", e.getMessage());
+                }
+            }
 
             return metadataUrl;
 

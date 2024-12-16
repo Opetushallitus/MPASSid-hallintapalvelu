@@ -94,6 +94,7 @@ class IntegrationServiceTests {
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
                 "/logos",
                 "http://localhost/test/metadata",
+                "http://localhost/test/metadata",
                 "/metadata");
 
         underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration);
