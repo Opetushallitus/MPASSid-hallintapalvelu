@@ -143,7 +143,7 @@ public class IntegrationExceptionHandler extends ResponseEntityExceptionHandler 
      */
     @ExceptionHandler(SecretSavingException.class)
     protected ResponseEntity<Object> handleSecretHandling(SecretSavingException ex) {
-        IntegrationError integrationError = new IntegrationError(HttpStatus.BAD_REQUEST);
+        IntegrationError integrationError = new IntegrationError(HttpStatus.CONFLICT);
         integrationError.setMessage(ex.getMessage());
         return buildResponseEntity(integrationError);
     }
