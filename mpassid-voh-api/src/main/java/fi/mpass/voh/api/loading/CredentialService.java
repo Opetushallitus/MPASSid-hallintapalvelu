@@ -46,8 +46,8 @@ public class CredentialService {
                     if (name.equals(credentialMetadataValueField)) {
                         integration.getConfigurationEntity().getSp().getMetadata().put((String) name,
                                 ((String) value).substring(0, 3) + "*********");
+                        logger.debug("Integration #{} Finished credential processing", integration.getId());
                     }
-                    logger.debug("Integration #{} Finished credential processing", integration.getId());
                 } else {
                     logger.error("Integration #{} Failed credential processing", integration.getId());
                 }

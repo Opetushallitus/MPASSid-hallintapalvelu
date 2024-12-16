@@ -53,6 +53,7 @@ import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
+import fi.mpass.voh.api.exception.SecretSavingException;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.idp.Adfs;
@@ -942,15 +943,7 @@ public class IntegrationService {
           setIntegration.setOrganization(integration.getOrganization());
           integration.removeFromSets();
 
-          if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
-            // Save client secret to aws parameter store
-            boolean success = credentialService.updateOidcCredential(integration, credentialMetadataValueField,
-                integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
-            if (!success) {
-              logger.error("Failed to save secret to aws parameter store.");
-              throw new EntityCreationException("Integration creation failed");
-            }
-          }
+          integration = handleSecrets(integration);
 
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
@@ -962,16 +955,7 @@ public class IntegrationService {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
           if (optionalSet.isPresent()) {
-            if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
-              // Save client secret to aws parameter store
-              boolean success = credentialService.updateOidcCredential(integration, credentialMetadataValueField,
-                  integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
-              if (!success) {
-                logger.error("Failed to save secret to aws parameter store.");
-                throw new EntityCreationException("Integration creation failed");
-              }
-            }
-
+            integration = handleSecrets(integration);
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
             integrationRepository.saveAndFlush(optionalSet.get());
@@ -1232,11 +1216,27 @@ public class IntegrationService {
   }
 
   private Integration handleSecrets(Integration integration) {
-    if (integration.getConfigurationEntity().getIdp().getType().equals("azure")) {
-      credentialService.updateIdpCredential(integration);
-
-    } else if (integration.getConfigurationEntity().getIdp().getType().equals("opinsys")) {
-      credentialService.updateIdpCredential(integration);
+    // Save client secret to aws parameter store
+    boolean success = false;
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+      if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+        success = credentialService.updateOidcCredential(integration, credentialMetadataValueField,
+            integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save secret.");
+        }
+      }
+    } else if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("azure")) {
+        success = credentialService.updateIdpCredential(integration);
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("opinsys")) {
+        success = credentialService.updateIdpCredential(integration);
+      }
+      if (!success) {
+        logger.error("Failed to save secret to aws parameter store.");
+        throw new SecretSavingException("Failed to save secret.");
+      }
     }
     return integration;
   }
