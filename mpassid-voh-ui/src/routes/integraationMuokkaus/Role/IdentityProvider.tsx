@@ -1,12 +1,13 @@
 import { useParams } from "react-router-dom";
 import type { Components } from "@/api";
-import { azureMetadataUrlTemplate, dataConfiguration, environments, testLink, UiConfiguration } from "@/config";
+import type { UiConfiguration } from "@/config";
+import { azureMetadataUrlTemplate, environments, testLink } from "@/config";
 import { Box, Grid, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../integraatio/IntegrationTab/DataRow"
 import LinkValue from "../LinkValue";
 import Type from "./Type";
-import { useState, type Dispatch, type MutableRefObject } from "react";
+import { type Dispatch, type MutableRefObject } from "react";
 import type { oneEnum } from "../Form/MultiSelectForm";
 import MultiSelectForm from "../Form/MultiSelectForm";
 import { useIntl } from 'react-intl';
@@ -25,6 +26,7 @@ interface Props {
   environment: MutableRefObject<number>;
   metadataUrl: string;
   metadataFile: File[];
+  dataConfiguration: UiConfiguration[];
   setName?: Dispatch<string>;
   setCanSave?: Dispatch<boolean>;
   setEnvironment: Dispatch<number>;
@@ -32,7 +34,7 @@ interface Props {
   setMetadataFile: Dispatch<File[]>;
 }
 
-export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl,metadataUrl="",metadataFile, setMetadataFile }: Props) {
+export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl,metadataUrl="",metadataFile, setMetadataFile,dataConfiguration }: Props) {
     const { role } = useParams();
     const intl = useIntl();
     const identityProvider: Components.Schemas.Integration|Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite= integration.configurationEntity!.idp!;

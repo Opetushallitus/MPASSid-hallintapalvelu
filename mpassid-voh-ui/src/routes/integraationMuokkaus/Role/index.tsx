@@ -5,6 +5,7 @@ import ServiceProvider from "./ServiceProvider";
 import SetProvider from "./SetProvider";
 import type { Dispatch, MutableRefObject } from "react";
 import { devLog } from "@/utils/devLog";
+import { dataConfiguration } from "@/config";
 
 
 
@@ -45,6 +46,7 @@ export default function Role({ integration, oid, environment, setName, setCanSav
   return (
     <>
       <Component 
+              dataConfiguration={dataConfiguration}
               integration={integration} 
               oid={oid} 
               environment={environment} 

@@ -1,4 +1,4 @@
-import { inactivateIntegration, type Components, uploadLogo, uploadSamlMetadata, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization } from "@/api";
+import { inactivateIntegration, type Components, uploadLogo, uploadSamlMetadata, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization, useDataUserInterfaceConfigurationRawSafe } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
@@ -10,7 +10,8 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import { useMe } from "@/api/käyttöoikeus";
-import { tallentajaOphGroup } from '../../config';
+import type { UiConfiguration } from '../../config';
+import { tallentajaOphGroup, dataConfiguration } from '../../config';
 import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -41,7 +42,8 @@ export default function IntegraatioMuokkaus() {
   const result = useRef<Components.Schemas.Integration>({});
   const [loading, setLoading] = useState<boolean>(false);
   const intl = useIntl();
-  
+  const [uiConfiguration, setUiConfiguration] = useState<UiConfiguration[]>([]);
+  const [ uiError, uiConfig ] = useDataUserInterfaceConfigurationRawSafe();
   
 
   useEffect(() => {
@@ -49,6 +51,17 @@ export default function IntegraatioMuokkaus() {
       setGroups(me.groups)
     }
   }, [me]);
+
+  useEffect(() => {
+    if(uiConfig&&uiConfig.status===200) {
+      //Note: Update to user uiconfig.data when backend supports
+      //setUiConfiguration(uiConfig.data)
+
+      setUiConfiguration(dataConfiguration)
+    } else {
+      setUiConfiguration(dataConfiguration)
+    }
+  }, [uiConfig,uiError]);
 
   var oid:string = newIntegration?.organization?.oid || "";
   var environment:number = newIntegration?.deploymentPhase || 0;
@@ -246,7 +259,7 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile}/>
+            <IntegrationDetails id={Number(id)} dataConfiguration={uiConfiguration} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile}/>
           </ErrorBoundary>
           
         </Suspense>
@@ -391,7 +404,7 @@ export default function IntegraatioMuokkaus() {
               </Alert>
                   
               </Dialog>
-              <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} tenantId={newIntegration?.configurationEntity?.attributes?.find(a=>a.type==='data'&&a.name==='tenantId')?.content } attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
+              <AttributeTest id={id||'0'} dataConfiguration={uiConfiguration} open={openAttributeTest} setOpen={setOpenAttributeTest} tenantId={newIntegration?.configurationEntity?.attributes?.find(a=>a.type==='data'&&a.name==='tenantId')?.content } attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
       </>
   );
 }

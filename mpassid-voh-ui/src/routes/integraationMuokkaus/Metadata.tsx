@@ -4,7 +4,7 @@ import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import { type Dispatch } from "react";
 import type { IntegrationType, UiConfiguration} from '../../config';
-import { dataConfiguration, defaultIntegrationType } from '../../config';
+import { defaultIntegrationType, dataConfiguration } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, trimCertificate, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
@@ -22,7 +22,9 @@ export default function Metadata({
   oid,
   environment,
   metadata,
-  setMetadata
+  setMetadata,
+  dataConfiguration
+
 }: {
   newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
@@ -34,6 +36,7 @@ export default function Metadata({
   environment: number;
   metadata: any;
   setMetadata: Dispatch<boolean>;
+  dataConfiguration:UiConfiguration[];
 }) {
   
   const intl = useIntl();
@@ -291,7 +294,7 @@ export default function Metadata({
                       }
                       
                       //console.log("*** metadata (attribute): ",attribute);
-                      const onUpdate = (name:string,value:any) => {
+                      const onUpdate = (name:string,value:string) => {
                         devLog("DEBUG","MetadataForm onUpdate (name)",name)
                         devLog("DEBUG","MetadataForm onUpdate (value)",value)
                         var trimmeValue=value
@@ -347,6 +350,7 @@ export default function Metadata({
 
                       return (<MetadataForm 
                         key={configuration.name!}
+                        dataConfiguration={dataConfiguration}
                         onUpdate={onUpdate}
                         onEdit={onEdit}
                         onDelete={onDelete}

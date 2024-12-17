@@ -180,6 +180,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
 
  interface MetadataProps {
     uiConfiguration: UiConfiguration;
+    dataConfiguration: UiConfiguration[];
     role?: any;
     type?: any;
     attribute: any;
@@ -192,7 +193,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     setCanSave: Dispatch<boolean>
 }
 
-export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave }: MetadataProps) {
+export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave,dataConfiguration }: MetadataProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -385,6 +386,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             {configuration&&roleConfiguration&&configuration.object !== undefined&&
                             (<ErrorBoundary>
                             <ObjectForm key={attribute.name+"_"+configuration.name} 
+                                dataConfiguration={dataConfiguration}
                                 integrationType={type}
                                 object={attribute} 
                                 path="content" 

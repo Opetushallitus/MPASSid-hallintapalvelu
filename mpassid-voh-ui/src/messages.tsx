@@ -474,3 +474,8 @@ defineMessage({
   id: "Integration update failed, no clientID given or clientID is already in use.",
   description: "Error message",
 });
+defineMessage({
+  defaultMessage: "Salaisuuden tallennus epäonnistu",
+  id: "Failed to save aws secret.",
+  description: "Error message",
+});

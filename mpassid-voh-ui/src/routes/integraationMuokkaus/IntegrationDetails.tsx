@@ -19,7 +19,7 @@ import Metadata from "./Metadata";
 import Attributes from "./Attributes";
 import IntegrationBasicDetails from "./IntegrationBasicDetails";
 import type { IntegrationType, UiConfiguration } from '../../config';
-import { dataConfiguration, defaultDataConfiguration, defaultIntegrationType, fixPackage, integrationTypesDefault } from '../../config';
+import { defaultDataConfiguration, defaultIntegrationType, fixPackage, integrationTypesDefault } from '../../config';
 import SchoolSelection from "./SchoolSelection";
 import { devLog } from "@/utils/devLog";
 
@@ -37,6 +37,7 @@ interface Props {
   setSaveDialogState: Dispatch<boolean>;
   setCanSave: Dispatch<boolean>;
   newIntegration?: Components.Schemas.Integration;
+  dataConfiguration: UiConfiguration[];
   setNewIntegration: Dispatch<Components.Schemas.Integration>;
   setLogo: Dispatch<Blob>;
   setMetadataFile: Dispatch<File[]>;
@@ -44,7 +45,7 @@ interface Props {
 
 
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile}: Props) {
+export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile,dataConfiguration}: Props) {
     
     const { state } = useLocation();
     const integration: Components.Schemas.Integration = state;
@@ -431,6 +432,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         {newConfigurationEntityData&&attributes&& <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
             <Attributes
+            dataConfiguration={dataConfiguration}
               newConfigurationEntityData={newConfigurationEntityData}
               setNewConfigurationEntityData={setNewConfigurationEntityData}  
               attributes={attributes}
@@ -455,6 +457,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         <ErrorBoundary>
 
         <Metadata
+          dataConfiguration={dataConfiguration}
           newConfigurationEntityData={newConfigurationEntityData}
           setNewConfigurationEntityData={setNewConfigurationEntityData}
           configurationEntity={integration.configurationEntity!}
@@ -476,6 +479,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             </Typography>
             <ErrorBoundary>
               <Attributes
+                dataConfiguration={dataConfiguration}
                 newConfigurationEntityData={newConfigurationEntityData}
                 setNewConfigurationEntityData={setNewConfigurationEntityData}  
                 attributes={attributes}

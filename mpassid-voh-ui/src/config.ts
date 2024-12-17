@@ -58,7 +58,7 @@ export interface IntegrationType {
     visible: boolean;
     attribute?: string;
     path?: string; 
-    defaultValue?: any;
+    defaultValue?: string;
     index?: string;
     generate?: string;
 }
@@ -72,7 +72,7 @@ export interface UiConfiguration {
   switch: boolean;
   object?: boolean;
   trim?: string;
-  enum?: any[]
+  enum?: string[]
   environment?: number;
   label?: string;
   validation: string[];
@@ -607,7 +607,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -630,7 +630,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -673,7 +673,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -818,7 +818,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -894,14 +894,14 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: false
+            defaultValue: 'false'
         }
     ]
   },

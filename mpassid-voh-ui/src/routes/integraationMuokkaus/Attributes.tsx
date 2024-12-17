@@ -5,7 +5,6 @@ import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
 import { useRef, type Dispatch} from "react";
 import AttributeForm from "./Form";
-import { dataConfiguration } from '../../config';
 import { helperText, validate } from "@/utils/Validators";
 import { devLog } from "@/utils/devLog";
 import { clone, cloneDeep } from "lodash";
@@ -19,13 +18,14 @@ interface Props {
   type: any;
   newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
   initAttributes:string[];
+  dataConfiguration:UiConfiguration[];
   addInitAttributes: (attribute: Components.Schemas.Attribute) => void;             
   setAttributes: Dispatch<Components.Schemas.Attribute[]>;
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
   setCanSave: Dispatch<boolean>;
 }
 
-export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid,environment, setCanSave, setAttributes, initAttributes, addInitAttributes }: Props) {
+export default function Attributes({ attributes, role, type, attributeType, newConfigurationEntityData, setNewConfigurationEntityData,oid,environment, setCanSave, setAttributes, initAttributes, addInitAttributes, dataConfiguration }: Props) {
   const intl = useIntl();
   const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===type).length>0)
   const specialConfiguration:string[] = configurations.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
