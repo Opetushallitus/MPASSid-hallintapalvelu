@@ -75,13 +75,12 @@ export default function IntegraatioMuokkaus() {
   }
 
   const getErrorId = () => {
-    if(newIntegration?.configurationEntity?.sp?.type) {
-      const id = openIntegrationErrorText;
-      return openIntegrationErrorText in intl.messages ? { id: id } : undefined;
-    }
-    return undefined
+    
+    const id = openIntegrationErrorText;
+    return openIntegrationErrorText in intl.messages ? { id: id } : undefined;
     
   }
+
   const closeNotice = () => {
       setOpenNotice(false)
       setOpenConfirmation(false);
