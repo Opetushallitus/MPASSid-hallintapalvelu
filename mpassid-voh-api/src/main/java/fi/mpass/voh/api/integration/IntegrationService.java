@@ -1230,12 +1230,16 @@ public class IntegrationService {
     } else if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
       if (integration.getConfigurationEntity().getIdp().getType().equals("azure")) {
         success = credentialService.updateIdpCredential(integration);
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
       } else if (integration.getConfigurationEntity().getIdp().getType().equals("opinsys")) {
         success = credentialService.updateIdpCredential(integration);
-      }
-      if (!success) {
-        logger.error("Failed to save secret to aws parameter store.");
-        throw new SecretSavingException("Failed to save aws secret.");
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
       }
     }
     return integration;
