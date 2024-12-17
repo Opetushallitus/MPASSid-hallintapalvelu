@@ -16,8 +16,8 @@ public class ParameterStoreService {
 
     private static final String DELIM = "/";
 
-    @Value("${application.parameterstore.region:eu-north-1}")
-    private String parameterStoreRegion = "eu-north-1";
+    @Value("${application.parameterstore.region:eu-west-1}")
+    private String parameterStoreRegion = "eu-west-1";
 
     @Value("${application.parameterstore.kms-key-id:mpassid-poc-key}")
     private String kmsKeyId = "alias/mpassid-poc-key";
