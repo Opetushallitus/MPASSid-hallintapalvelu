@@ -475,7 +475,7 @@ defineMessage({
   description: "Error message",
 });
 defineMessage({
-  defaultMessage: "Salaisuuden tallennus epäonnistu",
+  defaultMessage: "Salaisuuden tallennus epäonnistui",
   id: "Failed to save aws secret.",
   description: "Error message",
 });
