@@ -117,7 +117,7 @@ public class IdentityProviderService {
                         adfsIdp.setMetadataUrl(metadataUrl);
                         integrationService.updateIntegration(id, i.get());
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
-                        Adfs gsuiteIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
+                        Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
                         gsuiteIdp.setMetadataUrl(metadataUrl);
                         integrationService.updateIntegration(id, i.get());
