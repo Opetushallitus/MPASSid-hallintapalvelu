@@ -454,12 +454,12 @@ public class IntegrationService {
   }
 
   public Integration changeLogoUrlForUi(Integration integration) {
-    // Change the integrations logoUrl for UI suitable use. 
-      String logoUrl = this.configuration.getImageBaseUrlUi()
-      + "/" + integration.getId();
-      if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
-        integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
-      }
+    // Change the integrations logoUrl for UI suitable use.
+    String logoUrl = this.configuration.getImageBaseUrlUi()
+        + "/" + integration.getId();
+    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+      integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
+    }
     return integration;
   }
 
@@ -1202,15 +1202,17 @@ public class IntegrationService {
 
   private Integration addDefaultMetadataUrl(Integration integration) {
     // Add default metadataUrl (UI) if metadataUrl is not yet set
-    if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
-      Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
-      if (adfsIdp.getMetadataUrl() == null || adfsIdp.getMetadataUrl().isEmpty()) {
-        adfsIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
-      }
-    } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
-      Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
-      if (gsuiteIdp.getMetadataUrl() == null || gsuiteIdp.getMetadataUrl().isEmpty()) {
-        gsuiteIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
+    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+        Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
+        if (adfsIdp.getMetadataUrl() == null || adfsIdp.getMetadataUrl().isEmpty()) {
+          adfsIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
+        }
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
+        Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
+        if (gsuiteIdp.getMetadataUrl() == null || gsuiteIdp.getMetadataUrl().isEmpty()) {
+          gsuiteIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
+        }
       }
     }
     return integration;
