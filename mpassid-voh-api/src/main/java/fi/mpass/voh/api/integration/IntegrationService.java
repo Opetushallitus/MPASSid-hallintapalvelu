@@ -1224,7 +1224,7 @@ public class IntegrationService {
             integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
         if (!success) {
           logger.error("Failed to save secret to aws parameter store.");
-          throw new SecretSavingException("Failed to save secret.");
+          throw new SecretSavingException("Failed to save aws secret.");
         }
       }
     } else if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
@@ -1235,7 +1235,7 @@ public class IntegrationService {
       }
       if (!success) {
         logger.error("Failed to save secret to aws parameter store.");
-        throw new SecretSavingException("Failed to save secret.");
+        throw new SecretSavingException("Failed to save aws secret.");
       }
     }
     return integration;
