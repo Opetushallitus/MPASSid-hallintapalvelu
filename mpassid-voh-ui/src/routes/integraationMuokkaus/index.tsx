@@ -77,6 +77,8 @@ export default function IntegraatioMuokkaus() {
   const getErrorId = () => {
     
     const id = openIntegrationErrorText;
+    const test = openIntegrationErrorText in intl.messages ? { id: id } : undefined;
+    devLog("INFO","******* getErrorId",test)
     return openIntegrationErrorText in intl.messages ? { id: id } : undefined;
     
   }
