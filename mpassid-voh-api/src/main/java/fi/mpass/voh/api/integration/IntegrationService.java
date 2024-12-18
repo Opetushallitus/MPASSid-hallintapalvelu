@@ -566,6 +566,7 @@ public class IntegrationService {
       }
       try {
         // TODO check that integration.getId() and id matches
+        integration = handleSecrets(integration);
         Integration updatedIntegration = loadingService.loadOne(integration);
         if (updatedIntegration != null) {
           existingIntegration = updatedIntegration;
