@@ -429,7 +429,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     isEditable={roleConfiguration.editable}
                                     //onUpdate={onUpdate} 
                                     onValidate={onValidate}
-                                    mandatory={configuration.mandatory}
+                                    mandatory={configuration.mandatory&&attribute.content.length===0}
                                     label={label ? intl.formatMessage(label) : attribute.name!}
                                     //attributeType={"metadata"}
                                     helperText={helperText}
