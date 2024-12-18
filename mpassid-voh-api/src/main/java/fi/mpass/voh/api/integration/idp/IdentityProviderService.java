@@ -119,7 +119,7 @@ public class IdentityProviderService {
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                         Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
-                        gsuiteIdp.setMetadataUrl(metadataUrl);
+                        gsuiteIdp.setMetadata(getSAMLMetadata(id).getInputStream());
                         integrationService.updateIntegration(id, i.get());
                     } else {
                         logger.debug("Given id is not Adfs or Gsuite");
