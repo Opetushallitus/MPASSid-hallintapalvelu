@@ -58,6 +58,7 @@ public class IdentityProviderService {
         }
 
         InputStream metadataOutputStream = new ByteArrayInputStream(baos.toByteArray());
+        InputStream metadataReadingStream = new ByteArrayInputStream(baos.toByteArray());
 
         String flowname = null;
         String metadataUrl = null;
@@ -114,12 +115,12 @@ public class IdentityProviderService {
                     if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                         Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = adfsIdp.getMetadataUrl();
-                        adfsIdp.setMetadataUrlAndValidUntilDates(metadataOutputStream);
+                        adfsIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
                         integrationService.updateIntegration(id, i.get());
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                         Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
-                        gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataOutputStream);
+                        gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
                         integrationService.updateIntegration(id, i.get());
                     } else {
                         logger.debug("Given id is not Adfs or Gsuite");
