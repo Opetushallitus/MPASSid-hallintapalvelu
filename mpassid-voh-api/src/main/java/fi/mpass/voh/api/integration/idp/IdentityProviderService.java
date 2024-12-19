@@ -114,12 +114,12 @@ public class IdentityProviderService {
                     if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                         Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = adfsIdp.getMetadataUrl();
-                        adfsIdp.setMetadataUrl(metadataUrl);
+                        adfsIdp.setMetadataUrlAndValidUntilDates(metadataOutputStream);
                         integrationService.updateIntegration(id, i.get());
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                         Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
-                        gsuiteIdp.setMetadata(getSAMLMetadata(id).getInputStream());
+                        gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataOutputStream);
                         integrationService.updateIntegration(id, i.get());
                     } else {
                         logger.debug("Given id is not Adfs or Gsuite");

@@ -53,6 +53,10 @@ public class Azure extends IdentityProvider {
 
     public void setMetadataUrl(String metadataUrl) {
         this.metadataUrl = metadataUrl;
+    }
+
+    public void setMetadataUrlAndValidUntilDates(String metadataUrl) {
+        this.metadataUrl = metadataUrl;
         SamlMetadataProvider metadataProvider = new SamlMetadataProvider(metadataUrl);
         this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
         this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
