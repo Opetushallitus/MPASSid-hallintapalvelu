@@ -1,0 +1,38 @@
+.input-container {
+    position: static;
+    top: 30%;
+    left:30%;
+    right:10%;
+  }
+  
+  .input-zone {
+    min-width: 30%;
+    max-width: 80%;
+    min-height: 30% ;
+    border: 1px dashed #696262;
+    border-radius: 10px;
+    display: grid;    
+    justify-content: center;
+    align-items: left;
+    background-color: #f5f5f5;
+    color: #3f3e3e;
+    padding: 1vh;
+    
+    cursor: pointer;
+  }
+
+  .input-zone-missing {
+    min-width: 30%;
+    max-width: 80%;
+    min-height: 30% ;
+    border: 1px dashed red;
+    border-radius: 10px;
+    display: grid;    
+    justify-content: center;
+    align-items: left;
+    background-color: rgb(255, 233, 233);
+    color: #3f3e3e;
+    padding: 1vh;
+    
+    cursor: pointer;
+  }

@@ -4,7 +4,7 @@ import type { Dispatch} from "react";
 import { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { IntegrationType, UiConfiguration } from "@/config";
-import { calculateSHA1, dataConfiguration, defaultIntegrationType, getRandom } from "@/config";
+import { calculateSHA1, defaultIntegrationType, getRandom } from "@/config";
 import { trimCertificate, helperText as vHelperText, validate } from "@/utils/Validators";
 import SwitchForm from "./SwitchForm";
 import ListForm from "./ListForm";
@@ -23,6 +23,7 @@ interface Props {
   mandatory: boolean;
   path: any;
   currentObject: any;
+  dataConfiguration: UiConfiguration[];
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
   onUpdate: (name: string,value: string) => void;
@@ -33,7 +34,7 @@ interface Props {
 }
 
   
-export default function ObjectForm({ object, type, isEditable=false, mandatory=false,helperText, path, onUpdate, onEdit, onDelete, onValidate, attributeType,setCanSave, currentObject, integrationType, objectData }: Props) {
+export default function ObjectForm({ object, type, isEditable=false, mandatory=false,helperText, path, onUpdate, onEdit, onDelete, onValidate, attributeType,setCanSave, currentObject, integrationType, objectData,dataConfiguration }: Props) {
   const intl = useIntl();
   const id = `attribuutti.${object.name}`;
   //const tooltipId = `työkaluvihje.${object.name}`;
@@ -277,10 +278,11 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   
                   //if(configuration?.enum?.length===2&&configuration.array===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
                   if(configuration.switch&&configuration?.enum?.length===2&&configuration.array===false) {
-                    devLog("DEBUG","ObjectForm (switch init)",configuration.name)
-                    devLog("DEBUG","ObjectForm (switch init)",attribute.content)
+                    devLog("DEBUG","ObjectForm (switch init)",configuration.name)                    
+                    devLog("DEBUG","ObjectForm (switch init attribute.content value)",attribute.content);
+                    devLog("DEBUG","ObjectForm (switch init)",(String(attribute.content).toLowerCase() === 'true'));
+                    currentObject.current[configuration.name]=(String(attribute.content).toLowerCase() === 'true');
                     devLog("DEBUG","ObjectForm (SwitchForm resetValue)",true)
-                    currentObject.current[configuration.name]=attribute.content;
                     resetSwitchValue=true
                     //updateObjectSwitchFormValue(configuration.name,attribute.content,attribute.type)
                   }

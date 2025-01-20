@@ -6,19 +6,21 @@ import { useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import type { UiConfiguration } from '@/config';
-import { attributePreferredOrder, dataConfiguration } from '@/config';
+import { attributePreferredOrder } from '@/config';
 
 interface Props {
     id: string;
     attributes: Components.Schemas.Attribute[];
     open: boolean;
     oid: string;
+    tenantId: string| undefined;
     environment: number;
+    dataConfiguration: UiConfiguration[];
     setOpen: Dispatch<boolean>;
   }
 
 
-export default function AttributeTest({ id,attributes, open, setOpen, oid, environment }: Props){
+export default function AttributeTest({ id,attributes, open, setOpen, oid, environment,tenantId,dataConfiguration }: Props){
     const intl = useIntl();
     const [isValidPrincipal, setIsValidPrincipal] = useState(true);
     const [isKnown, setIsKnown] = useState(true);
@@ -155,6 +157,9 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                 if(!sessionAuthenticated){
                     const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
                     authRequest.id=parseInt(id);
+                    if(id==='0'&&tenantId&&tenantId!=="") {
+                        authRequest.tenantId=tenantId;
+                    }
                     authRequest.clientId=clientId;
                     authRequest.clientSecret=clientSecret;
                     

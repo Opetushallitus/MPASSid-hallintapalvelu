@@ -106,8 +106,10 @@ export default function Home() {
           </PageHeader>
            {((groups?.includes(tallentajaOphGroup))||(groups?.includes(katselijaOphGroup)))&&
               <FormControlLabel
+                key={"passiivise_integraation_switch"}
                 control={
                   <Switch
+                    key={"passiivise_integraation_switch"}
                     color="warning"
                     checked={JSON.parse(searchParams.get("passiiviset") ?? "false")}
                     onChange={(event) => {
