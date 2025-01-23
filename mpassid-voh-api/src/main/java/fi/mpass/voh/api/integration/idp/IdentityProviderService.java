@@ -109,7 +109,7 @@ public class IdentityProviderService {
             // Save metadata file to disk
             Files.copy(metadataOutputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 
-            // Set validUntil dates
+            // Set validUntil dates, does not work yet, he date is not stored in database
             if (i.isPresent()) {
                 try {
                     if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
@@ -121,6 +121,7 @@ public class IdentityProviderService {
                         Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
                         gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        i.get().getConfigurationEntity().setIdp(gsuiteIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else {
                         logger.debug("Given id is not Adfs or Gsuite");
