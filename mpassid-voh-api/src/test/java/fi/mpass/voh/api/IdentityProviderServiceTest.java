@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import fi.mpass.voh.api.integration.IntegrationService;
 import fi.mpass.voh.api.integration.idp.IdentityProviderService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,11 +18,12 @@ import java.io.IOException;
 @AutoConfigureMockMvc
 class IdentityProviderServiceTest {
     private IdentityProviderService underTest;
+    private IntegrationService integrationService;
 
     @BeforeEach
     void setUp() {
         // This path is relative to mpassid-voh-api module
-        underTest = new IdentityProviderService("src/test/resources/metadata");
+        underTest = new IdentityProviderService("src/test/resources/metadata", integrationService);
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })

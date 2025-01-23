@@ -17,6 +17,10 @@ public class IntegrationServiceConfiguration {
     private String imageBaseUrl;
     @NotBlank
     private String imageBasePath;
+
+    private String metadataBaseUrlUi;
+    private String metadataBaseUrl;
+    private String metadataBasePath;
     private String redirectUriReference;
     private String redirectUriReferenceValue;
     private String redirectUriValue1;
@@ -25,13 +29,16 @@ public class IntegrationServiceConfiguration {
     @ConstructorBinding
     public IntegrationServiceConfiguration(String adminOrganizationOid, Long defaultTestServiceIntegrationId,
             String imageBaseUrlUi,
-            String imageBaseUrl, String imageBasePath, String redirectUriReference, String redirectUriReferenceValue,
+            String imageBaseUrl, String imageBasePath, String metadataBaseUrlUi, String metadataBaseUrl, String metadataBasePath, String redirectUriReference, String redirectUriReferenceValue,
             String redirectUriValue1, String redirectUriValue2) {
         this.adminOrganizationOid = adminOrganizationOid;
         this.defaultTestServiceIntegrationId = defaultTestServiceIntegrationId;
         this.imageBaseUrlUi = imageBaseUrlUi;
         this.imageBaseUrl = imageBaseUrl;
         this.imageBasePath = imageBasePath;
+        this.metadataBaseUrlUi = metadataBaseUrlUi;
+        this.metadataBaseUrl = metadataBaseUrl;
+        this.metadataBasePath = metadataBasePath;
         this.redirectUriReference = redirectUriReference;
         this.redirectUriReferenceValue = redirectUriReferenceValue;
         this.redirectUriValue1 = redirectUriValue1;
@@ -79,6 +86,24 @@ public class IntegrationServiceConfiguration {
 
     public void setImageBasePath(String imageBasePath) {
         this.imageBasePath = imageBasePath;
+    }
+    public String getMetadataBaseUrlUi() {
+        return metadataBaseUrlUi;
+    }
+    public void setMetadataBaseUrlUi(String metadataBaseUrlUi) {
+        this.metadataBaseUrlUi = metadataBaseUrlUi;
+    }
+    public String getMetadataBaseUrl() {
+        return metadataBaseUrl;
+    }
+    public void setMetadataBaseUrl(String metadataBaseUrl) {
+        this.metadataBaseUrl = metadataBaseUrl;
+    }
+    public String getMetadataBasePath() {
+        return metadataBasePath;
+    }
+    public void setMetadataBasePath(String metadataBasePath) {
+        this.metadataBasePath = metadataBasePath;
     }
 
     public String getRedirectUriReference() {

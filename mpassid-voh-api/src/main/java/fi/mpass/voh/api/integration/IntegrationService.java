@@ -428,7 +428,6 @@ public class IntegrationService {
         integration.get().setOrganization(organization);
       }
       integration = extendPermissions(integration);
-      integration = changeLogoUrl(integration);
       return integration;
     } else {
       throw new EntityNotFoundException("Authentication not successful");
@@ -464,14 +463,12 @@ public class IntegrationService {
     return integration;
   }
 
-  private Optional<Integration> changeLogoUrl(Optional<Integration> integration) {
-    if (integration.isPresent()) {
-      String logoUrl = this.configuration.getImageBaseUrlUi()
-          + "/" + integration.get().getId();
-      if (integration.get().getConfigurationEntity().getIdp() instanceof IdentityProvider) {
-        integration.get().getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
-      }
-
+  public Integration changeLogoUrlForUi(Integration integration) {
+    // Change the integrations logoUrl for UI suitable use.
+    String logoUrl = this.configuration.getImageBaseUrlUi()
+        + "/" + integration.getId();
+    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+      integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
     }
     return integration;
   }
@@ -887,6 +884,9 @@ public class IntegrationService {
           throw new EntityCreationException("Integration creation failed");
         }
         integration = handleSecrets(integration);
+
+        integration = addDefaultMetadataUrl(integration);
+
         return integrationRepository.save(integration);
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
@@ -1221,6 +1221,46 @@ public class IntegrationService {
       }
     }
     return null;
+  }
+
+  private Integration addDefaultMetadataUrl(Integration integration) {
+    // Add default metadataUrl (UI) if metadataUrl is not yet set
+    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+        Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
+        if (adfsIdp.getMetadataUrl() == null || adfsIdp.getMetadataUrl().isEmpty()) {
+          adfsIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
+        }
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
+        Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
+        if (gsuiteIdp.getMetadataUrl() == null || gsuiteIdp.getMetadataUrl().isEmpty()) {
+          gsuiteIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
+        }
+      }
+    }
+    return integration;
+  }
+
+  public Integration changeMetadataUrlForProvisioning(Integration integration) {
+    // If metadataUrl points to proxy site, change it to point at hallintapalvelu
+    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+        Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
+        if (adfsIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi())) {
+          String metadataUrl = this.configuration.getMetadataBaseUrl()
+              + "/" + integration.getId();
+          adfsIdp.setMetadataUrl(metadataUrl);
+        }
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
+        Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
+        if (gsuiteIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi())) {
+          String metadataUrl = this.configuration.getMetadataBaseUrl()
+              + "/" + integration.getId();
+          gsuiteIdp.setMetadataUrl(metadataUrl);
+        }
+      }
+    }
+    return integration;
   }
 
   private Integration handleSecrets(Integration integration) {

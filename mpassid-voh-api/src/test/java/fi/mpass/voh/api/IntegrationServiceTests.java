@@ -80,7 +80,6 @@ class IntegrationServiceTests {
     private IntegrationService underTest;
     private IntegrationServiceConfiguration configuration;
 
-
     private Integration integration;
     private Integration integrationSp;
     private Integration inactiveIntegration;
@@ -97,11 +96,15 @@ class IntegrationServiceTests {
         configuration = new IntegrationServiceConfiguration("1.2.246.562.10.00000000001", 3000001L,
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
-                "/logos", "azureApplicationIdUri", "https://mpass-proxy.csc.fi/shibboleth",
+                "/logos",
+                "http://localhost/test/metadata",
+                "http://localhost/test/metadata",
+                "/metadata", "azureApplicationIdUri", "https://mpass-proxy.csc.fi/shibboleth",
                 "https://mpass-proxy.csc.fi/Shibboleth.sso/SAML2/POST",
                 "https://mpass-proxy.csc.fi/<flowname>/Shibboleth.sso/SAML2/POST");
 
-        underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration, credentialService);
+        underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration,
+                credentialService);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);
