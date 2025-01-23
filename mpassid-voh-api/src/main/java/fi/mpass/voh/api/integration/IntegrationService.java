@@ -28,6 +28,7 @@ import javax.imageio.stream.ImageInputStream;
 import org.hibernate.boot.jaxb.internal.FileXmlSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -52,6 +53,8 @@ import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
+import fi.mpass.voh.api.exception.SecretSavingException;
+import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.idp.Adfs;
 import fi.mpass.voh.api.integration.idp.Azure;
@@ -62,6 +65,7 @@ import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
+import fi.mpass.voh.api.loading.CredentialService;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -76,13 +80,19 @@ public class IntegrationService {
   private final OrganizationService organizationService;
   private final LoadingService loadingService;
   private final IntegrationServiceConfiguration configuration;
+  private final CredentialService credentialService;
+
+  @Value("${application.metadata.credential.value.field:client_secret}")
+  protected String credentialMetadataValueField = "client_secret";
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
-      LoadingService loadingService, IntegrationServiceConfiguration configuration) {
+      LoadingService loadingService, IntegrationServiceConfiguration configuration,
+      CredentialService credentialService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
     this.configuration = configuration;
+    this.credentialService = credentialService;
   }
 
   public List<Integration> getIntegrations() {
@@ -556,6 +566,7 @@ public class IntegrationService {
       }
       try {
         // TODO check that integration.getId() and id matches
+        integration = handleSecrets(integration);
         Integration updatedIntegration = loadingService.loadOne(integration);
         if (updatedIntegration != null) {
           existingIntegration = updatedIntegration;
@@ -868,6 +879,7 @@ public class IntegrationService {
           logger.error("Failed to find an available idp integration identifier");
           throw new EntityCreationException("Integration creation failed");
         }
+        integration = handleSecrets(integration);
         return integrationRepository.save(integration);
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
@@ -931,6 +943,9 @@ public class IntegrationService {
           setIntegration.getConfigurationEntity().getSet().setType("sp");
           setIntegration.setOrganization(integration.getOrganization());
           integration.removeFromSets();
+
+          integration = handleSecrets(integration);
+
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
           integration.addToSet(setIntegration);
@@ -941,6 +956,7 @@ public class IntegrationService {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
           if (optionalSet.isPresent()) {
+            integration = handleSecrets(integration);
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
             integrationRepository.saveAndFlush(optionalSet.get());
@@ -1198,5 +1214,35 @@ public class IntegrationService {
       }
     }
     return null;
+  }
+
+  private Integration handleSecrets(Integration integration) {
+    // Save client secret to aws parameter store
+    boolean success = false;
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+      if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+        success = credentialService.updateOidcCredential(integration, credentialMetadataValueField,
+            integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
+      }
+    } else if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("azure")) {
+        success = credentialService.updateIdpCredential(integration);
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("opinsys")) {
+        success = credentialService.updateIdpCredential(integration);
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
+      }
+    }
+    return integration;
   }
 }
