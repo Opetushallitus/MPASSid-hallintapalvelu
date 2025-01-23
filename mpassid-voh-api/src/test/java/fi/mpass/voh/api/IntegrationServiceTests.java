@@ -97,7 +97,9 @@ class IntegrationServiceTests {
         configuration = new IntegrationServiceConfiguration("1.2.246.562.10.00000000001", 3000001L,
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
                 "http://localhost/mpassid/integration/discoveryinformation/logo",
-                "/logos");
+                "/logos", "azureApplicationIdUri", "https://mpass-proxy.csc.fi/shibboleth",
+                "https://mpass-proxy.csc.fi/Shibboleth.sso/SAML2/POST",
+                "https://mpass-proxy.csc.fi/<flowname>/Shibboleth.sso/SAML2/POST");
 
         underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration, credentialService);
 
@@ -118,6 +120,7 @@ class IntegrationServiceTests {
         ConfigurationEntity configurationEntity = new ConfigurationEntity();
         Opinsys opinsys = new Opinsys("tenantId");
         configurationEntity.setIdp(opinsys);
+        configurationEntity.getIdp().setFlowName("opinsys101");
         ConfigurationEntity configurationEntitySp = new ConfigurationEntity();
         configurationEntitySp.setSp(new SamlServiceProvider());
         configurationEntitySp.getSp().setName("Testipalvelu");

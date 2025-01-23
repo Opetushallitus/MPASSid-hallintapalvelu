@@ -25,7 +25,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import org.hibernate.boot.jaxb.internal.FileXmlSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +55,7 @@ import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.exception.SecretSavingException;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
+import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.Adfs;
 import fi.mpass.voh.api.integration.idp.Azure;
 import fi.mpass.voh.api.integration.idp.Gsuite;
@@ -563,6 +563,10 @@ public class IntegrationService {
           logger.error("No authority to update IDP.");
           throw new EntityCreationException("Integration update failed, no authority to update IDP.");
         }
+
+        if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+          integration = addRedirectUri(integration);
+        }
       }
       try {
         // TODO check that integration.getId() and id matches
@@ -874,6 +878,9 @@ public class IntegrationService {
               .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
               .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableIdpIds.get(0));
+          if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+            integration = addRedirectUri(integration);
+          }
         } else {
           // TODO the case of the first integration without preloaded integrations
           logger.error("Failed to find an available idp integration identifier");
@@ -1242,6 +1249,44 @@ public class IntegrationService {
           throw new SecretSavingException("Failed to save aws secret.");
         }
       }
+    }
+    return integration;
+  }
+
+  private Integration addAttribute(Integration integration, Attribute attribute) {
+    try {
+      Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
+      for (Iterator<Attribute> i = attributes.iterator(); i.hasNext();) {
+        Attribute a = i.next();
+        if (a.getName().equals(attribute.getName())) {
+          i.remove();
+        }
+      }
+      attribute.setConfigurationEntity(integration.getConfigurationEntity());
+      attributes.add(attribute);
+    } catch (Exception e) {
+      logger.error("Error in handling integration attributes: ", e);
+      throw new EntityCreationException("Integration creation failed");
+    }
+    return integration;
+  }
+
+  private Integration addRedirectUri(Integration integration) {
+    Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
+    boolean found = false;
+    for (Attribute a : attributes) {
+      if (a.getName().equals(configuration.getRedirectUriReference())
+          && a.getName().equals(configuration.getRedirectUriReferenceValue())) {
+        Attribute newAttribute = new Attribute("data", "redirectUri", configuration.getRedirectUriValue1());
+        integration = addAttribute(integration, newAttribute);
+        found = true;
+      }
+    }
+    if (!found) {
+      String flowname = integration.getConfigurationEntity().getIdp().getFlowName();
+      String content = configuration.getRedirectUriValue2().replace("<flowname>", flowname);
+      Attribute newAttribute = new Attribute("data", "redirectUri", content);
+      integration = addAttribute(integration, newAttribute);
     }
     return integration;
   }
