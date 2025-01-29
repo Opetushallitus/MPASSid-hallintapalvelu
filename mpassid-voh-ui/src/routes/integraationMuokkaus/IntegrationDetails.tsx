@@ -481,6 +481,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setLogo={setLogo}
                 newLogo={newLogo}
                 setNewLogo={setNewLogo}
+                environment={environment.current}
                 isEditable={true}/>
               )
         }
@@ -496,6 +497,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 setLogo={setLogo}
                 newLogo={newLogo}
                 setNewLogo={setNewLogo}
+                environment={environment.current}
                 isEditable={false}/>
             )
           }

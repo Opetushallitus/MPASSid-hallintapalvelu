@@ -18,6 +18,7 @@ import { devLog } from "@/utils/devLog";
 interface Props {
     newLogo: boolean;
     isEditable: boolean; 
+    environment: number;
     integration: Components.Schemas.Integration;
     configurationEntity: Components.Schemas.ConfigurationEntity;
     discoveryInformation: Components.Schemas.DiscoveryInformation;
@@ -55,7 +56,7 @@ const convertSchoolCode = (value?:string) => {
   return Number(value.substring(17).split("#")[0])
 } 
 
-export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo, newLogo }: Props){
+export default function SchoolSelection({ integration, isEditable=false, setConfigurationEntity, configurationEntity, setDiscoveryInformation, discoveryInformation,setCanSave, setLogo, setNewLogo, newLogo, environment }: Props){
 
     const [enums, setEnums] = useState<oneEnum[]>([]);
     //const [showSchools, setShowSchools] = useState<boolean>(integration.id===0||integration?.discoveryInformation?.showSchools!);
@@ -205,7 +206,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {
         if(integration.organization&&integration.organization.oid) {
-          getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList, id: integration.id})
+          devLog("DEBUG","getExtraSchoolsConfiguration (deplomentPhase)",environment);
+          if(environment===1) {
+            getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList, id: integration.id})
             .then(response=>{              
               var newExtraSchoolConfigurationNeeded=false
               if(response.existingExcluded&&response.existingExcluded!==null&&response.existingExcluded.length>0&&response.existingExcluded.indexOf(String(integration.id))<0) {
@@ -243,6 +246,15 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
 
             })
+          } else {
+            devLog("DEBUG","getExtraSchoolsConfiguration (schools)",schools)
+            setAlreadyExcludeSchools(false)
+            possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
+            extraSchoolConfigurationNeeded.current=false;
+            updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
+            updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
+          }
+          
         }
         
     };
