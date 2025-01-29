@@ -223,73 +223,6 @@
                 }
             }
         },
-        "/api/v2/integration/discoveryinformation": {
-            "get": {
-                "tags": [
-                    "integration-controller"
-                ],
-                "summary": "Get integration discovery information",
-                "operationId": "getIntegrationDiscoveryInformation",
-                "parameters": [
-                    {
-                        "name": "organizationOid",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "institutionType",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "integer",
-                                "format": "int32"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/DiscoveryInformationDTO"
-                                },
-                                "examples": {
-                                    "existingExcluded: given organization's integrations (identifiers) of which discovery information contains exluded schools, existingIncluded: given organization's integrations' discovery information containing included schools": {
-                                        "description": "existingExcluded: given organization's integrations (identifiers) of which discovery information contains exluded schools, existingIncluded: given organization's integrations' discovery information containing included schools",
-                                        "value": {
-                                            "existingExcluded": [
-                                                "1000120"
-                                            ],
-                                            "existingIncluded": [
-                                                "00907",
-                                                "05899"
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Integration not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IntegrationError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/v2/integration/{id}": {
             "get": {
                 "tags": [
@@ -1141,10 +1074,10 @@
                                     "$ref": "#/components/schemas/DiscoveryInformationDTO"
                                 },
                                 "examples": {
-                                    "existingExcluded: given organization's integrations (identifiers) of which discovery information contains excluded schools (filtered by given institution types), existingIncluded: institution codes of the given organization's integrations' discovery information (filtered by given institution types)": {
+                                    "excluded": {
                                         "description": "existingExcluded: given organization's integrations (identifiers) of which discovery information contains excluded schools (filtered by given institution types), existingIncluded: institution codes of the given organization's integrations' discovery information (filtered by given institution types)",
                                         "value": {
-                                            "existingIncluded": null,
+                                            "existingIncluded": [],
                                             "existingExcluded": []
                                         }
                                     }

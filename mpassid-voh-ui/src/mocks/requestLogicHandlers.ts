@@ -1,4 +1,4 @@
-import type { Components } from "@/api";
+import {type Components } from "@/api";
 import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { clone, get, orderBy } from "lodash";
@@ -55,7 +55,7 @@ const attributes = definition.paths["/api/v2/attribute/test"].get.responses[
 
 const discoveryInformation = definition.paths["/api/v2/integration/discoveryinformation"].get.responses[
   "200"
-].content["application/json"].examples as {
+].content["application/json"].examples.excluded as {
   value?: Components.Schemas.DiscoveryInformationDTO
 }
 
@@ -87,6 +87,12 @@ export default {
   },
   getIntegrationDiscoveryInformation(request) {
     console.log("getIntegrationDiscoveryInformation: ",request);
+    discoveryInformation.value={};
+    discoveryInformation.value.existingExcluded=[]
+    discoveryInformation.value.existingIncluded=[]
+    discoveryInformation.value.existingExcluded = null;
+    discoveryInformation.value.existingIncluded.push("00907")
+    discoveryInformation.value.existingIncluded.push("05899")
     
   },
   getBlankIntegration(request) {
