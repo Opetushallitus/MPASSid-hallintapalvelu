@@ -56,7 +56,10 @@ const attributes = definition.paths["/api/v2/attribute/test"].get.responses[
 const discoveryInformation = definition.paths["/api/v2/integration/discoveryinformation"].get.responses[
   "200"
 ].content["application/json"].examples.excluded as {
-  value?: Components.Schemas.DiscoveryInformationDTO
+  value?: {
+    existingExcluded?: string[] | null;
+    existingIncluded?: string[] | null; 
+  } 
 }
 
 allIntegrations = Array(1).fill(allIntegrations).flat();
@@ -91,8 +94,9 @@ export default {
     discoveryInformation.value.existingExcluded=[]
     discoveryInformation.value.existingIncluded=[]
     discoveryInformation.value.existingExcluded = null;
-    discoveryInformation.value.existingIncluded.push("00907")
+    discoveryInformation.value.existingIncluded.push("30076")
     discoveryInformation.value.existingIncluded.push("05899")
+    //discoveryInformation.value.existingIncluded = null;
     
   },
   getBlankIntegration(request) {
