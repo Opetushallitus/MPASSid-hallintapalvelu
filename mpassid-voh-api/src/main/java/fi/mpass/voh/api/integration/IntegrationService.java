@@ -465,9 +465,9 @@ public class IntegrationService {
 
   public Integration changeLogoUrlForUi(Integration integration) {
     // Change the integrations logoUrl for UI suitable use.
-    String logoUrl = this.configuration.getImageBaseUrlUi()
-        + "/" + integration.getId();
-    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+    if (integration.getConfigurationEntity() != null || integration.getConfigurationEntity().getIdp() != null) {
+      String logoUrl = this.configuration.getImageBaseUrlUi()
+          + "/" + integration.getId();
       integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
     }
     return integration;
@@ -1242,7 +1242,7 @@ public class IntegrationService {
   }
 
   public Integration changeMetadataUrlForProvisioning(Integration integration) {
-    // If metadataUrl points to proxy site, change it to point at hallintapalvelu
+    // If metadataUrl points to hallintapalvelu, change it to point at proxy
     if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
       if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
         Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();

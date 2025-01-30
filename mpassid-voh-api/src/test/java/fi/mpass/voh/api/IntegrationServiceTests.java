@@ -281,6 +281,9 @@ class IntegrationServiceTests {
         given(loadingService.loadOne(any(Integration.class))).willReturn(updatedIntegration);
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedIntegration);
+        given(credentialService.updateIdpCredential(any(Integration.class))).willReturn(true);
+        given(credentialService.updateOidcCredential(any(Integration.class), any(Object.class), any(Object.class)))
+                .willReturn(true);
 
         // when - action or the behaviour that we are going test
         Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedIntegration);
@@ -297,6 +300,9 @@ class IntegrationServiceTests {
         // existing integration without any existing permissions
         given(integrationRepository.findOne(any(Specification.class))).willReturn(Optional.of(integration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
+        given(credentialService.updateIdpCredential(any(Integration.class))).willReturn(true);
+        given(credentialService.updateOidcCredential(any(Integration.class), any(Object.class), any(Object.class)))
+                .willReturn(true);
 
         // when updating with 9 permissions
         Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
@@ -314,6 +320,9 @@ class IntegrationServiceTests {
         given(integrationRepository.findOne(any(Specification.class)))
                 .willReturn(Optional.of(existingUpdatedAllowingIntegration));
         given(integrationRepository.saveAndFlush(any(Integration.class))).willReturn(updatedAllowingIntegration);
+        given(credentialService.updateIdpCredential(any(Integration.class))).willReturn(true);
+        given(credentialService.updateOidcCredential(any(Integration.class), any(Object.class), any(Object.class)))
+                .willReturn(true);
 
         // when adding 2 permissions
         Integration resultIntegration = underTest.updateIntegration(integration.getId(), updatedAllowingIntegration);
@@ -332,6 +341,9 @@ class IntegrationServiceTests {
                 .willReturn(Optional.of(updatedAllowingIntegration));
         given(integrationRepository.saveAndFlush(any(Integration.class)))
                 .willReturn(existingUpdatedAllowingIntegration);
+        given(credentialService.updateIdpCredential(any(Integration.class))).willReturn(true);
+        given(credentialService.updateOidcCredential(any(Integration.class), any(Object.class), any(Object.class)))
+                .willReturn(true);
 
         // when removing 2 permissions
         Integration resultIntegration = underTest.updateIntegration(integration.getId(),
@@ -447,6 +459,8 @@ class IntegrationServiceTests {
         given(organizationService.retrieveOrganization(any(String.class))).willReturn(integration.getOrganization());
         given(integrationRepository.getAvailableIdpTestIntegrationIdentifier()).willReturn(availableIdentifiers);
         given(integrationRepository.save(any(Integration.class))).willReturn(integration);
+        given(credentialService.updateIdpCredential(any(Integration.class))).willReturn(true);
+        given(credentialService.updateOidcCredential(any(Integration.class), any(Object.class), any(Object.class))).willReturn(true);
 
         // when
         Integration resultIntegration = underTest.createIntegration(integration);

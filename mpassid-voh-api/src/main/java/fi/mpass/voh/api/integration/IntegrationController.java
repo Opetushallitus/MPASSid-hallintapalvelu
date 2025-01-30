@@ -131,7 +131,7 @@ public class IntegrationController {
 	// @JsonView(value = IntegrationView.Default.class)
 	Integration updateIntegration(@Valid @RequestBody Integration integration, @PathVariable Long id) {
 		Integration i = integrationService.updateIntegration(id, integration);
-		i = integrationService.changeLogoUrlForUi(integration);
+		i = integrationService.changeLogoUrlForUi(i);
 		return i;
 	}
 
