@@ -25,12 +25,17 @@ public class ParameterStoreService {
     @Value("${application.parameterstore.parameterRootName:mpassid}")
     private String parameterRootName = "/MPASSID/organization";
 
+    @Value("${application.parameterstore.profileName}")
+    private String profileName;
+
+
+
     private final SsmClient ssmClient;
 
     public ParameterStoreService() {
         Region region = Region.of(parameterStoreRegion);
         ssmClient = SsmClient.builder()
-                .credentialsProvider(ProfileCredentialsProvider.create("mpassid-rr-dev"))
+                .credentialsProvider(ProfileCredentialsProvider.create(profileName))
                 .region(region)
                 .build();
     }

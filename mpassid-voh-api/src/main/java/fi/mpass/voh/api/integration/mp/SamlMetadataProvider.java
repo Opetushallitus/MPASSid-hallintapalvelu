@@ -178,8 +178,10 @@ public class SamlMetadataProvider {
         XMLObject xmlMetadata;
         try {
             xmlMetadata = doGetMetadata();
-            if (xmlMetadata == null)
+            if (xmlMetadata == null) {
+                logger.debug("xmlMetadata is null");
                 return;
+            }
 
             if (((EntityDescriptorImpl) xmlMetadata).getEntityID() != null) {
                 this.entityId = ((EntityDescriptorImpl) xmlMetadata).getEntityID();
