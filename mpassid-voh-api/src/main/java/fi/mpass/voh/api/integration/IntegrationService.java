@@ -465,7 +465,7 @@ public class IntegrationService {
 
   public Integration changeLogoUrlForUi(Integration integration) {
     // Change the integrations logoUrl for UI suitable use.
-    if (integration.getConfigurationEntity() != null || integration.getConfigurationEntity().getIdp() != null) {
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
       String logoUrl = this.configuration.getImageBaseUrlUi()
           + "/" + integration.getId();
       integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
