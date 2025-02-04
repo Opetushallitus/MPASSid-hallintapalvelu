@@ -540,6 +540,7 @@ class IntegrationServiceTests {
         institutionTypes.add(11);
         institutionTypes.add(15);
         integration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+        integration.setDeploymentPhase(1);
 
         // 2
         Set<String> included = new HashSet<>();
@@ -547,6 +548,7 @@ class IntegrationServiceTests {
         included.add("05899");
         referenceIntegration.getDiscoveryInformation().setSchools(included);
         referenceIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+        referenceIntegration.setDeploymentPhase(1);
 
         List<Integration> integrations = new ArrayList<>();
         integrations.add(integration);
@@ -613,10 +615,12 @@ class IntegrationServiceTests {
         institutionTypes.add(11);
         institutionTypes.add(15);
         integration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+        integration.setDeploymentPhase(1);
 
         Set<String> included = new HashSet<>();
         referenceIntegration.getDiscoveryInformation().setSchools(included);
         referenceIntegration.getConfigurationEntity().getIdp().setInstitutionTypes(institutionTypes);
+        referenceIntegration.setDeploymentPhase(1);
 
         List<Integration> integrations = new ArrayList<>();
         integrations.add(integration);
