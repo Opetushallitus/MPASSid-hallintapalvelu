@@ -3,7 +3,7 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { clone, get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response_1706792827801.json";
+import exampleData from "../../schemas/response.json";
 import blankData from "../../schemas/blankIdpIntegration.json"
 
 export { definition };
@@ -91,12 +91,18 @@ export default {
   getIntegrationDiscoveryInformation(request) {
     console.log("getIntegrationDiscoveryInformation: ",request);
     discoveryInformation.value={};
-    discoveryInformation.value.existingExcluded=[]
     discoveryInformation.value.existingIncluded=[]
-    discoveryInformation.value.existingExcluded = null;
-    discoveryInformation.value.existingIncluded.push("30076")
-    discoveryInformation.value.existingIncluded.push("05899")
+    discoveryInformation.value.existingExcluded=[]
+    
     //discoveryInformation.value.existingIncluded = null;
+    //discoveryInformation.value.existingExcluded = null;
+    //discoveryInformation.value.existingIncluded.push("30076")
+    //discoveryInformation.value.existingExcluded.push("30076")
+   
+    if(request?.query?.institutionType==="15") {
+      discoveryInformation.value.existingExcluded = null;
+      discoveryInformation.value.existingIncluded = null;
+    }
     
   },
   getBlankIntegration(request) {
