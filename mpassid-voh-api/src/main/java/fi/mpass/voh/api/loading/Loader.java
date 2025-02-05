@@ -375,10 +375,10 @@ public class Loader {
                     Attribute attr = attrIterator.next();
                     if (attr.getName().equals(diffElements[2])) {
                         if (attr.getName().equals(credentialAttributeNameField)) {
-                            credentialService.updateCredential(existingIntegration, attr.getName(), d.getRight());
+                            credentialService.updateOidcCredential(existingIntegration, attr.getName(), d.getRight());
                         }
                         if (attr.getName().equals(credentialAttributeValueField)) {
-                            credentialService.updateCredential(existingIntegration, attr.getName(), d.getRight());
+                            credentialService.updateOidcCredential(existingIntegration, attr.getName(), d.getRight());
                         }
                         if (diffElements[3].equals("type")) {
                             attr.setType((String) d.getRight());

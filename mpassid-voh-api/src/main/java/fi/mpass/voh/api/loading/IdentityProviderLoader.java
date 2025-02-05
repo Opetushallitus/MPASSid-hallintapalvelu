@@ -251,13 +251,13 @@ public class IdentityProviderLoader extends Loader {
                         }
                         if (d.getFieldName().contains("configurationEntity.idp.metadataUrl")) {
                             if (idp instanceof Azure) {
-                                ((Azure) idp).setMetadataUrl((String) d.getRight());
+                                ((Azure) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
                             }
                             if (idp instanceof Adfs) {
-                                ((Adfs) idp).setMetadataUrl((String) d.getRight());
+                                ((Adfs) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
                             }
                             if (idp instanceof Gsuite) {
-                                ((Gsuite) idp).setMetadataUrl((String) d.getRight());
+                                ((Gsuite) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
                             }
                         }
                         if (d.getFieldName().contains("configurationEntity.idp.tenantId")

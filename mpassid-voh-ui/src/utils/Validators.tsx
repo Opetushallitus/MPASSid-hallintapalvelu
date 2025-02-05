@@ -62,6 +62,12 @@ const validateNoLocalhost = (value:string) => {
     
 }
 
+const validateDate = (value:string) => {
+    const regExpPattern = new RegExp('^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-20[0-9]{2}$'); 
+    return !!regExpPattern.test(value);
+    
+}
+
 export function trimCertificate(pem:string) {
     const base64Cert = pem.replace(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\n| |\r/g, '').trim();
     return base64Cert;    
@@ -191,6 +197,9 @@ let validateStatus:boolean=true;
                 case "cert":
                     validateStatus=validateCert(value);
                     break;
+                case "date":
+                    validateStatus=validateDate(value);
+                    break;    
                 case "expert":
                     validateStatus=true;
                     break;         
@@ -271,6 +280,12 @@ export const helperText = (validators:string[],value:string) => {
                 case "cert":
                     helperText=validateCertText(value)                    
                     break;   
+                case "date":
+                    validateStatus=validateDate(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentän pitää olla pp-kk-vvvv muodossa!" />
+                    }
+                    break;
                 case "expert":
                     helperText=<FormattedMessage defaultMessage="VAROITUS älä koske tähän jollei erikseen ohjeistettu!" />                    
                     break;    

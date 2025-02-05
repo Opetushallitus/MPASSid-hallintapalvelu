@@ -30,11 +30,10 @@ interface AttributeProps {
     helperText: (data:string) => JSX.Element;
     onUpdate: (name: string,value: string,type: string) => void;
     onValidate: (data:string) => boolean;
-    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
 }
 
-export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: AttributeProps) {
+export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: AttributeProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -50,8 +49,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         devLog("DEBUG","updateInputItem (checked)",value)
         devLog("DEBUG","updateInputItem (type)",type)
         
-        devLog("DEBUG","updateInputItem (attribute)",attribute)
-        
+        devLog("DEBUG","updateInputItem (attribute)",attribute)        
         onUpdate(name,value,type)
         //currentObject.current={}
     }
@@ -62,7 +60,6 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         devLog("DEBUG","updateSwitchItem (type)",type)
         
         devLog("DEBUG","updateSwitchItem (attribute)",attribute)
-        
         onUpdate(name,String(value),type)
         //currentObject.current={}
     }
@@ -73,7 +70,6 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         devLog("DEBUG","updateMultiSelectItem (type)",attribute.type)
         
         devLog("DEBUG","updateMultiSelectItem (attribute)",attribute)
-        
         if(attribute.name !== undefined&&attribute.type) {
             onUpdate(attribute.name,value[0],attribute.type)
         }
@@ -87,6 +83,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         if(configuration.enum) {
             enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
         }
+        
         return (
             <Grid container >
                 
@@ -183,6 +180,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
 
  interface MetadataProps {
     uiConfiguration: UiConfiguration;
+    dataConfiguration: UiConfiguration[];
     role?: any;
     type?: any;
     attribute: any;
@@ -192,11 +190,10 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     onEdit: (name: string,value: string) => void;
     onDelete: (name: string,index: number) => void;
     onValidate: (data:string) => boolean;
-    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
 }
 
-export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, setNewConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave }: MetadataProps) {
+export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave,dataConfiguration }: MetadataProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -389,6 +386,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             {configuration&&roleConfiguration&&configuration.object !== undefined&&
                             (<ErrorBoundary>
                             <ObjectForm key={attribute.name+"_"+configuration.name} 
+                                dataConfiguration={dataConfiguration}
                                 integrationType={type}
                                 object={attribute} 
                                 path="content" 
@@ -431,7 +429,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     isEditable={roleConfiguration.editable}
                                     //onUpdate={onUpdate} 
                                     onValidate={onValidate}
-                                    mandatory={configuration.mandatory}
+                                    mandatory={configuration.mandatory&&attribute.content.length===0}
                                     label={label ? intl.formatMessage(label) : attribute.name!}
                                     //attributeType={"metadata"}
                                     helperText={helperText}
@@ -538,11 +536,10 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     helperText: (data:string) => JSX.Element;
     onUpdate: Dispatch<string>;
     onValidate: (data:string) => boolean;
-    setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
     setCanSave: Dispatch<boolean>
  }
 
- export function SchoolForm({ name, value, isVisible, isEditable, isMandatory, helperText, newConfigurationEntityData, setNewConfigurationEntityData,onUpdate,onValidate,setCanSave }: SchoolProps) {
+ export function SchoolForm({ name, value, isVisible, isEditable, isMandatory, helperText, newConfigurationEntityData,onUpdate,onValidate,setCanSave }: SchoolProps) {
 
     const intl = useIntl();
     const id = `attribuutti.${name}`;

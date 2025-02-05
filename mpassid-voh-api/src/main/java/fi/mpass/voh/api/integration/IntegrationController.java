@@ -111,7 +111,11 @@ public class IntegrationController {
 	@GetMapping("{id}")
 	// @JsonView(value = IntegrationView.Default.class)
 	public Optional<Integration> getIntegration(@PathVariable Long id) {
-		return integrationService.getSpecIntegrationById(id);
+		Optional<Integration> integration = integrationService.getSpecIntegrationById(id);
+		if (integration.isPresent()) {
+			integration = Optional.of(integrationService.changeLogoUrlForUi(integration.get()));
+		}
+		return integration;
 	}
 
 	@Operation(summary = "Update the specific integration")
@@ -126,7 +130,9 @@ public class IntegrationController {
 	@PutMapping("{id}")
 	// @JsonView(value = IntegrationView.Default.class)
 	Integration updateIntegration(@Valid @RequestBody Integration integration, @PathVariable Long id) {
-		return integrationService.updateIntegration(id, integration);
+		Integration i = integrationService.updateIntegration(id, integration);
+		i = integrationService.changeLogoUrlForUi(i);
+		return i;
 	}
 
 	@Operation(summary = "Get integrations since a point in time", ignoreJsonView = true)
@@ -181,7 +187,9 @@ public class IntegrationController {
 	@PostMapping
 	// @JsonView(value = IntegrationView.Default.class)
 	Integration createIntegration(@Valid @RequestBody Integration integration) {
-		return integrationService.createIntegration(integration);
+		Integration i = integrationService.createIntegration(integration);
+		i = integrationService.changeLogoUrlForUi(i);
+		return i;
 	}
 
 	@Operation(summary = "Get integration discovery information")

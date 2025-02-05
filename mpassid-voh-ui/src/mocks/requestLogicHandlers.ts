@@ -1,9 +1,9 @@
 import type { Components } from "@/api";
 import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
-import { get, orderBy } from "lodash";
+import { clone, get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response.json";
+import exampleData from "../../schemas/response_1706792827801.json";
 import blankData from "../../schemas/blankIdpIntegration.json"
 
 export { definition };
@@ -180,7 +180,14 @@ export default {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);
     if(id===999995&&integration.value?.configurationEntity?.idp){
-      integration.value.configurationEntity.idp.logoUrl="https://virkailija.testiopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
+      integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
+      if(integration.value.configurationEntity.idp.type==='azure') {
+        const azureIdp:Components.Schemas.Azure = clone(integration.value.configurationEntity.idp)
+        azureIdp.signingCertificateValidUntil="2028-11-30"
+        azureIdp.encryptionCertificateValidUntil="2028-11-30"
+        azureIdp.metadataValidUntil="2028-11-30"
+        integration.value.configurationEntity.idp=azureIdp;
+      }
     }
   },
   getIntegrationsSpecSearchPageable(request) {

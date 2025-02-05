@@ -229,6 +229,31 @@ defineMessage({
   id: "attribuutti.client_id",
   description: "attribuutti",
 });
+defineMessage({
+  defaultMessage: "Client Keyn voimassaolo",
+  id: "attribuutti.clientKeyValidUntil",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Metatiedot",
+  id: "attribuutti.metadataUrl",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "metadata url",
+  id: "attribuutti.metadataUrlField",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Metadatan lataus",
+  id: "attribuutti.metadataFileUpload",
+  description: "attribuutti",
+});
+defineMessage({
+  defaultMessage: "Metadatan url",
+  id: "attribuutti.metadataUrlUpload",
+  description: "attribuutti",
+});
 
 // Attribuuttien työkaluvihjeet
 defineMessage({
@@ -363,6 +388,16 @@ defineMessage({
   id: "työkaluvihje.client_id",
   description: "attribuutin työkaluvihje",
 });
+defineMessage({
+  defaultMessage: "Metadatan lataus",
+  id: "työkaluvihje.metadataFileUpload",
+  description: "attribuutin työkaluvihje",
+});
+defineMessage({
+  defaultMessage: "Metadatan Urlin lisäys",
+  id: "työkaluvihje.metadataUrlUpload",
+  description: "attribuutin työkaluvihje",
+});
 
 
 
@@ -437,5 +472,10 @@ defineMessage({
 defineMessage({
   defaultMessage: "clientID on jo käytössä",
   id: "Integration update failed, no clientID given or clientID is already in use.",
+  description: "Error message",
+});
+defineMessage({
+  defaultMessage: "Salaisuuden tallennus epäonnistui",
+  id: "Failed to save aws secret.",
   description: "Error message",
 });

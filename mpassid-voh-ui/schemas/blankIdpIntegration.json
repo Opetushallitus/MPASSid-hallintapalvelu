@@ -125,6 +125,31 @@
         "serviceContactAddress": "",
         "active": true
     },
+    {
+        "id": 0,
+        "version": 0,
+        "configurationEntity": {
+          "attributes": [],
+          "idp": {
+            "type": "azure",
+            "institutionTypes": [],
+            "hostname": "",
+            "entityId": ""
+          }
+        },
+        "organization": {"oid":"1.2.246.562.99.00000000001","name":"Mansikkalan testi kunta","children":[{"oid":"1.2.246.562.99.00000000003","name":"Mansikkalan testi lukio","children":[],"ytunnus":null,"oppilaitostyyppi":"oppilaitostyyppi_15#1","oppilaitosKoodi":"30077","organisaatiotyypit":["organisaatiotyyppi_02"]},{"oid":"1.2.246.562.99.00000000004","name":"Ahomansikan päiväkoti","children":[],"ytunnus":null,"oppilaitostyyppi":null,"oppilaitosKoodi":null,"organisaatiotyypit":["organisaatiotyyppi_08"]},{"oid":"1.2.246.562.99.00000000002","name":"Mansikkalan testi peruskoulu","children":[],"ytunnus":null,"oppilaitostyyppi":"oppilaitostyyppi_11#1","oppilaitosKoodi":"30076","organisaatiotyypit":["organisaatiotyyppi_02"]}],"ytunnus":null},
+        "integrationSets": [],
+        "discoveryInformation": {
+          "showSchools": false,
+          "schools": [],
+          "excludedSchools": [],
+          "earlyEducationProvider": false
+        },
+        "permissions": [],
+        "deploymentPhase": 0,
+        "serviceContactAddress": "",
+        "active": true
+      },
     {"id":0,"version":0,"configurationEntity":{"attributes":[],"sp":{"type":"saml","type":"saml","name":null,"entityId":null,"metadata":null}},"organization":{"oid":"1.2.246.562.99.00000000001","name":"Mansikkalan testi kunta","children":[{"oid":"1.2.246.562.99.00000000003","name":"Mansikkalan testi lukio","children":[],"ytunnus":null,"oppilaitostyyppi":"oppilaitostyyppi_15#1","oppilaitosKoodi":"30077","organisaatiotyypit":["organisaatiotyyppi_02"]},{"oid":"1.2.246.562.99.00000000004","name":"Ahomansikan päiväkoti","children":[],"ytunnus":null,"oppilaitostyyppi":null,"oppilaitosKoodi":null,"organisaatiotyypit":["organisaatiotyyppi_08"]},{"oid":"1.2.246.562.99.00000000002","name":"Mansikkalan testi peruskoulu","children":[],"ytunnus":null,"oppilaitostyyppi":"oppilaitostyyppi_11#1","oppilaitosKoodi":"30076","organisaatiotyypit":["organisaatiotyyppi_02"]}],"ytunnus":null},"integrationSets":[],"discoveryInformation":{"showSchools":false,"schools":[],"excludedSchools":[],"earlyEducationProvider":false},"permissions":[],"deploymentPhase":0,"serviceContactAddress":"","active":true},
     {
         "id": 1,
@@ -271,6 +296,130 @@
           "name": "ILT Oppiminen Oy",
           "children": [],
           "ytunnus": "2930327-5"
+        },
+        "integrationSets": [],
+        "discoveryInformation": {
+          "showSchools": false,
+          "schools": [],
+          "excludedSchools": [],
+          "earlyEducationProvider": false
+        },
+        "permissions": [],
+        "deploymentPhase": 0,
+        "serviceContactAddress": "",
+        "active": true
+      },
+      {
+        "id": 0,
+        "version": 0,
+        "configurationEntity": {
+          "attributes": [],
+          "idp": {
+            "type": "adfs",
+            "institutionTypes": []
+          }
+        },
+        "organization": {
+            "oid": "1.2.246.562.99.00000000001",
+            "name": "Mansikkalan testi kunta",
+            "children": [
+                {
+                    "oid": "1.2.246.562.99.00000000004",
+                    "name": "Ahomansikan päiväkoti",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": null,
+                    "oppilaitosKoodi": null,
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_08"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000002",
+                    "name": "Mansikkalan testi peruskoulu",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_11#1",
+                    "oppilaitosKoodi": "30076",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000003",
+                    "name": "Mansikkalan testi lukio",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_15#1",
+                    "oppilaitosKoodi": "30077",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                }
+            ],
+            "ytunnus": null
+        },
+        "integrationSets": [],
+        "discoveryInformation": {
+          "showSchools": false,
+          "schools": [],
+          "excludedSchools": [],
+          "earlyEducationProvider": false
+        },
+        "permissions": [],
+        "deploymentPhase": 0,
+        "serviceContactAddress": "",
+        "active": true
+      },
+      {
+        "id": 0,
+        "version": 0,
+        "configurationEntity": {
+          "attributes": [],
+          "idp": {
+            "type": "gsuite",
+            "institutionTypes": []
+          }
+        },
+        "organization": {
+            "oid": "1.2.246.562.99.00000000001",
+            "name": "Mansikkalan testi kunta",
+            "children": [
+                {
+                    "oid": "1.2.246.562.99.00000000004",
+                    "name": "Ahomansikan päiväkoti",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": null,
+                    "oppilaitosKoodi": null,
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_08"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000002",
+                    "name": "Mansikkalan testi peruskoulu",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_11#1",
+                    "oppilaitosKoodi": "30076",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000003",
+                    "name": "Mansikkalan testi lukio",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_15#1",
+                    "oppilaitosKoodi": "30077",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                }
+            ],
+            "ytunnus": null
         },
         "integrationSets": [],
         "discoveryInformation": {

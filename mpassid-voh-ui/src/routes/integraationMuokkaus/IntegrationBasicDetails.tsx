@@ -8,15 +8,13 @@ import {
     typeTooltips,
   } from "@/routes/home/IntegrationsTable";
 import UniqueId from "./UniqueId";
-import type { Dispatch, MutableRefObject} from "react";
+import type { MutableRefObject} from "react";
 
 interface Props {
     integration: Components.Schemas.Integration;
     environment: MutableRefObject<number>;
-    newEnvironment: boolean;
     configurationEntity: Components.Schemas.ConfigurationEntity;
     metadata?: any;
-    setNewEnvironment: Dispatch<boolean>;
 }
   
 export default function IntegrationBasicDetails({ integration, configurationEntity }: Props) {

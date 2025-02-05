@@ -257,11 +257,8 @@ public class ServiceProviderLoader extends Loader {
                 && !d.getLeft().equals(d.getRight())) {
             logger.debug("Metadata mod diff: {}", d.getFieldName());
             if (diffElements[3].length() > 0) {
-                if (diffElements[3].equals(credentialMetadataNameField)) {
-                    credentialService.updateCredential(existingIntegration, diffElements[3], d.getRight());
-                }
                 if (diffElements[3].equals(credentialMetadataValueField)) {
-                    credentialService.updateCredential(existingIntegration, diffElements[3], d.getRight());
+                    credentialService.updateOidcCredential(existingIntegration, diffElements[3], d.getRight());
                 } else {
                     // in other cases (including credentialMetadataNameField), persist metadata modification
                     Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();

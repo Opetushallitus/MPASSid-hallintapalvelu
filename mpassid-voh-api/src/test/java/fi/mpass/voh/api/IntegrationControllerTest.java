@@ -31,9 +31,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -110,6 +112,7 @@ class IntegrationControllerTest {
 		when(permissionEvaluator.hasPermission(any(MethodSecurityExpressionOperations.class), any(Object.class),
 				eq("KATSELIJA"))).thenReturn(true);
 		when(integrationService.getSpecIntegrationById(any(Long.class))).thenReturn(Optional.of(integration));
+		when(integrationService.changeLogoUrlForUi(integration)).thenReturn(integration);
 		mockMvc.perform(get("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -228,6 +231,7 @@ class IntegrationControllerTest {
 				eq("TALLENTAJA")))
 				.thenReturn(true);
 		when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+		when(integrationService.changeLogoUrlForUi(integration)).thenReturn(integration);
 		mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
 				// https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
 				.content(objectMapper.writeValueAsString(integration)).with(csrf()))
@@ -292,6 +296,7 @@ class IntegrationControllerTest {
 				eq("TALLENTAJA")))
 				.thenReturn(true);
 		when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
+		when(integrationService.changeLogoUrlForUi(integration)).thenReturn(integration);
 		mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
 				// https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
 				.content(json).with(csrf()))
@@ -359,6 +364,7 @@ class IntegrationControllerTest {
 				eq("TALLENTAJA")))
 				.thenReturn(true);
 		when(integrationService.createIntegration(any(Integration.class))).thenReturn(integration);
+		when(integrationService.changeLogoUrlForUi(integration)).thenReturn(integration);
 		mockMvc.perform(post("/api/v2/integration").contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(integration)).with(csrf()))
 				.andDo(print())
