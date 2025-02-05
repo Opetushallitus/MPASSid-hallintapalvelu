@@ -93,6 +93,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const existingSchoolsIncluded = useRef<string[]|null>([]);
     const existingSchoolsExcluded = useRef<string[]|null>([]);
     const oldEnvironment = useRef<number>(environment);
+    const originalEnvironment = useRef<number>(environment);
     const adminConfiguration = useRef<boolean>(false);
 
     const intl = useIntl();
@@ -205,8 +206,16 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           setCanSave(true)  
           devLog("DEBUG","SchoolSelection (saveCheck ready)",true)
         } else {
-          setCanSave(false)
-          devLog("DEBUG","SchoolSelection (saveCheck not ready)",false)
+          devLog("DEBUG","SchoolSelection (saveCheck environment)",environment)
+          devLog("DEBUG","SchoolSelection (saveCheck originalEnvironment.current)",originalEnvironment.current)
+          if(environment===originalEnvironment.current||originalEnvironment.current===-5) {
+            setCanSave(false)
+            devLog("DEBUG","SchoolSelection (saveCheck not ready)",false)
+          } else {
+            setCanSave(true)
+            devLog("DEBUG","SchoolSelection (saveCheck environment changed ready)",false)
+          }
+          
         }
 
       } else {
