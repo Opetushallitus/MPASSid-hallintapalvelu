@@ -14,6 +14,7 @@ import { SchoolForm } from "./Form";
 import { clone, last, toPath } from "lodash";
 import { PhotoCamera } from "@mui/icons-material";
 import { devLog } from "@/utils/devLog";
+
 interface Props {
     newLogo: boolean;
     isEditable: boolean; 
@@ -103,9 +104,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     useEffect(() => {
       devLog("DEBUG","SchoolSelection (localCanSave)",localCanSave)
       if(!localCanSave) {
+        devLog("DEBUG","SchoolSelection (canSave 1)",false)
         setCanSave(false)
       }
-    }, [localCanSave, setCanSave]);
+    }, [localCanSave, setCanSave]);    
     
     useEffect(() => {
       if(integration.organization?.children) {
@@ -203,22 +205,36 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             )
            )
         ) {
+          devLog("DEBUG","SchoolSelection (canSave 2)",true)
           setCanSave(true)  
           devLog("DEBUG","SchoolSelection (saveCheck ready)",true)
         } else {
           devLog("DEBUG","SchoolSelection (saveCheck environment)",environment)
           devLog("DEBUG","SchoolSelection (saveCheck originalEnvironment.current)",originalEnvironment.current)
           if(environment===originalEnvironment.current||originalEnvironment.current===-5) {
+            devLog("DEBUG","SchoolSelection (canSave 3)",false)
             setCanSave(false)
             devLog("DEBUG","SchoolSelection (saveCheck not ready)",false)
+
+            
           } else {
-            setCanSave(true)
+            devLog("DEBUG","SchoolSelection (canSave 4)",true)
+            devLog("DEBUG","SchoolSelection (canSave 4 schools)",discoveryInformation.schools?.length)
+            devLog("DEBUG","SchoolSelection (canSave 4 excludedSchools)",discoveryInformation.excludedSchools?.length)
+            
+            if(institutionTypeList.length>1&&discoveryInformation.schools?.length===0&&discoveryInformation.excludedSchools?.length===0) {
+              setCanSave(false)
+            } else {
+              setCanSave(true)
+            }
+            
             devLog("DEBUG","SchoolSelection (saveCheck environment changed ready)",false)
           }
           
         }
 
       } else {
+        devLog("DEBUG","SchoolSelection (canSave 5)",false)
         setCanSave(false)
         devLog("DEBUG","SchoolSelection (saveCheck not idp)",true)
       }
@@ -699,7 +715,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                   label={"schools"}
                                   attributeType={"data"}
                                   isEditable={true}
-                                  mandatory={false}                    
+                                  mandatory={
+                                    (environment===1&&institutionTypeList.length>1&&schools?.length===0&&excludeSchools?.length===0)?true:false
+                                  }                    
                                   helperText={helpGeneratorText}
                                   enums={possibleSchools.current}
                                   onValidate={validator} 
@@ -719,7 +737,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                   label={"excludeSchools"}
                                   attributeType={"data"}
                                   isEditable={true}
-                                  mandatory={false}                    
+                                  mandatory={
+                                    (environment===1&&institutionTypeList.length>1&&schools?.length===0&&excludeSchools?.length===0)?true:false
+                                  }                    
                                   helperText={extraIncludeNoticeHelpText}
                                   enums={possibleSchools.current}
                                   onValidate={validator} 
