@@ -1,9 +1,9 @@
-import type { Components } from "@/api";
+import {type Components } from "@/api";
 import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { clone, get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response_1706792827801.json";
+import exampleData from "../../schemas/response.json";
 import blankData from "../../schemas/blankIdpIntegration.json"
 
 export { definition };
@@ -55,8 +55,11 @@ const attributes = definition.paths["/api/v2/attribute/test"].get.responses[
 
 const discoveryInformation = definition.paths["/api/v2/integration/discoveryinformation"].get.responses[
   "200"
-].content["application/json"].examples as {
-  value?: Components.Schemas.DiscoveryInformationDTO
+].content["application/json"].examples.excluded as {
+  value?: {
+    existingExcluded?: string[] | null;
+    existingIncluded?: string[] | null; 
+  } 
 }
 
 allIntegrations = Array(1).fill(allIntegrations).flat();
@@ -87,6 +90,19 @@ export default {
   },
   getIntegrationDiscoveryInformation(request) {
     console.log("getIntegrationDiscoveryInformation: ",request);
+    discoveryInformation.value={};
+    discoveryInformation.value.existingIncluded=[]
+    discoveryInformation.value.existingExcluded=[]
+    
+    //discoveryInformation.value.existingIncluded = null;
+    //discoveryInformation.value.existingExcluded = null;
+    //discoveryInformation.value.existingIncluded.push("30076")
+    //discoveryInformation.value.existingExcluded.push("30076")
+   
+    if(request?.query?.institutionType==="15") {
+      discoveryInformation.value.existingExcluded = null;
+      discoveryInformation.value.existingIncluded = null;
+    }
     
   },
   getBlankIntegration(request) {

@@ -251,12 +251,15 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             const logoOK=(role==='sp'||
                           newLogo||metadataFile.length===1||
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
-        )
+                        )
 
             setSaveDialogState(true);
             devLog("DEBUG","setCanSave (newConfigurationEntityData)",newConfigurationEntityData)
             devLog("DEBUG","setCanSave (originalIntegration.current?.configurationEntity)",originalIntegration.current?.configurationEntity)
             if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)){   
+              devLog("DEBUG","setCanSave (environmentChanged)",environmentChanged)
+              devLog("DEBUG","setCanSave (isValid)",isValid)
+              devLog("DEBUG","setCanSave (logoOK)",logoOK)
               if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)||metadataFile.length===1||newLogo||environmentChanged)&&isValid&&logoOK) {      
                 devLog("DEBUG","setCanSave","1")
                 setCanSaveConfigurationEntity(true)
@@ -392,35 +395,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           <DataRow object={integration} path="organization.name" />
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
-        </Grid>
-        {role === "idp" && integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
-            (<SchoolSelection 
-                integration={integration} 
-                setConfigurationEntity={setNewConfigurationEntityData} 
-                configurationEntity={newConfigurationEntityData} 
-                discoveryInformation={newDiscoveryInformation} 
-                setDiscoveryInformation={setNewDiscoveryInformation} 
-                setCanSave={setIsValidSchoolSelection}
-                setLogo={setLogo}
-                newLogo={newLogo}
-                setNewLogo={setNewLogo}
-                isEditable={true}/>
-              )
-          }
-        {role === "idp" && !integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
-            (<SchoolSelection 
-                integration={integration} 
-                setConfigurationEntity={setNewConfigurationEntityData} 
-                configurationEntity={newConfigurationEntityData} 
-                discoveryInformation={newDiscoveryInformation} 
-                setDiscoveryInformation={setNewDiscoveryInformation}
-                setCanSave={setIsValidSchoolSelection}
-                setLogo={setLogo}
-                newLogo={newLogo}
-                setNewLogo={setNewLogo}
-                isEditable={false}/>
-            )
-          }
+        </Grid>        
 
         {(role === "idp" || role === "sp" ) && integration && showConfigurationEntityData &&(
           <IntegrationBasicDetails integration={integration} configurationEntity={showConfigurationEntityData} environment={environment} metadata={metadata}/>
@@ -497,6 +472,38 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               
           </>
         )}
+
+        {role === "idp" && integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
+            (<SchoolSelection 
+                integration={integration} 
+                setConfigurationEntity={setNewConfigurationEntityData} 
+                configurationEntity={newConfigurationEntityData} 
+                discoveryInformation={newDiscoveryInformation} 
+                setDiscoveryInformation={setNewDiscoveryInformation} 
+                setCanSave={setIsValidSchoolSelection}
+                setLogo={setLogo}
+                newLogo={newLogo}
+                setNewLogo={setNewLogo}
+                environment={environment.current}
+                isEditable={true}/>
+              )
+        }
+
+        {role === "idp" && !integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
+            (<SchoolSelection 
+                integration={integration} 
+                setConfigurationEntity={setNewConfigurationEntityData} 
+                configurationEntity={newConfigurationEntityData} 
+                discoveryInformation={newDiscoveryInformation} 
+                setDiscoveryInformation={setNewDiscoveryInformation}
+                setCanSave={setIsValidSchoolSelection}
+                setLogo={setLogo}
+                newLogo={newLogo}
+                setNewLogo={setNewLogo}
+                environment={environment.current}
+                isEditable={false}/>
+            )
+          }
         
       </>)      
     } else {

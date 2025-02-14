@@ -288,6 +288,12 @@ export const helperText = (validators:string[],value:string) => {
                     break;
                 case "expert":
                     helperText=<FormattedMessage defaultMessage="VAROITUS älä koske tähän jollei erikseen ohjeistettu!" />                    
+                    break;
+                case "extraExcludes":
+                    helperText=<FormattedMessage defaultMessage="Kaikki muihin integraatiohin lisätyt koulut lisätään automaattisesti" />                    
+                    break;
+                case "allSchoolsUsed":
+                    helperText=<FormattedMessage defaultMessage="Kaikki koulut ovat jo käytössä muissa integraatioissa" />                    
                     break;    
                 default:
                     validateStatus=false;

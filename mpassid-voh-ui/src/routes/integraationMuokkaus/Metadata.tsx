@@ -263,8 +263,23 @@ export default function Metadata({
                           
                         }
 
+                        if(configuration.array===false&&!configuration.switch&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
+                          //Initialize select value                
+                          devLog("DEBUG","Metadata (attribute init select content "+configuration.name+")",attribute.content)                              
+                          if(roleConfiguration.defaultValue !== undefined) {
+                            updateMetadata(configuration.array,configuration.name,String(roleConfiguration.defaultValue))                          
+                          } else {
+                            if(configuration.enum[0]!=='null') {
+                              updateMetadata(configuration.array,configuration.name,String(configuration.enum[0]))                          
+                            }
+                            
+                          } 
+                          
+                        }
+
                         if(configuration.array===true&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
-                          //Initialize array value                    
+                          //Initialize array value            
+                          devLog("DEBUG","Metadata (attribute init array content "+configuration.name+")",attribute.content)         
                           updateMetadata(configuration.array,configuration.name,attribute.content)                          
                         }
                         
