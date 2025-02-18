@@ -232,6 +232,7 @@ class IntegrationControllerTest {
 				.thenReturn(true);
 		when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
 		when(integrationService.changeLogoUrlForUi(integration)).thenReturn(integration);
+		when(integrationService.changeLogoUrlForProvisioning(any(Integration.class))).thenReturn(integration);
 		mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
 				// https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
 				.content(objectMapper.writeValueAsString(integration)).with(csrf()))
@@ -297,6 +298,8 @@ class IntegrationControllerTest {
 				.thenReturn(true);
 		when(integrationService.updateIntegration(eq(99L), any(Integration.class))).thenReturn(integration);
 		when(integrationService.changeLogoUrlForUi(integration)).thenReturn(integration);
+		when(integrationService.changeLogoUrlForProvisioning(any(Integration.class))).thenReturn(integration);
+
 		mockMvc.perform(put("/api/v2/integration/99").contentType(MediaType.APPLICATION_JSON)
 				// https://docs.spring.io/spring-security/reference/servlet/test/mockmvc/csrf.html
 				.content(json).with(csrf()))
