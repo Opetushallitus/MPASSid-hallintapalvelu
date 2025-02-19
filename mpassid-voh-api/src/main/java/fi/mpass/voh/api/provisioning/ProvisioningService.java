@@ -135,6 +135,11 @@ public class ProvisioningService {
                 logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
                 continue;
             }
+            try {
+                i = integrationService.changeLogoUrlForProvisioning(i);
+            } catch (Exception e) {
+                logger.debug("Exception in changing integration logo url. {}", e.getMessage());
+            }
         }
         return idps;
     }
