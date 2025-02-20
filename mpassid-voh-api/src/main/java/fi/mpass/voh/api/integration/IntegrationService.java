@@ -473,6 +473,16 @@ public class IntegrationService {
     return integration;
   }
 
+  public Integration changeLogoUrlForProvisioning(Integration integration) {
+    // Change the integrations logoUrl for provisioning.
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+      String logoUrl = this.configuration.getImageBaseUrl()
+          + "/" + integration.getId() + getLogoContentType(integration.getId());
+      integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
+    }
+    return integration;
+  }
+
   /**
    * The method queries integration sets by id.
    * Requires authentication yet not organizational authorization.
@@ -1050,6 +1060,10 @@ public class IntegrationService {
         Set<String> allIncluded = new HashSet<>();
         for (Integration i : integrations) {
           if (i.isActive() && !i.getId().equals(id) && (i.getConfigurationEntity().getIdp() != null)) {
+            if (i.getDeploymentPhase() != 1) {
+              // Filter out non production integrations
+              continue;
+            }
             if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
               if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
                 allExcluded.add(Long.toString(i.getId()));
@@ -1221,6 +1235,20 @@ public class IntegrationService {
       }
     }
     return null;
+  }
+
+  public String getLogoContentType(Long id) {
+    String type = "";
+    try {
+      InputStreamResource inputStreamResource = getDiscoveryInformationLogo(id);
+      getDiscoveryInformationLogoContentType(inputStreamResource.getInputStream());
+      if (type != null && type.contains("image/")) {
+        type = type.replace("image/", "");
+      }
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+    }
+    return type;
   }
 
   private Integration addDefaultMetadataUrl(Integration integration) {
