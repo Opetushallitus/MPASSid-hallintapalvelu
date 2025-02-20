@@ -1050,6 +1050,10 @@ public class IntegrationService {
         Set<String> allIncluded = new HashSet<>();
         for (Integration i : integrations) {
           if (i.isActive() && !i.getId().equals(id) && (i.getConfigurationEntity().getIdp() != null)) {
+            if (i.getDeploymentPhase() != 1) {
+              // Filter out non production integrations
+              continue;
+            }
             if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
               if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
                 allExcluded.add(Long.toString(i.getId()));
