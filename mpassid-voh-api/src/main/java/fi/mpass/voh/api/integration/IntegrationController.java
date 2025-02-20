@@ -130,7 +130,8 @@ public class IntegrationController {
 	@PutMapping("{id}")
 	// @JsonView(value = IntegrationView.Default.class)
 	Integration updateIntegration(@Valid @RequestBody Integration integration, @PathVariable Long id) {
-		Integration i = integrationService.updateIntegration(id, integration);
+		Integration i = integrationService.changeLogoUrlForProvisioning(integration);
+		i = integrationService.updateIntegration(id, integration);
 		i = integrationService.changeLogoUrlForUi(i);
 		return i;
 	}
