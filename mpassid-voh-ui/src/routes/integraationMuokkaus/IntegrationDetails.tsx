@@ -8,7 +8,7 @@ import {
   Link as MuiLink,
   Typography
 } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, MutableRefObject} from "react";
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from "react-router-dom";
@@ -33,6 +33,7 @@ if(fixPackage) {
 
 interface Props {
   id: number;
+  deploymentPhase: MutableRefObject<number>;
   metadataFile: File[];
   setSaveDialogState: Dispatch<boolean>;
   setCanSave: Dispatch<boolean>;
@@ -45,7 +46,7 @@ interface Props {
 
 
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile,dataConfiguration}: Props) {
+export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile,dataConfiguration,deploymentPhase}: Props) {
     
     const { state } = useLocation();
     const integration: Components.Schemas.Integration = state;
@@ -82,12 +83,13 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
       devLog("DEBUG","IntegrationDetails (integrationEnvironment)",integrationEnvironment)      
       environment.current=integrationEnvironment   
+      deploymentPhase.current=integrationEnvironment;
       if(environment.current!==originalEnvironment.current&&environment.current>=0&&originalEnvironment.current>=0) {
         setEnvironmentChanged(true) 
       } else {
         setEnvironmentChanged(false) 
       }
-    }, [integrationEnvironment]);
+    }, [deploymentPhase, integrationEnvironment]);
 
     useEffect(() => {          
       if(newConfigurationEntityData?.idp&&metadataUrl!=='') {        

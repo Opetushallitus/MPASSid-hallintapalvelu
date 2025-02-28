@@ -44,6 +44,7 @@ export default function IntegraatioMuokkaus() {
   const intl = useIntl();
   const [uiConfiguration, setUiConfiguration] = useState<UiConfiguration[]>([]);
   const [ uiError, uiConfig ] = useDataUserInterfaceConfigurationRawSafe();
+  const deploymentPhase = useRef<number>(-5);
   
 
   useEffect(() => {
@@ -156,7 +157,10 @@ export default function IntegraatioMuokkaus() {
                 if(newIntegration.integrationSets&&newIntegration.integrationSets.length>0) {
                   updateIntegration.integrationSets = newIntegration.integrationSets.map(i=> { return { id: i.id}})
                 }
-                result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;
+                if(deploymentPhase.current>=0) {
+                  updateIntegration.deploymentPhase=deploymentPhase.current;
+                }
+                result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;                
               }
               devLog("DEBUG","Integration save result",result.current)
               if(logo){
@@ -258,7 +262,7 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} dataConfiguration={uiConfiguration} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile}/>
+            <IntegrationDetails id={Number(id)} dataConfiguration={uiConfiguration} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile} deploymentPhase={deploymentPhase}/>
           </ErrorBoundary>
           
         </Suspense>
