@@ -43,8 +43,10 @@
     
   }
   .input-zone-missing.drag-over {    
+    background-color: rgb(233, 255, 233)
+    ;
     border-color: #000; 
-    border: 3px solid #ff9800;
+    border: 2px dashed green;
     animation: borderAnimation 1s infinite;
   }
   
