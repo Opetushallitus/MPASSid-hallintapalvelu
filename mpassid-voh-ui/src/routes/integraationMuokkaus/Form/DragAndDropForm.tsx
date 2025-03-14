@@ -14,6 +14,7 @@ interface FileUploaderInterface {
 
 function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false }: FileUploaderInterface) {
   const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {  
     if(!emptyFiles) {
@@ -29,7 +30,7 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false 
   const handleDrop = async (event: React.DragEvent) => {
     let files = Object.values(event.dataTransfer.files);
 
-    console.log('files =>', files);
+    devLog("DEBUG",'files =>', files);
 
     setFiles(files);
 
@@ -45,26 +46,30 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsDragging(true);
   };
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsDragging(false);
   };
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsDragging(true);    
   };
 
   //remove selected files
   const handleRemoveFiles = () => {
     onDelete();
     setFiles([]);
+    setIsDragging(false);
   };
 
   return (
     <div className="input-container">
       <div
-        className={(fileExist)?"input-zone":"input-zone-missing"}
+        className={(fileExist)?"input-zone":(isDragging) ? "input-zone-missing drag-over" : "input-zone-missing"}
         onDrop={(event) => handleDrop(event)}
         onDragEnter={(event) => handleDragEnter(event)}
         onDragLeave={(event) => handleDragLeave(event)}
