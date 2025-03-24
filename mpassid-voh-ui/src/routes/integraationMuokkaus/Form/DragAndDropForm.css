@@ -21,6 +21,12 @@
     cursor: pointer;
   }
 
+  /* Hover Effect */
+  .input-zone:hover {
+    background-color: #e0e0e0;
+    border-color: #3f3e3e;
+  }
+
   .input-zone-missing {
     min-width: 30%;
     max-width: 80%;
@@ -33,6 +39,14 @@
     background-color: rgb(255, 233, 233);
     color: #3f3e3e;
     padding: 1vh;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
     
-    cursor: pointer;
   }
+  .input-zone-missing.drag-over {    
+    background-color: rgb(233, 255, 233)
+    ;
+    border-color: #000; 
+    border: 2px dashed green;
+    animation: borderAnimation 1s infinite;
+  }
+  
