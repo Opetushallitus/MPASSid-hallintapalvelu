@@ -41,6 +41,10 @@ public class CredentialService {
             if (organizationOid != null) {
                 String path = organizationOid + "/" + integration.getId();
                 // TODO check the first and the second not null and size > 1 ?
+                if (((String) value).contains("*********") || ((String) value).equals("***")) {
+                    logger.debug("Skipping credential processing, secret value is censored already.");
+                    return true;
+                }
                 boolean success = parameterStoreService.put(path, (String) name, (String) value);
                 if (success) {
                     if (name.equals(credentialMetadataValueField)) {
