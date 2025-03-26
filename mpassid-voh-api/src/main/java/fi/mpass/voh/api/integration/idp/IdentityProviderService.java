@@ -62,6 +62,7 @@ public class IdentityProviderService {
 
         String flowname = null;
         String metadataUrl = null;
+        String entityId = null;
 
         Optional<Integration> i = integrationService.getIntegration(id);
         if (i.isPresent()) {
@@ -116,11 +117,16 @@ public class IdentityProviderService {
                         Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = adfsIdp.getMetadataUrl();
                         adfsIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        entityId = adfsIdp.getEntityId();
+                        logger.debug("entityId is " + entityId);
+                        i.get().getConfigurationEntity().setIdp(adfsIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                         Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
                         gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        entityId = gsuiteIdp.getEntityId();
+                        logger.debug("entityId is " + entityId);
                         i.get().getConfigurationEntity().setIdp(gsuiteIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else {
