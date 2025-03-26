@@ -99,7 +99,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     const intl = useIntl();
 
-    devLog("DEBUG","SchoolSelection (render)",integration)
+    useEffect(() => {
+      devLog("DEBUG","SchoolSelection (init localCanSave)",localCanSave)
+      if(!localCanSave) {
+        setLocalCanSave(true)
+      }
+    }, [integration]);
 
     useEffect(() => {
       devLog("DEBUG","SchoolSelection (localCanSave)",localCanSave)
@@ -609,16 +614,16 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       oldEnvironment.current=environment;
     }
     devLog("DEBUG","************************* SchoolSelection post ********************","start")
-    if((institutionTypeList === undefined || institutionTypeList.length===0)&&localCanSave) {
-      devLog("DEBUG","SchoolSelection post (localCanSave)",localCanSave)
-      devLog("DEBUG","SchoolSelection post (institutionTypeList)",institutionTypeList)
+    if((institutionTypeList === undefined || institutionTypeList.length===0)&&showSchools.current&&localCanSave) {
+      devLog("DEBUG","SchoolSelection post 1 (localCanSave)",localCanSave)
+      devLog("DEBUG","SchoolSelection post 1 (institutionTypeList)",institutionTypeList)
       setLocalCanSave(false)
     }
 
-    if(possibleSchools.current.length===0&&localCanSave) {
-      devLog("DEBUG","SchoolSelection post (localCanSave)",localCanSave)
-      devLog("DEBUG","SchoolSelection post (possibleSchools)",possibleSchools.current)
-      devLog("DEBUG","SchoolSelection post (extraSchoolsConfiguration)",extraSchoolsConfiguration)
+    if(possibleSchools.current.length===0&&showSchools.current&&localCanSave) {
+      devLog("DEBUG","SchoolSelection post 2 (localCanSave)",localCanSave)
+      devLog("DEBUG","SchoolSelection post 2 (possibleSchools)",possibleSchools.current)
+      devLog("DEBUG","SchoolSelection post 2 (extraSchoolsConfiguration)",extraSchoolsConfiguration)
       setLocalCanSave(false)
     }
 

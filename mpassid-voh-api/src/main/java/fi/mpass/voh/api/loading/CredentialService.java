@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 
@@ -41,6 +40,10 @@ public class CredentialService {
             if (organizationOid != null) {
                 String path = organizationOid + "/" + integration.getId();
                 // TODO check the first and the second not null and size > 1 ?
+                if (((String) value).contains("*********") || ((String) value).equals("***")) {
+                    logger.debug("Skipping credential processing, secret value is censored already.");
+                    return true;
+                }
                 boolean success = parameterStoreService.put(path, (String) name, (String) value);
                 if (success) {
                     if (name.equals(credentialMetadataValueField)) {
@@ -66,6 +69,10 @@ public class CredentialService {
                 Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
                 for (Attribute attribute : attributes) {
                     if (attribute.getName().equals(credentialValueField)) {
+                        if (attribute.getContent().contains("*********") || attribute.getContent().equals("***")) {
+                            logger.debug("Skipping credential processing, secret value is censored already.");
+                            return true;
+                        }
                         boolean success = parameterStoreService.put(path, credentialValueField, attribute.getContent());
                         if (success) {
                             attribute.setContent(attribute.getContent().substring(0, 3) + "*********");

@@ -8,7 +8,7 @@ import {
   Link as MuiLink,
   Typography
 } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, MutableRefObject} from "react";
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from "react-router-dom";
@@ -33,6 +33,7 @@ if(fixPackage) {
 
 interface Props {
   id: number;
+  deploymentPhase: MutableRefObject<number>;
   metadataFile: File[];
   setSaveDialogState: Dispatch<boolean>;
   setCanSave: Dispatch<boolean>;
@@ -45,7 +46,7 @@ interface Props {
 
 
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile,dataConfiguration}: Props) {
+export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile,dataConfiguration,deploymentPhase}: Props) {
     
     const { state } = useLocation();
     const integration: Components.Schemas.Integration = state;
@@ -82,12 +83,13 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
       devLog("DEBUG","IntegrationDetails (integrationEnvironment)",integrationEnvironment)      
       environment.current=integrationEnvironment   
+      deploymentPhase.current=integrationEnvironment;
       if(environment.current!==originalEnvironment.current&&environment.current>=0&&originalEnvironment.current>=0) {
         setEnvironmentChanged(true) 
       } else {
         setEnvironmentChanged(false) 
       }
-    }, [integrationEnvironment]);
+    }, [deploymentPhase, integrationEnvironment]);
 
     useEffect(() => {          
       if(newConfigurationEntityData?.idp&&metadataUrl!=='') {        
@@ -196,13 +198,13 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           const updatedServiceProvider: any = testNewConfigurationEntityData.sp;
           updatedServiceProvider[typeConf.attribute]=uniqueIdType;
           newConfigurationEntityData.sp=updatedServiceProvider;
-          
+          devLog("DEBUG","newConfigurationEntityData (metadata)",metadata)
           if(type==='saml') {
             if(metadata.entityId&&newConfigurationEntityData.sp) {
               const samlServiceProvider:Components.Schemas.SamlServiceProvider = cloneDeep(newConfigurationEntityData.sp)
               samlServiceProvider.entityId=metadata.entityId;
               if(name) {
-                devLog("DEBUG","newConfigurationEntityData (name)",name)
+                devLog("DEBUG","newConfigurationEntityData (saml name)",name)
                 samlServiceProvider.name=name;
               }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
@@ -213,13 +215,13 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           }
 
           if(type==='oidc') {
-            
+                    
             if(metadata.client_id&&newConfigurationEntityData.sp) {
               const oidcServiceProvider:Components.Schemas.OidcServiceProvider = cloneDeep(newConfigurationEntityData.sp)
               oidcServiceProvider.clientId=metadata.client_id;
               
               if(name) {
-                devLog("DEBUG","newConfigurationEntityData (name)",name)
+                devLog("DEBUG","newConfigurationEntityData (oidc name)",name)
                 oidcServiceProvider.name=name;
               }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
@@ -288,6 +290,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                   samlSP.entityId=metadata.entityId;
                   samlSP.name=name;
                   changedIntegration.configurationEntity.sp=samlSP
+                }
+                if(role==='sp'&&integration.configurationEntity&&integration.configurationEntity.sp&&newConfigurationEntityData.sp&&integration.configurationEntity.sp.type==='oidc') {
+                  const oidcSP:Components.Schemas.OidcServiceProvider = clone(newConfigurationEntityData.sp);
+                  oidcSP.clientId=metadata.client_id;
+                  oidcSP.name=name;
+                  changedIntegration.configurationEntity.sp=oidcSP
                 }
                 if(changedIntegration?.discoveryInformation&&changedIntegration.discoveryInformation?.showSchools&&(changedIntegration.discoveryInformation.title===''||changedIntegration.discoveryInformation.title===undefined)) {
                   if(changedIntegration?.organization?.name) {
