@@ -185,6 +185,7 @@ public class SamlMetadataProvider {
 
             if (((EntityDescriptorImpl) xmlMetadata).getEntityID() != null) {
                 this.entityId = ((EntityDescriptorImpl) xmlMetadata).getEntityID();
+                logger.debug("EntityId is " + this.entityId);
             }
 
             if (((EntityDescriptorImpl) xmlMetadata).getValidUntil() != null) {

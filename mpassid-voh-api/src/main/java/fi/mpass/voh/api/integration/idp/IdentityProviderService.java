@@ -116,7 +116,7 @@ public class IdentityProviderService {
                     if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                         Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = adfsIdp.getMetadataUrl();
-                        adfsIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        adfsIdp.setMetadataAndParse(metadataReadingStream);
                         entityId = adfsIdp.getEntityId();
                         logger.debug("entityId is " + entityId);
                         i.get().getConfigurationEntity().setIdp(adfsIdp);

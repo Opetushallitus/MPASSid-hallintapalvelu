@@ -51,19 +51,21 @@ public class Adfs extends IdentityProvider {
         this.metadataUrl = metadataUrl;
     }
 
-    public void setMetadataUrlAndValidUntilDates(String metadataUrl) {
+    public void setMetadataAndParse(String metadataUrl) {
         this.metadataUrl = metadataUrl;
         SamlMetadataProvider metadataProvider = new SamlMetadataProvider(metadataUrl);
         this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
         this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
         this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
+        this.entityId = metadataProvider.getEntityId();
     }
 
-    public void setMetadataUrlAndValidUntilDates(InputStream inputStream) {
+    public void setMetadataAndParse(InputStream inputStream) {
         SamlMetadataProvider metadataProvider = new SamlMetadataProvider(inputStream);
         this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
         this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
         this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
+        this.entityId = metadataProvider.getEntityId();
     }
 
     public LocalDate getMetadataValidUntil() {

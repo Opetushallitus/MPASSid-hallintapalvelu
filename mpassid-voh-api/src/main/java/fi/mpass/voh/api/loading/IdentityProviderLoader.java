@@ -254,7 +254,7 @@ public class IdentityProviderLoader extends Loader {
                                 ((Azure) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
                             }
                             if (idp instanceof Adfs) {
-                                ((Adfs) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
+                                ((Adfs) idp).setMetadataAndParse((String) d.getRight());
                             }
                             if (idp instanceof Gsuite) {
                                 ((Gsuite) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
