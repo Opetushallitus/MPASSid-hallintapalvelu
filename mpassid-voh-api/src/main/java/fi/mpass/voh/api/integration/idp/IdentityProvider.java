@@ -96,13 +96,13 @@ public abstract class IdentityProvider {
     protected String hostname;
 
     @Column(name = "metadata_valid_until", columnDefinition = "DATE")
-    private LocalDate metadataValidUntil;
+    protected LocalDate metadataValidUntil;
 
     @Column(name = "signing_certificate_valid_until", columnDefinition = "DATE")
-    private LocalDate signingCertificateValidUntil;
+    protected LocalDate signingCertificateValidUntil;
 
     @Column(name = "encryption_certificate_valid_until", columnDefinition = "DATE")
-    private LocalDate encryptionCertificateValidUntil;
+    protected LocalDate encryptionCertificateValidUntil;
 
     protected IdentityProvider() {
     }
