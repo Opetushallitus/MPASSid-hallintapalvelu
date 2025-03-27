@@ -191,6 +191,7 @@ public class SamlMetadataProvider {
             if (((EntityDescriptorImpl) xmlMetadata).getValidUntil() != null) {
                 this.metadataValidUntil = LocalDate.ofInstant(((EntityDescriptorImpl) xmlMetadata).getValidUntil(),
                         ZoneId.systemDefault());
+                logger.debug("metadataValidUntil is " + this.metadataValidUntil);
             }
 
             IDPSSODescriptor idpssoDescriptor = ((EntityDescriptorImpl) xmlMetadata)

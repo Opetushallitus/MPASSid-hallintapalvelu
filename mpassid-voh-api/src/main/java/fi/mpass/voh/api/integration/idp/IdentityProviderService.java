@@ -119,6 +119,7 @@ public class IdentityProviderService {
                         adfsIdp.setMetadataAndParse(metadataReadingStream);
                         entityId = adfsIdp.getEntityId();
                         logger.debug("entityId is " + entityId);
+                        logger.debug("metadataValidUntil is " + adfsIdp.getMetadataValidUntil());
                         i.get().getConfigurationEntity().setIdp(adfsIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
