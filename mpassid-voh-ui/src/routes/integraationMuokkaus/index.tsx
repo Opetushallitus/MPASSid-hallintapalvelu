@@ -181,10 +181,7 @@ export default function IntegraatioMuokkaus() {
                 const metadataResult= await uploadSamlMetadata({ id: metadataId },formData as any);
                 
                 if(result.current.configurationEntity?.idp) {
-                  var idpProvider:Components.Schemas.Adfs|Components.Schemas.Gsuite = {}
-                  idpProvider = clone(result.current.configurationEntity.idp)
-                  idpProvider.metadataUrl=metadataResult;
-                  result.current.configurationEntity.idp = idpProvider;
+                  result.current=metadataResult;
                 }
               }
               setLoading(false)
