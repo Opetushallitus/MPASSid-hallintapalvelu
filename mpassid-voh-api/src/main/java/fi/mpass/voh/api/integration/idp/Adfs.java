@@ -23,10 +23,6 @@ public class Adfs extends IdentityProvider {
 
     private String metadataUrl;
 
-    //private LocalDate metadataValidUntil;
-    //private LocalDate signingCertificateValidUntil;
-    //private LocalDate encryptionCertificateValidUntil;
-
     public Adfs() {
         super();
     }

@@ -24,11 +24,6 @@ public class Gsuite extends IdentityProvider {
 
     private String metadataUrl;
 
-    //@Column(name = "metadata_valid_until")
-    //private LocalDate metadataValidUntil;
-    //private LocalDate signingCertificateValidUntil;
-    //private LocalDate encryptionCertificateValidUntil;
-
     public Gsuite() {
     }
 

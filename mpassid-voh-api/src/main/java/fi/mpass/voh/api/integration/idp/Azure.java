@@ -23,10 +23,6 @@ public class Azure extends IdentityProvider {
 
     private String metadataUrl;
 
-    //private LocalDate metadataValidUntil;
-    //private LocalDate signingCertificateValidUntil;
-    //private LocalDate encryptionCertificateValidUntil;
-
     public Azure() {
         super();
     }
