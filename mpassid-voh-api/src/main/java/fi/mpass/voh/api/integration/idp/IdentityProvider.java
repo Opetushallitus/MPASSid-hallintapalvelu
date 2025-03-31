@@ -1,37 +1,34 @@
 package fi.mpass.voh.api.integration.idp;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import java.time.LocalDate;
+
+import org.hibernate.envers.Audited;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import fi.mpass.voh.api.integration.ConfigurationEntity;
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping;
-
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
-
-import org.hibernate.envers.Audited;
-
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.ElementCollection;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
-
-import fi.mpass.voh.api.integration.ConfigurationEntity;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
 
 @Audited
 @Entity
@@ -166,5 +163,29 @@ public abstract class IdentityProvider {
             return this.type;
         }
         return this.getClass().getSimpleName().toLowerCase();
+    }
+
+    public LocalDate getMetadataValidUntil() {
+        return this.metadataValidUntil;
+    }
+
+    public void setMetadataValidUntil(LocalDate metadataValidUntil) {
+        this.metadataValidUntil = metadataValidUntil;
+    }
+
+    public LocalDate getSigningCertificateValidUntil() {
+        return this.signingCertificateValidUntil;
+    }
+
+    public void setSigningCertificateValidUntil(LocalDate signingCertificateValidUntil) {
+        this.signingCertificateValidUntil = signingCertificateValidUntil;
+    }
+
+    public LocalDate getEncryptionCertificateValidUntil() {
+        return this.encryptionCertificateValidUntil;
+    }
+
+    public void setEncryptionCertificateValidUntil(LocalDate encryptionCertificateValidUntil) {
+        this.encryptionCertificateValidUntil = encryptionCertificateValidUntil;
     }
 }

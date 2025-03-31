@@ -1,5 +1,6 @@
 package fi.mpass.voh.api.integration.idp;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 
 import jakarta.persistence.DiscriminatorValue;
@@ -22,9 +23,9 @@ public class Azure extends IdentityProvider {
 
     private String metadataUrl;
 
-    private LocalDate metadataValidUntil;
-    private LocalDate signingCertificateValidUntil;
-    private LocalDate encryptionCertificateValidUntil;
+    //private LocalDate metadataValidUntil;
+    //private LocalDate signingCertificateValidUntil;
+    //private LocalDate encryptionCertificateValidUntil;
 
     public Azure() {
         super();
@@ -55,12 +56,21 @@ public class Azure extends IdentityProvider {
         this.metadataUrl = metadataUrl;
     }
 
-    public void setMetadataUrlAndValidUntilDates(String metadataUrl) {
+    public void setMetadataAndParse(String metadataUrl) {
         this.metadataUrl = metadataUrl;
         SamlMetadataProvider metadataProvider = new SamlMetadataProvider(metadataUrl);
-        this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
-        this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
-        this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
+        setMetadataValidUntil(metadataProvider.getMetadataValidUntil());
+        setSigningCertificateValidUntil(metadataProvider.getSigningCertificateValidUntil());
+        setEncryptionCertificateValidUntil(metadataProvider.getEncryptionCertificateValidUntil());
+        setEntityId(metadataProvider.getEntityId());
+    }
+
+    public void setMetadataAndParse(InputStream inputStream) {
+        SamlMetadataProvider metadataProvider = new SamlMetadataProvider(inputStream);
+        setMetadataValidUntil(metadataProvider.getMetadataValidUntil());
+        setSigningCertificateValidUntil(metadataProvider.getSigningCertificateValidUntil());
+        setEncryptionCertificateValidUntil(metadataProvider.getEncryptionCertificateValidUntil());
+        setEntityId(metadataProvider.getEntityId());
     }
 
     public LocalDate getMetadataValidUntil() {

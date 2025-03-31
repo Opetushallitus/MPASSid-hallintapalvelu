@@ -180,6 +180,18 @@ public class IntegrationDiffBuilder {
                 diffBuilder.append("configurationEntity.idp.metadataUrl",
                         ((Azure) i1.getConfigurationEntity().getIdp()).getMetadataUrl(),
                         ((Azure) i2.getConfigurationEntity().getIdp()).getMetadataUrl());
+
+                diffBuilder.append("configurationEntity.idp.metadataValidUntil",
+                        ((Azure) i1.getConfigurationEntity().getIdp()).getMetadataValidUntil(),
+                        ((Azure) i2.getConfigurationEntity().getIdp()).getMetadataValidUntil());
+
+                diffBuilder.append("configurationEntity.idp.signingCertificateValidUntil",
+                        ((Azure) i1.getConfigurationEntity().getIdp()).getSigningCertificateValidUntil(),
+                        ((Azure) i2.getConfigurationEntity().getIdp()).getSigningCertificateValidUntil());
+
+                diffBuilder.append("configurationEntity.idp.encryptionCertificateValidUntil",
+                        ((Azure) i1.getConfigurationEntity().getIdp()).getEncryptionCertificateValidUntil(),
+                        ((Azure) i2.getConfigurationEntity().getIdp()).getEncryptionCertificateValidUntil());
             }
 
             if (i1.getConfigurationEntity().getIdp() instanceof Adfs) {
@@ -190,6 +202,18 @@ public class IntegrationDiffBuilder {
                 diffBuilder.append("configurationEntity.idp.metadataUrl",
                         ((Adfs) i1.getConfigurationEntity().getIdp()).getMetadataUrl(),
                         ((Adfs) i2.getConfigurationEntity().getIdp()).getMetadataUrl());
+
+                diffBuilder.append("configurationEntity.idp.metadataValidUntil",
+                        ((Adfs) i1.getConfigurationEntity().getIdp()).getMetadataValidUntil(),
+                        ((Adfs) i2.getConfigurationEntity().getIdp()).getMetadataValidUntil());
+
+                diffBuilder.append("configurationEntity.idp.signingCertificateValidUntil",
+                        ((Adfs) i1.getConfigurationEntity().getIdp()).getSigningCertificateValidUntil(),
+                        ((Adfs) i2.getConfigurationEntity().getIdp()).getSigningCertificateValidUntil());
+
+                diffBuilder.append("configurationEntity.idp.encryptionCertificateValidUntil",
+                        ((Adfs) i1.getConfigurationEntity().getIdp()).getEncryptionCertificateValidUntil(),
+                        ((Adfs) i2.getConfigurationEntity().getIdp()).getEncryptionCertificateValidUntil());
             }
 
             if (i1.getConfigurationEntity().getIdp() instanceof Gsuite) {
@@ -200,6 +224,18 @@ public class IntegrationDiffBuilder {
                 diffBuilder.append("configurationEntity.idp.metadataUrl",
                         ((Gsuite) i1.getConfigurationEntity().getIdp()).getMetadataUrl(),
                         ((Gsuite) i2.getConfigurationEntity().getIdp()).getMetadataUrl());
+
+                diffBuilder.append("configurationEntity.idp.metadataValidUntil",
+                        ((Gsuite) i1.getConfigurationEntity().getIdp()).getMetadataValidUntil(),
+                        ((Gsuite) i2.getConfigurationEntity().getIdp()).getMetadataValidUntil());
+
+                diffBuilder.append("configurationEntity.idp.signingCertificateValidUntil",
+                        ((Gsuite) i1.getConfigurationEntity().getIdp()).getSigningCertificateValidUntil(),
+                        ((Gsuite) i2.getConfigurationEntity().getIdp()).getSigningCertificateValidUntil());
+
+                diffBuilder.append("configurationEntity.idp.encryptionCertificateValidUntil",
+                        ((Gsuite) i1.getConfigurationEntity().getIdp()).getEncryptionCertificateValidUntil(),
+                        ((Gsuite) i2.getConfigurationEntity().getIdp()).getEncryptionCertificateValidUntil());
             }
 
             if (i1.getConfigurationEntity().getIdp() instanceof Opinsys) {

@@ -54,18 +54,18 @@ public class Adfs extends IdentityProvider {
     public void setMetadataAndParse(String metadataUrl) {
         this.metadataUrl = metadataUrl;
         SamlMetadataProvider metadataProvider = new SamlMetadataProvider(metadataUrl);
-        this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
-        this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
-        this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
-        this.entityId = metadataProvider.getEntityId();
+        setMetadataValidUntil(metadataProvider.getMetadataValidUntil());
+        setSigningCertificateValidUntil(metadataProvider.getSigningCertificateValidUntil());
+        setEncryptionCertificateValidUntil(metadataProvider.getEncryptionCertificateValidUntil());
+        setEntityId(metadataProvider.getEntityId());
     }
 
     public void setMetadataAndParse(InputStream inputStream) {
         SamlMetadataProvider metadataProvider = new SamlMetadataProvider(inputStream);
-        this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
-        this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
-        this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
-        this.entityId = metadataProvider.getEntityId();
+        setMetadataValidUntil(metadataProvider.getMetadataValidUntil());
+        setSigningCertificateValidUntil(metadataProvider.getSigningCertificateValidUntil());
+        setEncryptionCertificateValidUntil(metadataProvider.getEncryptionCertificateValidUntil());
+        setEntityId(metadataProvider.getEntityId());
     }
 
     public LocalDate getMetadataValidUntil() {

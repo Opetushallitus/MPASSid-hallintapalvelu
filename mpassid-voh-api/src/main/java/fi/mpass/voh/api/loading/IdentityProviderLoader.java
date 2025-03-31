@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -249,15 +250,45 @@ public class IdentityProviderLoader extends Loader {
                                 ((Gsuite) idp).setEntityId((String) d.getRight());
                             }
                         }
+                        if (d.getFieldName().contains("configurationEntity.idp.metadataValidUntil")) {
+                            if (idp instanceof Azure) {
+                                ((Azure) idp).setMetadataValidUntil((LocalDate) d.getRight());
+                            }
+                            if (idp instanceof Adfs) {
+                                ((Adfs) idp).setMetadataValidUntil((LocalDate) d.getRight());
+                            }
+                            if (idp instanceof Gsuite) {
+                                ((Gsuite) idp).setMetadataValidUntil((LocalDate) d.getRight());
+                            }
+                        }
+                        if (d.getFieldName().contains("configurationEntity.idp.signingCertificateValidUntil")) {
+                            if (idp instanceof Azure) {
+                                ((Azure) idp).setSigningCertificateValidUntil((LocalDate) d.getRight());
+                            }
+                            if (idp instanceof Adfs) {
+                                ((Adfs) idp).setSigningCertificateValidUntil((LocalDate) d.getRight());
+                            }
+                            if (idp instanceof Gsuite) {
+                                ((Gsuite) idp).setSigningCertificateValidUntil((LocalDate) d.getRight());
+                            }
+                        }
+                        if (d.getFieldName().contains("configurationEntity.idp.encryptionCertificateValidUntil")) {
+                            if (idp instanceof Adfs) {
+                                ((Adfs) idp).setEncryptionCertificateValidUntil((LocalDate) d.getRight());
+                            }
+                            if (idp instanceof Gsuite) {
+                                ((Gsuite) idp).setEncryptionCertificateValidUntil((LocalDate) d.getRight());
+                            }
+                        }
                         if (d.getFieldName().contains("configurationEntity.idp.metadataUrl")) {
                             if (idp instanceof Azure) {
-                                ((Azure) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
+                                ((Azure) idp).setMetadataAndParse((String) d.getRight());
                             }
                             if (idp instanceof Adfs) {
                                 ((Adfs) idp).setMetadataAndParse((String) d.getRight());
                             }
                             if (idp instanceof Gsuite) {
-                                ((Gsuite) idp).setMetadataUrlAndValidUntilDates((String) d.getRight());
+                                ((Gsuite) idp).setMetadataAndParse((String) d.getRight());
                             }
                         }
                         if (d.getFieldName().contains("configurationEntity.idp.tenantId")

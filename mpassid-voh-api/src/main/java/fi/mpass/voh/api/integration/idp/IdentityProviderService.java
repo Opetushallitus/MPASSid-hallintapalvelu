@@ -39,7 +39,7 @@ public class IdentityProviderService {
         this.integrationService = integrationService;
     }
 
-    public String saveMetadata(Long id, MultipartFile file) {
+    public Integration saveMetadata(Long id, MultipartFile file) {
 
         InputStream inputStream;
         try {
@@ -81,6 +81,10 @@ public class IdentityProviderService {
                 logger.error("Exception in retrieving integration. {}", e.getMessage());
             }
         }
+        else {
+            logger.error("No integration found.");
+            throw new EntityCreationException("Failed to save metadata.");
+        }
 
         if (flowname == null) {
             logger.error("No flowname found.");
@@ -118,16 +122,13 @@ public class IdentityProviderService {
                         metadataUrl = adfsIdp.getMetadataUrl();
                         adfsIdp.setMetadataAndParse(metadataReadingStream);
                         entityId = adfsIdp.getEntityId();
-                        logger.debug("entityId is " + entityId);
-                        logger.debug("metadataValidUntil is " + adfsIdp.getMetadataValidUntil());
                         i.get().getConfigurationEntity().setIdp(adfsIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                         Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
-                        gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        gsuiteIdp.setMetadataAndParse(metadataReadingStream);
                         entityId = gsuiteIdp.getEntityId();
-                        logger.debug("entityId is " + entityId);
                         i.get().getConfigurationEntity().setIdp(gsuiteIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else {
@@ -138,7 +139,7 @@ public class IdentityProviderService {
                 }
             }
 
-            return metadataUrl;
+            return i.get();
 
         } catch (IOException e) {
             logger.error("Exception in saving metadata", e);
