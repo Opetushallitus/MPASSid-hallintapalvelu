@@ -250,36 +250,6 @@ public class IdentityProviderLoader extends Loader {
                                 ((Gsuite) idp).setEntityId((String) d.getRight());
                             }
                         }
-                        if (d.getFieldName().contains("configurationEntity.idp.metadataValidUntil")) {
-                            if (idp instanceof Azure) {
-                                ((Azure) idp).setMetadataValidUntil((LocalDate) d.getRight());
-                            }
-                            if (idp instanceof Adfs) {
-                                ((Adfs) idp).setMetadataValidUntil((LocalDate) d.getRight());
-                            }
-                            if (idp instanceof Gsuite) {
-                                ((Gsuite) idp).setMetadataValidUntil((LocalDate) d.getRight());
-                            }
-                        }
-                        if (d.getFieldName().contains("configurationEntity.idp.signingCertificateValidUntil")) {
-                            if (idp instanceof Azure) {
-                                ((Azure) idp).setSigningCertificateValidUntil((LocalDate) d.getRight());
-                            }
-                            if (idp instanceof Adfs) {
-                                ((Adfs) idp).setSigningCertificateValidUntil((LocalDate) d.getRight());
-                            }
-                            if (idp instanceof Gsuite) {
-                                ((Gsuite) idp).setSigningCertificateValidUntil((LocalDate) d.getRight());
-                            }
-                        }
-                        if (d.getFieldName().contains("configurationEntity.idp.encryptionCertificateValidUntil")) {
-                            if (idp instanceof Adfs) {
-                                ((Adfs) idp).setEncryptionCertificateValidUntil((LocalDate) d.getRight());
-                            }
-                            if (idp instanceof Gsuite) {
-                                ((Gsuite) idp).setEncryptionCertificateValidUntil((LocalDate) d.getRight());
-                            }
-                        }
                         if (d.getFieldName().contains("configurationEntity.idp.metadataUrl")) {
                             if (idp instanceof Azure) {
                                 ((Azure) idp).setMetadataAndParse((String) d.getRight());
