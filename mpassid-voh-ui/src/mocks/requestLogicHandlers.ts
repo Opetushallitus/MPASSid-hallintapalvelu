@@ -62,6 +62,12 @@ const discoveryInformation = definition.paths["/api/v2/integration/discoveryinfo
   } 
 }
 
+const samlMetadataIntegration = definition.paths["/api/v2/idp/saml/metadata/{id}"].post.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
 allIntegrations = Array(1).fill(allIntegrations).flat();
 
 allIntegrations.push(
@@ -205,6 +211,14 @@ export default {
         integration.value.configurationEntity.idp=azureIdp;
       }
     }
+  },
+  uploadSAMLMetadata(request) {
+    const id = Number(request.params.id);
+    console.log("******************** id: ",id)
+    console.log("******************** integration: ",allIntegrations.find((row) => row.id === id))
+    samlMetadataIntegration.value = allIntegrations.find((row) => row.id === id);
+    
+    
   },
   getIntegrationsSpecSearchPageable(request) {
     const page = Number(request.query.page ?? defaults.page);
