@@ -533,6 +533,16 @@ public class IntegrationService {
   public Integration updateIntegration(Long id, Integration integration) {
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
+
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      if (auth != null) {
+        List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+        if (!userOrganizationOids.contains(integration.getOrganization().getOid())) {
+          logger.error("Integration oid is not in list of allowed oids.");
+          throw new EntityUpdateException("Integration update failed, organization id is not allowed.");
+        }
+      }
+
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         if (!checkAuthority("ROLE_APP_MPASSID_PALVELU_TALLENTAJA") && !checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
           logger.error("No authority to update SP.");
