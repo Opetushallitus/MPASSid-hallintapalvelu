@@ -869,6 +869,16 @@ public class IntegrationService {
 
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
+
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      if (auth != null) {
+        List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+        if (!userOrganizationOids.contains(integration.getOrganization().getOid())) {
+          logger.error("Integration oid is not in list of allowed oids.");
+          throw new EntityCreationException("Integration creation failed, organization id is not allowed.");
+        }
+      }
+
       // TODO Separate IDP and SP creation to own methods
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
         if (!checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
@@ -906,14 +916,6 @@ public class IntegrationService {
           throw new EntityCreationException("Integration creation failed, no authority to create SP.");
         }
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null) {
-          List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
-          if (!userOrganizationOids.contains(integration.getOrganization().getOid())) {
-            logger.error("Integration oid is not in list of allowed oids.");
-            throw new EntityCreationException("Integration creation failed, organization id is not allowed.");
-          }
-        }
         if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
           SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
           if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
