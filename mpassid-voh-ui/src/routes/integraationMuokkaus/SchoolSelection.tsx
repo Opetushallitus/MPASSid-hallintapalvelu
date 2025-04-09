@@ -313,11 +313,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               } else {
                 //Exclude not defined, null
                 setHideExcludeSchools(false)
-                disableExtraSchoolConfigurationSwitch.current=false;                
-                if(institutionTypeList.length>1) {
-                  
-                } 
-                
+                disableExtraSchoolConfigurationSwitch.current=false;                                                
               }              
               devLog("DEBUG", "getExtraSchoolsConfiguration (response.existingIncluded)",response.existingIncluded)
               if(response.existingIncluded&&response.existingIncluded!==null&&response.existingIncluded.length>=0) {
