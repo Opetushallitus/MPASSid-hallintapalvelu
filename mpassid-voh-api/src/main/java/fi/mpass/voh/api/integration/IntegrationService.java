@@ -571,6 +571,12 @@ public class IntegrationService {
           throw new EntityCreationException("Integration update failed, no authority to update IDP.");
         }
 
+        if (existingIntegration.getDeploymentPhase() == 0 && integration.getDeploymentPhase() != 0) {
+          // If integration is idp and in testing, don't allow deployment phase to be changed to prod or test-prod. 
+          logger.error("Idp deployment phase is not allowed to be changed from test to prod or test to test-prod.");
+          throw new EntityCreationException("Integration update failed, not allowed to change deployment phase from test.");
+        }
+
         if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
           integration = addRedirectUri(integration);
         }
