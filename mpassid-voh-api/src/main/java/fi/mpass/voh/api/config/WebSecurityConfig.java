@@ -86,9 +86,9 @@ public class WebSecurityConfig {
                 .permitAll());
 
         http.securityMatchers(matchers -> matchers
-                .requestMatchers("/**"))
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated());
+                .requestMatchers("/**"));
+                //.authorizeHttpRequests(authorize -> authorize
+                //        .anyRequest().authenticated());
 
         http.addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class);
         http.addFilter(casAuthenticationFilter);
