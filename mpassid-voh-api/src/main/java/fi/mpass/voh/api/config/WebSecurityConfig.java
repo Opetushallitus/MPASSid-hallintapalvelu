@@ -3,6 +3,7 @@ package fi.mpass.voh.api.config;
 import org.apereo.cas.client.session.SingleSignOutFilter;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -16,8 +17,12 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 @Profile("!default")
@@ -28,6 +33,9 @@ public class WebSecurityConfig {
     private CasAuthenticationFilter casAuthenticationFilter;
     private ProvisioningAuthenticationProvider provisioningAuthenticationProvider;
     private SingleSignOutFilter singleSignOutFilter;
+
+    @Value("${server.servlet.context-path:/}") // Default to "/" if not set
+    private String contextPath;
 
     public WebSecurityConfig(AuthenticationEntryPoint entryPoint,
             CasAuthenticationFilter casAuthenticationFilter,
@@ -60,7 +68,7 @@ public class WebSecurityConfig {
         http.httpBasic(Customizer.withDefaults());
         http.authenticationManager(authManager);
         http.anonymous(AbstractHttpConfigurer::disable);
-        //http.csrf(AbstractHttpConfigurer::disable);
+        http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
@@ -88,6 +96,29 @@ public class WebSecurityConfig {
         http.anonymous(AbstractHttpConfigurer::disable);
         //http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
+
+        // Customize the cookie properties
+        CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        csrfTokenRepository.setCookieCustomizer(cookie -> cookie
+            .secure(true)          // Set cookie as Secure (only over HTTPS)
+            .httpOnly(false)        // Mark the cookie as not HttpOnly (can be accessed by JavaScript)
+            .sameSite("Strict")    // Set SameSite to Strict or Lax depending on your needs
+            .path(contextPath)
+            
+        );
+        
+        http
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(csrfTokenRepository)
+                .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
+                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session for CSRF token
+            )
+            .authorizeHttpRequests(auth -> auth   // Use MPASS authorize configuration
+                .anyRequest().permitAll()
+            );
+            
 
         return http.build();
     }
