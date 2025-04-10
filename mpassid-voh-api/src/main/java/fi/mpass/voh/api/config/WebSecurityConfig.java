@@ -60,7 +60,7 @@ public class WebSecurityConfig {
         http.httpBasic(Customizer.withDefaults());
         http.authenticationManager(authManager);
         http.anonymous(AbstractHttpConfigurer::disable);
-        http.csrf(AbstractHttpConfigurer::disable);
+        //http.csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
@@ -86,7 +86,7 @@ public class WebSecurityConfig {
         http.addFilter(casAuthenticationFilter);
         http.exceptionHandling(c -> c.authenticationEntryPoint(entryPoint));
         http.anonymous(AbstractHttpConfigurer::disable);
-        http.csrf(AbstractHttpConfigurer::disable);
+        //http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
