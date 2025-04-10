@@ -112,7 +112,8 @@ public class WebSecurityConfig {
                 .csrfTokenRepository(csrfTokenRepository)
                 .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
-            .sessionManagement(session -> session
+                .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
+                .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session for CSRF token
             )
             .authorizeHttpRequests(auth -> auth   // Use MPASS authorize configuration
