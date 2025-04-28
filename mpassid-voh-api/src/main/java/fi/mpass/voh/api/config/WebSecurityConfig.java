@@ -86,7 +86,7 @@ public class WebSecurityConfig {
                 .permitAll());
 
         http.securityMatchers(matchers -> matchers
-                .requestMatchers("/**"))
+                .requestMatchers("/login/**"))
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().authenticated());
 
@@ -112,7 +112,7 @@ public class WebSecurityConfig {
             .path(contextPath)
             
         );
-        
+
         http
             .csrf(csrf -> csrf
                 .csrfTokenRepository(csrfTokenRepository)
