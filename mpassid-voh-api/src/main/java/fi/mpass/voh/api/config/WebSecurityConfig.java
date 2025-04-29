@@ -110,9 +110,6 @@ public class WebSecurityConfig {
             .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
             .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session for CSRF token
-        )
-        .authorizeHttpRequests(auth -> auth   // Use MPASS authorize configuration
-            .anyRequest().permitAll()
         );
 
         http.securityMatchers(matchers -> matchers
