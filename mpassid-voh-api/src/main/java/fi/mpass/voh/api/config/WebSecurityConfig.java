@@ -77,16 +77,15 @@ public class WebSecurityConfig {
     @Order(2)
     @DependsOn("casFilter")
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-       
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(cache -> cache.requestCache(requestCache));
- 
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**")
+
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/cas/**")
                 .permitAll());
 
         http.securityMatchers(matchers -> matchers
-                .requestMatchers("/login/**"))
+                .requestMatchers("/**"))
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().authenticated());
 
@@ -113,7 +112,8 @@ public class WebSecurityConfig {
             
         );
 
-        http
+        http.securityMatchers(matchers -> matchers
+            .requestMatchers("/api/**"))
             .csrf(csrf -> csrf
                 .csrfTokenRepository(csrfTokenRepository)
                 .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
