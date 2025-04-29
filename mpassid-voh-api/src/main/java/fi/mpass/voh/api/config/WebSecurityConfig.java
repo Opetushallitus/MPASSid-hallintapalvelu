@@ -77,11 +77,12 @@ public class WebSecurityConfig {
     @Order(2)
     @DependsOn("casFilter")
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+        
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(cache -> cache.requestCache(requestCache));
 
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/cas/**")
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**")
                 .permitAll());
 
         http.securityMatchers(matchers -> matchers
