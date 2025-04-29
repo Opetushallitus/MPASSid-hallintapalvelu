@@ -85,17 +85,41 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**")
                 .permitAll());
 
-        http.securityMatchers(matchers -> matchers
-                .requestMatchers("/**"))
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated());
-
         http.addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class);
         http.addFilter(casAuthenticationFilter);
         http.exceptionHandling(c -> c.authenticationEntryPoint(entryPoint));
         http.anonymous(AbstractHttpConfigurer::disable);
-        http.csrf(AbstractHttpConfigurer::disable);
+        //http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
+
+        // CSRF
+        CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        // Customize the cookie properties
+        csrfTokenRepository.setCookieCustomizer(cookie -> cookie
+            .secure(true)          // Set cookie as Secure (only over HTTPS)
+            .httpOnly(false)        // Mark the cookie as not HttpOnly (can be accessed by JavaScript)
+            .sameSite("Strict")    // Set SameSite to Strict or Lax depending on your needs
+            .path(contextPath)
+            
+        );
+
+        http.csrf(csrf -> csrf
+            .csrfTokenRepository(csrfTokenRepository)
+            .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
+            .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+            .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
+            .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session for CSRF token
+        )
+        .authorizeHttpRequests(auth -> auth   // Use MPASS authorize configuration
+            .anyRequest().permitAll()
+        );
+
+        http.securityMatchers(matchers -> matchers
+        .requestMatchers("/**"))
+        .authorizeHttpRequests(authorize -> authorize
+                .anyRequest().authenticated());
+        
 
         return http.build();
     }
@@ -103,8 +127,8 @@ public class WebSecurityConfig {
     @Bean
     @Order(3)
     public SecurityFilterChain CsrfFilterChain(HttpSecurity http) throws Exception {
-        // Customize the cookie properties
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        // Customize the cookie properties
         csrfTokenRepository.setCookieCustomizer(cookie -> cookie
             .secure(true)          // Set cookie as Secure (only over HTTPS)
             .httpOnly(false)        // Mark the cookie as not HttpOnly (can be accessed by JavaScript)
