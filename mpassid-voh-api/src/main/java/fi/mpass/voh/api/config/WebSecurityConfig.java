@@ -72,12 +72,14 @@ public class WebSecurityConfig {
 
         return http.build();
     }
-    
+
     @Bean
     @Order(2)
     @DependsOn("casFilter")
+    @Profile("!test")
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-        
+        // Security filter for prod. CSRF enabled
+
         HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(cache -> cache.requestCache(requestCache));
@@ -89,66 +91,65 @@ public class WebSecurityConfig {
         http.addFilter(casAuthenticationFilter);
         http.exceptionHandling(c -> c.authenticationEntryPoint(entryPoint));
         http.anonymous(AbstractHttpConfigurer::disable);
-        //http.csrf(AbstractHttpConfigurer::disable);
+        // http.csrf(AbstractHttpConfigurer::disable);
         http.httpBasic(AbstractHttpConfigurer::disable);
 
         // CSRF
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         // Customize the cookie properties
         csrfTokenRepository.setCookieCustomizer(cookie -> cookie
-            .secure(true)          // Set cookie as Secure (only over HTTPS)
-            .httpOnly(false)        // Mark the cookie as not HttpOnly (can be accessed by JavaScript)
-            .sameSite("Strict")    // Set SameSite to Strict or Lax depending on your needs
-            .path(contextPath)
-            
+                .secure(true) // Set cookie as Secure (only over HTTPS)
+                .httpOnly(false) // Mark the cookie as not HttpOnly (can be accessed by JavaScript)
+                .sameSite("Strict") // Set SameSite to Strict or Lax depending on your needs
+                .path(contextPath)
+
         );
 
         http.csrf(csrf -> csrf
-            .csrfTokenRepository(csrfTokenRepository)
-            .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**", "/swagger-ui/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
-            .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
-            .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
-            .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session for CSRF token
-        );
+                .csrfTokenRepository(csrfTokenRepository)
+                .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**") // Disable CSRF for these
+                                                                                          // endpoints? In MPASS these
+                                                                                          // are differen't filter chain
+                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+                .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session for CSRF token
+                );
 
         http.securityMatchers(matchers -> matchers
-        .requestMatchers("/**"))
-        .authorizeHttpRequests(authorize -> authorize
-                .anyRequest().authenticated());
-        
+                .requestMatchers("/**"))
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().authenticated());
 
         return http.build();
     }
 
     @Bean
-    @Order(3)
-    public SecurityFilterChain CsrfFilterChain(HttpSecurity http) throws Exception {
-        CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
-        // Customize the cookie properties
-        csrfTokenRepository.setCookieCustomizer(cookie -> cookie
-            .secure(true)          // Set cookie as Secure (only over HTTPS)
-            .httpOnly(false)        // Mark the cookie as not HttpOnly (can be accessed by JavaScript)
-            .sameSite("Strict")    // Set SameSite to Strict or Lax depending on your needs
-            .path(contextPath)
-            
-        );
+    @Order(2)
+    @DependsOn("casFilter")
+    @Profile("test")
+    public SecurityFilterChain apiTestFilterChain(HttpSecurity http) throws Exception {
+        // Filter chain without CSRF so that swagger works
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setMatchingRequestParameterName(null);
+        http.requestCache(cache -> cache.requestCache(requestCache));
+
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**")
+                .permitAll());
 
         http.securityMatchers(matchers -> matchers
-            .requestMatchers("/api/**"))
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(csrfTokenRepository)
-                .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
-                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
-                .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
-                .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // Ensure session for CSRF token
-            )
-            .authorizeHttpRequests(auth -> auth   // Use MPASS authorize configuration
-                .anyRequest().permitAll()
-            );
-            
+                .requestMatchers("/**"))
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().authenticated());
+
+        http.addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class);
+        http.addFilter(casAuthenticationFilter);
+        http.exceptionHandling(c -> c.authenticationEntryPoint(entryPoint));
+        http.anonymous(AbstractHttpConfigurer::disable);
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.httpBasic(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
+
 }
