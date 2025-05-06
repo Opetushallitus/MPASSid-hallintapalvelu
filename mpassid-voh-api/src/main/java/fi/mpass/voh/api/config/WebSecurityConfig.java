@@ -82,7 +82,7 @@ public class WebSecurityConfig {
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(cache -> cache.requestCache(requestCache));
 
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**")
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/swagger-ui/**")
                 .permitAll());
 
         http.addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class);
