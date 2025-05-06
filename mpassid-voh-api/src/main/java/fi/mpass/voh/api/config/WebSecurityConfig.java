@@ -82,7 +82,7 @@ public class WebSecurityConfig {
         requestCache.setMatchingRequestParameterName(null);
         http.requestCache(cache -> cache.requestCache(requestCache));
 
-        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**", "/swagger-ui/**")
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/login/**")
                 .permitAll());
 
         http.addFilterBefore(singleSignOutFilter, CasAuthenticationFilter.class);
@@ -105,7 +105,7 @@ public class WebSecurityConfig {
 
         http.csrf(csrf -> csrf
             .csrfTokenRepository(csrfTokenRepository)
-            .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
+            .ignoringRequestMatchers("/api/v2/provisioning/**", "/api/v2/loading/**", "/swagger-ui/**") // Disable CSRF for these endpoints? In MPASS these are differen't filter chain
             .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
             .addFilterAfter(new CookieCsrfFilter(), BasicAuthenticationFilter.class)
             .sessionManagement(session -> session
