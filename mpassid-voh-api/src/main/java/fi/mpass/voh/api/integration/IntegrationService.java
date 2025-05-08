@@ -1344,7 +1344,7 @@ public class IntegrationService {
     boolean found = false;
     for (Attribute a : attributes) {
       if (a.getName().equals(configuration.getRedirectUriReference())
-          && a.getName().equals(configuration.getRedirectUriReferenceValue())) {
+          && a.getContent().equals(configuration.getRedirectUriReferenceValue())) {
         Attribute newAttribute = new Attribute("data", "redirectUri", configuration.getRedirectUriValue1());
         integration = addAttribute(integration, newAttribute);
         found = true;
