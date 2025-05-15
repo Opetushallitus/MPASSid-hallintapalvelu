@@ -66,7 +66,7 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false,
     setFiles([]);
     setIsDragging(false);
   };
-  devLog("DEBUG","className",(fileExist)?"input-zone" :(isDragging) ? (mandatoryColor) ? "input-zone-missing drag-over" : "input-zone-grey drag-over" : (mandatoryColor) ? "input-zone-missing" : "input-zone-grey")
+  
   return (
     <div className="input-container">
       <div
