@@ -73,8 +73,11 @@ public class IdentityProviderService {
                 } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                     flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
+                } else if (i.get().getConfigurationEntity().getIdp() instanceof Azure) {
+                    flowname = ((Azure) i.get().getConfigurationEntity().getIdp()).getFlowName();
+                    metadataUrl = ((Azure) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
                 } else {
-                    logger.debug("Given id is not Adfs or Gsuite");
+                    logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
                 }
             } catch (Exception e) {
                 logger.error("Exception in retrieving integration. {}", e.getMessage());
@@ -123,8 +126,14 @@ public class IdentityProviderService {
                         gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
                         i.get().getConfigurationEntity().setIdp(gsuiteIdp);
                         integrationService.updateIntegration(id, i.get());
+                    } else if (i.get().getConfigurationEntity().getIdp() instanceof Azure) {
+                        Azure azureIdp = (Azure) i.get().getConfigurationEntity().getIdp();
+                        metadataUrl = azureIdp.getMetadataUrl();
+                        azureIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        i.get().getConfigurationEntity().setIdp(azureIdp);
+                        integrationService.updateIntegration(id, i.get());
                     } else {
-                        logger.debug("Given id is not Adfs or Gsuite");
+                        logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
                     }
                 } catch (Exception e) {
                     logger.error("Exception in retrieving integration. {}", e.getMessage());

@@ -1,5 +1,6 @@
 package fi.mpass.voh.api.integration.idp;
 
+import java.io.InputStream;
 import java.time.LocalDate;
 
 import jakarta.persistence.DiscriminatorValue;
@@ -58,6 +59,13 @@ public class Azure extends IdentityProvider {
     public void setMetadataUrlAndValidUntilDates(String metadataUrl) {
         this.metadataUrl = metadataUrl;
         SamlMetadataProvider metadataProvider = new SamlMetadataProvider(metadataUrl);
+        this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
+        this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
+        this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
+    }
+
+    public void setMetadataUrlAndValidUntilDates(InputStream inputStream) {
+        SamlMetadataProvider metadataProvider = new SamlMetadataProvider(inputStream);
         this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
         this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
         this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
