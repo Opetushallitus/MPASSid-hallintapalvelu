@@ -39,6 +39,43 @@ public class IdentityProviderService {
         this.integrationService = integrationService;
     }
 
+
+    public void saveMetadata(Long id, String metadataUrl) {
+
+        Optional<Integration> i = integrationService.getIntegration(id);
+
+        if (metadataUrl == null) {
+            logger.debug("No metadataUrl found.");
+            throw new EntityCreationException("Failed to fetch metadata.");
+        }
+
+        // use the stream to save the metadata
+        Path rootLocation = Paths.get(this.metadataBasePath);
+        if (i.isPresent()) {
+            try {
+                if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
+                    Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
+                    adfsIdp.setMetadataUrlAndValidUntilDates(metadataUrl);
+                    integrationService.updateIntegration(id, i.get());
+                } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
+                    Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
+                    gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataUrl);
+                    i.get().getConfigurationEntity().setIdp(gsuiteIdp); // TÄN RIVIN VOI POISTAA?? testaa
+                    integrationService.updateIntegration(id, i.get());
+                } else if (i.get().getConfigurationEntity().getIdp() instanceof Azure) {
+                    Azure azureIdp = (Azure) i.get().getConfigurationEntity().getIdp();
+                    azureIdp.setMetadataUrlAndValidUntilDates(metadataUrl);
+                    i.get().getConfigurationEntity().setIdp(azureIdp);// TÄN RIVIN VOI POISTAA?? testaa
+                    integrationService.updateIntegration(id, i.get());
+                } else {
+                    logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
+                }
+            } catch (Exception e) {
+                logger.error("Exception in retrieving integration. {}", e.getMessage());
+            }
+        }
+    }
+
     public String saveMetadata(Long id, MultipartFile file) {
 
         InputStream inputStream;
@@ -112,7 +149,6 @@ public class IdentityProviderService {
             // Save metadata file to disk
             Files.copy(metadataOutputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 
-            // Set validUntil dates, does not work yet, he date is not stored in database
             if (i.isPresent()) {
                 try {
                     if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
