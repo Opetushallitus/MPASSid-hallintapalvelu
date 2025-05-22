@@ -39,7 +39,7 @@ public class IdentityProviderService {
         this.integrationService = integrationService;
     }
 
-    public String saveMetadata(Long id, MultipartFile file) {
+    public Integration saveMetadata(Long id, MultipartFile file) {
 
         InputStream inputStream;
         try {
@@ -62,6 +62,7 @@ public class IdentityProviderService {
 
         String flowname = null;
         String metadataUrl = null;
+        String entityId = null;
 
         Optional<Integration> i = integrationService.getIntegration(id);
         if (i.isPresent()) {
@@ -79,6 +80,10 @@ public class IdentityProviderService {
             } catch (Exception e) {
                 logger.error("Exception in retrieving integration. {}", e.getMessage());
             }
+        }
+        else {
+            logger.error("No integration found.");
+            throw new EntityCreationException("Failed to save metadata.");
         }
 
         if (flowname == null) {
@@ -115,12 +120,15 @@ public class IdentityProviderService {
                     if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                         Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = adfsIdp.getMetadataUrl();
-                        adfsIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        adfsIdp.setMetadataAndParse(metadataReadingStream);
+                        entityId = adfsIdp.getEntityId();
+                        i.get().getConfigurationEntity().setIdp(adfsIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                         Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
                         metadataUrl = gsuiteIdp.getMetadataUrl();
-                        gsuiteIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        gsuiteIdp.setMetadataAndParse(metadataReadingStream);
+                        entityId = gsuiteIdp.getEntityId();
                         i.get().getConfigurationEntity().setIdp(gsuiteIdp);
                         integrationService.updateIntegration(id, i.get());
                     } else {
@@ -131,7 +139,7 @@ public class IdentityProviderService {
                 }
             }
 
-            return metadataUrl;
+            return i.get();
 
         } catch (IOException e) {
             logger.error("Exception in saving metadata", e);

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import fi.mpass.voh.api.exception.IntegrationError;
+import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationController;
 import fi.mpass.voh.api.integration.IntegrationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,8 +65,7 @@ public class IdentityProviderController {
 			@ApiResponse(responseCode = "405", description = "SAML metadata update error", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
 	})
 	@PostMapping(path = "/saml/metadata/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-	public String uploadSAMLMetadata(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
-		// return metadata url
+	public Integration uploadSAMLMetadata(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
 		return identityProviderService.saveMetadata(id, file);
 	}
 
