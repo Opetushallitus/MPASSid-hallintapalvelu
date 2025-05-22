@@ -40,33 +40,25 @@ public class IdentityProviderService {
     }
 
 
-    public void saveMetadata(Long id, String metadataUrl) {
-
-        Optional<Integration> i = integrationService.getIntegration(id);
-
-        if (metadataUrl == null) {
+    public Integration saveMetadata(Integration i, String metadataUrl) {
+        if (metadataUrl == null && !metadataUrl.isEmpty()) {
             logger.debug("No metadataUrl found.");
             throw new EntityCreationException("Failed to fetch metadata.");
         }
 
         // use the stream to save the metadata
         Path rootLocation = Paths.get(this.metadataBasePath);
-        if (i.isPresent()) {
+        if (i != null) {
             try {
-                if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
-                    Adfs adfsIdp = (Adfs) i.get().getConfigurationEntity().getIdp();
+                if (i.getConfigurationEntity().getIdp() instanceof Adfs) {
+                    Adfs adfsIdp = (Adfs) i.getConfigurationEntity().getIdp();
                     adfsIdp.setMetadataAndParse(metadataUrl);
-                    integrationService.updateIntegration(id, i.get());
-                } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
-                    Gsuite gsuiteIdp = (Gsuite) i.get().getConfigurationEntity().getIdp();
+                } else if (i.getConfigurationEntity().getIdp() instanceof Gsuite) {
+                    Gsuite gsuiteIdp = (Gsuite) i.getConfigurationEntity().getIdp();
                     gsuiteIdp.setMetadataAndParse(metadataUrl);
-                    i.get().getConfigurationEntity().setIdp(gsuiteIdp); // TÄN RIVIN VOI POISTAA?? testaa
-                    integrationService.updateIntegration(id, i.get());
-                } else if (i.get().getConfigurationEntity().getIdp() instanceof Azure) {
-                    Azure azureIdp = (Azure) i.get().getConfigurationEntity().getIdp();
+                } else if (i.getConfigurationEntity().getIdp() instanceof Azure) {
+                    Azure azureIdp = (Azure) i.getConfigurationEntity().getIdp();
                     azureIdp.setMetadataAndParse(metadataUrl);
-                    i.get().getConfigurationEntity().setIdp(azureIdp);// TÄN RIVIN VOI POISTAA?? testaa
-                    integrationService.updateIntegration(id, i.get());
                 } else {
                     logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
                 }
@@ -74,6 +66,7 @@ public class IdentityProviderService {
                 logger.error("Exception in retrieving integration. {}", e.getMessage());
             }
         }
+        return i;
     }
 
     public Integration saveMetadata(Long id, MultipartFile file) {

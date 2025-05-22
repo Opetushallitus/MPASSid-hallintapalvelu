@@ -901,11 +901,11 @@ public class IntegrationService {
         integration = handleSecrets(integration);
 
         if (integration.getConfigurationEntity().getIdp() instanceof Adfs) {
-          identityProviderService.saveMetadata(integration.getId(), ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+          identityProviderService.saveMetadata(integration, ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         } else if (integration.getConfigurationEntity().getIdp() instanceof Gsuite) {
-          identityProviderService.saveMetadata(integration.getId(), ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+          identityProviderService.saveMetadata(integration, ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         } else if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
-          identityProviderService.saveMetadata(integration.getId(), ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+          identityProviderService.saveMetadata(integration, ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         }
 
         integration = addDefaultMetadataUrl(integration);
