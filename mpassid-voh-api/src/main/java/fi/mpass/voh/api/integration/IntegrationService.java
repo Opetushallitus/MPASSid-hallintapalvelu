@@ -28,6 +28,8 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -89,7 +91,7 @@ public class IntegrationService {
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
       LoadingService loadingService, IntegrationServiceConfiguration configuration,
-      CredentialService credentialService, IdentityProviderService identityProviderService) {
+      CredentialService credentialService, @Lazy IdentityProviderService identityProviderService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
@@ -899,11 +901,11 @@ public class IntegrationService {
         integration = handleSecrets(integration);
 
         if (integration.getConfigurationEntity().getIdp() instanceof Adfs) {
-          ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl();
+          identityProviderService.saveMetadata(integration.getId(), ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         } else if (integration.getConfigurationEntity().getIdp() instanceof Gsuite) {
-          ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl();
+          identityProviderService.saveMetadata(integration.getId(), ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         } else if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
-          ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl();
+          identityProviderService.saveMetadata(integration.getId(), ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         }
 
         integration = addDefaultMetadataUrl(integration);
