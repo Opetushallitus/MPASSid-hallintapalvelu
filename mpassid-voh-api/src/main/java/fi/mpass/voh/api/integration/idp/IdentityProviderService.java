@@ -41,13 +41,11 @@ public class IdentityProviderService {
 
 
     public Integration saveMetadata(Integration i, String metadataUrl) {
-        if (metadataUrl == null && !metadataUrl.isEmpty()) {
+        if (metadataUrl == null && metadataUrl.isEmpty()) {
             logger.debug("No metadataUrl found.");
-            throw new EntityCreationException("Failed to fetch metadata.");
+            return i;
         }
 
-        // use the stream to save the metadata
-        Path rootLocation = Paths.get(this.metadataBasePath);
         if (i != null) {
             try {
                 if (i.getConfigurationEntity().getIdp() instanceof Adfs) {
