@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -1119,8 +1120,15 @@ public class IntegrationService {
         }
 
         try (InputStream inputStream = file.getInputStream(); InputStream contentStream = file.getInputStream()) {
+          BufferedImage image = ImageIO.read(file.getInputStream());
           String logoContentType = getDiscoveryInformationLogoContentType(contentStream);
-          if (logoContentType != null && logoContentType.contains("image/")) {
+          if (image == null) {
+            logger.error("File is not an image.");
+            throw new EntityCreationException("Failed to save image.");
+          } else if (logoContentType == null || !logoContentType.contains("image/")) {
+            logger.error("File is not an image.");
+            throw new EntityCreationException("Failed to save image.");
+          } else if (logoContentType != null && logoContentType.contains("image/")) {
             logoContentType = logoContentType.replace("image/", "");
           }
           url += "." + logoContentType;
