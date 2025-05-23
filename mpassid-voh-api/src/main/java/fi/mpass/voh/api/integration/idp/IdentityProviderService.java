@@ -41,7 +41,7 @@ public class IdentityProviderService {
 
 
     public Integration saveMetadata(Integration i, String metadataUrl) {
-        if (metadataUrl == null && metadataUrl.isEmpty()) {
+        if (metadataUrl == null || metadataUrl.isEmpty()) {
             logger.debug("No metadataUrl found.");
             return i;
         }
