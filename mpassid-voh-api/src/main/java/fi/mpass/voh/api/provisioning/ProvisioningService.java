@@ -145,7 +145,10 @@ public class ProvisioningService {
         for (Integration i : sps) {
             try {
                 i.getConfigurationEntity().getAttributes().removeIf(a -> a.getContent().isEmpty());
-                i.setDiscoveryInformation(null); // Remove discoveryInformation from sp
+                i.setDiscoveryInformation(null); // Remove discoveryInformation and serviceContactAddress from sp
+                i.setServiceContactAddress(null);
+                i.getIntegrationSets().forEach(integration -> integration.setDiscoveryInformation(null));
+                i.getIntegrationSets().forEach(integration -> integration.setServiceContactAddress(null));
             } catch (Exception e) {
                 logger.debug("Exception in retrieving integration attributes. {}", e.getMessage());
                 continue;
