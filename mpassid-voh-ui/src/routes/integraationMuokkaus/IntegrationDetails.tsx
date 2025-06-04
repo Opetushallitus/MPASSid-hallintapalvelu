@@ -243,10 +243,16 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
         //Update newConfigurationEntityData
           if(newConfigurationEntityData) {
-            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
+            var isValidMetadataIdp=true  
+            if(newConfigurationEntityData.idp&&(newConfigurationEntityData.idp.type==='adfs'||newConfigurationEntityData.idp.type=='gsuite')&&(metadataFile.length===0&&metadataUrl==="")) {
+              isValidMetadataIdp=false
+            }
+        
+            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails&&isValidMetadataIdp;
             devLog("DEBUG","isvalid newConfigurationEntityData (isValidDataAttribute)",isValidDataAttribute)
             devLog("DEBUG","isvalid newConfigurationEntityData (isValidUserAttribute)",isValidUserAttribute)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata)",isValidMetadata)
+            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata sp)",isValidMetadata)
+            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata idp)",isValidMetadataIdp)
             devLog("DEBUG","isvalid newConfigurationEntityData (isValidSchoolSelection)",isValidSchoolSelection)
             devLog("DEBUG","isvalid newConfigurationEntityData (isValidRoleDetails)",isValidRoleDetails)
             
