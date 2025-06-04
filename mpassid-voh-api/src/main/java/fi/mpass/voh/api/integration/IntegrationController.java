@@ -55,16 +55,6 @@ public class IntegrationController {
 		this.integrationService = integrationService;
 	}
 
-	@Operation(summary = "Get all integrations", ignoreJsonView = true)
-	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
-	@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
-			@ExampleObject(name = "integrations", externalValue = "https://mpassid-rr-test.csc.fi/integrations.json") }))
-	@GetMapping("/list")
-	// @JsonView(value = IntegrationView.Default.class)
-	public List<Integration> getIntegrations() {
-		return integrationService.getIntegrations();
-	}
-
 	@Operation(summary = "Search paged integrations", ignoreJsonView = true)
 	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_TALLENTAJA')")
 	@ApiResponses(value = {
@@ -134,20 +124,6 @@ public class IntegrationController {
 		i = integrationService.updateIntegration(id, integration);
 		i = integrationService.changeLogoUrlForUi(i);
 		return i;
-	}
-
-	@Operation(summary = "Get integrations since a point in time", ignoreJsonView = true)
-	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
-					@ExampleObject(name = "integration", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
-			@ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
-	})
-	@GetMapping("/since/{timestamp}")
-	// @JsonView(value = IntegrationView.Default.class)
-	public List<Integration> getIntegrationsSince(
-			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timestamp) {
-		return integrationService.getIntegrationsSince(timestamp);
 	}
 
 	@Operation(summary = "Get a blank integration")
