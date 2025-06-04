@@ -497,22 +497,6 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 isEditable={true}/>
               )
         }
-
-        {role === "idp" && !integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
-            (<SchoolSelection 
-                integration={integration} 
-                setConfigurationEntity={setNewConfigurationEntityData} 
-                configurationEntity={newConfigurationEntityData} 
-                discoveryInformation={newDiscoveryInformation} 
-                setDiscoveryInformation={setNewDiscoveryInformation}
-                setCanSave={setIsValidSchoolSelection}
-                setLogo={setLogo}
-                newLogo={newLogo}
-                setNewLogo={setNewLogo}
-                environment={environment.current}
-                isEditable={false}/>
-            )
-          }
         
       </>)      
     } else {
