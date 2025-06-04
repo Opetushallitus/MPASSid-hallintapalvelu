@@ -28,6 +28,8 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -60,6 +62,7 @@ import fi.mpass.voh.api.integration.idp.Adfs;
 import fi.mpass.voh.api.integration.idp.Azure;
 import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.idp.IdentityProviderService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
@@ -81,18 +84,20 @@ public class IntegrationService {
   private final LoadingService loadingService;
   private final IntegrationServiceConfiguration configuration;
   private final CredentialService credentialService;
+  private final IdentityProviderService identityProviderService;
 
   @Value("${application.metadata.credential.value.field:client_secret}")
   protected String credentialMetadataValueField = "client_secret";
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
       LoadingService loadingService, IntegrationServiceConfiguration configuration,
-      CredentialService credentialService) {
+      CredentialService credentialService, @Lazy IdentityProviderService identityProviderService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
     this.configuration = configuration;
     this.credentialService = credentialService;
+    this.identityProviderService = identityProviderService;
   }
 
   public List<Integration> getIntegrations() {
@@ -894,6 +899,14 @@ public class IntegrationService {
           throw new EntityCreationException("Integration creation failed");
         }
         integration = handleSecrets(integration);
+
+        if (integration.getConfigurationEntity().getIdp() instanceof Adfs) {
+          identityProviderService.saveMetadata(integration, ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        } else if (integration.getConfigurationEntity().getIdp() instanceof Gsuite) {
+          identityProviderService.saveMetadata(integration, ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        } else if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+          identityProviderService.saveMetadata(integration, ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        }
 
         integration = addDefaultMetadataUrl(integration);
 
