@@ -20,15 +20,10 @@ import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
 import { integrationTypesDefault, tallentajaOphGroup } from '../../../../config';
 import { useEffect, useState } from "react";
-import { fixPackage } from '@/config';
 import { clone } from "lodash";
 
 export const integrationTypes = clone(integrationTypesDefault);
 
-if(fixPackage) {
-  integrationTypes.typesPI = [ "saml", "oidc" ];
-  integrationTypes.typesOKJ = [ "wilma", "azure" ];
-} 
 interface Props {
   integration: Components.Schemas.Integration;
 }

@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 import { devLog } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
-import { fixPackage, integrationTypesDefault } from "@/config";
+import { integrationTypesDefault } from "@/config";
 import { clone } from "lodash";
 
 const defaults = clone(integrationTypesDefault);
@@ -20,12 +20,6 @@ const defaults = clone(integrationTypesDefault);
     //defaults.typesPI.push("oidc")
     //defaults.typesOKJ.push("opinsys")
   }
-
-  if(fixPackage) {
-    defaults.typesPI = [ "saml" ];
-    defaults.typesOKJ = [ "wilma" ];
-  }
-
   interface Props {
     open: boolean;
     setOpen: Dispatch<boolean>;

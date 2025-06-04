@@ -1,4 +1,3 @@
-export const fixPackage = false;
 export const roles = ["idp", "sp", "set"] as const;
 export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
