@@ -69,6 +69,13 @@ public class Azure extends IdentityProvider {
         setEntityId(metadataProvider.getEntityId());
     }
 
+    public void setMetadataUrlAndValidUntilDates(InputStream inputStream) {
+        SamlMetadataProvider metadataProvider = new SamlMetadataProvider(inputStream);
+        this.metadataValidUntil = metadataProvider.getMetadataValidUntil();
+        this.signingCertificateValidUntil = metadataProvider.getSigningCertificateValidUntil();
+        this.encryptionCertificateValidUntil = metadataProvider.getEncryptionCertificateValidUntil();
+    }
+
     public LocalDate getMetadataValidUntil() {
         return this.metadataValidUntil;
     }

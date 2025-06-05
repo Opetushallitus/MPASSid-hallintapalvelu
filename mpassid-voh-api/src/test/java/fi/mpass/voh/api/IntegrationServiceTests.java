@@ -35,6 +35,7 @@ import fi.mpass.voh.api.integration.Integration;
 import fi.mpass.voh.api.integration.IntegrationPermission;
 import fi.mpass.voh.api.integration.IntegrationRepository;
 import fi.mpass.voh.api.integration.IntegrationService;
+import fi.mpass.voh.api.integration.idp.IdentityProviderService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
@@ -77,6 +78,8 @@ class IntegrationServiceTests {
     @Mock
     private CredentialService credentialService;
 
+    private IdentityProviderService identityProviderService;
+
     private IntegrationService underTest;
     private IntegrationServiceConfiguration configuration;
 
@@ -104,7 +107,7 @@ class IntegrationServiceTests {
                 "https://mpass-proxy.csc.fi/<flowname>/Shibboleth.sso/SAML2/POST");
 
         underTest = new IntegrationService(integrationRepository, organizationService, loadingService, configuration,
-                credentialService);
+                credentialService, identityProviderService);
 
         DiscoveryInformation discoveryInformation = new DiscoveryInformation("Custom Display Name",
                 "Custom Title", true);

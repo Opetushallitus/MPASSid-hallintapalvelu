@@ -39,6 +39,34 @@ public class IdentityProviderService {
         this.integrationService = integrationService;
     }
 
+
+    public Integration saveMetadata(Integration i, String metadataUrl) {
+        if (metadataUrl == null || metadataUrl.isEmpty()) {
+            logger.debug("No metadataUrl found.");
+            return i;
+        }
+
+        if (i != null) {
+            try {
+                if (i.getConfigurationEntity().getIdp() instanceof Adfs) {
+                    Adfs adfsIdp = (Adfs) i.getConfigurationEntity().getIdp();
+                    adfsIdp.setMetadataAndParse(metadataUrl);
+                } else if (i.getConfigurationEntity().getIdp() instanceof Gsuite) {
+                    Gsuite gsuiteIdp = (Gsuite) i.getConfigurationEntity().getIdp();
+                    gsuiteIdp.setMetadataAndParse(metadataUrl);
+                } else if (i.getConfigurationEntity().getIdp() instanceof Azure) {
+                    Azure azureIdp = (Azure) i.getConfigurationEntity().getIdp();
+                    azureIdp.setMetadataAndParse(metadataUrl);
+                } else {
+                    logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
+                }
+            } catch (Exception e) {
+                logger.error("Exception in retrieving integration. {}", e.getMessage());
+            }
+        }
+        return i;
+    }
+
     public Integration saveMetadata(Long id, MultipartFile file) {
 
         InputStream inputStream;
@@ -74,8 +102,11 @@ public class IdentityProviderService {
                 } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                     flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
+                } else if (i.get().getConfigurationEntity().getIdp() instanceof Azure) {
+                    flowname = ((Azure) i.get().getConfigurationEntity().getIdp()).getFlowName();
+                    metadataUrl = ((Azure) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
                 } else {
-                    logger.debug("Given id is not Adfs or Gsuite");
+                    logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
                 }
             } catch (Exception e) {
                 logger.error("Exception in retrieving integration. {}", e.getMessage());
@@ -114,7 +145,6 @@ public class IdentityProviderService {
             // Save metadata file to disk
             Files.copy(metadataOutputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
 
-            // Set validUntil dates, does not work yet, he date is not stored in database
             if (i.isPresent()) {
                 try {
                     if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
@@ -131,8 +161,14 @@ public class IdentityProviderService {
                         entityId = gsuiteIdp.getEntityId();
                         i.get().getConfigurationEntity().setIdp(gsuiteIdp);
                         integrationService.updateIntegration(id, i.get());
+                    } else if (i.get().getConfigurationEntity().getIdp() instanceof Azure) {
+                        Azure azureIdp = (Azure) i.get().getConfigurationEntity().getIdp();
+                        metadataUrl = azureIdp.getMetadataUrl();
+                        azureIdp.setMetadataUrlAndValidUntilDates(metadataReadingStream);
+                        i.get().getConfigurationEntity().setIdp(azureIdp);
+                        integrationService.updateIntegration(id, i.get());
                     } else {
-                        logger.debug("Given id is not Adfs or Gsuite");
+                        logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
                     }
                 } catch (Exception e) {
                     logger.error("Exception in retrieving integration. {}", e.getMessage());

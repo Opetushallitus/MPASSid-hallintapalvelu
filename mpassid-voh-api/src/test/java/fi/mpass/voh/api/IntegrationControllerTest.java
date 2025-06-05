@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +120,7 @@ class IntegrationControllerTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON));
 	}
 
+	@Disabled ("Disabled, end point is removed from IntegrationController.")
 	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_KATSELIJA" })
 	@Test
 	void testLeastAuthorizedGetIntegrationList() throws Exception {
@@ -133,6 +135,7 @@ class IntegrationControllerTest {
 				.andExpect(jsonPath("$").isArray());
 	}
 
+	@Disabled ("Disabled, end point is removed from IntegrationController.")
 	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA", "APP_MPASSID_KATSELIJA" })
 	@Test
 	void testAuthorizedGetIntegrationList() throws Exception {
@@ -147,6 +150,7 @@ class IntegrationControllerTest {
 				.andExpect(jsonPath("$").isArray());
 	}
 
+	@Disabled ("Disabled, end point is removed from IntegrationController.")
 	@WithMockUser(value = "testuser")
 	@Test
 	void testUnauthorizedGetIntegrationList() throws Exception {
@@ -159,6 +163,7 @@ class IntegrationControllerTest {
 				.andExpect(jsonPath("$").doesNotExist());
 	}
 
+	@Disabled ("Disabled, end point is removed from IntegrationController.")
 	@WithMockUser(value = "testuser", roles = { "APP_MPASSID" })
 	@Test
 	void testPartiallyUnauthorizedGetIntegrationList() throws Exception {
@@ -171,6 +176,7 @@ class IntegrationControllerTest {
 				.andExpect(jsonPath("$").doesNotExist());
 	}
 
+	@Disabled ("Disabled, end point is removed from IntegrationController.")
 	@WithMockUser(value = "testuser", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8", "APP_MPASSID_KATSELIJA" })
 	@Test
 	void testOrganizationalAuthorizedGetIntegrationList() throws Exception {

@@ -27,6 +27,17 @@
                 },
                 {
                     "oid": "1.2.246.562.99.00000000005",
+                    "name": "Mansikkalan testi0 peruskoulu",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_11#1",
+                    "oppilaitosKoodi": "30074",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000005",
                     "name": "Mansikkalan testi peruskoulu",
                     "children": [],
                     "ytunnus": null,
@@ -346,8 +357,30 @@
                     ]
                 },
                 {
-                    "oid": "1.2.246.562.99.00000000002",
+                    "oid": "1.2.246.562.99.00000000005",
+                    "name": "Mansikkalan testi0 peruskoulu",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_11#1",
+                    "oppilaitosKoodi": "30074",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000005",
                     "name": "Mansikkalan testi peruskoulu",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_11#1",
+                    "oppilaitosKoodi": "30075",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000002",
+                    "name": "Mansikkalan testi2 peruskoulu",
                     "children": [],
                     "ytunnus": null,
                     "oppilaitostyyppi": "oppilaitostyyppi_11#1",
@@ -408,8 +441,30 @@
                     ]
                 },
                 {
-                    "oid": "1.2.246.562.99.00000000002",
+                    "oid": "1.2.246.562.99.00000000005",
+                    "name": "Mansikkalan testi0 peruskoulu",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_11#1",
+                    "oppilaitosKoodi": "30074",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000005",
                     "name": "Mansikkalan testi peruskoulu",
+                    "children": [],
+                    "ytunnus": null,
+                    "oppilaitostyyppi": "oppilaitostyyppi_11#1",
+                    "oppilaitosKoodi": "30075",
+                    "organisaatiotyypit": [
+                        "organisaatiotyyppi_02"
+                    ]
+                },
+                {
+                    "oid": "1.2.246.562.99.00000000002",
+                    "name": "Mansikkalan testi2 peruskoulu",
                     "children": [],
                     "ytunnus": null,
                     "oppilaitostyyppi": "oppilaitostyyppi_11#1",
