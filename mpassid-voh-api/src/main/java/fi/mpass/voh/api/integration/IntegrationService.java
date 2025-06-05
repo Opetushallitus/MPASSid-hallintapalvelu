@@ -1348,6 +1348,7 @@ public class IntegrationService {
         Attribute newAttribute = new Attribute("data", "redirectUri", configuration.getRedirectUriValue1());
         integration = addAttribute(integration, newAttribute);
         found = true;
+        break;
       }
     }
     if (!found) {
