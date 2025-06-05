@@ -11,7 +11,7 @@ import type { oneEnum } from "./Form/MultiSelectForm";
 import MultiSelectForm from "./Form/MultiSelectForm";
 import { helperText, validate } from "@/utils/Validators";
 import { SchoolForm } from "./Form";
-import { clone, last, toPath } from "lodash";
+import { clone, last, toPath, isEqual } from 'lodash';
 import { PhotoCamera } from "@mui/icons-material";
 import { devLog } from "@/utils/devLog";
 
@@ -620,45 +620,56 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     }
 
     const updateExcludeSchools = (values:string[]) => {
-      const newDiscoveryInformation:Components.Schemas.DiscoveryInformation = clone(discoveryInformation);
-      if(newDiscoveryInformation) {
-        newDiscoveryInformation.excludedSchools=values.map(value=>value);
-        devLog("DEBUG","updateExcludeSchools (existingSchoolsIncluded)",existingSchoolsIncluded.current)
-        if(existingSchoolsIncluded.current!==null&&existingSchoolsIncluded.current.length>0) {
-          existingSchoolsIncluded.current.forEach(school=>{
-            if(newDiscoveryInformation.excludedSchools === undefined) {
-              newDiscoveryInformation.excludedSchools = [];
-            }
-                        
-            if(newDiscoveryInformation.schools && newDiscoveryInformation.schools?.length === 0 
-              && newDiscoveryInformation.excludedSchools && newDiscoveryInformation.excludedSchools.length >= 0 
-              && values.length>=0 
-              && newDiscoveryInformation.excludedSchools.indexOf(school)<0) {
-              newDiscoveryInformation.excludedSchools.push(school);
-              devLog("DEBUG","updateExcludeSchools (add schools)",school)
-            }
-            
-          })
+      if(!isEqual(discoveryInformation.excludedSchools,values)||!isEqual(excludeSchools,values)){
+        const newDiscoveryInformation:Components.Schemas.DiscoveryInformation = clone(discoveryInformation);
+        if(newDiscoveryInformation) {
+          newDiscoveryInformation.excludedSchools=values.map(value=>value);
+          devLog("DEBUG","updateExcludeSchools (existingSchoolsIncluded)",existingSchoolsIncluded.current)
+          if(existingSchoolsIncluded.current!==null&&existingSchoolsIncluded.current.length>0) {
+            existingSchoolsIncluded.current.forEach(school=>{
+              if(newDiscoveryInformation.excludedSchools === undefined) {
+                newDiscoveryInformation.excludedSchools = [];
+              }
+                          
+              if(newDiscoveryInformation.schools && newDiscoveryInformation.schools?.length === 0 
+                && newDiscoveryInformation.excludedSchools && newDiscoveryInformation.excludedSchools.length >= 0 
+                && values.length>=0 
+                && newDiscoveryInformation.excludedSchools.indexOf(school)<0) {
+                newDiscoveryInformation.excludedSchools.push(school);
+                devLog("DEBUG","updateExcludeSchools (add schools)",school)
+              }
+              
+            })
+          }
+                    
+          devLog("DEBUG","updateExcludeSchools (excludedSchools)",newDiscoveryInformation.excludedSchools)
+          updateDiscoveryInformation(newDiscoveryInformation)          
+          
         }
-        devLog("DEBUG","updateExcludeSchools (excludedSchools)",newDiscoveryInformation.excludedSchools)
-        updateDiscoveryInformation(newDiscoveryInformation)
+        
+        setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
+        setExcludeSchools(values)
+        
         
       }
-      setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
-      setExcludeSchools(values)
       currentExcludeSchools.current=values;
       saveCheck(true,showLogo,showSchools.current)
   }
 
   const updateSchools = (values:string[]) => {
     if(discoveryInformation) {
-      discoveryInformation.schools=values
-      discoveryInformation.excludedSchools=[]
-      updateDiscoveryInformation(discoveryInformation)
+      if(!isEqual(discoveryInformation.schools,values)||discoveryInformation?.excludedSchools?.length!=0){
+        discoveryInformation.schools=values
+        discoveryInformation.excludedSchools=[]
+        updateDiscoveryInformation(discoveryInformation)
+      
+      }
       
     }
-    devLog("DEBUG", "updateSchools (values)",values)
-    setSchools(values)
+    if(!isEqual(schools,values)){
+      devLog("DEBUG", "updateSchools (values)",values)
+      setSchools(values)
+    }
     saveCheck(true,showLogo,showSchools.current)
 }
 
@@ -798,6 +809,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     }
 
     devLog("DEBUG","SchoolSelection post (localCanSave)",localCanSave)
+    devLog("DEBUG","SchoolSelection post (environment)",environment)    
     devLog("DEBUG","SchoolSelection post (showSchools.current)",showSchools.current)
     devLog("DEBUG","SchoolSelection post (configurationEntity?.idp?.institutionTypes?.length)",configurationEntity?.idp?.institutionTypes?.length)
     devLog("DEBUG","SchoolSelection post (schools.length)",schools.length)  

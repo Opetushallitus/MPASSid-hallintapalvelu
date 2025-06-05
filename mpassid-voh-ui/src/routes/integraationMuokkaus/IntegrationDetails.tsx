@@ -19,17 +19,12 @@ import Metadata from "./Metadata";
 import Attributes from "./Attributes";
 import IntegrationBasicDetails from "./IntegrationBasicDetails";
 import type { IntegrationType, UiConfiguration } from '../../config';
-import { defaultDataConfiguration, defaultIntegrationType, fixPackage, integrationTypesDefault } from '../../config';
+import { defaultDataConfiguration, defaultIntegrationType, integrationTypesDefault } from '../../config';
 import SchoolSelection from "./SchoolSelection";
 import { devLog } from "@/utils/devLog";
 
 
 const integrationTypes = clone(integrationTypesDefault);
-
-if(fixPackage) {
-  integrationTypes.typesPI = [ "saml", "oidc" ];
-  integrationTypes.typesOKJ = [ "wilma", "azure" ];
-} 
 
 interface Props {
   id: number;
@@ -488,36 +483,22 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )}
 
         {role === "idp" && integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
-            (<SchoolSelection 
-                integration={integration} 
-                setConfigurationEntity={setNewConfigurationEntityData} 
-                configurationEntity={newConfigurationEntityData} 
-                discoveryInformation={newDiscoveryInformation} 
-                setDiscoveryInformation={setNewDiscoveryInformation} 
-                setCanSave={setIsValidSchoolSelection}
-                setLogo={setLogo}
-                newLogo={newLogo}
-                setNewLogo={setNewLogo}
-                environment={environment.current}
-                isEditable={true}/>
+            (<ErrorBoundary>
+                <SchoolSelection 
+                    integration={integration} 
+                    setConfigurationEntity={setNewConfigurationEntityData} 
+                    configurationEntity={newConfigurationEntityData} 
+                    discoveryInformation={newDiscoveryInformation} 
+                    setDiscoveryInformation={setNewDiscoveryInformation} 
+                    setCanSave={setIsValidSchoolSelection}
+                    setLogo={setLogo}
+                    newLogo={newLogo}
+                    setNewLogo={setNewLogo}
+                    environment={environment.current}
+                    isEditable={true}/>
+                </ErrorBoundary>
               )
         }
-
-        {role === "idp" && !integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
-            (<SchoolSelection 
-                integration={integration} 
-                setConfigurationEntity={setNewConfigurationEntityData} 
-                configurationEntity={newConfigurationEntityData} 
-                discoveryInformation={newDiscoveryInformation} 
-                setDiscoveryInformation={setNewDiscoveryInformation}
-                setCanSave={setIsValidSchoolSelection}
-                setLogo={setLogo}
-                newLogo={newLogo}
-                setNewLogo={setNewLogo}
-                environment={environment.current}
-                isEditable={false}/>
-            )
-          }
         
       </>)      
     } else {

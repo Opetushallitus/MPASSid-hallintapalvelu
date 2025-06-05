@@ -1,4 +1,3 @@
-export const fixPackage = false;
 export const roles = ["idp", "sp", "set"] as const;
 export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
@@ -33,7 +32,6 @@ export const integrationTypesDefault = {
     typePI: "saml",
     typesPI: [ "saml", "oidc" ],
     typeOKJ: "wilma",
-    //typesOKJ: [ "opinsys", "wilma", "adfs", "azure", "google" ]
     typesOKJ: [ "wilma", "opinsys","azure","adfs","gsuite" ]
   };
 
