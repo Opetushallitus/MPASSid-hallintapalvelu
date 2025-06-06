@@ -1,5 +1,12 @@
 # MPASSid-hallinta
 
+## 2.5
+- Koulutustoimija voi lisätä, muokata, poistaa Opinsys, Google, ADFS, Entra ID-integraation
+- Palveluntarjoaja voi lisätä, muokata, poistaa OIDC-integraation
+- Utbildningsaktören kan lägga till, redigera, ta bort en Opinsys, Google, ADFS, Entra ID-integration
+- Tjänsteleverantören kan lägga till, redigera, ta bort en OIDC-integration
+
+
 ## 2.4
 - Palveluntarjoaja voi luoda uuden SAML-integraation testi- ja tuotantoympäristöön
 - Palveluntarjoaja voi muokata olemassa olevaa SAML-palveluintegraatiota ja poistaa sen

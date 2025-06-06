@@ -16,23 +16,24 @@ public class ParameterStoreService {
 
     private static final String DELIM = "/";
 
-    @Value("${application.parameterstore.region:eu-north-1}")
-    private String parameterStoreRegion = "eu-north-1";
+    private String parameterStoreRegion;
 
-    @Value("${application.parameterstore.kms-key-id:mpassid-poc-key}")
-    private String kmsKeyId = "alias/mpassid-poc-key";
-    
-    @Value("${application.parameterstore.parameterRootName:mpassid}")
-    private String parameterRootName = "/MPASSID/organization";
+    private String kmsKeyId;
 
-    @Value("${application.parameterstore.profileName}")
+    private String parameterRootName;
+
     private String profileName;
-
-
 
     private final SsmClient ssmClient;
 
-    public ParameterStoreService() {
+    public ParameterStoreService(@Value("${application.parameterstore.region:eu-north-1}") String parameterStoreRegion,
+            @Value("${application.parameterstore.kms-key-id:mpassid-poc-key}") String kmsKeyId,
+            @Value("${application.parameterstore.parameterRootName:mpassid}") String parameterRootName,
+            @Value("${application.parameterstore.profileName}") String profileName) {
+        this.parameterStoreRegion = parameterStoreRegion;
+        this.kmsKeyId = kmsKeyId;
+        this.parameterRootName = parameterRootName;
+        this.profileName = profileName;
         Region region = Region.of(parameterStoreRegion);
         ssmClient = SsmClient.builder()
                 .credentialsProvider(ProfileCredentialsProvider.create(profileName))

@@ -189,7 +189,8 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                     <DataRowTitle/>              
                     <DataRowValue>
                       <FileUploader  
-                          fileExist={ ( metadataUrl !== undefined && metadataUrl !== "" ) || metadataFile.length === 1 }
+                          fileExist={ metadataFile.length === 1 }
+                          mandatoryColor={( metadataUrl === undefined || metadataUrl === "" )}
                           emptyFiles={metadataFile.length === 1}
                           onDelete={()=>setMetadataFile([])}
                           onFilesDrop={(e) => {setMetadataFile(e);setMetadataUrl("")}} 
@@ -202,7 +203,8 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                     <DataRowTitle path={'metadataUrl'}/>              
                     <DataRowValue>
                       <FileUploader     
-                          fileExist={ ( metadataUrl !== undefined && metadataUrl !== "" ) || metadataFile.length === 1 }   
+                          fileExist={ metadataFile.length === 1 }   
+                          mandatoryColor={( metadataUrl === undefined || metadataUrl === ""  )}
                           emptyFiles={metadataFile.length === 1}   
                           onDelete={()=>setMetadataFile([])}                                                                 
                           onFilesDrop={(e) => setMetadataFile(e)} 

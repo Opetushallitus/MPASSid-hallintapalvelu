@@ -7,12 +7,13 @@ import { devLog } from '@/utils/devLog';
 
 interface FileUploaderInterface {
   fileExist: boolean;
+  mandatoryColor: boolean;
   emptyFiles: boolean; 
   onFilesDrop?: (files: File[], event: React.DragEvent) => any;
   onDelete: () => void;
 }
 
-function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false }: FileUploaderInterface) {
+function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false, mandatoryColor=false }: FileUploaderInterface) {
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -65,11 +66,12 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false 
     setFiles([]);
     setIsDragging(false);
   };
-
+  
   return (
     <div className="input-container">
       <div
-        className={(fileExist)?"input-zone":(isDragging) ? "input-zone-missing drag-over" : "input-zone-missing"}
+        //className={(fileExist)?"input-zone" :(isDragging) ? "input-zone-missing drag-over" : "input-zone-missing"}
+        className={(fileExist)?"input-zone" :(isDragging) ? (mandatoryColor) ? "input-zone-missing drag-over" : "input-zone-grey drag-over" : (mandatoryColor) ? "input-zone-missing" : "input-zone-grey"}        
         onDrop={(event) => handleDrop(event)}
         onDragEnter={(event) => handleDragEnter(event)}
         onDragLeave={(event) => handleDragLeave(event)}

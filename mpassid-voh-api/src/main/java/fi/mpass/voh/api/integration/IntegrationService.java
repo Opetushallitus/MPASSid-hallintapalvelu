@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +29,8 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -60,6 +63,7 @@ import fi.mpass.voh.api.integration.idp.Adfs;
 import fi.mpass.voh.api.integration.idp.Azure;
 import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.idp.IdentityProviderService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
@@ -81,18 +85,20 @@ public class IntegrationService {
   private final LoadingService loadingService;
   private final IntegrationServiceConfiguration configuration;
   private final CredentialService credentialService;
+  private final IdentityProviderService identityProviderService;
 
   @Value("${application.metadata.credential.value.field:client_secret}")
   protected String credentialMetadataValueField = "client_secret";
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
       LoadingService loadingService, IntegrationServiceConfiguration configuration,
-      CredentialService credentialService) {
+      CredentialService credentialService, @Lazy IdentityProviderService identityProviderService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
     this.configuration = configuration;
     this.credentialService = credentialService;
+    this.identityProviderService = identityProviderService;
   }
 
   public List<Integration> getIntegrations() {
@@ -571,6 +577,12 @@ public class IntegrationService {
           throw new EntityCreationException("Integration update failed, no authority to update IDP.");
         }
 
+        if (existingIntegration.getDeploymentPhase() == 0 && integration.getDeploymentPhase() != 0) {
+          // If integration is idp and in testing, don't allow deployment phase to be changed to prod or test-prod. 
+          logger.error("Idp deployment phase is not allowed to be changed from test to prod or test to test-prod.");
+          throw new EntityCreationException("Integration update failed, not allowed to change deployment phase from test.");
+        }
+
         if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
           integration = addRedirectUri(integration);
         }
@@ -895,6 +907,14 @@ public class IntegrationService {
         }
         integration = handleSecrets(integration);
 
+        if (integration.getConfigurationEntity().getIdp() instanceof Adfs) {
+          identityProviderService.saveMetadata(integration, ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        } else if (integration.getConfigurationEntity().getIdp() instanceof Gsuite) {
+          identityProviderService.saveMetadata(integration, ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        } else if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+          identityProviderService.saveMetadata(integration, ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        }
+
         integration = addDefaultMetadataUrl(integration);
 
         return integrationRepository.save(integration);
@@ -1119,8 +1139,15 @@ public class IntegrationService {
         }
 
         try (InputStream inputStream = file.getInputStream(); InputStream contentStream = file.getInputStream()) {
+          BufferedImage image = ImageIO.read(file.getInputStream());
           String logoContentType = getDiscoveryInformationLogoContentType(contentStream);
-          if (logoContentType != null && logoContentType.contains("image/")) {
+          if (image == null) {
+            logger.error("File is not an image.");
+            throw new EntityCreationException("Failed to save image.");
+          } else if (logoContentType == null || !logoContentType.contains("image/")) {
+            logger.error("File is not an image.");
+            throw new EntityCreationException("Failed to save image.");
+          } else if (logoContentType != null && logoContentType.contains("image/")) {
             logoContentType = logoContentType.replace("image/", "");
           }
           url += "." + logoContentType;

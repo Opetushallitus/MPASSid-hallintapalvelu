@@ -49,4 +49,27 @@
     border: 2px dashed green;
     animation: borderAnimation 1s infinite;
   }
+
+  .input-zone-grey {
+    min-width: 30%;
+    max-width: 80%;
+    min-height: 30% ;
+    border: 1px dashed #696262;
+    border-radius: 10px;
+    display: grid;    
+    justify-content: center;
+    align-items: left;
+    background-color: #f5f5f5;;
+    color: #3f3e3e;
+    padding: 1vh;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    
+  }
+  .input-zone-grey.drag-over {    
+    background-color: rgb(233, 255, 233)
+    ;
+    border-color: #000; 
+    border: 2px dashed green;
+    animation: borderAnimation 1s infinite;
+  }
   

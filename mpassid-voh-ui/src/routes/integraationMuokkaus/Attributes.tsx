@@ -44,7 +44,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
         const currentAttribute=attributes.find(a=>a.name===name)
 
         if(currentAttribute) {
-          if((currentAttribute.content === undefined || currentAttribute.content === ''|| currentAttribute.content.length===0) && configuration.mandatory ){
+          if((currentAttribute.content === undefined || currentAttribute.content === ''|| (currentAttribute.content !== null && currentAttribute.content.length===0)) && configuration.mandatory ){
             result = false
           } else {                     
             if(currentAttribute.content) {
