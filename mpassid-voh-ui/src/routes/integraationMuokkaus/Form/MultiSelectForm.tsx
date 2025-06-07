@@ -133,8 +133,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                 </Select>
                 
             </FormControl>
-            <FormHelperText error={mandatory}>{helperText("")}</FormHelperText>
-            
+            <FormHelperText error={mandatory}>{helperText(selection.toString())}</FormHelperText>
             </div>
      
     );
