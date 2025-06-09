@@ -142,6 +142,7 @@ public class ProvisioningService {
             } catch (Exception e) {
                 logger.debug("Exception in retrieving integration validUntil dates. {}", e.getMessage());
             }
+            i = integrationService.changeMetadataUrlForProvisioning(i);
         }
         return idps;
     }

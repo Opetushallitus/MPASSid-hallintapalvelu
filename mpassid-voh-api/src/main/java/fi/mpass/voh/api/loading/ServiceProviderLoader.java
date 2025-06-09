@@ -257,10 +257,13 @@ public class ServiceProviderLoader extends Loader {
                 && !d.getLeft().equals(d.getRight())) {
             logger.debug("Metadata mod diff: {}", d.getFieldName());
             if (diffElements[3].length() > 0) {
+                boolean success = true;
                 if (diffElements[3].equals(credentialMetadataValueField)) {
-                    credentialService.updateOidcCredential(existingIntegration, diffElements[3], d.getRight());
+                    success = credentialService.updateOidcCredential(existingIntegration, diffElements[3], d.getRight());
+                }
+                if (!success) {
+                    logger.error("Failed to save secret to aws parameter store.");
                 } else {
-                    // in other cases (including credentialMetadataNameField), persist metadata modification
                     Map<String, Object> metadata = existingIntegration.getConfigurationEntity().getSp().getMetadata();
                     metadata.put(diffElements[3], d.getRight());
                     existingIntegration.getConfigurationEntity().getSp().setMetadata(metadata);

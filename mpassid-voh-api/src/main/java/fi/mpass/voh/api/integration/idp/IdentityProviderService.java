@@ -91,6 +91,8 @@ public class IdentityProviderService {
         String flowname = null;
         String metadataUrl = null;
         String entityId = null;
+        Path rootLocation = Paths.get(this.metadataBasePath);
+        Path destinationFile = null;
 
         Optional<Integration> i = integrationService.getIntegration(id);
         if (i.isPresent()) {
@@ -98,13 +100,15 @@ public class IdentityProviderService {
                 if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                     flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Adfs) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
-
+                    destinationFile = rootLocation.resolve(Paths.get("adfs_" + i.get().getId().toString() + "-metadata.xml")).normalize().toAbsolutePath();
                 } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                     flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
+                    destinationFile = rootLocation.resolve(Paths.get("gsuite_" + i.get().getId().toString() + "-metadata.xml")).normalize().toAbsolutePath();
                 } else if (i.get().getConfigurationEntity().getIdp() instanceof Azure) {
                     flowname = ((Azure) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Azure) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
+                    destinationFile = rootLocation.resolve(Paths.get("azure_" + i.get().getId().toString() + "-metadata.xml")).normalize().toAbsolutePath();
                 } else {
                     logger.debug("Given id is not Adfs, Gsuite or Azure (Entra id).");
                 }
@@ -127,15 +131,18 @@ public class IdentityProviderService {
             throw new EntityCreationException("Failed to save metadata.");
         }
 
+        if (destinationFile == null) {
+            logger.debug("No destinationFile found.");
+            throw new EntityCreationException("Failed to save metadata.");
+        }
+
         // use the stream to save the metadata
-        Path rootLocation = Paths.get(this.metadataBasePath);
         try {
             if (file.isEmpty()) {
                 logger.error("Empty file {}", file);
                 throw new EntityCreationException("Empty metadata.");
             }
 
-            Path destinationFile = rootLocation.resolve(Paths.get(flowname + ".xml")).normalize().toAbsolutePath();
             if (!destinationFile.getParent().equals(rootLocation.toAbsolutePath())) {
                 logger.error("Cannot store file outside configured directory: {}",
                         destinationFile);
