@@ -1303,14 +1303,14 @@ public class IntegrationService {
         Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
         if (adfsIdp.getId() != null && adfsIdp.getMetadataUrl() != null && adfsIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi()) && adfsIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
           String metadataUrl = this.configuration.getMetadataBaseUrl()
-              + "/adfs_" + adfsIdp.getId() + "-metadata.xml";
+              + "/adfs_" + adfsIdp.getId().toString() + "-metadata.xml";
           adfsIdp.setMetadataUrl(metadataUrl);
         }
       } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
         Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
         if (gsuiteIdp.getId() != null && gsuiteIdp.getMetadataUrl() != null && gsuiteIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi()) && gsuiteIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
           String metadataUrl = this.configuration.getMetadataBaseUrl()
-              + "/gsuite_" + gsuiteIdp.getId() + "-metadata.xml";
+              + "/gsuite_" + gsuiteIdp.getId().toString() + "-metadata.xml";
           gsuiteIdp.setMetadataUrl(metadataUrl);
         }
       }
