@@ -908,7 +908,7 @@ public class IntegrationService {
           throw new EntityCreationException("Integration creation failed, no authority to create IDP.");
         }
         // Create IDP
-        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1)
+        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
             ? integrationRepository.getAvailableIdpProdIntegrationIdentifier()
             : integrationRepository.getAvailableIdpTestIntegrationIdentifier();
         if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
@@ -963,7 +963,7 @@ public class IntegrationService {
           }
         }
 
-        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1)
+        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
             ? integrationRepository.getAvailableSpProdIntegrationIdentifier()
             : integrationRepository.getAvailableSpTestIntegrationIdentifier();
         if (availableSpIds != null && !availableSpIds.isEmpty()) {
@@ -982,7 +982,7 @@ public class IntegrationService {
 
         if (setId == 0) {
           // No existing integration set, create new
-          List<Long> availableSetIds = (integration.getDeploymentPhase() == 1)
+          List<Long> availableSetIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
               ? integrationRepository.getAvailableSetProdIntegrationIdentifier()
               : integrationRepository.getAvailableSetTestIntegrationIdentifier();
           if (availableSetIds != null && !availableSetIds.isEmpty()) {
