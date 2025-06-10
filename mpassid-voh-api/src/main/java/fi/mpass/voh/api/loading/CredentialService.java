@@ -20,10 +20,8 @@ public class CredentialService {
 
     private ParameterStoreService parameterStoreService;
 
-    @Value("${application.metadata.credential.name.field:client_id}")
-    protected String credentialMetadataNameField = "client_id";
-    @Value("${application.metadata.credential.value.field:client_secret}")
-    protected String credentialMetadataValueField = "client_secret";
+    @Value("${application.metadata.credential.value.field}")
+    protected String credentialMetadataValueField;
 
     public CredentialService(ParameterStoreService parameterStoreService) {
         this.parameterStoreService = parameterStoreService;
@@ -37,14 +35,14 @@ public class CredentialService {
     public boolean updateOidcCredential(Integration integration, Object name, Object value) {
         if (integration != null) {
             String organizationOid = integration.getOrganization().getOid();
-            if (organizationOid != null) {
+            if (organizationOid != null && integration.getConfigurationEntity().getSp() != null) {
                 String path = organizationOid + "/" + integration.getId();
                 // TODO check the first and the second not null and size > 1 ?
                 if (((String) value).contains("*********") || ((String) value).equals("***")) {
                     logger.debug("Skipping credential processing, secret value is censored already.");
                     return true;
                 }
-                boolean success = parameterStoreService.put(path, (String) name, (String) value);
+                boolean success = parameterStoreService.put(path, credentialMetadataValueField, (String) value);
                 if (success) {
                     if (name.equals(credentialMetadataValueField)) {
                         integration.getConfigurationEntity().getSp().getMetadata().put((String) name,
@@ -64,7 +62,7 @@ public class CredentialService {
         String credentialValueField = "clientKey";
         if (integration != null) {
             String organizationOid = integration.getOrganization().getOid();
-            if (organizationOid != null) {
+            if (organizationOid != null && integration.getConfigurationEntity().getIdp() != null) {
                 String path = organizationOid + "/" + integration.getId();
                 Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
                 for (Attribute attribute : attributes) {
@@ -73,7 +71,8 @@ public class CredentialService {
                             logger.debug("Skipping credential processing, secret value is censored already.");
                             return true;
                         }
-                        boolean success = parameterStoreService.put(path, credentialValueField, attribute.getContent());
+                        boolean success = parameterStoreService.put(path, credentialMetadataValueField,
+                                attribute.getContent());
                         if (success) {
                             attribute.setContent(attribute.getContent().substring(0, 3) + "*********");
                             logger.debug("Integration #{} Finished credential processing", integration.getId());
