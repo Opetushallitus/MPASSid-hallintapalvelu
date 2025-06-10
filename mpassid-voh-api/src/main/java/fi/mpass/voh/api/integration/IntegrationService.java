@@ -87,8 +87,8 @@ public class IntegrationService {
   private final CredentialService credentialService;
   private final IdentityProviderService identityProviderService;
 
-  @Value("${application.metadata.credential.value.field:client_secret}")
-  protected String credentialMetadataValueField = "client_secret";
+  @Value("${application.metadata.credential.value.field}")
+  protected String credentialMetadataValueField;
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
       LoadingService loadingService, IntegrationServiceConfiguration configuration,
