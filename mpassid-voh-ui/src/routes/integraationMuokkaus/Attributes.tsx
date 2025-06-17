@@ -127,7 +127,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
             (b.label ?? b.name!).localeCompare(a.label ?? a.name!)
         )
         */
-        .filter((configuration) => configuration.integrationType.filter(it=>it.name===type&&it.visible).length>0)
+        .filter((configuration) => configuration.integrationType.filter(it=>it.name===type).length>0)
         .map((configuration) => {
                 if(attributeConfiguration.current.find(a => a.name&&a.name === configuration.name) === undefined) {
                   attributeConfiguration.current.push(configuration)
@@ -169,7 +169,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                 var attributeExists:boolean=false
 
                 
-                devLog("DEBUG","Attributes (init attribute)",configuration.name);                    
+                devLog("DEBUG","Attributes (init attribute)",configuration.name);                                    
                 if(!initAttributes.includes(configuration.name)) {
                   if(attributes.find(a => a.name&&a.name === configuration.name)) {
                     //attiribute already exists
@@ -177,10 +177,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     useAttribute=attributes.find(a => a.name&&a.name === configuration.name)||{ type: attributeType, content: '', name: 'configurationError' }                    
                     devLog("DEBUG","Attributes (init using existing attribute)",useAttribute);
                   } else {
-                    //attiribute not exists
-                    
+                    //attiribute not exists                    
                     const testConfigurationEntity:any = clone(newConfigurationEntityData) 
                     
+                    //initilize using existing integration values
                     if(configuration?.name&&testConfigurationEntity?.idp?.[configuration.name]) {
                       useAttribute={ type: attributeType, content: String(testConfigurationEntity.idp[configuration.name]), name: configuration.name }
                       devLog("DEBUG","Attributes (init using configurationEntity.idp)",useAttribute);
@@ -195,6 +195,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                       devLog("DEBUG","Attributes (init empty content)",configuration.name)
                       if(configuration.name) {
                         if(roleConfiguration.defaultValue) {
+                          devLog("DEBUG","Attributes (init roleConfiguration.defaultValue)",roleConfiguration.defaultValue)
                           useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
                         } else {
                           if(configuration.enum&&configuration.enum.length>0) {
@@ -269,19 +270,25 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                 devLog("DEBUG","Attributes (useAttribute post)",useAttribute)
                 devLog("DEBUG","Attributes (attribute post)",attributes)                  
 
-                return (<AttributeForm 
-                  key={configuration.name!}
-                  onUpdate={updateAttribute}
-                  onValidate={validator}
-                  newConfigurationEntityData={newConfigurationEntityData}
-                  uiConfiguration={configuration}
-                  attribute={useAttribute}
-                  attributeType={attributeType!}
-                  type={type}
-                  role={role}
-                  helperText={helpGeneratorText} 
-                  setCanSave={function (value: boolean): void {} }                    
-                  />)
+                const visible = (configuration.integrationType.filter(it=>it.visible).length>0)?true:false;
+                if(visible) {
+                  return (<AttributeForm 
+                    key={configuration.name!}
+                    onUpdate={updateAttribute}
+                    onValidate={validator}
+                    newConfigurationEntityData={newConfigurationEntityData}
+                    uiConfiguration={configuration}
+                    attribute={useAttribute}
+                    attributeType={attributeType!}
+                    type={type}
+                    role={role}
+                    helperText={helpGeneratorText} 
+                    setCanSave={function (value: boolean): void {} }                    
+                    />)
+                } else {
+                  return(<></>)
+                }
+                
               }
           
             )
