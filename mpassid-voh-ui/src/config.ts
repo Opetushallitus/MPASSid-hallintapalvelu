@@ -256,7 +256,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'firstName'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'firstName'
+        }
       ]
   },
   {
@@ -271,7 +282,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'surname'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'surname'
+        }
       ]
   },
   {
@@ -286,7 +308,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'class'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'class'
+        }
       ]
   },
   {
@@ -317,7 +350,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'learningMaterialsCharge'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'learningMaterialsCharge'
+        }
       ]
   },
   {
@@ -332,7 +376,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'schoolCode'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'schoolCode'
+        }
       ]
   },
   {
@@ -394,7 +449,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'classLevel'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'classLevel'
+        }
       ]
   },
   {
@@ -425,7 +491,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: false,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'mpassUserIdentity'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'mpassUserIdentity'
+        }
       ]
   },
   {
@@ -440,7 +517,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'learnerId'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'learnerId'
+        }
       ]
   },
   {
@@ -455,7 +543,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'userRole'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'userRole'
+        }
       ]
   },
   {
