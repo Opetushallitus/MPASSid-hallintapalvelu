@@ -402,7 +402,17 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },{
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'mpassNickName'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'mpassNickName'
+        }
       ]
   },
   {
