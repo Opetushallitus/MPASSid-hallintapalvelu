@@ -31,6 +31,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const specialConfiguration:string[] = configurations.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   const environmentConfiguration:string[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const attributeConfiguration=useRef<UiConfiguration[]>([]);
+  const currentAttributes=useRef<Components.Schemas.Attribute[]>([]);
 
 
   const validateAttributes = () => {
@@ -40,7 +41,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
       if(result) {
 
         const name=configuration.name                  
-        const currentAttribute=attributes.find(a=>a.name===name)
+        var currentAttribute=attributes.find(a=>a.name===name)
+        if(attributes.length===0&&currentAttributes.current.length>0) {
+          currentAttribute=currentAttributes.current.find(a=>a.name===name)
+        }
 
         if(currentAttribute) {
           if((currentAttribute.content === undefined || currentAttribute.content === ''|| (currentAttribute.content !== null && currentAttribute.content.length===0)) && configuration.mandatory ){
@@ -209,7 +213,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                         //const attributeList=cloneDeep(attributes);
                         //attributeList.push(useAttribute)    
                         //setAttributes(attributeList)   
-                                       
+                        if(useAttribute.name!==undefined&&!currentAttributes.current.map(a=>a.name).includes(useAttribute.name)) {
+                          currentAttributes.current.push(useAttribute);           
+                        }
+                        
                       } 
                       
                     }
