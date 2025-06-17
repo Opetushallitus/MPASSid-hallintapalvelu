@@ -31,7 +31,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const specialConfiguration:string[] = configurations.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   const environmentConfiguration:string[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const attributeConfiguration=useRef<UiConfiguration[]>([]);
-  const allAttributes:string[] = [];
 
 
   const validateAttributes = () => {
@@ -101,7 +100,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     
     
   }
-  
+
   return (
     <Grid container >
       {configurations
@@ -132,9 +131,6 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                 if(attributeConfiguration.current.find(a => a.name&&a.name === configuration.name) === undefined) {
                   attributeConfiguration.current.push(configuration)
                 }
-                if(allAttributes.find(name => name === configuration.name) === undefined) {
-                  allAttributes.push(configuration.name);
-                }
                 
                 const validator = (value:string) => {
                   if(configuration.mandatory) {
@@ -145,10 +141,9 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     } else {
                       return true  
                     }
-                    
                   }
-                  
                 }
+
                 const helpGeneratorText = (value:string) => {
                   if(configuration.mandatory) {
                     return helperText(configuration.validation,value);
@@ -158,12 +153,11 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     } else {
                       return (<></>)  
                     }
-                    
                   }
-                  
                 }
+
                 const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
-                devLog("DEBUG","Metadata (roleConfiguration)",roleConfiguration) 
+                devLog("DEBUG","Metadata (roleConfiguration for "+configuration.name+")",roleConfiguration) 
                 
                 var useAttribute:Components.Schemas.Attribute ={}
                 var attributeExists:boolean=false
@@ -210,9 +204,12 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                           }
                           
                         }
-                        attributes.push(useAttribute)                      
-                        setAttributes(attributes) 
-                        
+                        //attributes.push(useAttribute)                      
+                        //setAttributes(attributes) 
+                        //const attributeList=cloneDeep(attributes);
+                        //attributeList.push(useAttribute)    
+                        //setAttributes(attributeList)   
+                                       
                       } 
                       
                     }
@@ -271,7 +268,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                 devLog("DEBUG","Attributes (attribute post)",attributes)                  
 
                 const visible = (configuration.integrationType.filter(it=>it.visible).length>0)?true:false;
-                if(visible) {
+                if(visible&&configuration.name!==undefined) {
                   return (<AttributeForm 
                     key={configuration.name!}
                     onUpdate={updateAttribute}
