@@ -1202,7 +1202,7 @@ public class IntegrationService {
 
   public InputStreamResource getDiscoveryInformationLogo(Long id) {
     if (configuration.getImageBasePath() == null) {
-      logger.error("Logo not found: {}", id);
+      logger.error("Logo not found: {}. imageBasePath is null.", id);
       throw new EntityNotFoundException("Logo not found.");
     }
     Path rootLocation = Paths.get(configuration.getImageBasePath());
@@ -1221,19 +1221,19 @@ public class IntegrationService {
         }
       }
     } else {
-      logger.error("Logo not found: {}", id);
+      logger.error("Logo not found: {}. No files found in target folder.", id);
       throw new EntityNotFoundException("Logo not found.");
     }
 
     if (!found) {
-      logger.error("Logo not found: {}", id);
+      logger.error("Logo not found: {}. No logo found with id.", id);
       throw new EntityNotFoundException("Logo not found.");
     }
 
     try {
       return new InputStreamResource(new FileInputStream(sourceFileName));
     } catch (FileNotFoundException e) {
-      logger.error("Logo not found: {}", sourceFileName);
+      logger.error("Logo not found: {}. Error in handling inputStreamResource.", sourceFileName);
       throw new EntityNotFoundException("Logo not found.");
     }
   }
