@@ -117,7 +117,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               initAttr.current.push(attr.name);
             }
           })
-          devLog("DEBUG","Attributes (initialized done attribute)",attributes);                        
+          devLog("DEBUG","IntegrationDetails (initialized done attributes)",attributes);                        
           setNewConfigurationEntityData(updatedConfigurationEntityData);
           
         }

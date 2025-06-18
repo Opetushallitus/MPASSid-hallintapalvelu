@@ -42,10 +42,8 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
         const name=configuration.name                  
         var currentAttribute=attributes.find(a=>a.name===name)
-        if(attributes.length===0&&currentAttributes.current.length>0) {
-          currentAttribute=currentAttributes.current.find(a=>a.name===name)
-        }
-
+        
+        devLog("DEBUG","validateAttributes (attributes)",attributes)
         if(currentAttribute) {
           if((currentAttribute.content === undefined || currentAttribute.content === ''|| (currentAttribute.content !== null && currentAttribute.content.length===0)) && configuration.mandatory ){
             result = false
@@ -213,10 +211,12 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                         //const attributeList=cloneDeep(attributes);
                         //attributeList.push(useAttribute)    
                         //setAttributes(attributeList)   
-                        if(useAttribute.name!==undefined&&!currentAttributes.current.map(a=>a.name).includes(useAttribute.name)) {
-                          currentAttributes.current.push(useAttribute);           
-                        }
-                        
+                        if(useAttribute.name!==undefined&&!currentAttributes.current.map(a=>a.name).includes(useAttribute.name)&&useAttribute.content!=='') {
+                          devLog("DEBUG","Attributes (new init attribute)",useAttribute);
+                          currentAttributes.current.push(useAttribute);   
+                          const attributeList=cloneDeep(currentAttributes.current);
+                          setAttributes(attributeList)                                 
+                        }                        
                       } 
                       
                     }
