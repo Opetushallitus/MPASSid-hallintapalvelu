@@ -2,7 +2,7 @@ import { updateIntegration } from "@/api";
 import type { Components } from "@/api";
 import { useIntegrationsSpecSearchPageable } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
-import { roles, tallentajaOphGroup, mpassIdUserAttributeTestService } from "@/config";
+import { roles, mpassIdUserAttributeTestService } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
@@ -155,7 +155,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   
   const writeAccess = () => {
     
-    if(integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    if(integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid))) {
       return true;
     }
     return false;
