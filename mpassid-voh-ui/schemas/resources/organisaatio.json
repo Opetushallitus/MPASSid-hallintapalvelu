@@ -38,18 +38,17 @@
                                 },
                                 "examples": {
                                     "nimet": {
-                                      "value": [
-                                        {
-                                            "oid": "1.2.246.562.10.00000000001",
-                                            "nimi": {
-                                              "fi": "Opetushallitus",
-                                              "sv": "Utbildningsstyrelsen",
-                                              "en": "Finnish National Agency for Education"
-                                            },
-                                            "alkuPvm": "1970-01-01",
-                                            "version": 0
-                                          }
-                                        ]
+                                      "value": [{
+                                        "oid": "1.2.246.562.99.00000000001",
+                                        "nimi": {
+                                            "fi": "Mansikkalan testi kunta",
+                                            "sv": "Mansikkalan testi kunta",
+                                            "en": "Mansikkalan testi kunta"
+                                        },
+                                        "alkuPvm": "2024-06-16",
+                                        "paivittaja": "test_data",
+                                        "version": 0
+                                    }]
                                     }
                                   }
                                 
