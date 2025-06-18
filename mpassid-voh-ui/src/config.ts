@@ -406,12 +406,12 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'gsuite',
             editable: false,
             visible: false,
-            defaultValue: 'mpassNickName'
+            defaultValue: 'nickName'
         },{
             name: 'adfs',
             editable: false,
             visible: false,
-            defaultValue: 'mpassNickName'
+            defaultValue: 'nickName'
         }
       ]
   },
