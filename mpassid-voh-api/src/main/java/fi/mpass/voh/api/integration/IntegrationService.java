@@ -1212,11 +1212,11 @@ public class IntegrationService {
     if (imageFiles != null) {
       for (File imageFile : imageFiles) {
         String filenameRegex = "(^" + id + "\\..*$|^" + id + "$)";
-        logger.debug("regex: " + filenameRegex + "\nfile: " + imageFile.getName());
         Pattern p = Pattern.compile(filenameRegex);
         Matcher m = p.matcher(imageFile.getName());
         boolean b = m.matches();
         if (b) {
+          logger.debug("FOUND: " + imageFile.getName());
           sourceFileName = imageFile.getAbsolutePath();
           found = true;
         }
