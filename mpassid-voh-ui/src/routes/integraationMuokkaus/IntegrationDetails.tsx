@@ -26,6 +26,16 @@ import { devLog } from "@/utils/devLog";
 
 const integrationTypes = clone(integrationTypesDefault);
 
+function removeStrings(source: Components.Schemas.Attribute[], toRemove: Components.Schemas.Attribute[]|undefined): Components.Schemas.Attribute[] {
+  if(toRemove===undefined) {
+    return source
+  } else {
+    const toRemoveSet = new Set(toRemove.map(a=>a.name));
+    return source.filter(item => item.name!==undefined&&!toRemoveSet.has(item.name));
+  }
+  
+}
+
 interface Props {
   id: number;
   deploymentPhase: MutableRefObject<number>;
@@ -67,6 +77,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [attributes, setAttributes] = useState<Components.Schemas.Attribute[]>((newConfigurationEntityData?.attributes&&newConfigurationEntityData?.attributes!==undefined)?newConfigurationEntityData.attributes:[]);
     const [initUserAttributes, setInitUserAttributes] = useState<string[]>([]);
     const [initDataAttributes, setInitDataAttributes] = useState<string[]>([]);
+    const initAttr = useRef<String[]>([]);
     
     const role  = (integration.configurationEntity?.idp) ? "idp" : "sp"
     const type = integration.configurationEntity?.idp?.type! || integration.configurationEntity?.sp?.type! || "unknown"
@@ -85,6 +96,37 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         setEnvironmentChanged(false) 
       }
     }, [deploymentPhase, integrationEnvironment]);
+
+    useEffect(() => {
+
+      if(newConfigurationEntityData!==undefined) {
+                
+        const unInitAttr = removeStrings(attributes.filter(a=>a.name!==undefined&&a.content!==''&&!initAttr.current.includes(a.name)),newConfigurationEntityData.attributes) 
+        devLog("DEBUG","IntegrationDetails (unInitAttr)",unInitAttr)
+        //const unInitAttr = removeStrings(attributes,newConfigurationEntityData.attributes) 
+
+        if(unInitAttr.length>0) {
+          
+          const updatedConfigurationEntityData=clone(newConfigurationEntityData); 
+          if(updatedConfigurationEntityData.attributes===undefined) {
+            updatedConfigurationEntityData.attributes=[];
+          }               
+          unInitAttr.forEach(attr=>{                    
+            if(attr.name!==undefined&&attr.content!=='') {            
+              updatedConfigurationEntityData.attributes?.push(attr);            
+              initAttr.current.push(attr.name);
+            }
+          })
+          devLog("DEBUG","IntegrationDetails (initialized done attributes)",attributes);                        
+          setNewConfigurationEntityData(updatedConfigurationEntityData);
+          
+        }
+        //devLog("DEBUG","Attributes (initialized done attribute.length)",attributes?.length); 
+        //devLog("DEBUG","Attributes (initialized done newConfigurationEntityData?.attributes)",newConfigurationEntityData?.attributes);
+      }
+      
+            
+    }, [attributes, newConfigurationEntityData, newConfigurationEntityData?.attributes])
 
     useEffect(() => {          
       if(newConfigurationEntityData?.idp&&metadataUrl!=='') {        
@@ -314,7 +356,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               setSaveDialogState(false);  
           }
         
-    }, [newConfigurationEntityData, integration, setCanSaveConfigurationEntity, setSaveDialogState, environmentChanged, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidSchoolSelection, isValidRoleDetails, setNewIntegration, newLogo, metadataFile, role, newDiscoveryInformation, metadata, name, newIntegration]);
+    }, [newConfigurationEntityData, integration, setCanSaveConfigurationEntity, setSaveDialogState, environmentChanged, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidSchoolSelection, isValidRoleDetails, setNewIntegration, newLogo, metadataFile, role, newDiscoveryInformation, metadata,metadataUrl, name, newIntegration]);
 
     useEffect(() => {
       
@@ -376,7 +418,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
     var hasAttributes =
                 role === "idp" &&
-                !["opinsys", "wilma", "adfs", "gsuite"].includes(
+                !["opinsys", "wilma"].includes(
+                  integration.configurationEntity?.[role]?.type!
+                );
+    var hasVisibleAttributes =
+                role === "idp" &&
+                !["opinsys", "wilma","gsuite","adfs"].includes(
                   integration.configurationEntity?.[role]?.type!
                 );
 
@@ -416,6 +463,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         {newConfigurationEntityData&&attributes&& <Grid mb={hasAttributes ? 3 : undefined}>
           <ErrorBoundary>
             <Attributes
+            key={"data"}
             dataConfiguration={dataConfiguration}
               newConfigurationEntityData={newConfigurationEntityData}
               setNewConfigurationEntityData={setNewConfigurationEntityData}  
@@ -456,13 +504,16 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         </ErrorBoundary>
         </>}
 
-        {hasAttributes && attributes && newConfigurationEntityData &&(
-          <>
+        {hasVisibleAttributes && attributes && newConfigurationEntityData &&(
+          
             <Typography variant="h2" gutterBottom>
               <FormattedMessage defaultMessage="Attribuutit" />
-            </Typography>
+            </Typography>)}
+        
+        {hasAttributes && attributes && newConfigurationEntityData &&(
             <ErrorBoundary>
               <Attributes
+              key={"user"}
                 dataConfiguration={dataConfiguration}
                 newConfigurationEntityData={newConfigurationEntityData}
                 setNewConfigurationEntityData={setNewConfigurationEntityData}  
@@ -479,7 +530,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               />
             </ErrorBoundary>
               
-          </>
+          
         )}
 
         {role === "idp" && integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&

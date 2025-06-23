@@ -18,7 +18,7 @@ import Metadata from "./Metadata";
 import Role from "./Role";
 import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
-import { integrationTypesDefault, tallentajaOphGroup } from '../../../../config';
+import { integrationTypesDefault } from '../../../../config';
 import { useEffect, useState } from "react";
 import { clone } from "lodash";
 
@@ -42,10 +42,10 @@ export default function IntegrationDetails({ integration }: Props) {
   
   const writeAccess = () => {
     
-    if(integration?.configurationEntity?.idp?.type && integration?.configurationEntity?.idp?.type!=="" && integrationTypes.typesOKJ.includes(integration?.configurationEntity?.idp?.type)  && integration.organization?.oid!=null && (groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    if(integration?.configurationEntity?.idp?.type && integration?.configurationEntity?.idp?.type!=="" && integrationTypes.typesOKJ.includes(integration?.configurationEntity?.idp?.type)  && integration.organization?.oid!=null && (groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid))) {
       return true;
     } else {
-      if(integration?.configurationEntity?.sp?.type && integration?.configurationEntity?.sp?.type !== "" && integrationTypes.typesPI.includes(integration?.configurationEntity?.sp?.type) && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+      if(integration?.configurationEntity?.sp?.type && integration?.configurationEntity?.sp?.type !== "" && integrationTypes.typesPI.includes(integration?.configurationEntity?.sp?.type) && integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+integration.organization.oid))) {
         return true
       }
     }
