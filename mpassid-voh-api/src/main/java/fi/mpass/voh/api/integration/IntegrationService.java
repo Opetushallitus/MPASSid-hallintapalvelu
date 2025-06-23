@@ -482,9 +482,15 @@ public class IntegrationService {
   public Integration changeLogoUrlForProvisioning(Integration integration) {
     // Change the integrations logoUrl for provisioning.
     if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
-      String logoUrl = this.configuration.getImageBaseUrl()
+      if (integration.getConfigurationEntity().getIdp().getLogoUrl() != null && (integration.getConfigurationEntity().getIdp().getLogoUrl().contains(this.configuration.getImageBaseUrlUi()) || integration.getConfigurationEntity().getIdp().getLogoUrl().isEmpty())) {
+        // Only change logoUrl if it points to Hallintapalvelu (opintopolku) or is empty
+        String logoContentType = getLogoContentType(integration.getId());
+        if (logoContentType != null && !logoContentType.isEmpty()) {
+          String logoUrl = this.configuration.getImageBaseUrl()
           + "/" + integration.getId() + getLogoContentType(integration.getId());
-      integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
+          integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
+        }
+      }
     }
     return integration;
   }
@@ -596,6 +602,8 @@ public class IntegrationService {
         if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
           integration = addRedirectUri(integration);
         }
+
+        integration = changeLogoUrlForProvisioning(integration);
       }
       try {
         // TODO check that integration.getId() and id matches
@@ -1290,7 +1298,7 @@ public class IntegrationService {
     String type = "";
     try {
       InputStreamResource inputStreamResource = getDiscoveryInformationLogo(id);
-      getDiscoveryInformationLogoContentType(inputStreamResource.getInputStream());
+      type = getDiscoveryInformationLogoContentType(inputStreamResource.getInputStream());
       if (type != null && type.contains("image/")) {
         type = type.replace("image/", "");
       }
