@@ -3,7 +3,6 @@ import "@visma/public.config";
 import "./patchLocalhostApplyRaamit";
 
 import App from "@/App";
-import VirkailijaRaamit from "@opetushallitus/virkailija-ui-components/VirkailijaRaamit";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import definition from "../schemas/schema.json";
@@ -45,7 +44,7 @@ async function main() {
 
   ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <>
-      <VirkailijaRaamit scriptUrl={ENV.RAAMIT_PATH} />
+      
       <React.StrictMode>
         <App />
       </React.StrictMode>
