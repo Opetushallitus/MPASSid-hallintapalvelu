@@ -1,4 +1,3 @@
-export const fixPackage = true;
 export const roles = ["idp", "sp", "set"] as const;
 export const environments = ["0", "1", "2"] as const;
 export const openIntegrationsSessionStorageKey =
@@ -14,6 +13,10 @@ export const testLink =
   // eslint-disable-next-line no-template-curly-in-string
   "https://firmitas.csc.fi/mpass/Shibboleth.sso/Login?entityID=https://mpass-proxy.csc.fi/idp/shibboleth&authnContextClassRef=urn:mpass.id:authnsource:${flowName}";
 
+  export const azureMetadataUrlTemplate =
+  // eslint-disable-next-line no-template-curly-in-string
+  "https://login.microsoftonline.com/${tenantId}/FederationMetadata/2007-06/FederationMetadata.xml";  
+
 export const tallentajaOphGroup =
   "APP_MPASSID_TALLENTAJA_1.2.246.562.10.00000000001";
 export const katselijaOphGroup =
@@ -24,6 +27,13 @@ export const mpassIdUserAttributeTestService = 3000001
 export const getRandom = () => {
   return Math.random();
 }
+
+export const integrationTypesDefault = {
+    typePI: "saml",
+    typesPI: [ "saml", "oidc" ],
+    typeOKJ: "wilma",
+    typesOKJ: [ "wilma", "opinsys","azure","adfs","gsuite" ]
+  };
 
 export async function calculateSHA1(message: string) {
     // Convert the string to an array buffer (UTF-8 encoding)
@@ -46,7 +56,7 @@ export interface IntegrationType {
     visible: boolean;
     attribute?: string;
     path?: string; 
-    defaultValue?: any;
+    defaultValue?: string;
     index?: string;
     generate?: string;
 }
@@ -60,7 +70,7 @@ export interface UiConfiguration {
   switch: boolean;
   object?: boolean;
   trim?: string;
-  enum?: any[]
+  enum?: string[]
   environment?: number;
   label?: string;
   validation: string[];
@@ -138,29 +148,29 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'clientId',
     type: 'data',
-    mandatory: false,
+    mandatory: true,
     array: false,
     switch: false,
     validation: [ ],
     integrationType: [
       {
           name: 'azure',
-          editable: false,
+          editable: true,
           visible: true,
       }
     ]
-},
+  },
   {
       name: 'clientKey',
       type: 'data',
-      mandatory: false,
+      mandatory: true,
       array: false,
       switch: false,
       validation: [],
       integrationType: [
         {
             name: 'azure',
-            editable: false,
+            editable: true,
             visible: true,
         },
         {
@@ -169,6 +179,21 @@ export const dataConfiguration:UiConfiguration[] = [
             visible: true,
         }
       ]
+  },
+  {
+    name: 'clientKeyValidUntil',
+    type: 'data',
+    mandatory: false,
+    array: false,
+    switch: false,
+    validation: [ 'date' ],
+    integrationType: [
+      {
+          name: 'azure',
+          editable: true,
+          visible: true,
+      }
+    ]
   },
   {
     name: 'datasource',
@@ -193,7 +218,7 @@ export const dataConfiguration:UiConfiguration[] = [
         },
         {
             name: 'azure',
-            editable: false,
+            editable: true,
             visible: true,
             defaultValue: 'azurev4'
         }
@@ -211,6 +236,11 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'opinsys',
             editable: true,
             visible: true
+        },
+        {
+            name: 'azure',
+            editable: true,
+            visible: true
         }
     ]
   },
@@ -226,7 +256,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'firstName'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'firstName'
+        }
       ]
   },
   {
@@ -241,7 +282,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'surname'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'surname'
+        }
       ]
   },
   {
@@ -256,7 +308,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'class'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'class'
+        }
       ]
   },
   {
@@ -287,22 +350,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
-      ]
-  },
-  {
-      name: 'azureApplicationIdUri',
-      type: 'user',
-      mandatory: false,
-      array: false,
-      switch: false,
-      validation: [],
-      integrationType: [
+          },
           {
-              name: 'azure',
-              editable: false,
-              visible: false,
-          }
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'learningMaterialsCharge'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'learningMaterialsCharge'
+        }
       ]
   },
   {
@@ -317,7 +376,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'schoolCode'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'schoolCode'
+        }
       ]
   },
   {
@@ -332,7 +402,17 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },{
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'nickName'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'nickName'
+        }
       ]
   },
   {
@@ -379,7 +459,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'classLevel'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'classLevel'
+        }
       ]
   },
   {
@@ -410,7 +501,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: false,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'mpassUserIdentity'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'mpassUserIdentity'
+        }
       ]
   },
   {
@@ -425,7 +527,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'learnerId'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'learnerId'
+        }
       ]
   },
   {
@@ -440,7 +553,18 @@ export const dataConfiguration:UiConfiguration[] = [
               name: 'azure',
               editable: true,
               visible: true,
-          }
+          },
+          {
+            name: 'gsuite',
+            editable: false,
+            visible: false,
+            defaultValue: 'userRole'
+        },{
+            name: 'adfs',
+            editable: false,
+            visible: false,
+            defaultValue: 'userRole'
+        }
       ]
   },
   {
@@ -540,8 +664,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            //index: 'randomsha1',
-            //generate: 'randomsha1'            
+            index: 'randomsha1',
+            generate: 'randomsha1'            
         }
     ]
 },
@@ -557,8 +681,8 @@ export const dataConfiguration:UiConfiguration[] = [
             name: 'oidc',
             editable: false,
             visible: true,
-            //index: 'name_randomsha1',
-            //generate: 'name_randomsha1',
+            index: 'name_randomsha1',
+            generate: 'name_randomsha1',
         }
     ]
 },
@@ -577,8 +701,8 @@ export const dataConfiguration:UiConfiguration[] = [
     integrationType: [
         {
             name: 'oidc',
-            //editable: true,
-            editable: false, //fix 2.4.1
+            editable: true,
+            //editable: false, //fix 2.4.1
             visible: true,
             defaultValue: 'code'
         }
@@ -590,7 +714,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -613,7 +737,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -656,7 +780,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -769,8 +893,8 @@ export const dataConfiguration:UiConfiguration[] = [
         
         {
             name: 'oidc',
-            //editable: true,
-            editable: false,//fix 2.4.1
+            editable: true,
+            //editable: false,//fix 2.4.1
             visible: true,
             defaultValue: 'client_secret_basic'
         }
@@ -789,8 +913,8 @@ export const dataConfiguration:UiConfiguration[] = [
         
         {
             name: 'oidc',
-            //editable: true,
-            editable: false, //fix 2.4.1
+            editable: true,
+            //editable: false, //fix 2.4.1
             visible: true 
         }
     ]
@@ -801,7 +925,7 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: false,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
@@ -812,8 +936,8 @@ export const dataConfiguration:UiConfiguration[] = [
         },
         {
             name: 'oidc',
-            //editable: true,
-            editable: false, //fix 2.4.1
+            editable: true,
+            //editable: false, //fix 2.4.1
             visible: true,
             defaultValue: 'false'
         }
@@ -877,14 +1001,14 @@ export const dataConfiguration:UiConfiguration[] = [
     mandatory: true,
     array: false,
     switch: true,
-    enum: [ true, false ],
+    enum: [ 'true', 'false' ],
     validation: [ ],
     integrationType: [
         {
             name: 'saml',
             editable: true,
             visible: true,
-            defaultValue: false
+            defaultValue: 'false'
         }
     ]
   },
@@ -977,22 +1101,60 @@ export const dataConfiguration:UiConfiguration[] = [
             attribute: 'clientId'
         }
       ]
-  },
-  {
-    name: 'deploymentPhase',
-    type: 'root',
-    mandatory: false,
-    array: true,
-    switch: false,
-    validation: [  ],
-    integrationType: [
-        {
-            name: 'wilma',
-            editable: true,
-            visible: true
-        }
-    ]
-}
-
-
+    },
+    {
+        name: 'deploymentPhase',
+        type: 'root',
+        mandatory: false,
+        array: true,
+        switch: false,
+        validation: [  ],
+        integrationType: [
+            {
+                name: 'wilma',
+                editable: true,
+                visible: true
+            }
+        ]
+    },
+    {
+        name: 'azureApplicationIdUri',
+        type: 'data',
+        mandatory: true,
+        array: false,
+        switch: false,
+        validation: [  ],
+        integrationType: [
+            {
+                name: 'azure',
+                editable: true,
+                visible: true
+            }
+        ]
+    },
+    {
+        name: 'metadataUrl',
+        type: 'idp',
+        mandatory: true,
+        array: false,
+        switch: false,
+        validation: [ ],
+        integrationType: [
+          {
+              name: 'adfs',
+              editable: true,
+              visible: true,
+          },
+          {
+              name: 'azure',
+              editable: true,
+              visible: true,
+          },
+          {
+              name: 'gsuite',
+              editable: true,    
+              visible: true,
+          }
+        ]
+    }
 ]

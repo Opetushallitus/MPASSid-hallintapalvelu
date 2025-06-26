@@ -55,16 +55,6 @@ public class IntegrationController {
 		this.integrationService = integrationService;
 	}
 
-	@Operation(summary = "Get all integrations", ignoreJsonView = true)
-	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
-	@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
-			@ExampleObject(name = "integrations", externalValue = "https://mpassid-rr-test.csc.fi/integrations.json") }))
-	@GetMapping("/list")
-	// @JsonView(value = IntegrationView.Default.class)
-	public List<Integration> getIntegrations() {
-		return integrationService.getIntegrations();
-	}
-
 	@Operation(summary = "Search paged integrations", ignoreJsonView = true)
 	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'PALVELU_TALLENTAJA')")
 	@ApiResponses(value = {
@@ -111,7 +101,11 @@ public class IntegrationController {
 	@GetMapping("{id}")
 	// @JsonView(value = IntegrationView.Default.class)
 	public Optional<Integration> getIntegration(@PathVariable Long id) {
-		return integrationService.getSpecIntegrationById(id);
+		Optional<Integration> integration = integrationService.getSpecIntegrationById(id);
+		if (integration.isPresent()) {
+			integration = Optional.of(integrationService.changeLogoUrlForUi(integration.get()));
+		}
+		return integration;
 	}
 
 	@Operation(summary = "Update the specific integration")
@@ -126,21 +120,10 @@ public class IntegrationController {
 	@PutMapping("{id}")
 	// @JsonView(value = IntegrationView.Default.class)
 	Integration updateIntegration(@Valid @RequestBody Integration integration, @PathVariable Long id) {
-		return integrationService.updateIntegration(id, integration);
-	}
-
-	@Operation(summary = "Get integrations since a point in time", ignoreJsonView = true)
-	@PreAuthorize("@authorize.hasPermission(#root, 'Integration', 'KATSELIJA') or @authorize.hasPermission(#root, 'Integration', 'TALLENTAJA')")
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integration.class), mediaType = "application/json", examples = {
-					@ExampleObject(name = "integration", externalValue = "https://mpassid-rr-test.csc.fi/integration-idp.json") })),
-			@ApiResponse(responseCode = "404", description = "Integration not found", content = @Content(schema = @Schema(implementation = IntegrationError.class), mediaType = "application/json"))
-	})
-	@GetMapping("/since/{timestamp}")
-	// @JsonView(value = IntegrationView.Default.class)
-	public List<Integration> getIntegrationsSince(
-			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime timestamp) {
-		return integrationService.getIntegrationsSince(timestamp);
+		Integration i = integrationService.changeLogoUrlForProvisioning(integration);
+		i = integrationService.updateIntegration(id, integration);
+		i = integrationService.changeLogoUrlForUi(i);
+		return i;
 	}
 
 	@Operation(summary = "Get a blank integration")
@@ -181,7 +164,9 @@ public class IntegrationController {
 	@PostMapping
 	// @JsonView(value = IntegrationView.Default.class)
 	Integration createIntegration(@Valid @RequestBody Integration integration) {
-		return integrationService.createIntegration(integration);
+		Integration i = integrationService.createIntegration(integration);
+		i = integrationService.changeLogoUrlForUi(i);
+		return i;
 	}
 
 	@Operation(summary = "Get integration discovery information")

@@ -178,16 +178,20 @@ public class SamlMetadataProvider {
         XMLObject xmlMetadata;
         try {
             xmlMetadata = doGetMetadata();
-            if (xmlMetadata == null)
+            if (xmlMetadata == null) {
+                logger.debug("xmlMetadata is null");
                 return;
+            }
 
             if (((EntityDescriptorImpl) xmlMetadata).getEntityID() != null) {
                 this.entityId = ((EntityDescriptorImpl) xmlMetadata).getEntityID();
+                logger.debug("EntityId is " + this.entityId);
             }
 
             if (((EntityDescriptorImpl) xmlMetadata).getValidUntil() != null) {
                 this.metadataValidUntil = LocalDate.ofInstant(((EntityDescriptorImpl) xmlMetadata).getValidUntil(),
                         ZoneId.systemDefault());
+                logger.debug("metadataValidUntil is " + this.metadataValidUntil);
             }
 
             IDPSSODescriptor idpssoDescriptor = ((EntityDescriptorImpl) xmlMetadata)

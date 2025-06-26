@@ -41,10 +41,6 @@ interface Props {
 
 export default function MultiSelectForm({ values, isEditable=false, mandatory=false, multiple=true, createEmpty=true, helperText, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
   const intl = useIntl();
-
-  devLog("DEBUG","MultiSelectForm (label)",label)
-  devLog("DEBUG","MultiSelectForm (values)",values)
-  devLog("DEBUG","MultiSelectForm (enums)",enums)
   const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
   const inputRef = useRef<HTMLFormElement>(null);
 
@@ -83,6 +79,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
 
 
   useEffect(() => {
+    devLog("DEBUG","MultiSelectForm (mandatory)",inputRef?.current?.value)
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
       setCanSave(false)  
@@ -100,6 +97,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                 id="multiselectForm-checkbox"
                 multiple={multiple}
                 multiline
+                error={mandatory}
                 value={selection}
                 onChange={handleChange}
                 input={<Input id="select-multiple-chip"  />}
@@ -133,8 +131,9 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                     </MenuItem>
                 )}
                 </Select>
-                <FormHelperText>{helperText("")}</FormHelperText>
+                
             </FormControl>
+            <FormHelperText error={mandatory}>{helperText(selection.toString())}</FormHelperText>
             </div>
      
     );

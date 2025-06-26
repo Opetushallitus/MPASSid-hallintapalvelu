@@ -11,27 +11,15 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 import { devLog } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
-import { fixPackage } from "@/config";
+import { integrationTypesDefault } from "@/config";
+import { clone } from "lodash";
 
-export const defaults = {
-    typePI: "saml",
-    typesPI: [ "saml", "oidc" ],
-    //typesPI: [ "saml"],
-    typeOKJ: "wilma",
-    //typesOKJ: [ "opinsys", "wilma", "adfs", "azure", "google" ]
-    typesOKJ: [ "wilma", "opinsys" ]
-  };
+const defaults = clone(integrationTypesDefault);
 
   if(!ENV.PROD) {
     //defaults.typesPI.push("oidc")
     //defaults.typesOKJ.push("opinsys")
   }
-
-  if(fixPackage) {
-    defaults.typesPI = [ "saml" ];
-    defaults.typesOKJ = [ "wilma" ];
-  }
-
   interface Props {
     open: boolean;
     setOpen: Dispatch<boolean>;
@@ -256,6 +244,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     
     return(<Dialog
         open={open}
+        maxWidth={"md"}
         onClose={()=>setOpen(false)}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"

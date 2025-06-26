@@ -2,7 +2,7 @@ import { updateIntegration } from "@/api";
 import type { Components } from "@/api";
 import { useIntegrationsSpecSearchPageable } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
-import { roles, tallentajaOphGroup, mpassIdUserAttributeTestService } from "@/config";
+import { roles, mpassIdUserAttributeTestService } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
 import TableHeaderCell from "@/utils/components/TableHeaderCell";
@@ -155,14 +155,14 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   
   const writeAccess = () => {
     
-    if(integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    if(integration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+integration.organization.oid))) {
       return true;
     }
     return false;
   }
 
   const copyFormDataToURLSearchParams = (formData: FormData) => (searchParams: URLSearchParams) => {
-    (formData as URLSearchParams).forEach((value, key) => {
+    (formData as unknown as URLSearchParams).forEach((value, key) => {
       if (value) {
         searchParams.set(key, value);
       } else {
@@ -308,7 +308,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
              
               <Stack direction="row" alignItems="center">
                 <Box flex={1} sx={{ mr: 2 }}>
-                  <SearchForm formData={searchParams} onSearch={handleSearch} />
+                  <SearchForm formData={searchParams as unknown as FormData} onSearch={handleSearch} />
                 </Box>
                 <RowsPerPage />
               </Stack>

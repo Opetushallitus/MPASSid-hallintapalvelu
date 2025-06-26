@@ -1,4 +1,4 @@
-import { useAttributeNames } from "@/api";
+import { getDataUserInterfaceConfiguration, getDataUserInterfaceConfigurationRaw, useAttributeNames, useDataUserInterfaceConfigurationRaw, useDataUserInterfaceConfigurationRawSafe } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
 import NotFound from "@/components/NotFound";
 import { category, tallentajaOphGroup, katselijaOphGroup } from "@/config";
@@ -13,10 +13,12 @@ import defaultMessages from "../../lang/fi-FI.json";
 import Home from "./home";
 import Integraatio from "./integraatio";
 import IntegraatioMuokkaus from "./integraationMuokkaus";
+import { devLog } from "@/utils/devLog";
 
 export default function Routes() {
   const defaultMessages = useDefaultMessagesWithAvailableAttributeKeys();
   const me = useMe();
+  const uiConfig = useDataUserInterfaceConfigurationRaw();
   const [groups, setGroups] = useState<string[]>();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function Routes() {
       setGroups(me.groups)
     }
   }, [me]);
- 
+
   return (
     <ReactRouterRoutes>
       <Route element={<Basic />}>

@@ -4,7 +4,7 @@ import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
 import { type Dispatch } from "react";
 import type { IntegrationType, UiConfiguration} from '../../config';
-import { dataConfiguration, defaultIntegrationType } from '../../config';
+import { defaultIntegrationType, dataConfiguration } from '../../config';
 import { useIntl } from 'react-intl';
 import { helperText, trimCertificate, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
@@ -22,7 +22,9 @@ export default function Metadata({
   oid,
   environment,
   metadata,
-  setMetadata
+  setMetadata,
+  dataConfiguration
+
 }: {
   newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>
@@ -34,6 +36,7 @@ export default function Metadata({
   environment: number;
   metadata: any;
   setMetadata: Dispatch<boolean>;
+  dataConfiguration:UiConfiguration[];
 }) {
   
   const intl = useIntl();
@@ -260,8 +263,23 @@ export default function Metadata({
                           
                         }
 
+                        if(configuration.array===false&&!configuration.switch&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
+                          //Initialize select value                
+                          devLog("DEBUG","Metadata (attribute init select content "+configuration.name+")",attribute.content)                              
+                          if(roleConfiguration.defaultValue !== undefined) {
+                            updateMetadata(configuration.array,configuration.name,String(roleConfiguration.defaultValue))                          
+                          } else {
+                            if(configuration.enum[0]!=='null') {
+                              updateMetadata(configuration.array,configuration.name,String(configuration.enum[0]))                          
+                            }
+                            
+                          } 
+                          
+                        }
+
                         if(configuration.array===true&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
-                          //Initialize array value                    
+                          //Initialize array value            
+                          devLog("DEBUG","Metadata (attribute init array content "+configuration.name+")",attribute.content)         
                           updateMetadata(configuration.array,configuration.name,attribute.content)                          
                         }
                         
@@ -291,7 +309,7 @@ export default function Metadata({
                       }
                       
                       //console.log("*** metadata (attribute): ",attribute);
-                      const onUpdate = (name:string,value:any) => {
+                      const onUpdate = (name:string,value:string) => {
                         devLog("DEBUG","MetadataForm onUpdate (name)",name)
                         devLog("DEBUG","MetadataForm onUpdate (value)",value)
                         var trimmeValue=value
@@ -347,12 +365,12 @@ export default function Metadata({
 
                       return (<MetadataForm 
                         key={configuration.name!}
+                        dataConfiguration={dataConfiguration}
                         onUpdate={onUpdate}
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onValidate={validator}
                         newConfigurationEntityData={newConfigurationEntityData}
-                        setNewConfigurationEntityData={setNewConfigurationEntityData}  
                         uiConfiguration={configuration}
                         attribute={attribute}
                         type={type}

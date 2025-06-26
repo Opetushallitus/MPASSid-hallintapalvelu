@@ -92,7 +92,7 @@ class IntegrationDiffBuilderTests {
         IdentityProvider idp = new Adfs();
         idp.setConfigurationEntity(ce);
         ce.setIdp(idp);
-        ((Adfs) idp).setMetadataUrl("https://example.org");
+        ((Adfs) idp).setMetadataAndParse("https://example.org");
         ((Adfs) idp).setEntityId("entityId-" + id);
         Integration integration = new Integration(id, LocalDate.now(), ce, LocalDate.of(2023, 7, 30),
                 0, null, organization, "serviceContactAddress" + id + "@example.net");

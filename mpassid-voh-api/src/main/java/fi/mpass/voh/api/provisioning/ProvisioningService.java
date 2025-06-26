@@ -135,6 +135,15 @@ public class ProvisioningService {
                 logger.debug("Exception in retrieving integration flowname. {}", e.getMessage());
                 continue;
             }
+            try {
+                i.getConfigurationEntity().getIdp().setMetadataValidUntil(null); // Remove valid until dates, as they are not needed in provisioning
+                i.getConfigurationEntity().getIdp().setSigningCertificateValidUntil(null);
+                i.getConfigurationEntity().getIdp().setEncryptionCertificateValidUntil(null);
+            } catch (Exception e) {
+                logger.debug("Exception in retrieving integration validUntil dates. {}", e.getMessage());
+            }
+            i = integrationService.changeMetadataUrlForProvisioning(i);
+            i = integrationService.changeLogoUrlForProvisioning(i);
         }
         return idps;
     }
@@ -147,6 +156,15 @@ public class ProvisioningService {
                 i.getConfigurationEntity().getAttributes().removeIf(a -> a.getContent().isEmpty());
             } catch (Exception e) {
                 logger.debug("Exception in retrieving integration attributes. {}", e.getMessage());
+                continue;
+            }
+            try {
+                i.setDiscoveryInformation(null); // Remove discoveryInformation and serviceContactAddress from sp, as they are not needed in provisioning
+                i.setServiceContactAddress(null);
+                i.getIntegrationSets().forEach(integration -> integration.setDiscoveryInformation(null));
+                i.getIntegrationSets().forEach(integration -> integration.setServiceContactAddress(null));
+            } catch (Exception e) {
+                logger.debug("Exception in retrieving integration discoveryInformation or serviceContactAddress. {}", e.getMessage());
                 continue;
             }
         }

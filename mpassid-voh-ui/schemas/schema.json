@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "@api.baseurl@"
+            "url": "https://virkailija.opintopolku.fi/mpassid"
         }
     ],
     "paths": {

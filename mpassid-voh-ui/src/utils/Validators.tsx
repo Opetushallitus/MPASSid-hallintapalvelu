@@ -14,7 +14,7 @@ const validateUri = (value:string) => {
     var regExpPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|localhost|'+ // validate domain name 
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
+      '(\\:\\d+)?(\\/[-a-z\\d%_@.:~+]*)*'+ // validate port and path
       '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
       '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
       return !!regExpPattern.test(value);
@@ -58,6 +58,12 @@ const validateNoHash = (value:string) => {
 
 const validateNoLocalhost = (value:string) => {
     const regExpPattern = new RegExp('^((?!localhost|127.0.0.1).)*$'); 
+    return !!regExpPattern.test(value);
+    
+}
+
+const validateDate = (value:string) => {
+    const regExpPattern = new RegExp('^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-20[0-9]{2}$'); 
     return !!regExpPattern.test(value);
     
 }
@@ -191,6 +197,9 @@ let validateStatus:boolean=true;
                 case "cert":
                     validateStatus=validateCert(value);
                     break;
+                case "date":
+                    validateStatus=validateDate(value);
+                    break;    
                 case "expert":
                     validateStatus=true;
                     break;         
@@ -271,8 +280,20 @@ export const helperText = (validators:string[],value:string) => {
                 case "cert":
                     helperText=validateCertText(value)                    
                     break;   
+                case "date":
+                    validateStatus=validateDate(value);
+                    if(!validateStatus) {
+                        helperText=<FormattedMessage defaultMessage="Kentän pitää olla pp-kk-vvvv muodossa!" />
+                    }
+                    break;
                 case "expert":
                     helperText=<FormattedMessage defaultMessage="VAROITUS älä koske tähän jollei erikseen ohjeistettu!" />                    
+                    break;
+                case "extraExcludes":
+                    helperText=<FormattedMessage defaultMessage="Kaikki muihin integraatiohin lisätyt koulut lisätään automaattisesti" />                    
+                    break;
+                case "allSchoolsUsed":
+                    helperText=<FormattedMessage defaultMessage="Kaikki koulut ovat jo käytössä muissa integraatioissa" />                    
                     break;    
                 default:
                     validateStatus=false;

@@ -1,7 +1,7 @@
-import type { Components } from "@/api";
+import {type Components } from "@/api";
 import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
-import { get, orderBy } from "lodash";
+import { clone, get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
 import exampleData from "../../schemas/response.json";
 import blankData from "../../schemas/blankIdpIntegration.json"
@@ -55,9 +55,56 @@ const attributes = definition.paths["/api/v2/attribute/test"].get.responses[
 
 const discoveryInformation = definition.paths["/api/v2/integration/discoveryinformation"].get.responses[
   "200"
-].content["application/json"].examples as {
-  value?: Components.Schemas.DiscoveryInformationDTO
+].content["application/json"].examples.excluded as {
+  value?: {
+    existingExcluded?: string[] | null;
+    existingIncluded?: string[] | null; 
+  } 
 }
+
+const samlMetadataIntegration = definition.paths["/api/v2/idp/saml/metadata/{id}"].post.responses[
+  "200"
+].content["application/json"].examples.integration as {
+  value?: Components.Schemas.Integration;
+};
+
+type DiscoveryInformationResult = {
+  existingIncluded: string[]|null;
+  existingExcluded: string[]|null;
+};
+
+const discoveryInformationResult:number = 0
+var discoveryInformationResultEdited:boolean = false
+
+const discoveryInformationResultsAdd:DiscoveryInformationResult[] = [
+  {existingIncluded: null, existingExcluded: null},
+  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076", "30077" ]},
+  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076" ]},
+  {existingIncluded: [], existingExcluded: [ "30074", "30075" ]},
+  {existingIncluded: [], existingExcluded: [ "30074" ]},
+  {existingIncluded: [], existingExcluded: [ "30074", "30077" ]},
+  {existingIncluded: [ "30075" ], existingExcluded: [ "30074", "30077" ]},
+  {existingIncluded: [ "30075", "30076" ], existingExcluded: [ "30074", "30077" ]},
+  {existingIncluded: [ "30074", "30075", "30076", "30077" ], existingExcluded: null},
+  {existingIncluded: [ "30074" ], existingExcluded: null},
+  {existingIncluded: [ "30074", "30077" ], existingExcluded: null},
+  {existingIncluded: [], existingExcluded: null}
+]
+
+var discoveryInformationResultsModify:DiscoveryInformationResult[] = [
+  {existingIncluded: null, existingExcluded: null},
+  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076", "30077" ]},
+  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076" ]},
+  {existingIncluded: [], existingExcluded: [ "30074", "30075" ]},
+  {existingIncluded: [], existingExcluded: [ "30074" ]},
+  {existingIncluded: [], existingExcluded: [ "30074", "30077" ]},
+  {existingIncluded: [ "30075" ], existingExcluded: [ "30074", "30077" ]},
+  {existingIncluded: [ "30075", "30076" ], existingExcluded: [ "30074", "30077" ]},
+  {existingIncluded: [ "30074", "30075", "30076", "30077" ], existingExcluded: null},
+  {existingIncluded: [ "30074" ], existingExcluded: null},
+  {existingIncluded: [ "30074", "30077" ], existingExcluded: null},
+  {existingIncluded: [], existingExcluded: null}
+]
 
 allIntegrations = Array(1).fill(allIntegrations).flat();
 
@@ -87,6 +134,11 @@ export default {
   },
   getIntegrationDiscoveryInformation(request) {
     console.log("getIntegrationDiscoveryInformation: ",request);
+    if(discoveryInformationResultEdited) {
+      discoveryInformation.value=discoveryInformationResultsModify[discoveryInformationResult]    
+    } else {
+      discoveryInformation.value=discoveryInformationResultsAdd[discoveryInformationResult]    
+    }
     
   },
   getBlankIntegration(request) {
@@ -166,8 +218,9 @@ export default {
     const id = 999995;
     request.requestBody.id=id;
     const index=allIntegrations.map(i=>i.id).indexOf(id);
+    discoveryInformationResultEdited=true
     if (index !== -1) {
-      allIntegrations[index] = request.requestBody;
+      allIntegrations[index] = request.requestBody;      
     } else {
       allIntegrations.push(request.requestBody)
     }
@@ -181,7 +234,40 @@ export default {
     integration.value = allIntegrations.find((row) => row.id === id);
     if(id===999995&&integration.value?.configurationEntity?.idp){
       integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
+      if(integration.value.configurationEntity.idp.type==='azure') {
+        const azureIdp:Components.Schemas.Azure = clone(integration.value.configurationEntity.idp)
+        azureIdp.signingCertificateValidUntil="2028-11-30"
+        azureIdp.encryptionCertificateValidUntil="2028-11-30"
+        azureIdp.metadataValidUntil="2028-11-30"
+        integration.value.configurationEntity.idp=azureIdp;
+      }
+      if(integration.value.configurationEntity.idp.type==='gsuite') {
+        const gsuiteIdp:Components.Schemas.Gsuite = clone(integration.value.configurationEntity.idp)
+        gsuiteIdp.signingCertificateValidUntil="2028-11-30"
+        gsuiteIdp.encryptionCertificateValidUntil="2028-11-30"
+        gsuiteIdp.metadataValidUntil="2028-11-30"
+        gsuiteIdp.logoUrl="https://mpass-proxy.csc.fi/images/buttons/btn-hausjarvi.png"
+        gsuiteIdp.metadataUrl="https://mpass-proxy.csc.fi/idp_local_metadata/shib_hausjarvi-metadata.xml"
+        integration.value.configurationEntity.idp=gsuiteIdp;
+      }
+      if(integration.value.configurationEntity.idp.type==='adfs') {
+        const gsuiteIdp:Components.Schemas.Gsuite = clone(integration.value.configurationEntity.idp)
+        gsuiteIdp.signingCertificateValidUntil="2028-11-30"
+        gsuiteIdp.encryptionCertificateValidUntil="2028-11-30"
+        gsuiteIdp.metadataValidUntil="2028-11-30"
+        gsuiteIdp.logoUrl="https://mpass-proxy.csc.fi/images/buttons/btn-test.png"
+        gsuiteIdp.metadataUrl="https://mpass-proxy.csc.fi/idp_local_metadata/shib_test§-metadata.xml"
+        integration.value.configurationEntity.idp=gsuiteIdp;
+      }
     }
+  },
+  uploadSAMLMetadata(request) {
+    const id = Number(request.params.id);
+    console.log("******************** id: ",id)
+    console.log("******************** integration: ",allIntegrations.find((row) => row.id === id))
+    samlMetadataIntegration.value = allIntegrations.find((row) => row.id === id);
+    
+    
   },
   getIntegrationsSpecSearchPageable(request) {
     const page = Number(request.query.page ?? defaults.page);

@@ -1,4 +1,4 @@
-import { inactivateIntegration, type Components, uploadLogo, createIntegrationRaw, updateIntegrationRaw } from "@/api";
+import { inactivateIntegration, type Components, uploadLogo, uploadSamlMetadata, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization, useDataUserInterfaceConfigurationRawSafe } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
@@ -10,18 +10,21 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import { useMe } from "@/api/käyttöoikeus";
-import { tallentajaOphGroup } from '../../config';
+import type { UiConfiguration } from '../../config';
+import { tallentajaOphGroup, dataConfiguration } from '../../config';
 import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { devLog } from "@/utils/devLog";
-import { cloneDeep } from "lodash";
+import { cloneDeep, clone } from 'lodash';
+import { integrationTypesDefault } from '@/config';
 
 export default function IntegraatioMuokkaus() {
   const { type } = useParams();
   const { id } = useParams();
   const [saveDialogState, setSaveDialogState] = useState(true);
   const [canSave, setCanSave] = useState(false);
+  const [azureTestDone, setAzureTestDone] = useState(true);
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration|undefined>();
   const navigate = useNavigate();
   const [openConfirmation, setOpenConfirmation] = useState(false);
@@ -35,10 +38,13 @@ export default function IntegraatioMuokkaus() {
   const [groups, setGroups] = useState<string[]>();
   const [openNotice, setOpenNotice] = useState(false);
   const [logo, setLogo] = useState<Blob>();
+  const [ metadataFile, setMetadataFile ] = useState<File[]>([]);
   const result = useRef<Components.Schemas.Integration>({});
   const [loading, setLoading] = useState<boolean>(false);
   const intl = useIntl();
-  
+  const [uiConfiguration, setUiConfiguration] = useState<UiConfiguration[]>([]);
+  const [ uiError, uiConfig ] = useDataUserInterfaceConfigurationRawSafe();
+  const deploymentPhase = useRef<number>(-5);
   
 
   useEffect(() => {
@@ -46,6 +52,17 @@ export default function IntegraatioMuokkaus() {
       setGroups(me.groups)
     }
   }, [me]);
+
+  useEffect(() => {
+    if(uiConfig&&uiConfig.status===200) {
+      //Note: Update to user uiconfig.data when backend supports
+      //setUiConfiguration(uiConfig.data)
+
+      setUiConfiguration(dataConfiguration)
+    } else {
+      setUiConfiguration(dataConfiguration)
+    }
+  }, [uiConfig,uiError]);
 
   var oid:string = newIntegration?.organization?.oid || "";
   var environment:number = newIntegration?.deploymentPhase || 0;
@@ -59,13 +76,12 @@ export default function IntegraatioMuokkaus() {
   }
 
   const getErrorId = () => {
-    if(newIntegration?.configurationEntity?.sp?.type) {
-      const id = openIntegrationErrorText;
-      return openIntegrationErrorText in intl.messages ? { id: id } : undefined;
-    }
-    return undefined
+    
+    const id = openIntegrationErrorText;
+    return openIntegrationErrorText in intl.messages ? { id: id } : undefined;
     
   }
+
   const closeNotice = () => {
       setOpenNotice(false)
       setOpenConfirmation(false);
@@ -90,10 +106,14 @@ export default function IntegraatioMuokkaus() {
 
   const writeAccess = () => {
 
-    if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma" ||  newIntegration?.configurationEntity?.idp?.type === "opinsys") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    devLog("DEBUG","writeAccess (type)",newIntegration?.configurationEntity?.idp?.type)
+    devLog("DEBUG","writeAccess (oid)",newIntegration?.organization?.oid)
+    devLog("DEBUG","writeAccess (groups)",groups)
+    //if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma" ||  newIntegration?.configurationEntity?.idp?.type === "opinsys") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+    if((newIntegration?.configurationEntity?.idp?.type && integrationTypesDefault.typesOKJ.includes(newIntegration.configurationEntity.idp.type)) && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid))) {
       return true;
     } else {
-      if((newIntegration?.configurationEntity?.sp?.type === "saml" ||  newIntegration?.configurationEntity?.sp?.type === "oidc") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
+      if((newIntegration?.configurationEntity?.sp?.type === "saml" ||  newIntegration?.configurationEntity?.sp?.type === "oidc") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes("APP_MPASSID_PALVELU_TALLENTAJA_"+newIntegration.organization.oid))) {
         return true
       }
     }
@@ -137,7 +157,10 @@ export default function IntegraatioMuokkaus() {
                 if(newIntegration.integrationSets&&newIntegration.integrationSets.length>0) {
                   updateIntegration.integrationSets = newIntegration.integrationSets.map(i=> { return { id: i.id}})
                 }
-                result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;
+                if(deploymentPhase.current>=0) {
+                  updateIntegration.deploymentPhase=deploymentPhase.current;
+                }
+                result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;                
               }
               devLog("DEBUG","Integration save result",result.current)
               if(logo){
@@ -150,6 +173,16 @@ export default function IntegraatioMuokkaus() {
                     result.current.configurationEntity.idp.logoUrl=logoResult
                   }                
                 } 
+              }
+              if(metadataFile.length===1){
+                const formData = new FormData();
+                formData.append("file", metadataFile[0]);
+                const metadataId:number = result.current.id||0;                
+                const metadataResult= await uploadSamlMetadata({ id: metadataId },formData as any);
+                
+                if(result.current.configurationEntity?.idp) {
+                  result.current=metadataResult;
+                }
               }
               setLoading(false)
             } catch (error:any) {   
@@ -182,6 +215,34 @@ export default function IntegraatioMuokkaus() {
 
   }
 
+  const testAzureAccess = () => {
+    
+    if (!azureTestDone&&openConfirmation&&newIntegration?.configurationEntity&&newIntegration?.configurationEntity.attributes&&newIntegration.configurationEntity.idp?.type==='azure') {
+      const clientId=newIntegration.configurationEntity.attributes?.find(a=>a.name==='clientId')?.content
+      const clientKey=newIntegration.configurationEntity.attributes?.find(a=>a.name==='clientKey')?.content
+      if(clientKey !== undefined && !clientKey.includes("***") && id !== undefined) {
+        setAzureTestDone(true)
+        const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
+                    authRequest.id=parseInt(id);
+                    if(id!=='0'&&newIntegration.configurationEntity.attributes.find(a=>a.name==='tenantId'&&a.type==='data')) {
+                      authRequest.tenantId=newIntegration.configurationEntity.attributes.find(a=>a.name==='tenantId'&&a.type==='data')?.content
+                    }
+                    authRequest.clientId=clientId;
+                    authRequest.clientSecret=clientKey;
+                    
+                    testAttributesAuthorization({},authRequest).then(result=>{ 
+                          devLog("DEBUG","testAttributesAuthorization",result)                           
+                        }).catch(error=>{
+                          return (<Alert severity="error"><FormattedMessage defaultMessage="Testi valtuutus epäonnistui nykyisillä arvoilla!"/></Alert>)
+                          
+                        })
+                    
+        //return (<Alert severity="error">TBD: azure tunnisteiden toimivuus testi!!!</Alert>)
+      } 
+    } 
+    return (<></>)
+  }
+
   return (
     <>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
@@ -198,7 +259,7 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo}/>
+            <IntegrationDetails id={Number(id)} dataConfiguration={uiConfiguration} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile} deploymentPhase={deploymentPhase}/>
           </ErrorBoundary>
           
         </Suspense>
@@ -228,7 +289,7 @@ export default function IntegraatioMuokkaus() {
                       <FormattedMessage defaultMessage="Tallenna muutokset" />
                   </Typography>
                   
-                  {isEntraId()&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
+                  {isEntraId()&&canSave&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
                                       <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
                                   </Button></>}
                   
@@ -237,7 +298,7 @@ export default function IntegraatioMuokkaus() {
                       {id==='0'&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
                       {(!canSave&&!isDisabled)&&<Button sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
-                      {(canSave&&!isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
+                      {(canSave&&!isDisabled)&&<Button onClick={()=>{setAzureTestDone(false);setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}
                       {(isDisabled)&&<Button onClick={()=>{setOpenConfirmation(true);setSaveDialogState(false)}} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Poista" /></Button>}                    
                   </Box>
                   <br></br>
@@ -257,6 +318,8 @@ export default function IntegraatioMuokkaus() {
                 </DialogTitle>
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
+                    {testAzureAccess()}
+                    
                   {!isDisabled&&<FormattedMessage defaultMessage="Haluatko varmasti tallentaa?" />}
                     {isDisabled&&<FormattedMessage defaultMessage="Haluatko varmasti poistaa?" />}
                   
@@ -284,7 +347,7 @@ export default function IntegraatioMuokkaus() {
                 <DialogContent>
                   <DialogContentText id="alert-dialog-description">
                   <FormattedMessage defaultMessage="Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa muutoksen tallentamishetkestä." />
-                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&!String(newIntegration.configurationEntity.sp.metadata.client_secret).includes("*********")&&
+                  {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&!String(newIntegration.configurationEntity.sp.metadata.client_secret).includes("***")&&
                   newIntegration?.configurationEntity?.sp?.type === "oidc"&&<>
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
                     {newIntegration?.configurationEntity?.sp?.metadata?.client_secret&&<br />}
@@ -341,7 +404,7 @@ export default function IntegraatioMuokkaus() {
               </Alert>
                   
               </Dialog>
-              <AttributeTest id={id||'0'} open={openAttributeTest} setOpen={setOpenAttributeTest} attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
+              <AttributeTest id={id||'0'} dataConfiguration={uiConfiguration} open={openAttributeTest} setOpen={setOpenAttributeTest} tenantId={newIntegration?.configurationEntity?.attributes?.find(a=>a.type==='data'&&a.name==='tenantId')?.content } attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
       </>
   );
 }

@@ -4,23 +4,30 @@ import { FormattedMessage } from 'react-intl';
 import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
 import InputForm from "../Form/InputForm";
-import type { Dispatch} from "react";
+import type { Dispatch, MutableRefObject} from "react";
 import { useRef } from "react";
 import { devLog } from "@/utils/devLog";
 import { helperText, validate } from "@/utils/Validators";
 import type { UiConfiguration } from "@/config";
-import { dataConfiguration, defaultDataConfiguration } from "@/config";
+import { defaultDataConfiguration } from "@/config";
 
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
-  environment: number;
+  environment: MutableRefObject<number>;
   name: string;
+  tenantId?: string;
+  metadataUrl?: string;
+  metadataFile?: File[];
+  dataConfiguration:UiConfiguration[];
   setName: Dispatch<string>;
   setCanSave: Dispatch<boolean>;
+  setEnvironment: Dispatch<number>;
+  setMetadataUrl: Dispatch<string>;
+  setMetadataFile?: Dispatch<File[]>;
 }
 
-export default function ServiceProvider({ integration, setName, setCanSave, name }: Props) {
+export default function ServiceProvider({ integration, setName, setCanSave, name,dataConfiguration }: Props) {
   const currentName = useRef<string>(name);
   const serviceProvider = integration.configurationEntity!.sp!;
   const configuration:UiConfiguration = dataConfiguration.filter(conf=>conf.type&&conf.type==='integrationDetails').find(conf=>conf.name&&conf.name==='serviceName') || defaultDataConfiguration;

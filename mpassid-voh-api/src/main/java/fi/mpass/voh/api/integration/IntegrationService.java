@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,9 +26,11 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 
-import org.hibernate.boot.jaxb.internal.FileXmlSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -52,16 +55,21 @@ import fi.mpass.voh.api.exception.EntityCreationException;
 import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
+import fi.mpass.voh.api.exception.SecretSavingException;
+import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
+import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.Adfs;
 import fi.mpass.voh.api.integration.idp.Azure;
 import fi.mpass.voh.api.integration.idp.Gsuite;
 import fi.mpass.voh.api.integration.idp.IdentityProvider;
+import fi.mpass.voh.api.integration.idp.IdentityProviderService;
 import fi.mpass.voh.api.integration.idp.Opinsys;
 import fi.mpass.voh.api.integration.idp.Wilma;
 import fi.mpass.voh.api.integration.set.IntegrationSet;
 import fi.mpass.voh.api.integration.sp.OidcServiceProvider;
 import fi.mpass.voh.api.integration.sp.SamlServiceProvider;
+import fi.mpass.voh.api.loading.CredentialService;
 import fi.mpass.voh.api.loading.LoadingService;
 import fi.mpass.voh.api.organization.Organization;
 import fi.mpass.voh.api.organization.OrganizationService;
@@ -76,13 +84,21 @@ public class IntegrationService {
   private final OrganizationService organizationService;
   private final LoadingService loadingService;
   private final IntegrationServiceConfiguration configuration;
+  private final CredentialService credentialService;
+  private final IdentityProviderService identityProviderService;
+
+  @Value("${application.metadata.credential.value.field}")
+  protected String credentialMetadataValueField;
 
   public IntegrationService(IntegrationRepository integrationRepository, OrganizationService organizationService,
-      LoadingService loadingService, IntegrationServiceConfiguration configuration) {
+      LoadingService loadingService, IntegrationServiceConfiguration configuration,
+      CredentialService credentialService, @Lazy IdentityProviderService identityProviderService) {
     this.integrationRepository = integrationRepository;
     this.organizationService = organizationService;
     this.loadingService = loadingService;
     this.configuration = configuration;
+    this.credentialService = credentialService;
+    this.identityProviderService = identityProviderService;
   }
 
   public List<Integration> getIntegrations() {
@@ -418,7 +434,6 @@ public class IntegrationService {
         integration.get().setOrganization(organization);
       }
       integration = extendPermissions(integration);
-      integration = changeLogoUrl(integration);
       return integration;
     } else {
       throw new EntityNotFoundException("Authentication not successful");
@@ -454,14 +469,28 @@ public class IntegrationService {
     return integration;
   }
 
-  private Optional<Integration> changeLogoUrl(Optional<Integration> integration) {
-    if (integration.isPresent()) {
+  public Integration changeLogoUrlForUi(Integration integration) {
+    // Change the integrations logoUrl for UI suitable use.
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
       String logoUrl = this.configuration.getImageBaseUrlUi()
-          + "/" + integration.get().getId();
-      if (integration.get().getConfigurationEntity().getIdp() instanceof IdentityProvider) {
-        integration.get().getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
-      }
+          + "/" + integration.getId();
+      integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
+    }
+    return integration;
+  }
 
+  public Integration changeLogoUrlForProvisioning(Integration integration) {
+    // Change the integrations logoUrl for provisioning.
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+      if (integration.getConfigurationEntity().getIdp().getLogoUrl() != null && (integration.getConfigurationEntity().getIdp().getLogoUrl().contains(this.configuration.getImageBaseUrlUi()) || integration.getConfigurationEntity().getIdp().getLogoUrl().isEmpty())) {
+        // Only change logoUrl if it points to Hallintapalvelu (opintopolku) or is empty
+        String logoContentType = getLogoContentType(integration.getId());
+        if (logoContentType != null && !logoContentType.isEmpty()) {
+          String logoUrl = this.configuration.getImageBaseUrl()
+          + "/" + integration.getId() + getLogoContentType(integration.getId());
+          integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
+        }
+      }
     }
     return integration;
   }
@@ -516,6 +545,16 @@ public class IntegrationService {
   public Integration updateIntegration(Long id, Integration integration) {
     Integration existingIntegration = getSpecIntegrationById(id).get();
     if (existingIntegration != null) {
+
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      if (auth != null) {
+        List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+        if (!userOrganizationOids.contains(integration.getOrganization().getOid())) {
+          logger.error("Integration oid is not in list of allowed oids.");
+          throw new EntityUpdateException("Integration update failed, organization id is not allowed.");
+        }
+      }
+
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
         if (!checkAuthority("ROLE_APP_MPASSID_PALVELU_TALLENTAJA") && !checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
           logger.error("No authority to update SP.");
@@ -553,9 +592,22 @@ public class IntegrationService {
           logger.error("No authority to update IDP.");
           throw new EntityCreationException("Integration update failed, no authority to update IDP.");
         }
+
+        if (existingIntegration.getDeploymentPhase() == 0 && integration.getDeploymentPhase() != 0) {
+          // If integration is idp and in testing, don't allow deployment phase to be changed to prod or test-prod. 
+          logger.error("Idp deployment phase is not allowed to be changed from test to prod or test to test-prod.");
+          throw new EntityCreationException("Integration update failed, not allowed to change deployment phase from test.");
+        }
+
+        if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+          integration = addRedirectUri(integration);
+        }
+
+        integration = changeLogoUrlForProvisioning(integration);
       }
       try {
         // TODO check that integration.getId() and id matches
+        integration = handleSecrets(integration);
         Integration updatedIntegration = loadingService.loadOne(integration);
         if (updatedIntegration != null) {
           existingIntegration = updatedIntegration;
@@ -847,6 +899,16 @@ public class IntegrationService {
 
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
+
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      if (auth != null) {
+        List<String> userOrganizationOids = getUserDetailsOrganizationOids(auth);
+        if (!userOrganizationOids.contains(integration.getOrganization().getOid())) {
+          logger.error("Integration oid is not in list of allowed oids.");
+          throw new EntityCreationException("Integration creation failed, organization id is not allowed.");
+        }
+      }
+
       // TODO Separate IDP and SP creation to own methods
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
         if (!checkAuthority("ROLE_APP_MPASSID_TALLENTAJA")) {
@@ -854,7 +916,7 @@ public class IntegrationService {
           throw new EntityCreationException("Integration creation failed, no authority to create IDP.");
         }
         // Create IDP
-        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1)
+        List<Long> availableIdpIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
             ? integrationRepository.getAvailableIdpProdIntegrationIdentifier()
             : integrationRepository.getAvailableIdpTestIntegrationIdentifier();
         if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
@@ -863,11 +925,26 @@ public class IntegrationService {
               .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableIdpIds.get(0));
           integration.getConfigurationEntity().getIdp()
               .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableIdpIds.get(0));
+          if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+            integration = addRedirectUri(integration);
+          }
         } else {
           // TODO the case of the first integration without preloaded integrations
           logger.error("Failed to find an available idp integration identifier");
           throw new EntityCreationException("Integration creation failed");
         }
+        integration = handleSecrets(integration);
+
+        if (integration.getConfigurationEntity().getIdp() instanceof Adfs) {
+          identityProviderService.saveMetadata(integration, ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        } else if (integration.getConfigurationEntity().getIdp() instanceof Gsuite) {
+          identityProviderService.saveMetadata(integration, ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        } else if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
+          identityProviderService.saveMetadata(integration, ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+        }
+
+        integration = addDefaultMetadataUrl(integration);
+
         return integrationRepository.save(integration);
       }
       if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
@@ -876,6 +953,7 @@ public class IntegrationService {
           logger.error("No authority to create SP.");
           throw new EntityCreationException("Integration creation failed, no authority to create SP.");
         }
+
         if (integration.getConfigurationEntity().getSp().getType().equals("saml")) {
           SamlServiceProvider samlSP = ((SamlServiceProvider) integration.getConfigurationEntity().getSp());
           if (samlSP.getEntityId() == null || !validateEntityId(samlSP.getEntityId())) {
@@ -893,7 +971,7 @@ public class IntegrationService {
           }
         }
 
-        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1)
+        List<Long> availableSpIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
             ? integrationRepository.getAvailableSpProdIntegrationIdentifier()
             : integrationRepository.getAvailableSpTestIntegrationIdentifier();
         if (availableSpIds != null && !availableSpIds.isEmpty()) {
@@ -912,7 +990,7 @@ public class IntegrationService {
 
         if (setId == 0) {
           // No existing integration set, create new
-          List<Long> availableSetIds = (integration.getDeploymentPhase() == 1)
+          List<Long> availableSetIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
               ? integrationRepository.getAvailableSetProdIntegrationIdentifier()
               : integrationRepository.getAvailableSetTestIntegrationIdentifier();
           if (availableSetIds != null && !availableSetIds.isEmpty()) {
@@ -931,6 +1009,9 @@ public class IntegrationService {
           setIntegration.getConfigurationEntity().getSet().setType("sp");
           setIntegration.setOrganization(integration.getOrganization());
           integration.removeFromSets();
+
+          integration = handleSecrets(integration);
+
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
           integration.addToSet(setIntegration);
@@ -941,6 +1022,7 @@ public class IntegrationService {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
           if (optionalSet.isPresent()) {
+            integration = handleSecrets(integration);
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
             integrationRepository.saveAndFlush(optionalSet.get());
@@ -1027,6 +1109,10 @@ public class IntegrationService {
         Set<String> allIncluded = new HashSet<>();
         for (Integration i : integrations) {
           if (i.isActive() && !i.getId().equals(id) && (i.getConfigurationEntity().getIdp() != null)) {
+            if (i.getDeploymentPhase() != 1) {
+              // Filter out non production integrations
+              continue;
+            }
             if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
               if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
                 allExcluded.add(Long.toString(i.getId()));
@@ -1082,8 +1168,15 @@ public class IntegrationService {
         }
 
         try (InputStream inputStream = file.getInputStream(); InputStream contentStream = file.getInputStream()) {
+          BufferedImage image = ImageIO.read(file.getInputStream());
           String logoContentType = getDiscoveryInformationLogoContentType(contentStream);
-          if (logoContentType != null && logoContentType.contains("image/")) {
+          if (image == null) {
+            logger.error("File is not an image.");
+            throw new EntityCreationException("Failed to save image.");
+          } else if (logoContentType == null || !logoContentType.contains("image/")) {
+            logger.error("File is not an image.");
+            throw new EntityCreationException("Failed to save image.");
+          } else if (logoContentType != null && logoContentType.contains("image/")) {
             logoContentType = logoContentType.replace("image/", "");
           }
           url += "." + logoContentType;
@@ -1117,7 +1210,7 @@ public class IntegrationService {
 
   public InputStreamResource getDiscoveryInformationLogo(Long id) {
     if (configuration.getImageBasePath() == null) {
-      logger.error("Logo not found: {}", id);
+      logger.error("Logo not found: {}. imageBasePath is null.", id);
       throw new EntityNotFoundException("Logo not found.");
     }
     Path rootLocation = Paths.get(configuration.getImageBasePath());
@@ -1131,24 +1224,25 @@ public class IntegrationService {
         Matcher m = p.matcher(imageFile.getName());
         boolean b = m.matches();
         if (b) {
+          logger.debug("FOUND: " + imageFile.getName());
           sourceFileName = imageFile.getAbsolutePath();
           found = true;
         }
       }
     } else {
-      logger.error("Logo not found: {}", id);
+      logger.error("Logo not found: {}. No files found in target folder.", id);
       throw new EntityNotFoundException("Logo not found.");
     }
 
     if (!found) {
-      logger.error("Logo not found: {}", id);
+      logger.error("Logo not found: {}. No logo found with id.", id);
       throw new EntityNotFoundException("Logo not found.");
     }
 
     try {
       return new InputStreamResource(new FileInputStream(sourceFileName));
     } catch (FileNotFoundException e) {
-      logger.error("Logo not found: {}", sourceFileName);
+      logger.error("Logo not found: {}. Error in handling inputStreamResource.", sourceFileName);
       throw new EntityNotFoundException("Logo not found.");
     }
   }
@@ -1198,5 +1292,128 @@ public class IntegrationService {
       }
     }
     return null;
+  }
+
+  public String getLogoContentType(Long id) {
+    String type = "";
+    try {
+      InputStreamResource inputStreamResource = getDiscoveryInformationLogo(id);
+      type = getDiscoveryInformationLogoContentType(inputStreamResource.getInputStream());
+      if (type != null && type.contains("image/")) {
+        type = type.replace("image/", "");
+      }
+    } catch (Exception e) {
+      logger.error(e.getMessage());
+    }
+    return type;
+  }
+
+  private Integration addDefaultMetadataUrl(Integration integration) {
+    // Add default metadataUrl (UI) if metadataUrl is not yet set
+    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+        Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
+        if (adfsIdp.getMetadataUrl() == null || adfsIdp.getMetadataUrl().isEmpty()) {
+          adfsIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
+        }
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
+        Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
+        if (gsuiteIdp.getMetadataUrl() == null || gsuiteIdp.getMetadataUrl().isEmpty()) {
+          gsuiteIdp.setMetadataUrl(configuration.getMetadataBaseUrlUi() + "/" + integration.getId());
+        }
+      }
+    }
+    return integration;
+  }
+
+  public Integration changeMetadataUrlForProvisioning(Integration integration) {
+    // If metadataUrl points to hallintapalvelu, change it to point at proxy
+    if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
+        Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
+        if (integration.getId() != null && adfsIdp.getMetadataUrl() != null && adfsIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi()) && adfsIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
+          String metadataUrl = this.configuration.getMetadataBaseUrl()
+              + "/adfs_" + integration.getId().toString() + "-metadata.xml";
+          adfsIdp.setMetadataUrl(metadataUrl);
+        }
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
+        Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
+        if (integration.getId() != null && gsuiteIdp.getMetadataUrl() != null && gsuiteIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi()) && gsuiteIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
+          String metadataUrl = this.configuration.getMetadataBaseUrl()
+              + "/gsuite_" + integration.getId().toString() + "-metadata.xml";
+          gsuiteIdp.setMetadataUrl(metadataUrl);
+        }
+      }
+    }
+    return integration;
+  }
+
+  private Integration handleSecrets(Integration integration) {
+    // Save client secret to aws parameter store
+    boolean success = false;
+    if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getSp() != null) {
+      if (integration.getConfigurationEntity().getSp().getType().equals("oidc")) {
+        success = credentialService.updateOidcCredential(integration, credentialMetadataValueField,
+            integration.getConfigurationEntity().getSp().getMetadata().get(credentialMetadataValueField));
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
+      }
+    } else if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
+      if (integration.getConfigurationEntity().getIdp().getType().equals("azure")) {
+        success = credentialService.updateIdpCredential(integration);
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
+      } else if (integration.getConfigurationEntity().getIdp().getType().equals("opinsys")) {
+        success = credentialService.updateIdpCredential(integration);
+        if (!success) {
+          logger.error("Failed to save secret to aws parameter store.");
+          throw new SecretSavingException("Failed to save aws secret.");
+        }
+      }
+    }
+    return integration;
+  }
+
+  private Integration addAttribute(Integration integration, Attribute attribute) {
+    try {
+      Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
+      for (Iterator<Attribute> i = attributes.iterator(); i.hasNext();) {
+        Attribute a = i.next();
+        if (a.getName().equals(attribute.getName())) {
+          i.remove();
+        }
+      }
+      attribute.setConfigurationEntity(integration.getConfigurationEntity());
+      attributes.add(attribute);
+    } catch (Exception e) {
+      logger.error("Error in handling integration attributes: ", e);
+      throw new EntityCreationException("Integration creation failed");
+    }
+    return integration;
+  }
+
+  private Integration addRedirectUri(Integration integration) {
+    Set<Attribute> attributes = integration.getConfigurationEntity().getAttributes();
+    boolean found = false;
+    for (Attribute a : attributes) {
+      if (a.getName().equals(configuration.getRedirectUriReference())
+          && a.getContent().equals(configuration.getRedirectUriReferenceValue())) {
+        Attribute newAttribute = new Attribute("data", "redirectUri", configuration.getRedirectUriValue1());
+        integration = addAttribute(integration, newAttribute);
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      String flowname = integration.getConfigurationEntity().getIdp().getFlowName();
+      String content = configuration.getRedirectUriValue2().replace("<flowname>", flowname);
+      Attribute newAttribute = new Attribute("data", "redirectUri", content);
+      integration = addAttribute(integration, newAttribute);
+    }
+    return integration;
   }
 }
