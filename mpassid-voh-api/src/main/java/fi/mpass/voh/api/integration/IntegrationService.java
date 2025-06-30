@@ -487,7 +487,7 @@ public class IntegrationService {
         String logoContentType = getLogoContentType(integration.getId());
         if (logoContentType != null && !logoContentType.isEmpty()) {
           String logoUrl = this.configuration.getImageBaseUrl()
-          + "/" + integration.getId() + getLogoContentType(integration.getId());
+          + "/" + integration.getId() + "." + getLogoContentType(integration.getId());
           integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
         }
       }
