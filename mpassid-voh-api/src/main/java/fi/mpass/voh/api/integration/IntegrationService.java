@@ -1007,6 +1007,7 @@ public class IntegrationService {
           setIntegration.getConfigurationEntity().getSet()
               .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
+          setIntegration.setDeploymentPhase(integration.getDeploymentPhase());
           setIntegration.setOrganization(integration.getOrganization());
           integration.removeFromSets();
 
