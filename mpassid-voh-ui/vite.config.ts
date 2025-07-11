@@ -25,5 +25,11 @@ export default defineConfig({
     })
       // Each plugin except dynamicBase
       .filter((plugin) => plugin !== dynamicBase),
+      {
+        name: 'html-transform',
+        transformIndexHtml(html) {
+          return html.replace("https://virkailija.vaihda_opintopolku.fi/virkailija-raamit/apply-raamit.js", process.env.VITE_RAAMIT_PATH)
+        }
+      }
   ],
 });

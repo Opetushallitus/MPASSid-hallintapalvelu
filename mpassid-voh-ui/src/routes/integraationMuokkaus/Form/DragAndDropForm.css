@@ -13,7 +13,7 @@
     border-radius: 10px;
     display: grid;    
     justify-content: center;
-    align-items: left;
+    align-items: start;
     background-color: #f5f5f5;
     color: #3f3e3e;
     padding: 1vh;
@@ -35,7 +35,7 @@
     border-radius: 10px;
     display: grid;    
     justify-content: center;
-    align-items: left;
+    align-items: start;
     background-color: rgb(255, 233, 233);
     color: #3f3e3e;
     padding: 1vh;
@@ -58,7 +58,7 @@
     border-radius: 10px;
     display: grid;    
     justify-content: center;
-    align-items: left;
+    align-items: start;
     background-color: #f5f5f5;;
     color: #3f3e3e;
     padding: 1vh;

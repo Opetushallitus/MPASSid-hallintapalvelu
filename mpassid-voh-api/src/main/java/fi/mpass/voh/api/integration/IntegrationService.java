@@ -487,7 +487,7 @@ public class IntegrationService {
         String logoContentType = getLogoContentType(integration.getId());
         if (logoContentType != null && !logoContentType.isEmpty()) {
           String logoUrl = this.configuration.getImageBaseUrl()
-          + "/" + integration.getId() + getLogoContentType(integration.getId());
+          + "/" + integration.getId() + "." + getLogoContentType(integration.getId());
           integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
         }
       }
@@ -1007,6 +1007,7 @@ public class IntegrationService {
           setIntegration.getConfigurationEntity().getSet()
               .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
+          setIntegration.setDeploymentPhase(integration.getDeploymentPhase());
           setIntegration.setOrganization(integration.getOrganization());
           integration.removeFromSets();
 
