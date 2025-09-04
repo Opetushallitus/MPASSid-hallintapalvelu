@@ -150,7 +150,7 @@ const validateCertText = (value:string) => {
         }
         
     } else {
-        return (<FormattedMessage defaultMessage="Ei validi certificate!" />);
+        return(<></>);
     }
     
 }
