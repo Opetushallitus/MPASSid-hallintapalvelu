@@ -921,8 +921,10 @@ public class IntegrationService {
             : integrationRepository.getAvailableIdpTestIntegrationIdentifier();
         if (availableIdpIds != null && !availableIdpIds.isEmpty()) {
           integration.setId(availableIdpIds.get(0));
+          String flowname = integration.getConfigurationEntity().getIdp().getType() + availableIdpIds.get(0);
+          flowname = flowname.substring(0, 1).toUpperCase() + flowname.substring(1);
           integration.getConfigurationEntity().getIdp()
-              .setFlowName(integration.getConfigurationEntity().getIdp().getType() + availableIdpIds.get(0));
+              .setFlowName(flowname);
           integration.getConfigurationEntity().getIdp()
               .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableIdpIds.get(0));
           if (integration.getConfigurationEntity().getIdp() instanceof Azure) {

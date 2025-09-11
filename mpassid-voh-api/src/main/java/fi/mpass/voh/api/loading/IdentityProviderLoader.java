@@ -231,6 +231,8 @@ public class IdentityProviderLoader extends Loader {
                         IdentityProvider idp = existingIntegration.get().getConfigurationEntity()
                                 .getIdp();
                         if (d.getFieldName().contains("configurationEntity.idp.flowName")) {
+                            String flowname = (String) d.getRight();
+                            flowname = flowname.substring(0, 1).toUpperCase() + flowname.substring(1);
                             idp.setFlowName((String) d.getRight());
                         }
                         if (d.getFieldName().contains("configurationEntity.idp.idpId")) {
