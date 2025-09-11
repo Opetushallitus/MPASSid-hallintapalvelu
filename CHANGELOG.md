@@ -1,5 +1,9 @@
 # MPASSid-hallinta
 
+## 2.6
+- Allekirjoitusvarmenne on pakollinen palveluntarjoajien SAML2-integraatiossa myös testiympäristössä
+- Signingcertificate är oblikatoriskt i testmiljön för SAML2-integration
+
 ## 2.5
 - Koulutustoimija voi lisätä, muokata, poistaa Opinsys, Google, ADFS, Entra ID-integraation
 - Palveluntarjoaja voi lisätä, muokata, poistaa OIDC-integraation
