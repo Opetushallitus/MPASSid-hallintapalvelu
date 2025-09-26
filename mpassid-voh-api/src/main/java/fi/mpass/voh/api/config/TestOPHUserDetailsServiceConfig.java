@@ -39,19 +39,14 @@ public class TestOPHUserDetailsServiceConfig {
     public PasswordEncoder testPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-/* 
+
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetailsService userDetails;
-        try {
-            userDetails = new OphUserDetailsServiceImpl(kayttooikeusServerPrefix, kayttooikeusClientCallerId);
-        } catch (Exception e) {
-            logger.error("Exception through OphUserDetailsServiceImpl: " + e);
-            userDetails = new OPHUserDetailsService(testPasswordEncoder());
-        }
+        userDetails = new OPHUserDetailsService(passwordEncoder());
         return userDetails;
     }
- */
+
     static class OPHUserDetailsService implements UserDetailsService {
         PasswordEncoder passwordEncoder;
 
