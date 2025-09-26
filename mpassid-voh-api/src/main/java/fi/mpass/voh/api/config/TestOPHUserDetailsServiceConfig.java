@@ -39,7 +39,7 @@ public class TestOPHUserDetailsServiceConfig {
     public PasswordEncoder testPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
+/* 
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetailsService userDetails;
@@ -51,7 +51,7 @@ public class TestOPHUserDetailsServiceConfig {
         }
         return userDetails;
     }
-
+ */
     static class OPHUserDetailsService implements UserDetailsService {
         PasswordEncoder passwordEncoder;
 

@@ -25,6 +25,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
+import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 @Profile("prod")
@@ -79,6 +81,7 @@ public class CasSecurityConfig {
     public CasAuthenticationProvider casAuthenticationProvider(ServiceProperties sp, TicketValidator ticketValidator,
             UserDetailsService userDetailsService) {
         CasAuthenticationProvider provider = new CasAuthenticationProvider();
+        provider.setAuthenticationUserDetailsService(new OphUserDetailsServiceImpl());
         String random = RandomStringUtils.randomAlphanumeric(10);
         provider.setServiceProperties(sp);
         provider.setTicketValidator(ticketValidator);

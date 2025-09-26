@@ -40,7 +40,7 @@ public class OPHUserDetailsServiceConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
+/* 
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetailsService userDetails;
@@ -52,7 +52,7 @@ public class OPHUserDetailsServiceConfig {
         }
         return userDetails;
     }
-
+ */
     static class OPHUserDetailsService implements UserDetailsService {
         PasswordEncoder passwordEncoder;
 
