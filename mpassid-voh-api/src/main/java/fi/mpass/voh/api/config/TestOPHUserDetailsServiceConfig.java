@@ -43,7 +43,7 @@ public class TestOPHUserDetailsServiceConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetailsService userDetails;
-        userDetails = new OPHUserDetailsService(passwordEncoder());
+        userDetails = new OPHUserDetailsService(testPasswordEncoder());
         return userDetails;
     }
 

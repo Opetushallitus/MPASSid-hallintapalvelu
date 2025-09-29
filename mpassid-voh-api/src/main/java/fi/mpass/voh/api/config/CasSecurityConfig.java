@@ -16,9 +16,12 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
+import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
+import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -77,15 +80,21 @@ public class CasSecurityConfig {
         return new Cas30ServiceTicketValidator(casServerPrefix);
     }
 
+    @Bean
+    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService(
+            UserDetailsService userDetailsService) {
+        return new UserDetailsByNameServiceWrapper<>(userDetailsService);
+    }
+
     @Bean("casAuthenticationProvider")
     public CasAuthenticationProvider casAuthenticationProvider(ServiceProperties sp, TicketValidator ticketValidator,
-            UserDetailsService userDetailsService) {
+            AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authUserDetailsService) {
         CasAuthenticationProvider provider = new CasAuthenticationProvider();
-        provider.setAuthenticationUserDetailsService(new OphUserDetailsServiceImpl());
         String random = RandomStringUtils.randomAlphanumeric(10);
+        provider.setAuthenticationUserDetailsService(new OphUserDetailsServiceImpl());
         provider.setServiceProperties(sp);
         provider.setTicketValidator(ticketValidator);
-        provider.setUserDetailsService(userDetailsService);
+        provider.setAuthenticationUserDetailsService(authUserDetailsService);
         provider.setKey(random);
         return provider;
     }
