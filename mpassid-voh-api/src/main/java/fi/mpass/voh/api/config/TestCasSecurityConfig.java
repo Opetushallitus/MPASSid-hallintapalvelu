@@ -78,14 +78,34 @@ public class TestCasSecurityConfig {
         return new Cas30ServiceTicketValidator(casServerPrefix);
     }
 
+    @Bean
+    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
+        return token -> {
+            Assertion assertion = token.getAssertion();
+            Map<String, Object> attrs = assertion.getPrincipal().getAttributes();
+
+            // Extract roles from CAS attributes
+            Collection<?> rawRoles = (Collection<?>) attrs.getOrDefault("roles", List.of());
+
+            List<String> roles = rawRoles.stream()
+                    .map(Object::toString)
+                    .toList();
+
+            return User.withUsername(token.getName())
+                    .password("N/A")
+                    .authorities(roles.toArray(new String[0]))
+                    .build();
+        };
+    }
+
     @Bean("casAuthenticationProvider")
     public CasAuthenticationProvider casAuthenticationProvider(ServiceProperties sp, TicketValidator ticketValidator,
-            UserDetailsService userDetailsService) {
+            AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authUserDetailsService) {
         CasAuthenticationProvider provider = new CasAuthenticationProvider();
         String random = RandomStringUtils.randomAlphanumeric(10);
         provider.setServiceProperties(sp);
         provider.setTicketValidator(ticketValidator);
-        provider.setUserDetailsService(userDetailsService);
+        provider.setAuthenticationUserDetailsService(authUserDetailsService);
         provider.setKey(random);
         return provider;
     }
