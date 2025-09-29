@@ -1,8 +1,13 @@
 package fi.mpass.voh.api.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.apereo.cas.client.session.SingleSignOutFilter;
+import org.apereo.cas.client.validation.Assertion;
 import org.apereo.cas.client.validation.Cas30ServiceTicketValidator;
 import org.apereo.cas.client.validation.TicketValidator;
 
@@ -21,6 +26,7 @@ import org.springframework.security.cas.authentication.CasAuthenticationProvider
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
 import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -80,20 +86,35 @@ public class CasSecurityConfig {
         return new Cas30ServiceTicketValidator(casServerPrefix);
     }
 
-    @Bean
-    public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService(
-            UserDetailsService userDetailsService) {
-        return new UserDetailsByNameServiceWrapper<>(userDetailsService);
-    }
+@Bean
+public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
+    return token -> {
+        Assertion assertion = token.getAssertion();
+        Map<String, Object> attrs = assertion.getPrincipal().getAttributes();
+
+        // Extract roles from CAS attributes
+        Collection<?> rawRoles = (Collection<?>) attrs.getOrDefault("roles", List.of());
+
+        List<String> roles = rawRoles.stream()
+                                     .map(Object::toString)
+                                     .toList();
+
+
+        return User.withUsername(token.getName())
+                   .password("N/A")
+                   .authorities(roles.toArray(new String[0]))
+                   .build();
+    };
+}
 
     @Bean("casAuthenticationProvider")
     public CasAuthenticationProvider casAuthenticationProvider(ServiceProperties sp, TicketValidator ticketValidator,
             AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authUserDetailsService) {
         CasAuthenticationProvider provider = new CasAuthenticationProvider();
         String random = RandomStringUtils.randomAlphanumeric(10);
-        provider.setAuthenticationUserDetailsService(new OphUserDetailsServiceImpl());
         provider.setServiceProperties(sp);
         provider.setTicketValidator(ticketValidator);
+        //provider.setAuthenticationUserDetailsService(new OphUserDetailsServiceImpl());
         provider.setAuthenticationUserDetailsService(authUserDetailsService);
         provider.setKey(random);
         return provider;
