@@ -840,33 +840,11 @@ export const dataConfiguration:UiConfiguration[] = [
   {
     name: 'signingCertificates',
     type: 'metadata',
-    mandatory: false,
-    array: true,
-    switch: false,
-    validation: [ 'cert'],
-    trim: 'cert',
-    integrationType: [
-        {
-            name: 'saml',
-            editable: true,
-            visible: true,
-        },
-        {
-            name: 'oidc',
-            editable: false,
-            visible: false,
-        }
-    ]
-  },
-  {
-    name: 'signingCertificates',
-    type: 'metadata',
     mandatory: true,
     array: true,
     switch: false,
     validation: ['cert' ],
     trim: 'cert',
-    environment: 1,
     integrationType: [
         {
             name: 'saml',
