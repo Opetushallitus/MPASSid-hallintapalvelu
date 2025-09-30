@@ -34,7 +34,6 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
-import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl;
 
 import org.apache.commons.lang3.RandomStringUtils;
 

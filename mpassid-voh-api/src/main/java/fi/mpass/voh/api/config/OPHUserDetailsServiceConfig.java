@@ -12,7 +12,6 @@ import org.springframework.context.annotation.PropertySource;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import fi.vm.sade.javautils.kayttooikeusclient.OphUserDetailsServiceImpl;
 
 import java.util.List;
 
@@ -41,31 +40,31 @@ public class OPHUserDetailsServiceConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetailsService userDetails;
-        userDetails = new OPHUserDetailsService(passwordEncoder());
-        return userDetails;
-    }
+    // @Bean
+    // public UserDetailsService userDetailsService() {
+    //     UserDetailsService userDetails;
+    //     userDetails = new OPHUserDetailsService(passwordEncoder());
+    //     return userDetails;
+    // }
 
-    static class OPHUserDetailsService implements UserDetailsService {
-        PasswordEncoder passwordEncoder;
+    // static class OPHUserDetailsService implements UserDetailsService {
+    //     PasswordEncoder passwordEncoder;
 
-        private OPHUserDetailsService(PasswordEncoder passwordEncoder) {
-            this.passwordEncoder = passwordEncoder;
-        }
+    //     private OPHUserDetailsService(PasswordEncoder passwordEncoder) {
+    //         this.passwordEncoder = passwordEncoder;
+    //     }
 
-        @Override
-        public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-            String random = RandomStringUtils.randomAlphanumeric(10);
-            switch (username) {
-                default:
-                    return User.builder()
-                            .authorities(List.of(RESTRICTED_AUTHORITIES))
-                            .password(this.passwordEncoder.encode(random))
-                            .username(username)
-                            .build();
-            }
-        }
-    }
+    //     @Override
+    //     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    //         String random = RandomStringUtils.randomAlphanumeric(10);
+    //         switch (username) {
+    //             default:
+    //                 return User.builder()
+    //                         .authorities(List.of(RESTRICTED_AUTHORITIES))
+    //                         .password(this.passwordEncoder.encode(random))
+    //                         .username(username)
+    //                         .build();
+    //         }
+    //     }
+    // }
 }
