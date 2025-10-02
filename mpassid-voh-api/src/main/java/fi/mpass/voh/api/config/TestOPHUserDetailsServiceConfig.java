@@ -1,4 +1,4 @@
-package fi.mpass.voh.api.config;
+/* package fi.mpass.voh.api.config;
 
 import java.util.List;
 
@@ -67,3 +67,4 @@ public class TestOPHUserDetailsServiceConfig {
     //     }
     // }
 }
+ */

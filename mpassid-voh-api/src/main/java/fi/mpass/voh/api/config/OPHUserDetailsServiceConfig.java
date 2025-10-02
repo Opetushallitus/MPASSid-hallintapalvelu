@@ -1,4 +1,4 @@
-package fi.mpass.voh.api.config;
+/* package fi.mpass.voh.api.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,3 +68,4 @@ public class OPHUserDetailsServiceConfig {
     //     }
     // }
 }
+ */
