@@ -930,6 +930,9 @@ public class IntegrationService {
           if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
             integration = addRedirectUri(integration);
           }
+          if (integration.getDiscoveryInformation().getTitle() == null) {
+            integration.getDiscoveryInformation().setTitle("");
+          }
         } else {
           // TODO the case of the first integration without preloaded integrations
           logger.error("Failed to find an available idp integration identifier");
