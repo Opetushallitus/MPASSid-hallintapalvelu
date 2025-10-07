@@ -603,6 +603,10 @@ public class IntegrationService {
           integration = addRedirectUri(integration);
         }
 
+        if (integration.getDiscoveryInformation().getTitle() == null) {
+          integration.getDiscoveryInformation().setTitle("");
+        }
+
         integration = changeLogoUrlForProvisioning(integration);
       }
       try {

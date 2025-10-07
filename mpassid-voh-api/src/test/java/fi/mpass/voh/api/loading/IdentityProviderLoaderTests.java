@@ -370,7 +370,7 @@ class IdentityProviderLoaderTests {
         // 4000002 removed discovery information title field
         Optional<Integration> removedDiscoveryInformationTitleIntegration = repository.findById(4000002L);
         assertTrue(removedDiscoveryInformationTitleIntegration.isPresent());
-        assertNull(removedDiscoveryInformationTitleIntegration.get().getDiscoveryInformation().getTitle());
+        assertTrue(removedDiscoveryInformationTitleIntegration.get().getDiscoveryInformation().getTitle().equals(""));
     }
 
     @Test
