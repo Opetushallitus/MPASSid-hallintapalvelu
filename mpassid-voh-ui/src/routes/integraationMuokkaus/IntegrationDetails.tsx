@@ -293,10 +293,16 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             devLog("DEBUG","isvalid newConfigurationEntityData (isValidSchoolSelection)",isValidSchoolSelection)
             devLog("DEBUG","isvalid newConfigurationEntityData (isValidRoleDetails)",isValidRoleDetails)
             
+            devLog("DEBUG","logoOK newConfigurationEntityData (role)",role)
+            devLog("DEBUG","logoOK newConfigurationEntityData (newLogo)",newLogo)
+            devLog("DEBUG","logoOK newConfigurationEntityData (metadataFile.length)",metadataFile.length)
+            devLog("DEBUG","logoOK newConfigurationEntityData (newConfigurationEntityData?.idp?.logoUrl)",newConfigurationEntityData?.idp?.logoUrl)
+            
             const logoOK=(role==='sp'||
-                          newLogo||metadataFile.length===1||
+                          newLogo||
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
                         )
+            devLog("DEBUG","logoOK )",logoOK)
 
             setSaveDialogState(true);
             devLog("DEBUG","setCanSave (newConfigurationEntityData)",newConfigurationEntityData)
@@ -371,7 +377,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             
         
         const logoOK=(role==='sp'||
-                          newLogo||metadataFile.length===1||
+                          newLogo||
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
         )
         setSaveDialogState(true);

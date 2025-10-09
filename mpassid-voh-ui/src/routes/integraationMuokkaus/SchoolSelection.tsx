@@ -288,13 +288,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
             
           } else {
-            devLog("DEBUG","SchoolSelection (canSave 4)",true)
+            devLog("DEBUG","SchoolSelection (canSave 4 institutionTypeList.length)",institutionTypeList.length)
             devLog("DEBUG","SchoolSelection (canSave 4 schools)",discoveryInformation.schools?.length)
             devLog("DEBUG","SchoolSelection (canSave 4 excludedSchools)",discoveryInformation.excludedSchools?.length)
             
             if(institutionTypeList.length>1&&discoveryInformation.schools?.length===0&&discoveryInformation.excludedSchools?.length===0) {
               setCanSave(false)
             } else {
+            
               setCanSave(true)
             }
             
@@ -578,13 +579,18 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           setInstitutionTypeList(configurationEntity.idp.institutionTypes)  
           if(values&&values.length>0) {
             getExtraSchoolsConfiguration(values.map(v=>Number(v)))
-          }
+          } 
         }
         //if(extraSchoolsConfiguration) {
         //  getExtraSchoolsConfiguration(values.map(v=>Number(v)))
         //}
-        setConfigurationEntity(clone(configurationEntity))        
-        saveCheck(true,showLogo,showSchools.current)
+        setConfigurationEntity(clone(configurationEntity))      
+        if(values&&values.length>0) {  
+          saveCheck(true,showLogo,showSchools.current)
+        } else {
+          setCanSave(false)
+        }
+        
         
         
     }
