@@ -261,28 +261,32 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
     }
 
-    const saveCheck = (value:boolean,showLogo:boolean,showSchools:boolean) => {
+    const saveCheck = (idp:boolean,showLogo:boolean,showSchools:boolean) => {
       
       if(integration?.configurationEntity?.idp) {
-        devLog("DEBUG","SchoolSelection (value)",value)                
-
-        if(value&&
-          ((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo)&&
-           (!showSchools||
-            (showSchools&&
-             isExtraSchoolConfigurationOk()&&
-             (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0))
-            )
-           )
-        ) {
-          devLog("DEBUG","SchoolSelection (canSave 2)",true)
-          setCanSave(true)  
-          devLog("DEBUG","SchoolSelection (saveCheck ready)",true)
+        devLog("DEBUG","SchoolSelection (idp)",idp)      
+        
+        if(idp&&((configurationEntity?.idp?.logoUrl&&configurationEntity?.idp?.logoUrl!=='')||showLogo)) {
+            devLog("DEBUG","SchoolSelection (logo)",true)            
+            if (!showSchools||
+                (showSchools&&
+                isExtraSchoolConfigurationOk()&&
+                (configurationEntity?.idp&&(configurationEntity.idp.institutionTypes?.length!>0))
+                )){
+                  devLog("DEBUG","SchoolSelection (canSave School configuration)",true)                  
+                  setCanSave(true)  
+                  devLog("DEBUG","SchoolSelection (saveCheck ready)",true)
+                } else {
+                  devLog("DEBUG","SchoolSelection (canSave School configuration)",false)                  
+                  setCanSave(false)  
+                  devLog("DEBUG","SchoolSelection (saveCheck ready)",false)
+                }
+          
         } else {
           devLog("DEBUG","SchoolSelection (saveCheck environment)",environment)
           devLog("DEBUG","SchoolSelection (saveCheck originalEnvironment.current)",originalEnvironment.current)
           if(environment===originalEnvironment.current||originalEnvironment.current===-5) {
-            devLog("DEBUG","SchoolSelection (canSave 3)",false)
+            devLog("DEBUG","SchoolSelection (canSave Original environemt)",true)
             setCanSave(false)
             devLog("DEBUG","SchoolSelection (saveCheck not ready)",false)
 
@@ -293,9 +297,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             devLog("DEBUG","SchoolSelection (canSave 4 excludedSchools)",discoveryInformation.excludedSchools?.length)
             
             if(institutionTypeList.length>1&&discoveryInformation.schools?.length===0&&discoveryInformation.excludedSchools?.length===0) {
+              devLog("DEBUG","SchoolSelection (canSave 4)",false)
               setCanSave(false)
             } else {
-            
+              devLog("DEBUG","SchoolSelection (canSave 4)",true)
               setCanSave(true)
             }
             
@@ -305,15 +310,15 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         }
 
       } else {
-        devLog("DEBUG","SchoolSelection (canSave 5)",false)
+        devLog("DEBUG","SchoolSelection (canSave not idp)",false)
         setCanSave(false)
-        devLog("DEBUG","SchoolSelection (saveCheck not idp)",true)
+        devLog("DEBUG","SchoolSelection (saveCheck not ready)",true)
       }
 
     }
 
     const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
-
+      devLog("DEBUG", "handleShowSchoolsChange",checked)
       showSchools.current=checked
        discoveryInformation.showSchools=checked;
       if(checked) {
@@ -338,6 +343,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       updateDiscoveryInformation(clone(discoveryInformation))
       setConfigurationEntity(clone(configurationEntity))
 
+      
       saveCheck(true,showLogo,checked);
     };
 
@@ -588,6 +594,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         if(values&&values.length>0) {  
           saveCheck(true,showLogo,showSchools.current)
         } else {
+          devLog("DEBUG","SchoolSelection (canSave 6)",false)
           setCanSave(false)
         }
         
