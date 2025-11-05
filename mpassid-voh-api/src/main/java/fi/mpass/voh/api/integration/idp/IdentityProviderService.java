@@ -100,6 +100,8 @@ public class IdentityProviderService {
                 if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
                     flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Adfs) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
+                    ((Adfs) i.get().getConfigurationEntity().getIdp()).setMetadataUrl(""); // Reset the metadataUrl
+                    integrationService.addDefaultMetadataUrl(i.get());
                     destinationFile = rootLocation.resolve(Paths.get("adfs_" + i.get().getId().toString() + "-metadata.xml")).normalize().toAbsolutePath();
                 } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                     flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
@@ -205,16 +207,13 @@ public class IdentityProviderService {
 
     public InputStreamResource getSAMLMetadata(Long id) {
         // TODO: Unit tests
-        String flowname = null;
         String filename = null;
         Optional<Integration> i = integrationService.getIntegration(id);
         if (i.isPresent()) {
             try {
                 if (i.get().getConfigurationEntity().getIdp() instanceof Adfs) {
-                    flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     filename = "adfs_" + i.get().getId().toString() + "-metadata.xml";
                 } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
-                    flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     filename = "gsuite_" + i.get().getId().toString() + "-metadata.xml";
                 } else {
                     logger.debug("Given id is not Adfs or Gsuite");
@@ -223,19 +222,17 @@ public class IdentityProviderService {
                 logger.error("Exception in retrieving integration. {}", e.getMessage());
             }
 
-            if (flowname == null) {
-                logger.error("No flowname.");
-                //throw new EntityCreationException("Failed to get metadata.");
-            }
-
             if (filename == null) {
                 logger.error("No filename.");
                 throw new EntityCreationException("Failed to get metadata.");
             }
         }
+        else {
+            logger.error("No integration {} found.", id.toString());
+        }
 
         Path rootLocation = Paths.get(metadataBasePath);
-        Path sourceFile = rootLocation.resolve(Paths.get(filename)).normalize().toAbsolutePath();  
+        Path sourceFile = rootLocation.resolve(Paths.get(filename)).normalize().toAbsolutePath();
 
         try {
             return new InputStreamResource(new FileInputStream(sourceFile.toString()));

@@ -1311,7 +1311,7 @@ public class IntegrationService {
     return type;
   }
 
-  private Integration addDefaultMetadataUrl(Integration integration) {
+  public Integration addDefaultMetadataUrl(Integration integration) {
     // Add default metadataUrl (UI) if metadataUrl is not yet set
     if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
       if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
