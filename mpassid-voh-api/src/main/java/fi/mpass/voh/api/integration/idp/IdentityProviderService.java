@@ -101,7 +101,7 @@ public class IdentityProviderService {
                     flowname = ((Adfs) i.get().getConfigurationEntity().getIdp()).getFlowName();
                     metadataUrl = ((Adfs) i.get().getConfigurationEntity().getIdp()).getMetadataUrl();
                     ((Adfs) i.get().getConfigurationEntity().getIdp()).setMetadataUrl(""); // Reset the metadataUrl
-                    integrationService.addDefaultMetadataUrl(i.get());
+                    //integrationService.addDefaultMetadataUrl(i.get());
                     destinationFile = rootLocation.resolve(Paths.get("adfs_" + i.get().getId().toString() + "-metadata.xml")).normalize().toAbsolutePath();
                 } else if (i.get().getConfigurationEntity().getIdp() instanceof Gsuite) {
                     flowname = ((Gsuite) i.get().getConfigurationEntity().getIdp()).getFlowName();
