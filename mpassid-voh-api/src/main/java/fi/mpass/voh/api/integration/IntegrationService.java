@@ -482,12 +482,14 @@ public class IntegrationService {
   public Integration changeLogoUrlForProvisioning(Integration integration) {
     // Change the integrations logoUrl for provisioning.
     if (integration.getConfigurationEntity() != null && integration.getConfigurationEntity().getIdp() != null) {
-      if (integration.getConfigurationEntity().getIdp().getLogoUrl() != null && (integration.getConfigurationEntity().getIdp().getLogoUrl().contains(this.configuration.getImageBaseUrlUi()) || integration.getConfigurationEntity().getIdp().getLogoUrl().isEmpty())) {
+      if (integration.getConfigurationEntity().getIdp().getLogoUrl() != null && (integration.getConfigurationEntity()
+          .getIdp().getLogoUrl().contains(this.configuration.getImageBaseUrlUi())
+          || integration.getConfigurationEntity().getIdp().getLogoUrl().isEmpty())) {
         // Only change logoUrl if it points to Hallintapalvelu (opintopolku) or is empty
         String logoContentType = getLogoContentType(integration.getId());
         if (logoContentType != null && !logoContentType.isEmpty()) {
           String logoUrl = this.configuration.getImageBaseUrl()
-          + "/" + integration.getId() + "." + getLogoContentType(integration.getId());
+              + "/" + integration.getId() + "." + getLogoContentType(integration.getId());
           integration.getConfigurationEntity().getIdp().setLogoUrl(logoUrl);
         }
       }
@@ -594,9 +596,11 @@ public class IntegrationService {
         }
 
         if (existingIntegration.getDeploymentPhase() == 0 && integration.getDeploymentPhase() != 0) {
-          // If integration is idp and in testing, don't allow deployment phase to be changed to prod or test-prod. 
+          // If integration is idp and in testing, don't allow deployment phase to be
+          // changed to prod or test-prod.
           logger.error("Idp deployment phase is not allowed to be changed from test to prod or test to test-prod.");
-          throw new EntityCreationException("Integration update failed, not allowed to change deployment phase from test.");
+          throw new EntityCreationException(
+              "Integration update failed, not allowed to change deployment phase from test.");
         }
 
         if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
@@ -938,11 +942,14 @@ public class IntegrationService {
         integration = handleSecrets(integration);
 
         if (integration.getConfigurationEntity().getIdp() instanceof Adfs) {
-          identityProviderService.saveMetadata(integration, ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+          identityProviderService.saveMetadata(integration,
+              ((Adfs) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         } else if (integration.getConfigurationEntity().getIdp() instanceof Gsuite) {
-          identityProviderService.saveMetadata(integration, ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+          identityProviderService.saveMetadata(integration,
+              ((Gsuite) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         } else if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
-          identityProviderService.saveMetadata(integration, ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
+          identityProviderService.saveMetadata(integration,
+              ((Azure) integration.getConfigurationEntity().getIdp()).getMetadataUrl());
         }
 
         integration = addDefaultMetadataUrl(integration);
@@ -1330,18 +1337,38 @@ public class IntegrationService {
   }
 
   public Integration changeMetadataUrlForProvisioning(Integration integration) {
-    // If metadataUrl points to hallintapalvelu, change it to point at proxy
+    // If metadataUrl points to hallintapalvelu or is old style, change it to point at proxy
     if (integration.getConfigurationEntity().getIdp() instanceof IdentityProvider) {
       if (integration.getConfigurationEntity().getIdp().getType().equals("adfs")) {
         Adfs adfsIdp = (Adfs) integration.getConfigurationEntity().getIdp();
-        if (integration.getId() != null && adfsIdp.getMetadataUrl() != null && adfsIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi()) && adfsIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
+        if (integration.getId() != null && adfsIdp.getMetadataUrl() != null
+            && adfsIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi())
+            && adfsIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
+          // If metadataUrl is set for UI
+          String metadataUrl = this.configuration.getMetadataBaseUrl()
+              + "/adfs_" + integration.getId().toString() + "-metadata.xml";
+          adfsIdp.setMetadataUrl(metadataUrl);
+        } else if (integration.getId() != null && adfsIdp.getMetadataUrl() != null
+            && adfsIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrl())
+            && !adfsIdp.getMetadataUrl().contains(integration.getId().toString())) {
+          // If metadataUrl is old style
           String metadataUrl = this.configuration.getMetadataBaseUrl()
               + "/adfs_" + integration.getId().toString() + "-metadata.xml";
           adfsIdp.setMetadataUrl(metadataUrl);
         }
       } else if (integration.getConfigurationEntity().getIdp().getType().equals("gsuite")) {
         Gsuite gsuiteIdp = (Gsuite) integration.getConfigurationEntity().getIdp();
-        if (integration.getId() != null && gsuiteIdp.getMetadataUrl() != null && gsuiteIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi()) && gsuiteIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
+        if (integration.getId() != null && gsuiteIdp.getMetadataUrl() != null
+            && gsuiteIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrlUi())
+            && gsuiteIdp.getMetadataUrl().endsWith(integration.getId().toString())) {
+          // If metadataUrl is set for UI
+          String metadataUrl = this.configuration.getMetadataBaseUrl()
+              + "/gsuite_" + integration.getId().toString() + "-metadata.xml";
+          gsuiteIdp.setMetadataUrl(metadataUrl);
+        } else if (integration.getId() != null && gsuiteIdp.getMetadataUrl() != null
+            && gsuiteIdp.getMetadataUrl().contains(configuration.getMetadataBaseUrl())
+            && !gsuiteIdp.getMetadataUrl().contains(integration.getId().toString())) {
+          // If metadataUrl is old style
           String metadataUrl = this.configuration.getMetadataBaseUrl()
               + "/gsuite_" + integration.getId().toString() + "-metadata.xml";
           gsuiteIdp.setMetadataUrl(metadataUrl);
