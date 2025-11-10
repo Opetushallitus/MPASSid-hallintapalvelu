@@ -1030,7 +1030,7 @@ public class IntegrationService {
             integration = handleSecrets(integration);
             //integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
-            //integrationRepository.saveAndFlush(optionalSet.get());
+            integrationRepository.save(optionalSet.get());
             return integrationRepository.save(integration);
           } else {
             logger.error("No integration set with id {} found.", setId);
