@@ -324,7 +324,7 @@ public class Integration implements Persistable<Long> {
         boolean forwardExists = false;
         for (Iterator<Integration> integrationIterator = this.getIntegrationSets()
                 .iterator(); integrationIterator.hasNext();) {
-            if (integrationIterator.next().getId().equals(this.getId())) {
+            if (integrationIterator.next().getId().equals(integrationSet.getId())) {
                 forwardExists = true;
                 break;
             }

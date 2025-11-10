@@ -1017,20 +1017,20 @@ public class IntegrationService {
 
           integration = handleSecrets(integration);
 
-          integrationRepository.save(setIntegration);
-          integrationRepository.save(integration);
+          setIntegration = integrationRepository.save(setIntegration);
+          //integrationRepository.save(integration);
           integration.addToSet(setIntegration);
-          integrationRepository.save(setIntegration);
+          //integrationRepository.save(setIntegration);
           integration = integrationRepository.save(integration);
           return integration;
         } else {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
           if (optionalSet.isPresent()) {
-            integration = handleSecrets(integration);
-            //integration = integrationRepository.saveAndFlush(integration);
+            handleSecrets(integration);
+            integration = integrationRepository.save(integration);
             integration.addToSet(optionalSet.get());
-            integrationRepository.save(optionalSet.get());
+            //integrationRepository.save(optionalSet.get());
             return integrationRepository.save(integration);
           } else {
             logger.error("No integration set with id {} found.", setId);
