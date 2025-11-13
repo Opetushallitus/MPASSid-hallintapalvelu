@@ -1005,7 +1005,7 @@ public class IntegrationService {
 
           Integration setIntegration = createBlankIntegration("set", "", "", null);
           setIntegration.setId(setId);
-          setIntegration.getConfigurationEntity().getSet().setId(setId);
+          //setIntegration.getConfigurationEntity().getSet().setId(setId);
           setIntegration.getConfigurationEntity().getSet()
               .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
