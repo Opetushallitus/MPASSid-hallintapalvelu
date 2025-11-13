@@ -111,7 +111,9 @@ public class ConfigurationEntity {
 
     public void setSet(IntegrationSet set) {
         this.set = set;
-        this.set.setConfigurationEntity(this);
-        this.role = "set";
+        if (set != null) {
+            this.set.setConfigurationEntity(this);
+            this.role = "set";
+        }
     }
 }
