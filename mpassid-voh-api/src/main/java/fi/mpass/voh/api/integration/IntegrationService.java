@@ -1020,11 +1020,17 @@ public class IntegrationService {
           removeSetFromSpOrIdp(integration);
           integration = handleSecrets(integration);
 
-          setIntegration = integrationRepository.save(setIntegration);
+          //setIntegration = integrationRepository.save(setIntegration);
           //integrationRepository.save(integration);
-          integration.addToSet(setIntegration);
+          //integration.addToSet(setIntegration);
           //integrationRepository.save(setIntegration);
-          integration = integrationRepository.save(integration);
+          //integration = integrationRepository.save(integration);
+          //return integration;
+
+          integrationRepository.save(setIntegration);           // persist set first (no link yet)
+          integrationRepository.save(integration);              // persist SP (no link yet)
+          integration.addToSet(setIntegration);                 // set link in memory
+          integration = integrationRepository.saveAndFlush(integration); // save owner writes join row
           return integration;
         } else {
           // Add to existing integration set

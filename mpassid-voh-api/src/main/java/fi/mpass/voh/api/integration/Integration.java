@@ -74,7 +74,7 @@ public class Integration implements Persistable<Long> {
     // @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE,
     // CascadeType.PERSIST }, fetch = FetchType.EAGER)
     //@ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.PERSIST }, fetch = FetchType.EAGER)
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
     @Audited
     @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
     private Set<Integration> integrationSets = new HashSet<>();
@@ -155,7 +155,7 @@ public class Integration implements Persistable<Long> {
     @JsonIgnore
     @Override
     public boolean isNew() {
-        return this.id == null;
+        return this.id == null || this.id == 0L;
     }
 
     public int getVersion() {
