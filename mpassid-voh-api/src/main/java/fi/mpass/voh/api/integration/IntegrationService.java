@@ -45,6 +45,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -896,6 +897,7 @@ public class IntegrationService {
     }
   }
 
+  @Transactional
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
 
@@ -1018,10 +1020,10 @@ public class IntegrationService {
           removeSetFromSpOrIdp(integration);
           integration = handleSecrets(integration);
 
-          integrationRepository.save(setIntegration);
-          integrationRepository.save(integration);
+          setIntegration = integrationRepository.save(setIntegration);
+          //integrationRepository.save(integration);
           integration.addToSet(setIntegration);
-          integrationRepository.save(setIntegration);
+          //integrationRepository.save(setIntegration);
           integration = integrationRepository.save(integration);
           return integration;
         } else {
@@ -1032,8 +1034,8 @@ public class IntegrationService {
             integration = handleSecrets(integration);
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
-            integrationRepository.saveAndFlush(optionalSet.get());
-            return integrationRepository.saveAndFlush(integration);
+            //integrationRepository.save(optionalSet.get());
+            return integrationRepository.save(integration);
           } else {
             logger.error("No integration set with id {} found.", setId);
             throw new EntityCreationException("Integration creation failed");

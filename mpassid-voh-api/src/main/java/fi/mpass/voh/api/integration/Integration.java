@@ -73,7 +73,8 @@ public class Integration implements Persistable<Long> {
     @JsonIgnoreProperties("integrationSets")
     // @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE,
     // CascadeType.PERSIST }, fetch = FetchType.EAGER)
-    @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.PERSIST }, fetch = FetchType.EAGER)
+    //@ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.PERSIST }, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @Audited
     @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
     private Set<Integration> integrationSets = new HashSet<>();
@@ -323,7 +324,7 @@ public class Integration implements Persistable<Long> {
         boolean forwardExists = false;
         for (Iterator<Integration> integrationIterator = this.getIntegrationSets()
                 .iterator(); integrationIterator.hasNext();) {
-            if (integrationIterator.next().getId().equals(this.getId())) {
+            if (integrationIterator.next().getId().equals(integrationSet.getId())) {
                 forwardExists = true;
                 break;
             }
