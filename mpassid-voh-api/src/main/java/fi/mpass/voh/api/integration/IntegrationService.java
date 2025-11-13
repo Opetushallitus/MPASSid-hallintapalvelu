@@ -990,6 +990,9 @@ public class IntegrationService {
           logger.error("No integration set id found", e);
         }
 
+        removeSetFromSpOrIdp(integration);
+        integration.getIntegrationSets().clear();
+
         if (setId == 0) {
           // No existing integration set, create new
           List<Long> availableSetIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
