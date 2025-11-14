@@ -607,6 +607,10 @@ public class IntegrationService {
           integration = addRedirectUri(integration);
         }
 
+        if (integration.getDiscoveryInformation().getTitle() == null) {
+          integration.getDiscoveryInformation().setTitle("");
+        }
+
         integration = changeLogoUrlForProvisioning(integration);
       }
       try {
@@ -933,6 +937,9 @@ public class IntegrationService {
               .setIdpId(integration.getConfigurationEntity().getIdp().getType() + "_" + availableIdpIds.get(0));
           if (integration.getConfigurationEntity().getIdp() instanceof Azure) {
             integration = addRedirectUri(integration);
+          }
+          if (integration.getDiscoveryInformation().getTitle() == null) {
+            integration.getDiscoveryInformation().setTitle("");
           }
         } else {
           // TODO the case of the first integration without preloaded integrations
