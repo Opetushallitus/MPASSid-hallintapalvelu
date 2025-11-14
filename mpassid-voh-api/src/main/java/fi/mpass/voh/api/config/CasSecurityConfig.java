@@ -1,10 +1,18 @@
 package fi.mpass.voh.api.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.apereo.cas.client.session.SingleSignOutFilter;
+import org.apereo.cas.client.validation.Assertion;
 import org.apereo.cas.client.validation.Cas30ServiceTicketValidator;
 import org.apereo.cas.client.validation.TicketValidator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,14 +24,19 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.cas.ServiceProperties;
+import org.springframework.security.cas.authentication.CasAssertionAuthenticationToken;
 import org.springframework.security.cas.authentication.CasAuthenticationProvider;
 import org.springframework.security.cas.web.CasAuthenticationEntryPoint;
 import org.springframework.security.cas.web.CasAuthenticationFilter;
+import org.springframework.security.core.userdetails.AuthenticationUserDetailsService;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+
 
 import org.apache.commons.lang3.RandomStringUtils;
 
@@ -31,6 +44,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 @Configuration
 @PropertySource("classpath:cas-prod.properties")
 public class CasSecurityConfig {
+    private static final Logger logger = LoggerFactory.getLogger(CasSecurityConfig.class);
+
 
     @Value("${cas.server.prefix}")
     private String casServerPrefix;
@@ -75,14 +90,37 @@ public class CasSecurityConfig {
         return new Cas30ServiceTicketValidator(casServerPrefix);
     }
 
+@Bean
+public AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authenticationUserDetailsService() {
+    return token -> {
+        Assertion assertion = token.getAssertion();
+        Map<String, Object> attrs = assertion.getPrincipal().getAttributes();
+
+        // Extract roles from CAS attributes
+        Collection<?> rawRoles = (Collection<?>) attrs.getOrDefault("roles", List.of());
+
+        List<String> roles = rawRoles.stream()
+                                     .map(Object::toString)
+                                     .toList();
+
+        logger.debug(roles.toString());
+
+        return User.withUsername(token.getName())
+                   .password("N/A")
+                   .authorities(roles.toArray(new String[0]))
+                   .build();
+    };
+}
+
     @Bean("casAuthenticationProvider")
     public CasAuthenticationProvider casAuthenticationProvider(ServiceProperties sp, TicketValidator ticketValidator,
-            UserDetailsService userDetailsService) {
+            AuthenticationUserDetailsService<CasAssertionAuthenticationToken> authUserDetailsService) {
         CasAuthenticationProvider provider = new CasAuthenticationProvider();
         String random = RandomStringUtils.randomAlphanumeric(10);
         provider.setServiceProperties(sp);
         provider.setTicketValidator(ticketValidator);
-        provider.setUserDetailsService(userDetailsService);
+        //provider.setAuthenticationUserDetailsService(new OphUserDetailsServiceImpl());
+        provider.setAuthenticationUserDetailsService(authUserDetailsService);
         provider.setKey(random);
         return provider;
     }
