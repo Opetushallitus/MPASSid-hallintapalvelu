@@ -1,11 +1,11 @@
 package fi.mpass.voh.api.integration;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,7 +29,6 @@ import javax.imageio.stream.ImageInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -46,6 +45,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -56,7 +56,6 @@ import fi.mpass.voh.api.exception.EntityInactivationException;
 import fi.mpass.voh.api.exception.EntityNotFoundException;
 import fi.mpass.voh.api.exception.EntityUpdateException;
 import fi.mpass.voh.api.exception.SecretSavingException;
-import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.IntegrationSpecificationCriteria.Category;
 import fi.mpass.voh.api.integration.attribute.Attribute;
 import fi.mpass.voh.api.integration.idp.Adfs;
@@ -615,6 +614,7 @@ public class IntegrationService {
       }
       try {
         // TODO check that integration.getId() and id matches
+        removeSetFromSpOrIdp(integration);
         integration = handleSecrets(integration);
         Integration updatedIntegration = loadingService.loadOne(integration);
         if (updatedIntegration != null) {
@@ -905,6 +905,7 @@ public class IntegrationService {
     }
   }
 
+  @Transactional
   public Integration createIntegration(@Valid Integration integration) {
     if (integration != null) {
 
@@ -946,6 +947,7 @@ public class IntegrationService {
           logger.error("Failed to find an available idp integration identifier");
           throw new EntityCreationException("Integration creation failed");
         }
+        removeSetFromSpOrIdp(integration);
         integration = handleSecrets(integration);
 
         if (integration.getConfigurationEntity().getIdp() instanceof Adfs) {
@@ -1004,6 +1006,9 @@ public class IntegrationService {
           logger.error("No integration set id found", e);
         }
 
+        removeSetFromSpOrIdp(integration);
+        integration.getIntegrationSets().clear();
+
         if (setId == 0) {
           // No existing integration set, create new
           List<Long> availableSetIds = (integration.getDeploymentPhase() == 1 || integration.getDeploymentPhase() == 2)
@@ -1019,31 +1024,29 @@ public class IntegrationService {
 
           Integration setIntegration = createBlankIntegration("set", "", "", null);
           setIntegration.setId(setId);
-          setIntegration.getConfigurationEntity().getSet().setId(setId);
           setIntegration.getConfigurationEntity().getSet()
               .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
           setIntegration.setDeploymentPhase(integration.getDeploymentPhase());
           setIntegration.setOrganization(integration.getOrganization());
           integration.removeFromSets();
-
+          removeSetFromSpOrIdp(integration);
           integration = handleSecrets(integration);
 
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
           integration.addToSet(setIntegration);
-          integrationRepository.save(setIntegration);
-          integration = integrationRepository.save(integration);
+          integration = integrationRepository.saveAndFlush(integration);
           return integration;
         } else {
           // Add to existing integration set
           Optional<Integration> optionalSet = getIntegration(setId);
           if (optionalSet.isPresent()) {
+            removeSetFromSpOrIdp(integration);
             integration = handleSecrets(integration);
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
-            integrationRepository.saveAndFlush(optionalSet.get());
-            return integrationRepository.saveAndFlush(integration);
+            return integrationRepository.save(integration);
           } else {
             logger.error("No integration set with id {} found.", setId);
             throw new EntityCreationException("Integration creation failed");
@@ -1059,6 +1062,17 @@ public class IntegrationService {
   public Boolean validateAcsUrl(String url) {
 
     return true;
+  }
+
+  private void removeSetFromSpOrIdp(Integration i) {
+      if (i == null) return;
+      var ce = i.getConfigurationEntity();
+      if (ce == null) return;
+
+      // If creating/updating an SP or an IDP, NEVER cascade a Set from payload
+      if (ce.getSp() != null || ce.getIdp() != null) {
+          ce.setSet(null);
+      }
   }
 
   public Boolean validateEntityId(String id) {
