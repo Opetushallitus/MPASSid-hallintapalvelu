@@ -1010,7 +1010,6 @@ public class IntegrationService {
 
           Integration setIntegration = createBlankIntegration("set", "", "", null);
           setIntegration.setId(setId);
-          //setIntegration.getConfigurationEntity().getSet().setId(setId);
           setIntegration.getConfigurationEntity().getSet()
               .setName(integration.getConfigurationEntity().getSp().getName());
           setIntegration.getConfigurationEntity().getSet().setType("sp");
@@ -1020,17 +1019,10 @@ public class IntegrationService {
           removeSetFromSpOrIdp(integration);
           integration = handleSecrets(integration);
 
-          //setIntegration = integrationRepository.save(setIntegration);
-          //integrationRepository.save(integration);
-          //integration.addToSet(setIntegration);
-          //integrationRepository.save(setIntegration);
-          //integration = integrationRepository.save(integration);
-          //return integration;
-
-          integrationRepository.save(setIntegration);           // persist set first (no link yet)
-          integrationRepository.save(integration);              // persist SP (no link yet)
-          integration.addToSet(setIntegration);                 // set link in memory
-          integration = integrationRepository.saveAndFlush(integration); // save owner writes join row
+          integrationRepository.save(setIntegration);
+          integrationRepository.save(integration);
+          integration.addToSet(setIntegration);
+          integration = integrationRepository.saveAndFlush(integration);
           return integration;
         } else {
           // Add to existing integration set
@@ -1040,7 +1032,6 @@ public class IntegrationService {
             integration = handleSecrets(integration);
             integration = integrationRepository.saveAndFlush(integration);
             integration.addToSet(optionalSet.get());
-            //integrationRepository.save(optionalSet.get());
             return integrationRepository.save(integration);
           } else {
             logger.error("No integration set with id {} found.", setId);

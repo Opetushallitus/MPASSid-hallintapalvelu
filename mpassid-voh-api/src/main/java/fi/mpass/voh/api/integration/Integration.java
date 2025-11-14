@@ -71,9 +71,6 @@ public class Integration implements Persistable<Long> {
 
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIgnoreProperties("integrationSets")
-    // @ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.MERGE,
-    // CascadeType.PERSIST }, fetch = FetchType.EAGER)
-    //@ManyToMany(cascade = { CascadeType.REFRESH, CascadeType.PERSIST }, fetch = FetchType.EAGER)
     @ManyToMany(cascade = { CascadeType.REFRESH }, fetch = FetchType.EAGER)
     @Audited
     @JoinTable(name = "integrationsSets", joinColumns = @JoinColumn(name = "integration_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "integration_set_id", referencedColumnName = "id"))
