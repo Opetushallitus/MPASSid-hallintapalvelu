@@ -1019,9 +1019,10 @@ public class IntegrationService {
           removeSetFromSpOrIdp(integration);
           integration = handleSecrets(integration);
 
-          integration.addToSet(setIntegration);
           integrationRepository.save(setIntegration);
           integrationRepository.save(integration);
+          integration.addToSet(setIntegration);
+          integrationRepository.save(setIntegration);
           integration = integrationRepository.saveAndFlush(integration);
           return integration;
         } else {
