@@ -1,5 +1,7 @@
 # MPASSid-hallinta
 
+## 2.6.1
+
 ## 2.6
 - Allekirjoitusvarmenne on pakollinen palveluntarjoajien SAML2-integraatiossa myös testiympäristössä
 - Signingcertificate är oblikatoriskt i testmiljön för SAML2-integration

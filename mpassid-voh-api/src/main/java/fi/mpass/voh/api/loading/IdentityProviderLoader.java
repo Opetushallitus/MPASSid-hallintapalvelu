@@ -55,7 +55,8 @@ public class IdentityProviderLoader extends Loader {
     @Value("#{${application.home-organizations.input}}")
     private List<String> homeOrganizationsInput;
 
-    public IdentityProviderLoader(IntegrationRepository repository, OrganizationService organizationService, CredentialService credentialService,
+    public IdentityProviderLoader(IntegrationRepository repository, OrganizationService organizationService,
+            CredentialService credentialService,
             ResourceLoader loader) {
         super(repository, organizationService, credentialService, loader);
         if (this.homeOrganizationsInput == null) {
@@ -275,10 +276,14 @@ public class IdentityProviderLoader extends Loader {
                                 && (d.getRight() instanceof Set)) {
                             idp.setInstitutionTypes((Set<Integer>) d.getRight());
                         }
-
                         if (d.getFieldName().contains("discoveryInformation.title")) {
-                            existingIntegration.get().getDiscoveryInformation()
-                                    .setTitle((String) d.getRight());
+                            if (d.getRight() == null) {
+                                existingIntegration.get().getDiscoveryInformation()
+                                        .setTitle((String) "");
+                            } else {
+                                existingIntegration.get().getDiscoveryInformation()
+                                        .setTitle((String) d.getRight());
+                            }
                         }
                         if (d.getFieldName().contains("discoveryInformation.customDisplayName")) {
                             existingIntegration.get().getDiscoveryInformation()
