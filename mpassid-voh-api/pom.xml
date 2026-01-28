@@ -11,7 +11,7 @@
 	<artifactId>mpassid-voh-api</artifactId>
 
 	<properties>
-		<opensaml.version>4.0.1</opensaml.version>
+		<opensaml.version>4.3.2</opensaml.version>
 		<xmlsectool.version>3.0.0</xmlsectool.version>
 	</properties>
 
@@ -47,6 +47,14 @@
 				<artifactId>istack-commons-runtime</artifactId>
 				<version>3.0.5</version>
 			</dependency>
+
+			<!--dependency>
+				<groupId>org.opensaml</groupId>
+				<artifactId>opensaml-bom</artifactId>
+				<version>4.3.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency-->
 		</dependencies>
 	</dependencyManagement>
 
@@ -136,30 +144,25 @@
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-core</artifactId>
-			<version>${opensaml.version}</version>
 			<scope>compile</scope>
+			<version>${opensaml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-api</artifactId>
-			<version>${opensaml.version}</version>
 			<scope>compile</scope>
+			<version>${opensaml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-saml-impl</artifactId>
-			<version>${opensaml.version}</version>
 			<scope>compile</scope>
+			<version>${opensaml.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>opensaml-xmlsec-api</artifactId>
 			<version>${opensaml.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.santuario</groupId>
-			<artifactId>xmlsec</artifactId>
-			<version>3.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
@@ -171,6 +174,12 @@
 			<artifactId>opensaml-security-impl</artifactId>
 			<version>${opensaml.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.santuario</groupId>
+			<artifactId>xmlsec</artifactId>
+			<version>3.0.6</version>
+		</dependency>
+
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>ssm</artifactId>
