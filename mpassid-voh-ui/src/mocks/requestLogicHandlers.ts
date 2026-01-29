@@ -3,7 +3,7 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { clone, get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response_1706792827801.json"
+import exampleData from "../../schemas/response.json"
 import blankData from "../../schemas/blankIdpIntegration.json"
 
 export { definition };
