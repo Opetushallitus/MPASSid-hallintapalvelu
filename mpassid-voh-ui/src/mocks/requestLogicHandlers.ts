@@ -3,7 +3,7 @@ import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { clone, get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
-import exampleData from "../../schemas/response.json";
+import exampleData from "../../schemas/response.json"
 import blankData from "../../schemas/blankIdpIntegration.json"
 
 export { definition };
@@ -314,11 +314,11 @@ export default {
     if ("sort" in query) {
       const sort = Array.isArray(query.sort) ? query.sort[0] : query.sort;
       const [path, direction] = sort.split(",").slice(0, 2);
-      filteredElements = orderBy(
+      filteredElements  = orderBy(
         filteredElements,
         [path],
         [direction as boolean | "asc" | "desc"]
-      );
+      ) as Components.Schemas.Integration[];
     }
 
     const start = page * size;
