@@ -1152,10 +1152,12 @@ public class IntegrationService {
               for (String school : i.getDiscoveryInformation().getSchools()) {
                 allIncluded.add(school);
               }
-              di.setExistingExcluded(allExcluded);
               di.setExistingIncluded(allIncluded);
             }
           }
+        }
+        if (!allExcluded.isEmpty()) {
+          di.setExistingExcluded(allExcluded);
         }
       }
     } else {
