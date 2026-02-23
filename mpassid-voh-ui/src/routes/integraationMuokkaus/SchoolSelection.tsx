@@ -97,7 +97,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const oldEnvironment = useRef<number>(environment);
     const originalEnvironment = useRef<number>(environment);
     const adminConfiguration = useRef<boolean>(false);
-    const institutionTypeInit = useRef<boolean>(false);    
+    const institutionTypeInit = useRef<boolean>(false);
+    const noExistingSchoolConfigurations = useRef<boolean>(true);    
 
     const intl = useIntl();
 
@@ -347,189 +348,207 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       saveCheck(true,showLogo,checked);
     };
 
-    const getExtraSchoolsConfiguration = (institutionTypeList:number[]) => {        
-        if(integration.organization&&integration.organization.oid&&institutionTypeList.length>0) {
-          devLog("DEBUG","getExtraSchoolsConfiguration (deplomentPhase)",environment);
-          adminConfiguration.current=false
-          devLog("DEBUG", "getExtraSchoolsConfiguration (adminConfiguration.current init)",adminConfiguration.current)
-          
-          if(environment===1) {
-            getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList, id: integration.id})
-            .then(response=>{              
-              existingSchoolsExcluded.current=(response.existingExcluded !== undefined)?response.existingExcluded:null;
-              existingSchoolsIncluded.current=(response.existingIncluded!== undefined)?response.existingIncluded:null;              
-              devLog("DEBUG","getExtraSchoolsConfiguration (integration.id)",integration.id)
-              devLog("DEBUG","getExtraSchoolsConfiguration (response.existingExcluded)",response.existingExcluded)
-              if(response.existingExcluded&&response.existingExcluded!==null&&response.existingExcluded.length>=0) {
-                //Exclude defined, either all [], or list [ "1", "2"]                                                
-                if(institutionTypeList.length>1) {
-                  devLog("DEBUG","getExtraSchoolsConfiguration (several institutionTypes)",institutionTypeList.length)
-                  setHideExcludeSchools(false)          
-                  devLog("DEBUG","getExtraSchoolsConfiguration (hideExcludeSchools 1)",false)         
-                  extraSchoolConfigurationNeeded.current=true
-                  if(existingSchoolsIncluded.current!==null&&existingSchoolsIncluded.current?.length>0&&existingSchoolsExcluded.current?.length===0) {
-                    adminConfiguration.current=false                                                      
-                  } else {
-                    adminConfiguration.current=true                                                      
-                  }
-                  devLog("DEBUG", "getExtraSchoolsConfiguration (adminConfiguration.current several institution types 1)",adminConfiguration.current)
-                } else {                  
-                  devLog("DEBUG","getExtraSchoolsConfiguration (one institutionTypes)",institutionTypeList.length)
-                  if(existingSchoolsExcluded.current?.length!>0) {
-                    if(integration&&integration.id&&integration.id>0) {
-                      setHideExcludeSchools(false)                                                      
-                      devLog("DEBUG","getExtraSchoolsConfiguration (hideExcludeSchools 2.1)",true)
-                    } else {
-                      setHideExcludeSchools(true)                                                      
-                      devLog("DEBUG","getExtraSchoolsConfiguration (hideExcludeSchools 2.2)",true)
-                    }
-                    
-                  } else {
-                    setHideExcludeSchools(false)                                            
-                    devLog("DEBUG","getExtraSchoolsConfiguration (hideExcludeSchools 3)",false)          
-                  }
-                  
-                  extraSchoolConfigurationNeeded.current=false                  
-                }
-                disableExtraSchoolConfigurationSwitch.current=true
-                devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 1)",disableExtraSchoolConfigurationSwitch.current)
-                
-              } else {
-                //Exclude not defined, null
-                setHideExcludeSchools(false)         
-                devLog("DEBUG","getExtraSchoolsConfiguration (hideExcludeSchools 4)",false)        
-                disableExtraSchoolConfigurationSwitch.current=false;                                                
-                devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 2)",disableExtraSchoolConfigurationSwitch.current)
-                
-                if(institutionTypeList.length>1) {                      
-                  if(existingSchoolsIncluded.current!==null&&existingSchoolsIncluded.current?.length>=0&&existingSchoolsExcluded.current?.length===0) {
-                    adminConfiguration.current=false                                                      
-                  } else {
-                    adminConfiguration.current=true                                                      
-                  }
-                  devLog("DEBUG", "getExtraSchoolsConfiguration (adminConfiguration.current several institution types 2)",adminConfiguration.current)
-                }
-                
-              }              
-              devLog("DEBUG", "getExtraSchoolsConfiguration (response.existingIncluded)",response.existingIncluded)
-              if(response.existingIncluded&&response.existingIncluded!==null&&response.existingIncluded.length>=0) {
-              
-                if(integration?.discoveryInformation?.schools&&integration.discoveryInformation?.schools.length>=0) {                                    
-                  if(existingSchoolsIncluded.current!==null) {
-                    existingSchoolsIncluded.current = existingSchoolsIncluded.current
-                        .filter(e=>integration?.discoveryInformation?.schools&&integration?.discoveryInformation?.schools?.indexOf(e)<0)
-                  } 
-                }
-                if(existingSchoolsIncluded.current!==null) {                  
-                  if(existingSchoolsIncluded.current.length===0) {
-                    if(existingSchoolsExcluded.current?.length===0) {                      
-                      possibleSchools.current=[];
-                      devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools, all excluded)",possibleSchools.current)
-                    } else {                      
-                      possibleSchools.current=schoolData.koulut
-                        .filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1)                        
-                        .filter(k=>existingSchoolsExcluded.current!==null&&existingSchoolsExcluded.current.indexOf(String(k.koulukoodi))>=0)
-                        .map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));  
-                      devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools, only excluded with correct school code)",possibleSchools.current)  
-                    }                                      
-                  } else {
-                    devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools filter out existingSchoolsExcluded)",3) 
-                    
-                    possibleSchools.current=schoolData.koulut
-                        .filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1)
-                        .filter(k=>existingSchoolsIncluded.current!==null&&existingSchoolsIncluded.current.indexOf(String(k.koulukoodi))<0)                        
-                        .map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-                    devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools filter with existing and correct school code)",possibleSchools.current)
-                  }
-                  
-                } else {               
-                  possibleSchools.current=schoolData.koulut
-                        .filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1)
-                        .map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-                  devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools filter with correct school code)",possibleSchools.current)
-                }
-                
-                if(existingSchoolsExcluded.current!==null) {                  
-                  devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools filter out existingSchoolsExcluded)",existingSchoolsExcluded.current)  
-                  possibleSchools.current=possibleSchools.current.filter(k=>existingSchoolsExcluded.current&&existingSchoolsExcluded.current.indexOf(k.value)>-1);
-                }
-                devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools existing integrations)",possibleSchools.current) 
-                
-                
-                extraSchoolConfigurationNeeded.current=true
-                disableExtraSchoolConfigurationSwitch.current=true;
-                devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 3)",disableExtraSchoolConfigurationSwitch.current)
-                /*
-                if(response.existingIncluded.length===0||possibleSchools.current.length===0){
-                  possibleSchools.current=[]
-                }
-                */
-              } else {                
-                if(existingSchoolsExcluded.current!==null) {                  
-                  possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1)
-                    .filter(k=>existingSchoolsExcluded.current&&existingSchoolsExcluded.current.indexOf(k.koulukoodi)>-1)
-                    .map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-                    devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools, only excluded with correct school code)",possibleSchools.current)  
-                } else {                  
-                  possibleSchools.current=schoolData.koulut
-                    .filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1)
-                    .map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-                    devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools, filter with correct school code)",possibleSchools.current)  
-                }
-                
-                devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools)",possibleSchools.current)  
-                if(existingSchoolsIncluded.current===null&&(existingSchoolsExcluded.current===null)) {
-                  extraSchoolConfigurationNeeded.current=false
+  const getExtraSchoolsConfiguration = async (institutionTypeList: number[]): Promise<boolean> => {
+    if (integration.organization && integration.organization.oid && institutionTypeList.length > 0) {
+      devLog("DEBUG", "getExtraSchoolsConfiguration (deplomentPhase)", environment);
+      adminConfiguration.current = false
+      devLog("DEBUG", "getExtraSchoolsConfiguration (adminConfiguration.current init)", adminConfiguration.current)
+
+      if (environment === 1) {
+        try {
+          const response = await getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList, id: integration.id })
+          if (response.existingExcluded == undefined && response.existingIncluded == undefined) {
+              noExistingSchoolConfigurations.current = true
+            } else {
+              noExistingSchoolConfigurations.current = false
+            }
+            existingSchoolsExcluded.current = (response.existingExcluded !== undefined) ? response.existingExcluded : null;
+            existingSchoolsIncluded.current = (response.existingIncluded !== undefined) ? response.existingIncluded : null;
+            devLog("DEBUG", "getExtraSchoolsConfiguration (integration.id)", integration.id)
+            devLog("DEBUG", "getExtraSchoolsConfiguration (response.existingExcluded)", response.existingExcluded)
+            if (response.existingExcluded && response.existingExcluded !== null && response.existingExcluded.length >= 0) {
+              //Exclude defined, either all [], or list [ "1", "2"]                                                
+              if (institutionTypeList.length > 1) {
+                devLog("DEBUG", "getExtraSchoolsConfiguration (several institutionTypes)", institutionTypeList.length)
+                setHideExcludeSchools(false)
+                devLog("DEBUG", "getExtraSchoolsConfiguration (hideExcludeSchools 1)", false)
+                extraSchoolConfigurationNeeded.current = true
+                if (existingSchoolsIncluded.current !== null && existingSchoolsIncluded.current?.length > 0 && existingSchoolsExcluded.current?.length === 0) {
+                  adminConfiguration.current = false
                 } else {
-                  extraSchoolConfigurationNeeded.current=true
+                  adminConfiguration.current = true
                 }
-                
-                disableExtraSchoolConfigurationSwitch.current=false;  
-                devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 4)",disableExtraSchoolConfigurationSwitch.current)                  
-                      
-              }  
-
-              //define if extra school configuration is mandatory
-              if(institutionTypeList.length>1) {
-                setExtraSchoolsConfiguration(true)
+                devLog("DEBUG", "getExtraSchoolsConfiguration (adminConfiguration.current several institution types 1)", adminConfiguration.current)
               } else {
-                if(existingSchoolsExcluded.current&&existingSchoolsIncluded.current&&
-                  existingSchoolsExcluded.current.length===0&&existingSchoolsIncluded.current?.length===0) {
-                    setExtraSchoolsConfiguration(false)
+                devLog("DEBUG", "getExtraSchoolsConfiguration (one institutionTypes)", institutionTypeList.length)
+                if (existingSchoolsExcluded.current?.length! > 0) {
+                  if (integration && integration.id && integration.id > 0) {
+                    setHideExcludeSchools(false)
+                    devLog("DEBUG", "getExtraSchoolsConfiguration (hideExcludeSchools 2.1)", true)
                   } else {
-                    setExtraSchoolsConfiguration(true)
+                    setHideExcludeSchools(true)
+                    devLog("DEBUG", "getExtraSchoolsConfiguration (hideExcludeSchools 2.2)", true)
                   }
-                
+
+                } else {
+                  setHideExcludeSchools(false)
+                  devLog("DEBUG", "getExtraSchoolsConfiguration (hideExcludeSchools 3)", false)
+                }
+
+                extraSchoolConfigurationNeeded.current = false
+              }
+              disableExtraSchoolConfigurationSwitch.current = true
+              devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 1)", disableExtraSchoolConfigurationSwitch.current)
+
+            } else {
+              //Exclude not defined, null
+              setHideExcludeSchools(false)
+              devLog("DEBUG", "getExtraSchoolsConfiguration (hideExcludeSchools 4)", false)
+              disableExtraSchoolConfigurationSwitch.current = false;
+              devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 2)", disableExtraSchoolConfigurationSwitch.current)
+
+              if (institutionTypeList.length > 1) {
+                if (existingSchoolsIncluded.current !== null && existingSchoolsIncluded.current?.length >= 0 && existingSchoolsExcluded.current?.length === 0) {
+                  adminConfiguration.current = false
+                } else {
+                  adminConfiguration.current = true
+                }
+                devLog("DEBUG", "getExtraSchoolsConfiguration (adminConfiguration.current several institution types 2)", adminConfiguration.current)
               }
 
-              if(adminConfiguration.current) {
-                possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));    
-                devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools admin)",possibleSchools.current) 
+            }
+            devLog("DEBUG", "getExtraSchoolsConfiguration (response.existingIncluded)", response.existingIncluded)
+            if (response.existingIncluded && response.existingIncluded !== null && response.existingIncluded.length >= 0) {
+
+              if (integration?.discoveryInformation?.schools && integration.discoveryInformation?.schools.length >= 0) {
+                if (existingSchoolsIncluded.current !== null) {
+                  existingSchoolsIncluded.current = existingSchoolsIncluded.current
+                    .filter(e => integration?.discoveryInformation?.schools && integration?.discoveryInformation?.schools?.indexOf(e) < 0)
+                }
               }
-              updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-              devLog("DEBUG", "getExtraSchoolsConfiguration (institutionTypeInit.current)",institutionTypeInit.current)
-              if(institutionTypeInit.current) {
-                devLog("DEBUG", "getExtraSchoolsConfiguration (updateSchools)",schools)
-                
-                updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))              
+              if (existingSchoolsIncluded.current !== null) {
+                if (existingSchoolsIncluded.current.length === 0) {
+                  if (existingSchoolsExcluded.current?.length === 0) {
+                    possibleSchools.current = [];
+                    devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools, all excluded)", possibleSchools.current)
+                  } else {
+                    possibleSchools.current = schoolData.koulut
+                      .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+                      .filter(k => existingSchoolsExcluded.current !== null && existingSchoolsExcluded.current.indexOf(String(k.koulukoodi)) >= 0)
+                      .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+                    devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools, only excluded with correct school code)", possibleSchools.current)
+                  }
+                } else {
+                  devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools filter out existingSchoolsExcluded)", 3)
+
+                  possibleSchools.current = schoolData.koulut
+                    .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+                    .filter(k => existingSchoolsIncluded.current !== null && existingSchoolsIncluded.current.indexOf(String(k.koulukoodi)) < 0)
+                    .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+                  devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools filter with existing and correct school code)", possibleSchools.current)
+                }
+
+              } else {
+                possibleSchools.current = schoolData.koulut
+                  .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+                  .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+                devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools filter with correct school code)", possibleSchools.current)
               }
-              institutionTypeInit.current=true;
-            })
-          } else {
-            devLog("DEBUG","getExtraSchoolsConfiguration (schools)",schools)            
-            possibleSchools.current=schoolData.koulut.filter(k=>institutionTypeList.indexOf(k.oppilaitostyyppi)>-1).map(k=>({ label: k.nimi, value: String(k.koulukoodi) }));
-            devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools not production integration)",possibleSchools.current) 
-            extraSchoolConfigurationNeeded.current=false;
-            updateExcludeSchools(excludeSchools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-            devLog("DEBUG", "updateSchools (3)",schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-            updateSchools(schools.filter((es)=>possibleSchools.current.map(p=>p.value).indexOf(es)>=0))
-          }
+
+              if (existingSchoolsExcluded.current !== null) {
+                devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools filter out existingSchoolsExcluded)", existingSchoolsExcluded.current)
+                possibleSchools.current = possibleSchools.current.filter(k => existingSchoolsExcluded.current && existingSchoolsExcluded.current.indexOf(k.value) > -1);
+              }
+              devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools existing integrations)", possibleSchools.current)
+
+
+              extraSchoolConfigurationNeeded.current = true
+              disableExtraSchoolConfigurationSwitch.current = true;
+              devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 3)", disableExtraSchoolConfigurationSwitch.current)
+              /*
+              if(response.existingIncluded.length===0||possibleSchools.current.length===0){
+                possibleSchools.current=[]
+              }
+              */
+            } else {
+              if (existingSchoolsExcluded.current !== null) {
+                possibleSchools.current = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+                  .filter(k => existingSchoolsExcluded.current && existingSchoolsExcluded.current.indexOf(k.koulukoodi) > -1)
+                  .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+                devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools, only excluded with correct school code)", possibleSchools.current)
+              } else {
+                possibleSchools.current = schoolData.koulut
+                  .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+                  .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+                devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools, filter with correct school code)", possibleSchools.current)
+              }
+
+              devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools)", possibleSchools.current)
+              if (existingSchoolsIncluded.current === null && (existingSchoolsExcluded.current === null)) {
+                extraSchoolConfigurationNeeded.current = false
+              } else {
+                extraSchoolConfigurationNeeded.current = true
+              }
+
+              disableExtraSchoolConfigurationSwitch.current = false;
+              devLog("DEBUG", "getExtraSchoolsConfiguration (disableExtraSchoolConfigurationSwitch.current 4)", disableExtraSchoolConfigurationSwitch.current)
+
+            }
+
+            //define if extra school configuration is mandatory
+            if (institutionTypeList.length > 1) {
+              setExtraSchoolsConfiguration(true)
+            } else {
+              if (existingSchoolsExcluded.current && existingSchoolsIncluded.current &&
+                existingSchoolsExcluded.current.length === 0 && existingSchoolsIncluded.current?.length === 0) {
+                setExtraSchoolsConfiguration(false)
+              } else {
+                setExtraSchoolsConfiguration(true)
+              }
+
+            }
+
+            if (adminConfiguration.current) {
+              possibleSchools.current = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+              devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools admin)", possibleSchools.current)
+            }
+            updateExcludeSchools(excludeSchools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
+            devLog("DEBUG", "getExtraSchoolsConfiguration (institutionTypeInit.current)", institutionTypeInit.current)
+            if (institutionTypeInit.current) {
+              devLog("DEBUG", "getExtraSchoolsConfiguration (updateSchools)", schools)
+
+              updateSchools(schools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
+            }
+            institutionTypeInit.current = true;
+
+            devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools.current)", possibleSchools.current)
+            devLog("DEBUG", "getExtraSchoolsConfiguration (schools)", schools)
+            return true
           
+        } catch (error) {
+          devLog("DEBUG", "getExtraSchoolsConfiguration failed", error)
+          return false
         }
-        devLog("DEBUG","getExtraSchoolsConfiguration (possibleSchools.current)",schools)
         
-        devLog("DEBUG","getExtraSchoolsConfiguration (schools)",schools)
-    };
+      } else {
+        devLog("DEBUG", "getExtraSchoolsConfiguration (schools)", schools)
+        possibleSchools.current = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+        devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools not production integration)", possibleSchools.current)
+        extraSchoolConfigurationNeeded.current = false;
+        updateExcludeSchools(excludeSchools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
+        devLog("DEBUG", "updateSchools (3)", schools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
+        updateSchools(schools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
+
+        devLog("DEBUG", "getExtraSchoolsConfiguration (possibleSchools.current*)", possibleSchools.current)
+        devLog("DEBUG", "getExtraSchoolsConfiguration (schools*)", schools)
+        return true
+      }
+
+    } else {
+      return false
+    }
+
+  };
 
     const changeExtraSchoolsConfiguration = (event: ChangeEvent<HTMLInputElement>) => {
       if(event.target.checked) {
@@ -578,13 +597,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         setDiscoveryInformation(clone(value)) 
     }
 
-    const updateInstitutionTypes = (values:string[]) => {
-      
+    const updateInstitutionTypes = async (values:string[]) => {
         if(configurationEntity&&configurationEntity.idp) {
           configurationEntity.idp.institutionTypes=values.map(value=>Number(value))
-          setInstitutionTypeList(configurationEntity.idp.institutionTypes)  
-          if(values&&values.length>0) {
-            getExtraSchoolsConfiguration(values.map(v=>Number(v)))
+          setInstitutionTypeList(configurationEntity.idp.institutionTypes)            
+          if(values&&values.length>0) {            
+            await getExtraSchoolsConfiguration(values.map(v=>Number(v)))
           } 
         }
         //if(extraSchoolsConfiguration) {
@@ -804,7 +822,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       oldEnvironment.current=environment;
     }
     
-    devLog("DEBUG","*************************","updateiscoveryInformation")
     updateiscoveryInformation(discoveryInformation);
 
     devLog("DEBUG","************************* SchoolSelection post ********************","start")
@@ -812,7 +829,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       devLog("DEBUG","SchoolSelection post 1 (localCanSave)",localCanSave)
       devLog("DEBUG","SchoolSelection post 1 (institutionTypeList)",institutionTypeList)
       setLocalCanSave(false)
-    }
+    } 
 
     if(possibleSchools.current.length===0&&showSchools.current&&localCanSave) {
       devLog("DEBUG","SchoolSelection post 2 (localCanSave)",localCanSave)
@@ -870,7 +887,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                               setCanSave={setInstitutionTypeCanSave} 
                               onUpdate={updateInstitutionTypes}/>}
                   </Grid>
-                  {adminConfiguration.current&&
+                  {adminConfiguration.current&&!noExistingSchoolConfigurations.current&&
                         <>
                         <Grid item xs={4}>
                         </Grid>
