@@ -1139,6 +1139,7 @@ public class IntegrationService {
 
         Set<String> allExcluded = new HashSet<>();
         Set<String> allIncluded = new HashSet<>();
+        Boolean emptyIncludedFound = false;
         for (Integration i : integrations) {
           if (i.isActive() && !i.getId().equals(id) && (i.getConfigurationEntity().getIdp() != null)) {
             if (i.getDeploymentPhase() != 1) {
@@ -1149,6 +1150,9 @@ public class IntegrationService {
               for (String school : i.getDiscoveryInformation().getExcludedSchools()) {
                 allExcluded.add(school);
               }
+              if (i.getDiscoveryInformation().getSchools().isEmpty()) {
+                emptyIncludedFound = true; // Empty school set, so this integration includes all schools (possible future schools as well).
+              }
               for (String school : i.getDiscoveryInformation().getSchools()) {
                 allIncluded.add(school);
               }
@@ -1158,6 +1162,9 @@ public class IntegrationService {
         }
         if (!allExcluded.isEmpty()) {
           di.setExistingExcluded(allExcluded);
+        }
+        if (emptyIncludedFound) {
+          allIncluded.clear();
         }
       }
     } else {
