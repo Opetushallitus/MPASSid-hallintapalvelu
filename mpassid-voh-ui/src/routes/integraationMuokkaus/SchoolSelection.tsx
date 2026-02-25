@@ -169,7 +169,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       }
       
       
-    }, [institutionTypeList, integration, possibleSchools,extraSchoolsConfiguration]);
+    }, [institutionTypeList, integration, possibleSchools]);
 
     useEffect(() => {
      
