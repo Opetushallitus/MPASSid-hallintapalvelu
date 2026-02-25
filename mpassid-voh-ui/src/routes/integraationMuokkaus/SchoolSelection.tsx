@@ -377,6 +377,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         
         if (environment === 1) {
           try {
+            devLog("DEBUG","updateExtraSchoolsConfigurationData (execute getIntegrationDiscoveryInformation)","")
             const response = await getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList, id: integration.id })
             if (response.existingExcluded == undefined && response.existingIncluded == undefined) {
                 noExistingSchoolConfigurations.current = true
@@ -526,7 +527,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                 devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools admin)", possibleSchools.current)
               }
 
-              mandatoryExtraSchoolConfiguration(schools,excludeSchools,eSI,existingSchoolsExcluded.current)
+              mandatoryExtraSchoolConfiguration(schools,excludeSchools,eSI,eSE)
 
               updateExcludeSchools(excludeSchools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
               devLog("DEBUG", "updateExtraSchoolsConfigurationData (institutionTypeInit.current)", institutionTypeInit.current)
@@ -836,7 +837,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
 
     if(!institutionTypeInit.current) {
-      institutionTypeInit.current = true;
+      //institutionTypeInit.current = true;
       if(institutionTypeList.length>0) {
         devLog("DEBUG","Init updateExtraSchoolsConfigurationData",institutionTypeInit.current)
         updateExtraSchoolsConfigurationData(institutionTypeList);
