@@ -5,10 +5,12 @@ import { clone, get, orderBy } from "lodash";
 import definition from "../../schemas/schema.json";
 import exampleData from "../../schemas/response.json"
 import blankData from "../../schemas/blankIdpIntegration.json"
+import exampleOrganisations from "../../schemas/organizations.json"
 
 export { definition };
 
 let allIntegrations = exampleData as unknown as Components.Schemas.Integration[];
+const organisations = exampleOrganisations as unknown as Components.Schemas.Organization;
 const blankIntegrations = blankData as unknown as Components.Schemas.Integration[];
 
 
@@ -106,10 +108,7 @@ var discoveryInformationResultsModify:DiscoveryInformationResult[] = [
   {existingIncluded: [], existingExcluded: null}
 ]
 
-allIntegrations = Array(1).fill(allIntegrations).flat();
-
-allIntegrations.push(
-  ...allIntegrations.map((row) => ({
+allIntegrations = [ ...allIntegrations.map((row) => ({
     ...row,
     configurationEntity: {
       entityId: undefined as unknown as string,
@@ -121,7 +120,8 @@ allIntegrations.push(
       //name: `${row.organization!.name} (julkaistu)`,
     },
   }))
-);
+ ]
+
 
 const defaults = {
   page: 1,
@@ -232,6 +232,12 @@ export default {
   getIntegration(request) {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);
+    
+    if(integration.value !== undefined) {
+      integration.value.organization = {}
+      integration.value.organization = organisations
+    }
+    
     if(id===999995&&integration.value?.configurationEntity?.idp){
       integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
       if(integration.value.configurationEntity.idp.type==='azure') {
@@ -263,8 +269,6 @@ export default {
   },
   uploadSAMLMetadata(request) {
     const id = Number(request.params.id);
-    console.log("******************** id: ",id)
-    console.log("******************** integration: ",allIntegrations.find((row) => row.id === id))
     samlMetadataIntegration.value = allIntegrations.find((row) => row.id === id);
     
     
