@@ -67,6 +67,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const language = toLanguage(useIntl().locale).toUpperCase();
     const identityProvider = integration.configurationEntity!.idp!;
     const possibleSchools = useRef<oneEnum[]>(integration?.organization?.children?.map(c=>({ nimi: c.name!, oppilaitostyyppi: convertSchoolCode(c.oppilaitostyyppi), koulukoodi: c.oppilaitosKoodi||''})).map(k=>({ label: k.nimi, value: k.koulukoodi }))||[]);
+    const [possibleSchoolList, setPossibleSchoolList] = useState<oneEnum[]>([]);
     const [schools, setSchools] = useState<string[]>(integration?.discoveryInformation?.schools||[]);
     
     const [excludeSchools, setExcludeSchools] = useState<string[]>(integration?.discoveryInformation?.excludedSchools||[]);
@@ -318,7 +319,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
     }
 
-    const handleShowSchoolsChange = (event: ChangeEvent,checked: boolean) => {
+    const handleShowSchoolsChange = async (event: ChangeEvent,checked: boolean) => {
       devLog("DEBUG", "handleShowSchoolsChange",checked)
       showSchools.current=checked
        discoveryInformation.showSchools=checked;
@@ -327,7 +328,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           handleCustomDisplayNameChange('')
         }
         //delete discoveryInformation.customDisplayName;
-        updateExtraSchoolsConfigurationData(institutionTypeList)
+        const response: oneEnum[] = await updateExtraSchoolsConfigurationData(institutionTypeList);
+        setPossibleSchoolList(response);
         handleTitleChange(integration?.organization?.name||'')        
       } else {
         if(!customDisplayName){
@@ -370,8 +372,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     }
   }
 
-  const updateExtraSchoolsConfigurationData = async (institutionTypeList: number[]): Promise<boolean> => {
+  const updateExtraSchoolsConfigurationData = async (institutionTypeList: number[]): Promise<oneEnum[]> => {
+
     if(schoolData !== undefined && schoolData.koulut !== null){
+       
       if (integration.organization && integration.organization.oid && institutionTypeList.length > 0) {
         devLog("DEBUG", "updateExtraSchoolsConfigurationData (deplomentPhase)", environment);
         
@@ -540,11 +544,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
               devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools.current)", possibleSchools.current)
               devLog("DEBUG", "updateExtraSchoolsConfigurationData (schools)", schools)
-              return true
+              if(possibleSchoolList.length!==possibleSchools.current.length) {
+                setPossibleSchoolList(possibleSchools.current)
+              }              
+              return possibleSchools.current
             
           } catch (error) {
             devLog("DEBUG", "updateExtraSchoolsConfigurationData failed", error)
-            return false
+            return possibleSchools.current
           }
           
         } else {
@@ -559,14 +566,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
           devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools.current*)", possibleSchools.current)
           devLog("DEBUG", "updateExtraSchoolsConfigurationData (schools*)", schools)
-          return true
+          return possibleSchools.current
         }
 
       } else {
-        return false
+        return possibleSchools.current
       }
     } else {
-      return false
+      return possibleSchools.current
     }
   };
 
@@ -577,7 +584,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
       setLoading(true)
       if(event.target.checked) {
-          await updateExtraSchoolsConfigurationData(institutionTypeList)
+          const response: oneEnum[] =  await updateExtraSchoolsConfigurationData(institutionTypeList)
+          setPossibleSchoolList(response)
       } else {
         updateExcludeSchools([])
         devLog("DEBUG", "changeExtraSchoolsConfiguration (updateSchools 4)",[])
@@ -627,8 +635,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         if(configurationEntity&&configurationEntity.idp) {
           configurationEntity.idp.institutionTypes=values.map(value=>Number(value))
           setInstitutionTypeList(configurationEntity.idp.institutionTypes)            
-          if(values&&values.length>0) {            
-            await updateExtraSchoolsConfigurationData(values.map(v=>Number(v)))
+          if(values&&values.length>0) {        
+            const response: oneEnum[] = await updateExtraSchoolsConfigurationData(values.map(v=>Number(v)))
+            setPossibleSchoolList(response)
           } 
         }
         //if(extraSchoolsConfiguration) {
@@ -837,7 +846,6 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
 
     if(!institutionTypeInit.current) {
-      //institutionTypeInit.current = true;
       if(institutionTypeList.length>0) {
         devLog("DEBUG","Init updateExtraSchoolsConfigurationData",institutionTypeInit.current)
         updateExtraSchoolsConfigurationData(institutionTypeList);
@@ -846,8 +854,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     
     
     if(environment!==oldEnvironment.current&&institutionTypeList !== undefined && institutionTypeList.length > 0) {
-      updateExtraSchoolsConfigurationData(institutionTypeList);
       oldEnvironment.current=environment;
+      updateExtraSchoolsConfigurationData(institutionTypeList);
+      
     }
     
     updateiscoveryInformation(discoveryInformation);
@@ -875,6 +884,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     devLog("DEBUG","SchoolSelection post (hideExcludeSchools)",hideExcludeSchools)
     devLog("DEBUG","SchoolSelection post (excludeSchools.length)",excludeSchools.length)
     devLog("DEBUG","SchoolSelection post (possibleSchools)",possibleSchools.current.length)
+    devLog("DEBUG","SchoolSelection post (possibleSchoolList)",possibleSchoolList.length)
     devLog("DEBUG","SchoolSelection post (schoolData)",schoolData)
 
     devLog("DEBUG","************************* SchoolSelection post ********************","end")
@@ -965,7 +975,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                     (environment===1&&institutionTypeList.length>1&&schools?.length===0&&excludeSchools?.length===0)?true:false
                                   }                    
                                   helperText={helpGeneratorText}
-                                  enums={possibleSchools.current}
+                                  enums={possibleSchoolList}
                                   onValidate={validator} 
                                   setCanSave={setSchoolsCanSave} 
                                   onUpdate={updateSchools}/>
@@ -987,7 +997,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                     (environment===1&&institutionTypeList.length>1&&schools?.length===0&&excludeSchools?.length===0)?true:false
                                   }                    
                                   helperText={extraIncludeNoticeHelpText}
-                                  enums={possibleSchools.current}
+                                  enums={possibleSchoolList}
                                   onValidate={validator} 
                                   setCanSave={setExcludeSchoolsCanSave} 
                                   onUpdate={updateExcludeSchools}/>
