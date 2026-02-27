@@ -83,6 +83,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const [customDisplayCanSave, setCustomDisplayCanSave] = useState<boolean>(true);
     const [excludeSchoolsCanSave, setExcludeSchoolsCanSave] = useState<boolean>(true);
     const [loading, setLoading] = useState(false);
+    const [adminConfiguration, setAdminConfiguration] = useState(false);
   
 
     
@@ -92,7 +93,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const existingSchoolsExcluded = useRef<string[]|null>([]);
     const oldEnvironment = useRef<number>(environment);
     const originalEnvironment = useRef<number>(environment);
-    const adminConfiguration = useRef<boolean>(false);
+
+
     const institutionTypeInit = useRef<boolean>(false);
     const noExistingSchoolConfigurations = useRef<boolean>(true);    
 
@@ -154,9 +156,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           integration?.configurationEntity?.idp?.institutionTypes?.length>1&&
           integration.discoveryInformation?.schools&&integration.discoveryInformation?.excludedSchools&&
           (integration.discoveryInformation?.schools.length>0||integration.discoveryInformation?.excludedSchools.length>0)) {
-          if(integration.deploymentPhase===1) {
-            adminConfiguration.current=true;
-            devLog("DEBUG", "SchoolSelection (adminConfiguration.current)",adminConfiguration.current)
+          if(integration.deploymentPhase===1&&institutionTypeList.length>1) {
+            setAdminConfiguration(true);
+            devLog("DEBUG", "SchoolSelection (adminConfiguration)",true)
           }
           
         }
@@ -196,30 +198,22 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
         
         if(configurationEntity?.idp?.institutionTypes?.length===1) {
-          var configurationCheckOk=true;
-          if(!(discoveryInformation?.schools?.length!>0||discoveryInformation?.excludedSchools?.length!>0)) {
-
-            if((existingSchoolsIncluded.current!==null&&existingSchoolsIncluded.current.length>0)) {
-              devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)","empty, mutta includet lisätään excludeihin ok")
-            } else {
-              devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)","empty")
-              configurationCheckOk=false
-            }
-            
-          }
+          var configurationCheckOk=true;          
           
           devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.excludedSchools)",discoveryInformation?.excludedSchools)
           devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.schools)",discoveryInformation?.schools)
           devLog("DEBUG","isExtraSchoolConfigurationOk (existingSchoolsExcluded.current)",existingSchoolsExcluded.current)
-          if(existingSchoolsExcluded.current?.length! > 0) {       
-
+          if(existingSchoolsIncluded.current?.length! === 0) {
             if(discoveryInformation?.excludedSchools?.length! > 0) {              
-              devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)",1)
+              devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)","All schools include already exists")
               configurationCheckOk=false
             }
+          }
+          if(existingSchoolsExcluded.current?.length! > 0) {                   
+
             discoveryInformation?.schools?.forEach(school=>{
               if(existingSchoolsExcluded.current!.indexOf(school)<0) {
-                devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)",2)
+                devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)","one included school is not in existing excluded schools")
                 configurationCheckOk=false
               }
             })
@@ -235,7 +229,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             })    
             
           }      
-
+          
           devLog("DEBUG","isExtraSchoolConfigurationOk (return 1)",(configurationCheckOk&&discoveryInformation?.showSchools&&configurationEntity !== undefined&&configurationEntity&&
             configurationEntity?.idp?.institutionTypes?.length!>0&&
             ((currentExcludeSchools.current?.length!>0||discoveryInformation?.schools?.length!>0))))  
@@ -328,8 +322,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           handleCustomDisplayNameChange('')
         }
         //delete discoveryInformation.customDisplayName;
-        const response: oneEnum[] = await updateExtraSchoolsConfigurationData(institutionTypeList);
-        setPossibleSchoolList(response);
+        devLog("DEBUG","handleShowSchoolsChange (updateExtraSchoolsConfigurationData)",checked)
+        possibleSchools.current = await updateExtraSchoolsConfigurationData(institutionTypeList,environment,schoolData);
+        //setPossibleSchoolList(response);
         handleTitleChange(integration?.organization?.name||'')        
       } else {
         if(!customDisplayName){
@@ -337,6 +332,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         }
         handleTitleChange('')
         updateInstitutionTypes([])
+        devLog("DEBUG","handleShowSchoolsChange (setExcludeSchools)",[])
         updateExcludeSchools([])
         devLog("DEBUG", "updateSchools (1)",[])
         updateSchools([])
@@ -350,8 +346,8 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       saveCheck(true,showLogo,checked);
     };
 
-  const mandatoryExtraSchoolConfiguration = (includes: string[]|null,excludes: string[]|null,otherIncludes: string[]|null,otherExcludes: string[]|null) => {
-    if (includes && excludes && includes.length > 0 && excludes.length > 0) {
+  const mandatoryExtraSchoolConfiguration = (includes: string[],excludes: string[],otherIncludes: string[]|null,otherExcludes: string[]|null) => {
+    if (includes.length > 0 && excludes.length > 0) {
         devLog("DEBUG","mandatoryExtraSchoolConfiguration (current existing configuration)",true)
         devLog("DEBUG","mandatoryExtraSchoolConfiguration (possibleSchools.current.length)",possibleSchools.current.length)
         setExtraSchoolsConfiguration(true)
@@ -372,10 +368,128 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     }
   }
 
-  const updateExtraSchoolsConfigurationData = async (institutionTypeList: number[]): Promise<oneEnum[]> => {
+  const analyseExistingInclude = (institutionTypeList:number[],eSI: string[] | null,eSE: string[] | null, allSchools: SchoolType[]): oneEnum[] => {
+
+    var newPossibleSchools = allSchools.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+    devLog("DEBUG", "updateExtraSchoolsConfigurationData (response.existingIncluded)", eSI)    
+    if (eSI !== null) {
+      // eSI is [] (all) or [ "123","234" ] (specific set)
+      
+      if (eSI.length === 0) {
+        // Only new excludes are allowed. All existing exculded need to be filttered out
+        if (eSE?.length === 0) {
+          newPossibleSchools = [];
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, all excluded)", newPossibleSchools)
+        } else {
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, only excluded with correct school code 1)", eSE)
+          newPossibleSchools = allSchools
+            .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+            .filter(k => eSE !== null && eSE.indexOf(String(k.koulukoodi)) >= 0)
+            .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, only excluded with correct school code 1)", newPossibleSchools)
+        }
+      } else {          
+          newPossibleSchools = allSchools
+            .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)            
+            .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools)", newPossibleSchools)                
+      }
+
+      if (eSE !== null) {
+        devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools filter out existingSchoolsExcluded)", eSE)
+        newPossibleSchools = newPossibleSchools.filter(k => eSE && eSE.indexOf(k.value) > -1);
+      }
+      devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools existing integrations)", newPossibleSchools)
+
+
+      extraSchoolConfigurationNeeded.current = true
+      disableExtraSchoolConfigurationSwitch.current = true;
+      devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 3)", disableExtraSchoolConfigurationSwitch.current)
+      
+    } else {
+      if (eSE !== null) {
+        newPossibleSchools = allSchools.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+          .filter(k => eSE && eSE.indexOf(String(k.koulukoodi)) > -1)
+          .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+        devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, only excluded with correct school code 2)", newPossibleSchools)
+      } else {
+        newPossibleSchools = allSchools
+          .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
+          .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+        devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, filter with correct school code)", newPossibleSchools)
+      }
+
+      devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools)", newPossibleSchools)
+      if (eSI === null && (eSE === null)) {
+        extraSchoolConfigurationNeeded.current = false
+      } else {
+        extraSchoolConfigurationNeeded.current = true
+      }
+
+      disableExtraSchoolConfigurationSwitch.current = false;
+      devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 4)", disableExtraSchoolConfigurationSwitch.current)
+
+    }
+    return newPossibleSchools;
+  }
+  const analyseExistingExclude = (oldIntegration:boolean,institutionTypeCount: number, eSI: string[] | null,eSE: string[] | null) => {
+    if (eSE !== null && eSE.length >= 0) {
+          //existing Exclude defined list [ "1", "2"]                                                
+          if (institutionTypeCount > 1) {
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (several institutionTypes)", institutionTypeCount)
+            setHideExcludeSchools(false)
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 1)", false)
+            extraSchoolConfigurationNeeded.current = true
+            if (eSI !== null && eSI?.length > 0 && eSE?.length === 0) {
+              setAdminConfiguration(false)
+            } else {
+              setAdminConfiguration(true)
+            }            
+          } else {
+            setAdminConfiguration(false)
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (one institutionTypes)", institutionTypeCount)
+            if (eSE?.length! > 0) {
+              if (oldIntegration) {
+                setHideExcludeSchools(false)
+                devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 2.1)", true)
+              } else {
+                setHideExcludeSchools(true)
+                devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 2.2)", true)
+              }
+
+            } else {
+              setHideExcludeSchools(false)
+              devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 3)", false)
+            }
+
+            extraSchoolConfigurationNeeded.current = false
+          }
+          disableExtraSchoolConfigurationSwitch.current = true
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 1)", disableExtraSchoolConfigurationSwitch.current)
+
+        } else {
+          //Exclude not defined, null
+          setHideExcludeSchools(false)
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 4)", false)
+          disableExtraSchoolConfigurationSwitch.current = false;
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 2)", disableExtraSchoolConfigurationSwitch.current)
+
+          if (institutionTypeCount > 1) {
+            if (eSI !== null && eSI?.length >= 0 && eSE?.length === 0) {
+              setAdminConfiguration(false)
+            } else {
+              setAdminConfiguration(true)
+            }
+            
+          }
+
+        }
+  }
+
+  const updateExtraSchoolsConfigurationData = async (institutionTypeList: number[],environment: number,schoolData:  SchoolData|undefined): Promise<oneEnum[]> => {
 
     if(schoolData !== undefined && schoolData.koulut !== null){
-       
+
       if (integration.organization && integration.organization.oid && institutionTypeList.length > 0) {
         devLog("DEBUG", "updateExtraSchoolsConfigurationData (deplomentPhase)", environment);
         
@@ -383,197 +497,91 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           try {
             devLog("DEBUG","updateExtraSchoolsConfigurationData (execute getIntegrationDiscoveryInformation)","")
             const response = await getIntegrationDiscoveryInformation({ organizationOid: integration.organization.oid, institutionType: institutionTypeList, id: integration.id })
-            if (response.existingExcluded == undefined && response.existingIncluded == undefined) {
-                noExistingSchoolConfigurations.current = true
-              } else {
-                noExistingSchoolConfigurations.current = false
-              }
-              existingSchoolsExcluded.current = (response.existingExcluded !== undefined) ? response.existingExcluded : null;
-              existingSchoolsIncluded.current = (response.existingIncluded !== undefined) ? response.existingIncluded : null;
-              const eSE = existingSchoolsExcluded.current
-              const eSI = existingSchoolsIncluded.current
-              devLog("DEBUG", "updateExtraSchoolsConfigurationData (integration.id)", integration.id)
-              devLog("DEBUG", "updateExtraSchoolsConfigurationData (response.existingExcluded)", response.existingExcluded)
-              if (response.existingExcluded && response.existingExcluded !== null && response.existingExcluded.length >= 0) {
-                //Exclude defined, either all [], or list [ "1", "2"]                                                
-                if (institutionTypeList.length > 1) {
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (several institutionTypes)", institutionTypeList.length)
-                  setHideExcludeSchools(false)
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 1)", false)
-                  extraSchoolConfigurationNeeded.current = true
-                  if (eSI !== null && eSI?.length > 0 && eSE?.length === 0) {
-                    adminConfiguration.current = false
-                  } else {
-                    adminConfiguration.current = true
-                  }
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (adminConfiguration.current several institution types 1)", adminConfiguration.current)
-                } else {
-                  adminConfiguration.current = false
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (adminConfiguration.current one institution types)", adminConfiguration.current)
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (one institutionTypes)", institutionTypeList.length)
-                  if (eSE?.length! > 0) {
-                    if (integration && integration.id && integration.id > 0) {
-                      setHideExcludeSchools(false)
-                      devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 2.1)", true)
-                    } else {
-                      setHideExcludeSchools(true)
-                      devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 2.2)", true)
-                    }
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (integration.id)", integration.id)
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (response.existingIncluded)", response.existingIncluded)
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (response.existingExcluded)", response.existingExcluded)
+            if (response.existingExcluded === null && response.existingIncluded === null) {
+              noExistingSchoolConfigurations.current = true
+            } else {
+              noExistingSchoolConfigurations.current = false
+            }
+            existingSchoolsExcluded.current = (response.existingExcluded !== undefined) ? response.existingExcluded : null;
+            existingSchoolsIncluded.current = (response.existingIncluded !== undefined) ? response.existingIncluded : null;
+            const eSE = existingSchoolsExcluded.current
+            const eSI = (discoveryInformation?.schools && discoveryInformation?.schools.length >= 0 && existingSchoolsIncluded.current !== null)?existingSchoolsIncluded.current.filter(e => discoveryInformation?.schools && discoveryInformation?.schools?.indexOf(e) < 0):existingSchoolsIncluded.current
 
-                  } else {
-                    setHideExcludeSchools(false)
-                    devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 3)", false)
-                  }
+            //Check if extra school configuration is needed and so on...
+            analyseExistingExclude((integration.id !== undefined && integration.id > 0),institutionTypeList.length,eSI,eSE)
+            let newPossibleSchools = analyseExistingInclude(institutionTypeList,eSI,eSE,schoolData.koulut)
+                          
+            if (institutionTypeList.length>1) {
+              newPossibleSchools = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+              devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools admin)", possibleSchools.current)
+            }
 
-                  extraSchoolConfigurationNeeded.current = false
-                }
-                disableExtraSchoolConfigurationSwitch.current = true
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 1)", disableExtraSchoolConfigurationSwitch.current)
+            mandatoryExtraSchoolConfiguration(schools,excludeSchools,eSI,eSE)
 
-              } else {
-                //Exclude not defined, null
-                setHideExcludeSchools(false)
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 4)", false)
-                disableExtraSchoolConfigurationSwitch.current = false;
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 2)", disableExtraSchoolConfigurationSwitch.current)
-
-                if (institutionTypeList.length > 1) {
-                  if (eSI !== null && eSI?.length >= 0 && eSE?.length === 0) {
-                    adminConfiguration.current = false
-                  } else {
-                    adminConfiguration.current = true
-                  }
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (adminConfiguration.current several institution types 2)", adminConfiguration.current)
-                }
-
-              }
+            const newExcludeSchools = excludeSchools.filter((es) => schoolData.koulut.map(p => p.koulukoodi).indexOf(es) >= 0);
+            devLog("DEBUG","updateExtraSchoolsConfigurationData 0.1 (setExcludeSchools)",excludeSchools)
+            devLog("DEBUG","updateExtraSchoolsConfigurationData 0.2 (setExcludeSchools)",newPossibleSchools)
+            devLog("DEBUG","updateExtraSchoolsConfigurationData 1 (setExcludeSchools)",newExcludeSchools)
+            updateExcludeSchools(newExcludeSchools)
               
-              devLog("DEBUG", "updateExtraSchoolsConfigurationData (response.existingIncluded)", response.existingIncluded)
-              devLog("DEBUG", "updateExtraSchoolsConfigurationData (existingSchoolsIncluded.current)", existingSchoolsIncluded.current)
-              if (response.existingIncluded && response.existingIncluded !== null && response.existingIncluded.length >= 0) {
-
-                if (integration?.discoveryInformation?.schools && integration.discoveryInformation?.schools.length >= 0) {
-                  if (eSI !== null) {
-                    existingSchoolsIncluded.current = eSI
-                      .filter(e => integration?.discoveryInformation?.schools && integration?.discoveryInformation?.schools?.indexOf(e) < 0)
-                  }
-                }
-                if (eSI !== null) {              
-                  if (eSI.length === 0) {
-                    if (eSE?.length === 0) {
-                      possibleSchools.current = [];
-                      devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, all excluded)", possibleSchools.current)
-                    } else {
-                      possibleSchools.current = schoolData.koulut
-                        .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
-                        .filter(k => eSE !== null && eSE.indexOf(String(k.koulukoodi)) >= 0)
-                        .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
-                      devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, only excluded with correct school code)", possibleSchools.current)
-                    }
-                  } else {
-                    devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools filter out existingSchoolsExcluded)", 3)
-                    possibleSchools.current = schoolData.koulut
-                      .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
-                      .filter(k => eSI !== null && eSI.indexOf(String(k.koulukoodi)) < 0)
-                      .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
-                    devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools filter with existing and correct school code)", possibleSchools.current)
-                  }
-
-                } else {
-                  possibleSchools.current = schoolData.koulut
-                    .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
-                    .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools filter with correct school code)", possibleSchools.current)
-                }
-
-                if (eSE !== null) {
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools filter out existingSchoolsExcluded)", eSE)
-                  possibleSchools.current = possibleSchools.current.filter(k => eSE && eSE.indexOf(k.value) > -1);
-                }
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools existing integrations)", possibleSchools.current)
-
-
-                extraSchoolConfigurationNeeded.current = true
-                disableExtraSchoolConfigurationSwitch.current = true;
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 3)", disableExtraSchoolConfigurationSwitch.current)
-                /*
-                if(response.existingIncluded.length===0||possibleSchools.current.length===0){
-                  possibleSchools.current = []
-                }
-                */
-              } else {
-                if (eSE !== null) {
-                  possibleSchools.current = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
-                    .filter(k => eSE && eSE.indexOf(k.koulukoodi) > -1)
-                    .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, only excluded with correct school code)", possibleSchools.current)
-                } else {
-                  possibleSchools.current = schoolData.koulut
-                    .filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1)
-                    .map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
-                  devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools, filter with correct school code)", possibleSchools.current)
-                }
-
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools)", possibleSchools.current)
-                if (eSI === null && (eSE === null)) {
-                  extraSchoolConfigurationNeeded.current = false
-                } else {
-                  extraSchoolConfigurationNeeded.current = true
-                }
-
-                disableExtraSchoolConfigurationSwitch.current = false;
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (disableExtraSchoolConfigurationSwitch.current 4)", disableExtraSchoolConfigurationSwitch.current)
-
-              }
-              
-              if (adminConfiguration.current) {
-                possibleSchools.current = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools admin)", possibleSchools.current)
-              }
-
-              mandatoryExtraSchoolConfiguration(schools,excludeSchools,eSI,eSE)
-
-              updateExcludeSchools(excludeSchools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
-              devLog("DEBUG", "updateExtraSchoolsConfigurationData (institutionTypeInit.current)", institutionTypeInit.current)
-              if (institutionTypeInit.current) {
-                institutionTypeInit.current = true;
-                devLog("DEBUG", "updateExtraSchoolsConfigurationData (updateSchools)", schools)
-                updateSchools(schools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
-              }
-              
-
-              devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools.current)", possibleSchools.current)
-              devLog("DEBUG", "updateExtraSchoolsConfigurationData (schools)", schools)
-              if(possibleSchoolList.length!==possibleSchools.current.length) {
-                setPossibleSchoolList(possibleSchools.current)
-              }              
-              return possibleSchools.current
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (institutionTypeInit.current)", institutionTypeInit.current)
+            if (!institutionTypeInit.current) {
+              institutionTypeInit.current = true;
+              devLog("DEBUG", "updateExtraSchoolsConfigurationData (updateSchools)", schools)
+              devLog("DEBUG", "updateExtraSchoolsConfigurationData (updateSchools)", discoveryInformation.schools)
+              updateSchools(schools.filter((es) => newPossibleSchools.map(p => p.value).indexOf(es) >= 0))
+            }
+            
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools.current)", newPossibleSchools)
+            devLog("DEBUG", "updateExtraSchoolsConfigurationData (schools)", schools)
+            if(possibleSchoolList.length!==newPossibleSchools.length) {
+              setPossibleSchoolList(newPossibleSchools)
+            }           
+            existingSchoolsExcluded.current = eSE
+            existingSchoolsIncluded.current = eSI   
+            return newPossibleSchools
             
           } catch (error) {
             devLog("DEBUG", "updateExtraSchoolsConfigurationData failed", error)
-            return possibleSchools.current
+            return schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
           }
           
         } else {
-          adminConfiguration.current = false
-          devLog("DEBUG", "updateExtraSchoolsConfigurationData (schools)", schools)
-          possibleSchools.current = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
-          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools not production integration)", possibleSchools.current)
-          extraSchoolConfigurationNeeded.current = false;
-          updateExcludeSchools(excludeSchools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
-          devLog("DEBUG", "updateSchools (3)", schools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
-          updateSchools(schools.filter((es) => possibleSchools.current.map(p => p.value).indexOf(es) >= 0))
 
-          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools.current*)", possibleSchools.current)
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (for environment)", environment)
+          setAdminConfiguration(false)
+          
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (schools)", schools)
+          const newPossibleSchools = schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+          
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools not production integration)", newPossibleSchools)
+          extraSchoolConfigurationNeeded.current = false;
+          
+          const newExcludeSchools = excludeSchools.filter((es) => schoolData.koulut.map(p => p.koulukoodi).indexOf(es) >= 0)
+          devLog("DEBUG","updateExtraSchoolsConfigurationData 2 (setExcludeSchools)",newExcludeSchools)
+          updateExcludeSchools(newExcludeSchools)
+          
+          devLog("DEBUG", "updateSchools (3)", schools.filter((es) => newPossibleSchools.map(p => p.value).indexOf(es) >= 0))
+          updateSchools(schools.filter((es) => newPossibleSchools.map(p => p.value).indexOf(es) >= 0))
+
+          devLog("DEBUG", "updateExtraSchoolsConfigurationData (possibleSchools.current*)", newPossibleSchools)
           devLog("DEBUG", "updateExtraSchoolsConfigurationData (schools*)", schools)
-          return possibleSchools.current
+          return newPossibleSchools
         }
 
       } else {
-        return possibleSchools.current
+
+        return schoolData.koulut.filter(k => institutionTypeList.indexOf(k.oppilaitostyyppi) > -1).map(k => ({ label: k.nimi, value: String(k.koulukoodi) }));
+
       }
+
     } else {
-      return possibleSchools.current
+
+      return []
+      
     }
   };
 
@@ -584,9 +592,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
       setLoading(true)
       if(event.target.checked) {
-          const response: oneEnum[] =  await updateExtraSchoolsConfigurationData(institutionTypeList)
-          setPossibleSchoolList(response)
+          devLog("DEBUG","changeExtraSchoolsConfiguration (updateExtraSchoolsConfigurationData)",newValue)
+          possibleSchools.current =  await updateExtraSchoolsConfigurationData(institutionTypeList,environment,schoolData)          
       } else {
+        devLog("DEBUG","changeExtraSchoolsConfiguration (setExcludeSchools)",[])
         updateExcludeSchools([])
         devLog("DEBUG", "changeExtraSchoolsConfiguration (updateSchools 4)",[])
         updateSchools([])
@@ -632,12 +641,15 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     }
 
     const updateInstitutionTypes = async (values:string[]) => {
+        if(values.length<=1) {
+          setAdminConfiguration(false)
+        }
         if(configurationEntity&&configurationEntity.idp) {
           configurationEntity.idp.institutionTypes=values.map(value=>Number(value))
           setInstitutionTypeList(configurationEntity.idp.institutionTypes)            
-          if(values&&values.length>0) {        
-            const response: oneEnum[] = await updateExtraSchoolsConfigurationData(values.map(v=>Number(v)))
-            setPossibleSchoolList(response)
+          if(values&&values.length>0) {       
+            devLog("DEBUG","updateInstitutionTypes (updateExtraSchoolsConfigurationData)",values) 
+            possibleSchools.current = await updateExtraSchoolsConfigurationData(values.map(v=>Number(v)),environment,schoolData)            
           } 
         }
         //if(extraSchoolsConfiguration) {
@@ -655,11 +667,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         
     }
 
-    const updateiscoveryInformation = (newDiscoveryInformation:Components.Schemas.DiscoveryInformation) => {      
+    const checkDiscoveryInformation = (newDiscoveryInformation:Components.Schemas.DiscoveryInformation) => {      
       var updateNeeded=false;
       if(newDiscoveryInformation) {        
-        devLog("DEBUG","updateiscoveryInformation (existingSchoolsIncluded)",existingSchoolsIncluded.current)
-        devLog("DEBUG","updateiscoveryInformation (existingSchoolsExcluded)",existingSchoolsExcluded.current)
+        devLog("DEBUG","checkDiscoveryInformation (existingSchoolsIncluded)",existingSchoolsIncluded.current)
+        devLog("DEBUG","checkDiscoveryInformation (existingSchoolsExcluded)",existingSchoolsExcluded.current)
         if(existingSchoolsIncluded.current!==null&&existingSchoolsIncluded.current.length>0&&existingSchoolsExcluded.current === null) {
           existingSchoolsIncluded.current.forEach(school=>{
             if(newDiscoveryInformation.excludedSchools === undefined) {
@@ -672,14 +684,14 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
               && newDiscoveryInformation.excludedSchools.indexOf(school)<0) {
               newDiscoveryInformation.excludedSchools.push(school);
               updateNeeded=true
-              devLog("DEBUG","updateiscoveryInformation (add schools)",school)
+              devLog("DEBUG","checkDiscoveryInformation (add schools)",school)
             }
             
           })
         }
         
         if(updateNeeded) {
-          devLog("DEBUG","updateiscoveryInformation (excludedSchools)",newDiscoveryInformation.excludedSchools)
+          devLog("DEBUG","checkDiscoveryInformation (excludedSchools)",newDiscoveryInformation.excludedSchools)
           updateDiscoveryInformation(newDiscoveryInformation)
         }                
       }      
@@ -714,6 +726,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         }
         
         setExampleSchool(possibleSchools.current?.filter(p=>values.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu')
+        devLog("DEBUG","updateExcludeSchools (setExcludeSchools)",values)
         setExcludeSchools(values)
         
         
@@ -727,8 +740,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       if(!isEqual(discoveryInformation.schools,values)||discoveryInformation?.excludedSchools?.length!=0){
         discoveryInformation.schools=values
         discoveryInformation.excludedSchools=[]
-        updateDiscoveryInformation(discoveryInformation)
-      
+        updateDiscoveryInformation(discoveryInformation)      
       }
       
     }
@@ -846,20 +858,24 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       
 
     if(!institutionTypeInit.current) {
+      //institutionTypeInit.current=true
       if(institutionTypeList.length>0) {
         devLog("DEBUG","Init updateExtraSchoolsConfigurationData",institutionTypeInit.current)
-        updateExtraSchoolsConfigurationData(institutionTypeList);
+        devLog("DEBUG","schoolSelection 1 (updateExtraSchoolsConfigurationData)",institutionTypeList) 
+        updateExtraSchoolsConfigurationData(institutionTypeList,environment,schoolData).then(result => possibleSchools.current = result)
+        
       }      
     }
     
     
     if(environment!==oldEnvironment.current&&institutionTypeList !== undefined && institutionTypeList.length > 0) {
       oldEnvironment.current=environment;
-      updateExtraSchoolsConfigurationData(institutionTypeList);
+      devLog("DEBUG","schoolSelection 2 (updateExtraSchoolsConfigurationData)",institutionTypeList) 
+      updateExtraSchoolsConfigurationData(institutionTypeList,environment,schoolData).then(result => possibleSchools.current = result);
       
     }
     
-    updateiscoveryInformation(discoveryInformation);
+    checkDiscoveryInformation(discoveryInformation);
 
     devLog("DEBUG","************************* SchoolSelection post ********************","start")
     if((institutionTypeList === undefined || institutionTypeList.length===0)&&showSchools.current&&localCanSave) {
@@ -926,7 +942,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                               setCanSave={setInstitutionTypeCanSave} 
                               onUpdate={updateInstitutionTypes}/>}
                   </Grid>
-                  {adminConfiguration.current&&!noExistingSchoolConfigurations.current&&institutionTypeList!==null&&institutionTypeList.length>0&&
+                  {adminConfiguration&&!noExistingSchoolConfigurations.current&&institutionTypeList!==null&&institutionTypeList.length>0&&
                         <>
                         <Grid item xs={4}>
                         </Grid>
@@ -975,7 +991,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                     (environment===1&&institutionTypeList.length>1&&schools?.length===0&&excludeSchools?.length===0)?true:false
                                   }                    
                                   helperText={helpGeneratorText}
-                                  enums={possibleSchoolList}
+                                  enums={possibleSchools.current}
                                   onValidate={validator} 
                                   setCanSave={setSchoolsCanSave} 
                                   onUpdate={updateSchools}/>
@@ -997,7 +1013,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                                     (environment===1&&institutionTypeList.length>1&&schools?.length===0&&excludeSchools?.length===0)?true:false
                                   }                    
                                   helperText={extraIncludeNoticeHelpText}
-                                  enums={possibleSchoolList}
+                                  enums={possibleSchools.current}
                                   onValidate={validator} 
                                   setCanSave={setExcludeSchoolsCanSave} 
                                   onUpdate={updateExcludeSchools}/>
