@@ -1,4 +1,4 @@
-import {type Components } from "@/api";
+import { type Components } from '@/api';
 import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { clone, get, orderBy } from "lodash";
@@ -6,6 +6,7 @@ import definition from "../../schemas/schema.json";
 import exampleData from "../../schemas/response.json"
 import blankData from "../../schemas/blankIdpIntegration.json"
 import exampleOrganisations from "../../schemas/organizations.json"
+
 
 export { definition };
 
@@ -75,39 +76,6 @@ type DiscoveryInformationResult = {
   existingExcluded: string[]|null;
 };
 
-const discoveryInformationResult:number = 0
-var discoveryInformationResultEdited:boolean = false
-
-const discoveryInformationResultsAdd:DiscoveryInformationResult[] = [
-  {existingIncluded: null, existingExcluded: null},
-  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076", "30077" ]},
-  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076" ]},
-  {existingIncluded: [], existingExcluded: [ "30074", "30075" ]},
-  {existingIncluded: [], existingExcluded: [ "30074" ]},
-  {existingIncluded: [], existingExcluded: [ "30074", "30077" ]},
-  {existingIncluded: [ "30075" ], existingExcluded: [ "30074", "30077" ]},
-  {existingIncluded: [ "30075", "30076" ], existingExcluded: [ "30074", "30077" ]},
-  {existingIncluded: [ "30074", "30075", "30076", "30077" ], existingExcluded: null},
-  {existingIncluded: [ "30074" ], existingExcluded: null},
-  {existingIncluded: [ "30074", "30077" ], existingExcluded: null},
-  {existingIncluded: [], existingExcluded: null}
-]
-
-var discoveryInformationResultsModify:DiscoveryInformationResult[] = [
-  {existingIncluded: null, existingExcluded: null},
-  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076", "30077" ]},
-  {existingIncluded: [], existingExcluded: [ "30074", "30075", "30076" ]},
-  {existingIncluded: [], existingExcluded: [ "30074", "30075" ]},
-  {existingIncluded: [], existingExcluded: [ "30074" ]},
-  {existingIncluded: [], existingExcluded: [ "30074", "30077" ]},
-  {existingIncluded: [ "30075" ], existingExcluded: [ "30074", "30077" ]},
-  {existingIncluded: [ "30075", "30076" ], existingExcluded: [ "30074", "30077" ]},
-  {existingIncluded: [ "30074", "30075", "30076", "30077" ], existingExcluded: null},
-  {existingIncluded: [ "30074" ], existingExcluded: null},
-  {existingIncluded: [ "30074", "30077" ], existingExcluded: null},
-  {existingIncluded: [], existingExcluded: null}
-]
-
 allIntegrations = [ ...allIntegrations.map((row) => ({
     ...row,
     configurationEntity: {
@@ -128,22 +96,73 @@ const defaults = {
   size: 25,
 };
 
+const hasCommon = (a: string[], b: number[]): boolean => {
+  if(a === undefined || b === undefined) return false
+  return b.some(x => a.includes(String(x)));
+};
+
+const getIntegrationDiscoveryInformationValue = (oid:string,id:string,institutionTypes:string[]) => {
+  
+    var di:DiscoveryInformationResult = {existingIncluded: null, existingExcluded: null}
+    // Find all integrations of the given organization
+    var integrations: Components.Schemas.Integration[] = allIntegrations.filter(i => String(i.organization?.oid) === oid);
+
+    const allExcluded = new Set<string>();
+    const allIncluded = new Set<string>();
+    let emptyIncludedFound = false;
+
+    // eslint-disable-next-line no-loops/no-loops
+    for (const i of integrations) {
+      if (i.active && String(i.id) !== id && i.configurationEntity?.idp != null) {
+        if (i.deploymentPhase !== 1) {
+          // Filter out non production integrations
+          continue;
+        }
+        if (hasCommon(institutionTypes,i?.configurationEntity?.idp?.institutionTypes||[]) && i.discoveryInformation != null) {
+          if(i.discoveryInformation.excludedSchools) {
+            // eslint-disable-next-line no-loops/no-loops
+            for (const school of i.discoveryInformation.excludedSchools) {
+              allExcluded.add(school);
+            }
+          }
+          
+          if (i?.discoveryInformation?.schools?.length === 0) {
+            emptyIncludedFound = true; // Empty school set, so this integration includes all schools (possible future schools as well).
+          }
+
+          if(i.discoveryInformation.schools) {
+            // eslint-disable-next-line no-loops/no-loops
+            for (const school of i.discoveryInformation.schools) {
+              allIncluded.add(school);
+            }
+          }
+          di.existingIncluded=[ ...allIncluded];
+        }
+      }
+    }
+
+    if (allExcluded.size > 0) {
+      di.existingExcluded=[...allExcluded];
+    }
+    if (emptyIncludedFound) {
+      allIncluded.clear();
+    }
+    
+    return di;
+}
+
 export default {
   inactivateIntegration(request) {
     console.log("inactivateIntegration: ",request.path)
   },
-  getIntegrationDiscoveryInformation(request) {
-    console.log("getIntegrationDiscoveryInformation: ",request);
-    if(discoveryInformationResultEdited) {
-      discoveryInformation.value=discoveryInformationResultsModify[discoveryInformationResult]    
-    } else {
-      discoveryInformation.value=discoveryInformationResultsAdd[discoveryInformationResult]    
-    }
-    
+  getIntegrationDiscoveryInformation(request) {    
+    discoveryInformation.value = getIntegrationDiscoveryInformationValue(request.query.organizationOid,request.query.id,request.query.institutionType)
   },
   getBlankIntegration(request) {
     if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type).length>0) {
-      blankIntegration.value = blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type)[0]
+      blankIntegration.value = blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type)[0]      
+      blankIntegration.value.organization = {}
+      blankIntegration.value.organization = organisations
     }
     if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.sp?.type === request.query.type).length>0) {
       blankIntegration.value = blankIntegrations.filter(b=>b?.configurationEntity?.sp?.type === request.query.type)[0]
@@ -215,10 +234,9 @@ export default {
     updateIntegration.value = request.requestBody
   },
   createIntegration(request) {
-    const id = 999995;
+    const id = Math.max(9000000,...allIntegrations.map(i=>i.id!))+1;
     request.requestBody.id=id;
     const index=allIntegrations.map(i=>i.id).indexOf(id);
-    discoveryInformationResultEdited=true
     if (index !== -1) {
       allIntegrations[index] = request.requestBody;      
     } else {
