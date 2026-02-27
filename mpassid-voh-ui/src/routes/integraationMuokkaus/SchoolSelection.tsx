@@ -1082,7 +1082,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           <DataRowTitle></DataRowTitle>
           <DataRowValue><FormattedMessage defaultMessage="Esim. {exampleSchool} ({title})" values={{exampleSchool: exampleSchool,title: title}} /></DataRowValue>            
           </>}
-          {title===undefined||title===''&&showSchools.current&&<>
+          {(title===undefined||title==='')&&showSchools.current&&<>
           <DataRowTitle></DataRowTitle>
           <DataRowValue><FormattedMessage defaultMessage="Esim. {exampleSchool}" values={{exampleSchool: exampleSchool}} /></DataRowValue>            
           </>}
