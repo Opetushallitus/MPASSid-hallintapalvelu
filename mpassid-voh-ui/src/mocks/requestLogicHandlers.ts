@@ -145,7 +145,7 @@ const getIntegrationDiscoveryInformationValue = (oid:string,id:string,institutio
       di.existingExcluded=[...allExcluded];
     }
     if (emptyIncludedFound) {
-      allIncluded.clear();
+      //allIncluded.clear();
     }
     
     return di;
