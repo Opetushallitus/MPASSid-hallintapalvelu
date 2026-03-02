@@ -78,6 +78,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
     const schoolsRef = useRef<string[]>(integration?.discoveryInformation?.schools||[]);
     const [excludeSchools, setExcludeSchools] = useState<string[]>(integration?.discoveryInformation?.excludedSchools||[]);
     const excludeSchoolsRef = useRef<string[]>(integration?.discoveryInformation?.excludedSchools||[])
+    const originalExcludeSchoolsRef = useRef<string[]>(integration?.discoveryInformation?.excludedSchools||[]);
     const currentExcludeSchools = useRef<string[]>(integration?.discoveryInformation?.excludedSchools||[]);
     const [hideExcludeSchools, setHideExcludeSchools] = useState<boolean>(false);
     const [exampleSchool, setExampleSchool] = useState<string>(possibleSchools.current?.filter(p=>excludeSchools.indexOf(p?.value||'')===-1)[0]?.label||'Mansikkalan koulu');
@@ -112,6 +113,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
       devLog("DEBUG","SchoolSelection (init localCanSave)",localCanSave)
       if(idRef.current && idRef.current !== integration.id) {
         originalSchoolsRef.current=(integration.discoveryInformation?.schools)?integration.discoveryInformation?.schools:[]
+        originalExcludeSchoolsRef.current=(integration.discoveryInformation?.excludedSchools)?integration.discoveryInformation?.excludedSchools:[]
       }
       idRef.current=integration.id;
       oidRef.current=integration.organization?.oid
@@ -519,7 +521,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             devLog("DEBUG", "updateExtraSchoolsConfigurationData (one institutionTypes)", institutionTypeCount)
             if (eSE?.length! > 0) {
               if (oldIntegration) {
-                setHideExcludeSchools(false)
+                if(originalExcludeSchoolsRef.current.length===0) {
+                  setHideExcludeSchools(true)
+                } else {
+                  setHideExcludeSchools(false)
+                }                
                 devLog("DEBUG", "updateExtraSchoolsConfigurationData (hideExcludeSchools 2.1)", true)
               } else {
                 setHideExcludeSchools(true)
