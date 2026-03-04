@@ -569,8 +569,10 @@ class IntegrationServiceTests {
         // then
         assertEquals(2, dto.getExistingIncluded().size());
         assertEquals(2, dto.getExistingExcluded().size());
-        assertTrue(dto.getExistingIncluded().contains("00907")); // institution code
-        assertTrue(dto.getExistingExcluded().contains("1111")); // integration identifier
+        assertTrue(dto.getExistingIncluded().contains("00907"));
+        assertTrue(dto.getExistingIncluded().contains("05899"));
+        assertTrue(dto.getExistingExcluded().contains("00907"));
+        assertTrue(dto.getExistingExcluded().contains("05899"));
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })
@@ -640,7 +642,7 @@ class IntegrationServiceTests {
 
         // then
         assertTrue(dto.getExistingIncluded().isEmpty());
-        assertTrue(dto.getExistingExcluded().isEmpty());
+        assertTrue(dto.getExistingExcluded() == null);
     }
 
     @WithMockUser(value = "tallentaja", roles = { "APP_MPASSID_TALLENTAJA_1.2.3.4.5.6.7.8" })

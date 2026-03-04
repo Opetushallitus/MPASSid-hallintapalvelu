@@ -1146,16 +1146,18 @@ public class IntegrationService {
               continue;
             }
             if (matchInstitutionTypes(institutionTypes, i) && i.getDiscoveryInformation() != null) {
-              if (!i.getDiscoveryInformation().getExcludedSchools().isEmpty()) {
-                allExcluded.add(Long.toString(i.getId()));
+              for (String school : i.getDiscoveryInformation().getExcludedSchools()) {
+                allExcluded.add(school);
               }
               for (String school : i.getDiscoveryInformation().getSchools()) {
                 allIncluded.add(school);
               }
-              di.setExistingExcluded(allExcluded);
               di.setExistingIncluded(allIncluded);
             }
           }
+        }
+        if (!allExcluded.isEmpty()) {
+          di.setExistingExcluded(allExcluded);
         }
       }
     } else {
