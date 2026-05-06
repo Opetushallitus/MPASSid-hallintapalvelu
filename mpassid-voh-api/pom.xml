@@ -23,24 +23,6 @@
 				<artifactId>asm</artifactId>
 				<version>9.1</version>
 			</dependency>
-			<!-- Bouncycastle dependencies can be removed after opensaml is updated to 5.x -->
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk18on</artifactId>
-				<version>1.84</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk18on</artifactId>
-				<version>1.84</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcutil-jdk18on</artifactId>
-				<version>1.84</version>
-			</dependency>
 
 			<dependency>
 				<groupId>org.checkerframework</groupId>
