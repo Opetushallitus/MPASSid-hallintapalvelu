@@ -1,0 +1,44 @@
+{
+  "name": "@visma/formatjs-scripts",
+  "version": "1.0.0",
+  "description": "Extract and compile messages, scan `node_modules` for messages.",
+  "homepage": "https://github.com/Visma-AS/visma/tree/main/packages/formatjs-scripts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Visma-AS/visma.git"
+  },
+  "license": "ISC",
+  "author": {
+    "name": "Arno Saine",
+    "email": "arno.saine@visma.com"
+  },
+  "type": "module",
+  "bin": "./scripts/main.js",
+  "files": [
+    "lib",
+    "scripts"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "dependencies": {
+    "@formatjs/cli": "^4.2.33",
+    "@visma/react-app-locale-utils": "file:../react-app-locale-utils",
+    "@visma/react-intl-bundled-messages": "file:../react-intl-bundled-messages",
+    "fast-glob": "^3.2.7",
+    "fs-extra": "^10.0.0",
+    "read-pkg-up": "^9.1.0"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^1.6.4",
+    "typescript": "^4.4.3"
+  },
+  "peerDependencies": {
+    "@visma/public.config": "^1.0.1"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  }
+}
