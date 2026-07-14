@@ -96,6 +96,34 @@ const defaults = {
   size: 25,
 };
 
+const E2E_TRIGGER_409 = "__e2e_trigger_409__";
+const E2E_TRIGGER_GENERIC_ERROR = "__e2e_trigger_500__";
+const E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE = "__e2e_trigger_403__";
+
+const triggerIntegrationSaveError = (body: Components.Schemas.Integration) => {
+  const marker =
+    body?.discoveryInformation?.customDisplayName ||
+    body?.configurationEntity?.sp?.name ||
+    "";
+  if (marker === E2E_TRIGGER_409) {
+    return {
+      status: 409,
+      mock: { message: "E2E-testin simuloima 409-konflikti" },
+    };
+  }
+  if (marker === E2E_TRIGGER_GENERIC_ERROR) {
+    return { status: 500, mock: {} };
+  }
+  return undefined;
+};
+
+const maskClientSecret = (body: Components.Schemas.Integration) => {
+  const metadata = body?.configurationEntity?.sp?.metadata as any;
+  if (metadata?.client_secret) {
+    metadata.client_secret = "***"
+  }
+};
+
 const hasCommon = (a: string[], b: number[]): boolean => {
   if(a === undefined || b === undefined) return false
   return b.some(x => a.includes(String(x)));
@@ -221,10 +249,16 @@ export default {
   },
   testAttributesAuthorization(request) {
     console.log("testAttributesAuthorization: ",request.requestBody)
+    if (request.requestBody?.clientId === E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE) {
+      return { status: 403, mock: {} };
+    }
   },
   updateIntegration(request) {
+    const errorResponse = triggerIntegrationSaveError(request.requestBody);
+    if (errorResponse) return errorResponse;
     const id = Number(request.params.id);
     const index=allIntegrations.map(i=>i.id).indexOf(id);
+    maskClientSecret(request.requestBody);
     if (index !== -1) {
       allIntegrations[index] = request.requestBody;
     }
@@ -234,11 +268,14 @@ export default {
     updateIntegration.value = request.requestBody
   },
   createIntegration(request) {
+    const errorResponse = triggerIntegrationSaveError(request.requestBody);
+    if (errorResponse) return errorResponse;
     const id = Math.max(9000000,...allIntegrations.map(i=>i.id!))+1;
     request.requestBody.id=id;
     const index=allIntegrations.map(i=>i.id).indexOf(id);
+    maskClientSecret(request.requestBody);
     if (index !== -1) {
-      allIntegrations[index] = request.requestBody;      
+      allIntegrations[index] = request.requestBody;
     } else {
       allIntegrations.push(request.requestBody)
     }
@@ -250,12 +287,14 @@ export default {
   getIntegration(request) {
     const id = Number(request.params.id);
     integration.value = allIntegrations.find((row) => row.id === id);
-    
-    if(integration.value !== undefined) {
-      integration.value.organization = {}
-      integration.value.organization = organisations
+
+    if (integration.value === undefined) {
+      return { status: 404, mock: {} };
     }
-    
+
+    integration.value.organization = {}
+    integration.value.organization = organisations
+
     if(id===999995&&integration.value?.configurationEntity?.idp){
       integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
       if(integration.value.configurationEntity.idp.type==='azure') {
@@ -288,8 +327,15 @@ export default {
   uploadSAMLMetadata(request) {
     const id = Number(request.params.id);
     samlMetadataIntegration.value = allIntegrations.find((row) => row.id === id);
-    
-    
+
+
+  },
+  uploadLogo(request) {
+    const id = Number(request.params.id);
+    const found = allIntegrations.find((row) => row.id === id);
+    if (found?.configurationEntity?.idp) {
+      found.configurationEntity.idp.logoUrl = `https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/${id}`;
+    }
   },
   getIntegrationsSpecSearchPageable(request) {
     const page = Number(request.query.page ?? defaults.page);
