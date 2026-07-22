@@ -17,8 +17,7 @@
     "generate:organisaatio-client": "react-openapi-client-generator ./schemas/organisaatio.json src/api/organisaatio.ts",
     "generate:messages": "formatjs-scripts && node scripts/export-messages.js",
     "preview": "vite preview",
-    "postinstall": "patch-package && npm run build:vendor",
-    "build:vendor": "(cd vendor/@visma/react-app-locale-utils && npm run build) && (cd vendor/@visma/react-intl-bundled-messages && npm run build) && (cd vendor/@visma/vite-plugin-super-template && npm run build) && (cd vendor/@visma/formatjs-scripts && npm run build) && (cd vendor/@visma/public.config && npm run build)",
+    "postinstall": "patch-package",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "playwright:install": "playwright install --with-deps chromium"
