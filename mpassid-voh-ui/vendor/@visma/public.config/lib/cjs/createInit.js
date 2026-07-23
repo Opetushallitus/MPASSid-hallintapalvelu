@@ -17,7 +17,9 @@ const overrides = ([hostname, { HOSTNAME_OVERRIDES = [], ...config },]) => [
 const toConfigByHostname = (config) => {
     var _a, _b;
     return Array.isArray(config)
-        ? config
+        ? // TS >= 4.6 narrows Array.isArray() on this union to `any[]` rather than
+            // the ConfigByHostname tuple, so cast explicitly (runtime-neutral).
+            config
         : [(_b = (_a = globalThis.location) === null || _a === void 0 ? void 0 : _a.hostname) !== null && _b !== void 0 ? _b : '', config];
 };
 const hostnameSafe = (hostname) => `.${hostname}`;

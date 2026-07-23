@@ -18,6 +18,7 @@
     "generate:messages": "formatjs-scripts && node scripts/export-messages.js",
     "preview": "vite preview",
     "postinstall": "patch-package",
+    "vendor:build": "bash vendor/build-vendor.sh",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "playwright:install": "playwright install --with-deps chromium"

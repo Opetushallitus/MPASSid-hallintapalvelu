@@ -1,4 +1,4 @@
-declare type DisplayName = {
+type DisplayName = {
     locale: string;
     value: string;
 };

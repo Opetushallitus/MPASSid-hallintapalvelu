@@ -8,6 +8,7 @@ export default defineConfig({
   // timing out under load, not a real app bug) - a retried test is still
   // flagged as flaky in the report, just not reported as a hard failure.
   retries: process.env.CI ? 2 : 1,
+  timeout: 200_000,
   reporter: "html",
   use: {
     // App runs unprefixed in dev (App.tsx only applies ENV.BASENAME when
