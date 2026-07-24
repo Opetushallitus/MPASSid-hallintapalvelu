@@ -67,7 +67,7 @@ export default function IntegrationTab({ id }: Props) {
   const [activateAllServices, setActivateAllServices] = useState(false);
   const { state } = useLocation();
 
-  const role = getRole(origInteg);
+  const role = origInteg ? getRole(origInteg) : undefined;
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
