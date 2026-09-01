@@ -296,7 +296,7 @@ export default {
     integration.value.organization = organisations
 
     if(id===999995&&integration.value?.configurationEntity?.idp){
-      integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
+      integration.value.configurationEntity.idp.logoUrl="https://virkailija.testiopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
       if(integration.value.configurationEntity.idp.type==='azure') {
         const azureIdp:Components.Schemas.Azure = clone(integration.value.configurationEntity.idp)
         azureIdp.signingCertificateValidUntil="2028-11-30"
