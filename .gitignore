@@ -8,5 +8,4 @@
 *.njsproj
 *.sln
 *.sw?
-mpassid-voh-api/target/
-mpassid-voh-app/target/
+target/
