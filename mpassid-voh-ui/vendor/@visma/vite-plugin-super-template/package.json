@@ -1,0 +1,56 @@
+{
+  "name": "@visma/vite-plugin-super-template",
+  "version": "0.1.7",
+  "description": "Vite plugin for super-template.",
+  "homepage": "https://github.com/Visma-AS/visma/tree/main/packages/vite-plugin-super-template",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Visma-AS/visma.git"
+  },
+  "license": "ISC",
+  "author": {
+    "name": "Arno Saine",
+    "email": "arno.saine@visma.com"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./lib/main.js",
+    "./lib": "./lib/main.js",
+    "./lib/*": "./lib/*",
+    "./*": "./lib/*.js"
+  },
+  "main": "./lib/main.js",
+  "types": "./lib/main.d.ts",
+  "files": [
+    "src",
+    "lib"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.1.1",
+    "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
+    "@visma/babel-preset-formatjs": "file:../babel-preset-formatjs",
+    "@visma/react-app-locale-utils": "file:../react-app-locale-utils",
+    "@visma/react-intl-bundled-messages": "file:../react-intl-bundled-messages",
+    "@vitejs/plugin-react": "^2.0.1",
+    "babel-plugin-codegen": "^4.1.5",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "vite-plugin-dynamic-base": "^0.4.4",
+    "vite-plugin-dynamic-import": "^1.0.0",
+    "vite-plugin-env-compatible": "^1.1.1",
+    "vite-plugin-favicons-inject": "^2.1.0",
+    "vite-tsconfig-paths": "^3.5.0"
+  },
+  "devDependencies": {
+    "@visma/tsconfig": "^0.2.1",
+    "typescript": "^4.5.2",
+    "vite": "^3.0.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  }
+}

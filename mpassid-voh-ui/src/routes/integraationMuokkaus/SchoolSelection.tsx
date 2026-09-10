@@ -226,20 +226,19 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
         
         if(configurationEntity?.idp?.institutionTypes?.length===1) {
-          var configurationCheckOk=true;          
-          
-          devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.excludedSchools)",discoveryInformation?.excludedSchools)
-          devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.schools)",discoveryInformation?.schools)
+          var configurationCheckOk=true;
+          devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.excludedSchools)",discoveryInformationRef.current?.excludedSchools)
+          devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.schools)",discoveryInformationRef.current?.schools)
           devLog("DEBUG","isExtraSchoolConfigurationOk (existingSchoolsExcluded.current)",existingSchoolsExcluded.current)
           if(existingSchoolsIncluded.current?.length! === 0) {
-            if(discoveryInformation?.excludedSchools?.length! > 0) {              
+            if(discoveryInformationRef.current?.excludedSchools?.length! > 0) {
               devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)","All schools include already exists")
               configurationCheckOk=false
             }
           }
-          if(existingSchoolsExcluded.current?.length! > 0) {                   
+          if(existingSchoolsExcluded.current?.length! > 0) {
 
-            discoveryInformation?.schools?.forEach(school=>{
+            discoveryInformationRef.current?.schools?.forEach(school=>{
               if(existingSchoolsExcluded.current!.indexOf(school)<0) {
                 devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)","one included school is not in existing excluded schools")
                 configurationCheckOk=false
@@ -247,40 +246,40 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             })
           }
           devLog("DEBUG","isExtraSchoolConfigurationOk (existingSchoolsIncluded.current)",existingSchoolsIncluded.current)
-          if(existingSchoolsIncluded.current?.length! > 0 && configurationCheckOk) { 
+          if(existingSchoolsIncluded.current?.length! > 0 && configurationCheckOk) {
 
-            discoveryInformation?.schools?.forEach(school=>{
+            discoveryInformationRef.current?.schools?.forEach(school=>{
               if(existingSchoolsIncluded.current!.indexOf(school)>=0) {
                 devLog("DEBUG","isExtraSchoolConfigurationOk (failed check)",3)
                 configurationCheckOk=false
               }
-            })    
-            
-          }      
-          
-          devLog("DEBUG","isExtraSchoolConfigurationOk (return 1)",(configurationCheckOk&&discoveryInformation?.showSchools&&configurationEntity !== undefined&&configurationEntity&&
+            })
+
+          }
+
+          devLog("DEBUG","isExtraSchoolConfigurationOk (return 1)",(configurationCheckOk&&discoveryInformationRef.current?.showSchools&&configurationEntity !== undefined&&configurationEntity&&
             configurationEntity?.idp?.institutionTypes?.length!>0&&
-            ((currentExcludeSchools.current?.length!>0||discoveryInformation?.schools?.length!>0))))  
-          return (configurationCheckOk&&discoveryInformation?.showSchools&&configurationEntity !== undefined&&configurationEntity&&
+            ((currentExcludeSchools.current?.length!>0||discoveryInformationRef.current?.schools?.length!>0))))
+          return (configurationCheckOk&&discoveryInformationRef.current?.showSchools&&configurationEntity !== undefined&&configurationEntity&&
             configurationEntity?.idp?.institutionTypes?.length!>0&&
-            ((currentExcludeSchools.current?.length!>0||discoveryInformation?.schools?.length!>0)))
-                  
+            ((currentExcludeSchools.current?.length!>0||discoveryInformationRef.current?.schools?.length!>0)))
+
         } else {
 
-          devLog("DEBUG","isExtraSchoolConfigurationOk (return 2)",(discoveryInformation?.showSchools&&configurationEntity&&
+          devLog("DEBUG","isExtraSchoolConfigurationOk (return 2)",(discoveryInformationRef.current?.showSchools&&configurationEntity&&
             configurationEntity?.idp?.institutionTypes?.length!>0&&
-            ((currentExcludeSchools.current?.length!>0||discoveryInformation?.schools?.length!>0))))      
-          return (discoveryInformation?.showSchools&&configurationEntity&&
+            ((currentExcludeSchools.current?.length!>0||discoveryInformationRef.current?.schools?.length!>0))))
+          return (discoveryInformationRef.current?.showSchools&&configurationEntity&&
             configurationEntity?.idp?.institutionTypes?.length!>0&&
-            ((currentExcludeSchools.current?.length!>0||discoveryInformation?.schools?.length!>0)))
+            ((currentExcludeSchools.current?.length!>0||discoveryInformationRef.current?.schools?.length!>0)))
         }
 
       } else {
         devLog("DEBUG","isExtraSchoolConfigurationOk (check)",6)
-        devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.excludedSchools)",discoveryInformation?.excludedSchools)
-        devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.schools)",discoveryInformation?.schools)
-        devLog("DEBUG","isExtraSchoolConfigurationOk (return 3)",(discoveryInformation?.excludedSchools?.length! >= 0 && discoveryInformation?.schools?.length! >= 0))
-        return discoveryInformation?.excludedSchools?.length! >= 0 && discoveryInformation?.schools?.length! >= 0;
+        devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.excludedSchools)",discoveryInformationRef.current?.excludedSchools)
+        devLog("DEBUG","isExtraSchoolConfigurationOk (discoveryInformation?.schools)",discoveryInformationRef.current?.schools)
+        devLog("DEBUG","isExtraSchoolConfigurationOk (return 3)",(discoveryInformationRef.current?.excludedSchools?.length! >= 0 && discoveryInformationRef.current?.schools?.length! >= 0))
+        return discoveryInformationRef.current?.excludedSchools?.length! >= 0 && discoveryInformationRef.current?.schools?.length! >= 0;
       }
       
     }

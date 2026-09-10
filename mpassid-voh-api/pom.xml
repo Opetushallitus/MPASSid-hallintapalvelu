@@ -6,12 +6,12 @@
 	<parent>
 		<groupId>fi.mpass</groupId>
 		<artifactId>mpassid-voh</artifactId>
-		<version>2.6.5</version>
+		<version>2.6.6</version>
 	</parent>
 	<artifactId>mpassid-voh-api</artifactId>
 
 	<properties>
-		<opensaml.version>4.3.2</opensaml.version>
+		<opensaml.version>5.2.3</opensaml.version>
 		<xmlsectool.version>3.0.0</xmlsectool.version>
 	</properties>
 
@@ -39,7 +39,7 @@
 			<!--dependency>
 				<groupId>org.opensaml</groupId>
 				<artifactId>opensaml-bom</artifactId>
-				<version>4.3.2</version>
+				<version>${opensaml.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency-->
@@ -145,7 +145,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.opensaml</groupId>
-			<artifactId>opensaml-core</artifactId>
+			<artifactId>opensaml-core-api</artifactId>
+			<scope>compile</scope>
+			<version>${opensaml.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-core-impl</artifactId>
 			<scope>compile</scope>
 			<version>${opensaml.version}</version>
 		</dependency>

@@ -59,21 +59,26 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
 
   const updateFormValue = () => {
 
-    
+
     if(onValidate(inputRef.current!.value)) {
-      
-      setCanSave(true) 
-      setUsedHelperText(helperText(inputRef.current!.value))
-      setIsValid(true)    
+
+      setCanSave(true)
+      setIsValid(true)
       if(inputRef.current?.value) {
-        onUpdate(type,inputRef.current.value);
-        inputRef.current.value=''  
+        if(object.content.indexOf(inputRef.current.value)===-1) {
+          setUsedHelperText(helperText(inputRef.current!.value))
+          onUpdate(type,inputRef.current.value);
+          inputRef.current.value=''
+        } else {
+          setUsedHelperText(<FormattedMessage defaultMessage="Tämä {type} on jo olemassa" values={{type: type}} />)
+          setIsValid(false)
+        }
       } else {
         //onUpdate(type,"");
       }
     } else {
       setUsedHelperText(helperText(inputRef.current!.value))
-      setIsValid(false)  
+      setIsValid(false)
       setCanSave(false)
       //onUpdate(type,"");
     }
@@ -114,7 +119,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
           event.preventDefault();
           if(onValidate(inputRef.current?.value)&&isDirty) {
             setIsValid(true)
-            if(inputRef.current&&defaultValue.indexOf(inputRef.current.value)===-1) {
+            if(inputRef.current&&object.content.indexOf(inputRef.current.value)===-1) {
               onUpdate(type,inputRef.current.value);
               inputRef.current!.value = "";
               setUsedHelperText(<></>)
@@ -144,7 +149,8 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
               key={index}
               disableGutters
               secondaryAction={
-                <IconButton 
+                <IconButton
+                  type="button"
                   aria-label={intl.formatMessage({
                     defaultMessage: "kommentti",
                   })}
@@ -174,14 +180,19 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
             ref: inputRef,
             autoComplete: "off",
           }}
-          onKeyUp={(ev) => {            
+          onKeyDown={(ev) => {
+            if (ev.key === 'Enter') {
+              ev.preventDefault()
+            }
+          }}
+          onKeyUp={(ev) => {
             if (ev.key === 'Enter') {
               updateFormValue()
             } else {
               validateFormValue()
             }
           }}
-          
+
         />
       </form>
     );

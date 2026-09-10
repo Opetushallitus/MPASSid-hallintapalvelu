@@ -19,6 +19,16 @@ export default defineConfig({
   define: {
     CHANGELOG: "`" + (await readFile("../CHANGELOG.md", "utf8")) + "`",
   },
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        // Dependencies ship a 'use client' directive for Next.js/RSC bundlers;
+        // Vite doesn't use it and Rollup only warns that it's ignored.
+        if (warning.code === "MODULE_LEVEL_DIRECTIVE") return;
+        warn(warning);
+      },
+    },
+  },
   plugins: [
     superTemplate({
       reactIntlBundledMessages: { noParser: false },

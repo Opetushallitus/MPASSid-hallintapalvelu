@@ -5,7 +5,6 @@ import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
 import InputForm from "../Form/InputForm";
 import type { Dispatch, MutableRefObject} from "react";
-import { useRef } from "react";
 import { devLog } from "@/utils/devLog";
 import { helperText, validate } from "@/utils/Validators";
 import type { UiConfiguration } from "@/config";
@@ -28,7 +27,6 @@ interface Props {
 }
 
 export default function ServiceProvider({ integration, setName, setCanSave, name,dataConfiguration }: Props) {
-  const currentName = useRef<string>(name);
   const serviceProvider = integration.configurationEntity!.sp!;
   const configuration:UiConfiguration = dataConfiguration.filter(conf=>conf.type&&conf.type==='integrationDetails').find(conf=>conf.name&&conf.name==='serviceName') || defaultDataConfiguration;
   const isEditable = (integration.integrationSets&&integration.integrationSets.length>0&&integration.integrationSets[0].id&&integration.integrationSets[0].id!==0)?false:true;
@@ -88,16 +86,16 @@ export default function ServiceProvider({ integration, setName, setCanSave, name
           <FormattedMessage defaultMessage="Palvelun nimi" />
         </Grid>
         <Grid item xs={8}>
-          <InputForm 
-                object={currentName.current} 
-                type={""} label={""} 
-                attributeType={""} 
-                isEditable={isEditable} 
-                mandatory={true} 
-                path={"undefined"} 
-                helperText={helpGeneratorText} 
-                setCanSave={canSave} 
-                onUpdate={updateName} 
+          <InputForm
+                object={{ content: name }}
+                type={""} label={"palvelun nimi"}
+                attributeType={""}
+                isEditable={isEditable}
+                mandatory={true}
+                path={"content"}
+                helperText={helpGeneratorText}
+                setCanSave={canSave}
+                onUpdate={updateName}
                 onValidate={validator}></InputForm>
         </Grid>
       </>)}

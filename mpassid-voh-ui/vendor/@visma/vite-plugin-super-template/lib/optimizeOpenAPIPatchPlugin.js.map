@@ -1,0 +1,1 @@
+{"version":3,"file":"optimizeOpenAPIPatchPlugin.js","sourceRoot":"","sources":["../src/optimizeOpenAPIPatchPlugin.ts"],"names":[],"mappings":"AAEA,6EAA6E;AAC7E,2DAA2D;AAE3D,MAAM,0BAA0B,GAAW;IACzC,IAAI,EAAE,0DAA0D;IAChE,MAAM,EAAE,CAAC,OAAO,EAAE,EAAE,CAAC,CAAC;QACpB,YAAY,EAAE;YACZ,OAAO,EAAE,CAAC,OAAO,CAAC;SACnB;KACF,CAAC;CACH,CAAC;AAEF,eAAe,0BAA0B,CAAC"}

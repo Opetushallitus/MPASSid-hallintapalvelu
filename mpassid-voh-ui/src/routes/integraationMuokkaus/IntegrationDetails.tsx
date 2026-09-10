@@ -307,7 +307,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             setSaveDialogState(true);
             devLog("DEBUG","setCanSave (newConfigurationEntityData)",newConfigurationEntityData)
             devLog("DEBUG","setCanSave (originalIntegration.current?.configurationEntity)",originalIntegration.current?.configurationEntity)
-            if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)){   
+            const nameChanged = role==='sp'&&name!==(originalIntegration.current?.configurationEntity?.sp?.name||'');
+            if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)&&!nameChanged){
               devLog("DEBUG","setCanSave (environmentChanged)",environmentChanged)
               devLog("DEBUG","setCanSave (isValid)",isValid)
               devLog("DEBUG","setCanSave (logoOK)",logoOK)
@@ -383,8 +384,9 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         setSaveDialogState(true);
         devLog("DEBUG","setCanSave (newDiscoveryInformation)",newDiscoveryInformation)
         devLog("DEBUG","setCanSave (originalIntegration.current?.discoveryInformation)",originalIntegration.current?.discoveryInformation)
-        if(isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)){     
-          if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||metadataFile.length===1||environmentChanged)&&logoOK&&isValid) {
+        const nameChanged = role==='sp'&&name!==(originalIntegration.current?.configurationEntity?.sp?.name||'');
+        if(isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)){
+          if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||metadataFile.length===1||environmentChanged||nameChanged)&&logoOK&&isValid) {
             devLog("DEBUG","setCanSave","5")
             setCanSaveDiscoveryInformation(true)
           } else {
@@ -420,7 +422,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
           
       }
     
-}, [newDiscoveryInformation, integration, setCanSaveDiscoveryInformation, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, environmentChanged, newLogo, metadataFile, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidRoleDetails]);
+}, [newDiscoveryInformation, integration, setCanSaveDiscoveryInformation, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, environmentChanged, newLogo, metadataFile, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidRoleDetails, name]);
 
     var hasAttributes =
                 role === "idp" &&

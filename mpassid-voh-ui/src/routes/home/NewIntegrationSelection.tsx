@@ -190,8 +190,10 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                 if(result?.configurationEntity?.sp) {
                     devLog("DEBUG","createIntegration (oldSet)",service)
                     if(service!==undefined) {
-                        result.configurationEntity.sp.name=service.name
-                        result.deploymentPhase=service.environment                        
+                        if(service.setId!==0) {
+                          result.configurationEntity.sp.name=service.name
+                        }
+                        result.deploymentPhase=service.environment
                         result.integrationSets=[]
                         result.integrationSets.push( { id: service.setId })
 

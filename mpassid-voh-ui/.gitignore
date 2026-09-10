@@ -23,3 +23,8 @@ dist-ssr
 /src/api/localisation.ts
 /src/api/organisaatio.ts
 /target/*
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/

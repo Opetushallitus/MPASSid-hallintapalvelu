@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -86,7 +86,7 @@ public class IntegrationController {
 		} catch (PropertyReferenceException exc) {
 			logger.error(exc.getMessage());
 			throw new ResponseStatusException(
-					HttpStatus.SC_NOT_FOUND, "Integration Not Found", exc);
+					HttpStatus.NOT_FOUND, "Integration Not Found", exc);
 		}
 	}
 
