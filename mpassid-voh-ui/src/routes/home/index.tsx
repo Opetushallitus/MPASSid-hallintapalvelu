@@ -92,7 +92,7 @@ export default function Home() {
         <FormattedMessage defaultMessage="(palvelun lyhyt kuvaus)" />
       </Typography>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
-        <Box display="flex" alignItems="baseline">
+        <Box sx={{ display: "flex", alignItems: "baseline" }}>
           <PageHeader
             icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}
@@ -131,8 +131,8 @@ export default function Home() {
           <HelpLinkButton />
         </Box>
         <Divider sx={{ marginBottom: 2 }} />
-        <Stack direction="row" alignItems="center">
-          <Box flex={1} sx={{ mr: 2 }}>
+        <Stack direction="row" sx={{ alignItems: "center" }}>
+          <Box sx={{ flex: 1, mr: 2 }}>
             <SearchForm formData={searchParams as unknown as FormData} onSearch={handleSearch} />
           </Box>
           <RowsPerPage />

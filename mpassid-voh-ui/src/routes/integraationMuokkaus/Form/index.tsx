@@ -6,7 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useIntl, FormattedMessage } from 'react-intl';
 import InputForm from "./InputForm";
-import { useEffect, useRef, useState, type Dispatch } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type JSX } from 'react';
 import type { IntegrationType, UiConfiguration } from "../../../config";
 import { defaultIntegrationType } from "../../../config"
 import ListForm from "./ListForm";
@@ -85,15 +85,15 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
         }
         
         return (
-            <Grid container >
-                
-                    <Grid key={attribute.name} container spacing={2} mb={3} >
-                    <Grid item xs={4}>
+            <Grid container size={12} >
+
+                    <Grid key={attribute.name} container size={12} spacing={2} sx={{ mb: 3 }} >
+                    <Grid size={4}>
                     <Tooltip
                         title={
                             <>
                             {tooltip && (
-                                <Box mb={1}>
+                                <Box sx={{ mb: 1 }}>
                                 <FormattedMessage {...tooltip} />
                                 </Box>
                             )}
@@ -106,7 +106,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
                         
                         
                     </Grid>
-                    <Grid item xs={8} sx={{}}>
+                    <Grid size={8} sx={{}}>
                         <Typography
                         sx={{
                             whiteSpace: "pre-wrap",
@@ -352,15 +352,15 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         }
         
         return (
-            <Grid container >
-                
-                    <Grid key={attribute.name} container spacing={2} mb={3} >
-                    <Grid item xs={4}>
+            <Grid container size={12} >
+
+                    <Grid key={attribute.name} container size={12} spacing={2} sx={{ mb: 3 }} >
+                    <Grid size={4}>
                     <Tooltip
                         title={
                             <>
                             {tooltip && (
-                                <Box mb={1}>
+                                <Box sx={{ mb: 1 }}>
                                 <FormattedMessage {...tooltip} />
                                 </Box>
                             )}
@@ -374,7 +374,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         
                     </Grid>
                     
-                    <Grid item xs={8} sx={{}}>
+                    <Grid size={8} sx={{}}>
                         <Typography
                         sx={{
                             whiteSpace: "pre-wrap",
@@ -456,8 +456,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             }
                             {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&configuration.object&&roleConfiguration.editable&&
                             (<Grid container spacing={2} >
-                                <Grid item xs={10}></Grid>
-                                <Grid item xs={2}>
+                                <Grid size={10}></Grid>
+                                <Grid size={2}>
                                         <IconButton 
                                             size="small"
                                             color={buttonColor}                                                                                        
@@ -484,8 +484,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 setCanSave={setCanSaveItem}/>)}        
                             {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&!configuration.object&&roleConfiguration.editable&&
                                 (<Grid container spacing={2} >
-                                    <Grid item xs={10}></Grid>
-                                    <Grid item xs={2}>
+                                    <Grid size={10}></Grid>
+                                    <Grid size={2}>
                                         <IconButton 
                                             size="small"
                                             color={buttonColor}
@@ -498,8 +498,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 }
                             {configuration&&roleConfiguration&&roleConfiguration.generate&&
                                 (<Grid container spacing={2} >
-                                    <Grid item xs={10}></Grid>
-                                    <Grid item xs={2}>
+                                    <Grid size={10}></Grid>
+                                    <Grid size={2}>
                                         <IconButton    
                                             key="generate"                                                                                   
                                             onClick={()=>{
@@ -555,12 +555,12 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     if(isVisible) {
         return (
             <>
-                <Grid item xs={4}>
+                <Grid size={4}>
                     <Tooltip
                         title={
                             <>
                             {tooltip && (
-                                <Box mb={1}>
+                                <Box sx={{ mb: 1 }}>
                                 <FormattedMessage {...tooltip} />
                                 </Box>
                             )}
@@ -571,7 +571,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         <span>{label ? <FormattedMessage {...label} /> : attribute.name}</span>
                     </Tooltip>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                     <Typography
                         sx={{
                             whiteSpace: "pre-wrap",

@@ -1,5 +1,5 @@
 import type { Components } from "@/api";
-import type { PropsWithChildren } from "react";
+import type { JSX, PropsWithChildren } from "react";
 import { cloneElement } from "react";
 import { useIntl } from "react-intl";
 import { DataRowBase, typeComponents } from "../DataRow";
@@ -24,7 +24,7 @@ export function AttributeRowContainer({
     typeof type === "function" ? type : typeComponents[type];
 
   return cloneElement(
-    children as React.ReactElement,
+    children as React.ReactElement<any>,
     {
       name,
       label,

@@ -235,6 +235,15 @@ export default {
           attributeResponse.onPremisesExtensionAttributes.extensionAttribute15=""
           
           break; 
+        }
+        case "deepTestAttributes": {           
+          attributeResponse.deepTestAttributes={}
+          attributeResponse.deepTestAttributes.level2={}
+          attributeResponse.deepTestAttributes.level2.level3="test_value_depth_3"
+          attributeResponse.deepTestAttributes.level2.level3Object={}
+          attributeResponse.deepTestAttributes.level2.level3Object.level4="test_value_depth_4"
+          
+          break; 
         } 
         default: { 
           attributeResponse[element]="test_value_"+i;

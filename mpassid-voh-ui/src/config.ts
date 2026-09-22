@@ -38,7 +38,11 @@ export const integrationTypesDefault = {
 export async function calculateSHA1(message: string) {
     // Convert the string to an array buffer (UTF-8 encoding)
     const encoder = new TextEncoder();
-    const data: Uint8Array = encoder.encode(message);
+    // No explicit Uint8Array annotation: TS 5.7+ types encode() as
+    // Uint8Array<ArrayBuffer>, which crypto.subtle.digest accepts; annotating
+    // as bare Uint8Array widens it to Uint8Array<ArrayBufferLike> (includes
+    // SharedArrayBuffer) and no longer satisfies BufferSource.
+    const data = encoder.encode(message);
   
     // Use SubtleCrypto API to hash the data using SHA-1
     const hashBuffer: ArrayBuffer = await crypto.subtle.digest('SHA-1', data);

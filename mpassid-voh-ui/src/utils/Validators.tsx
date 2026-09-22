@@ -1,3 +1,4 @@
+import type { JSX } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { devLog } from './devLog';
 import { X509Certificate } from '@peculiar/x509';

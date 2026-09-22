@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Paper, Tooltip } from "@mui/material";
 import { get, last, toPath } from "lodash";
-import type { PropsWithChildren } from "react";
+import type { JSX, PropsWithChildren } from "react";
 import { cloneElement } from "react";
 import type { MessageDescriptor } from "react-intl";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -26,7 +26,7 @@ export function DataRowContainer({
     typeof type === "function" ? type : typeComponents[type];
 
   return cloneElement(
-    children as React.ReactElement,
+    children as React.ReactElement<any>,
     {
       name,
       label,
@@ -61,12 +61,12 @@ export type DataRowProps = PropsWithChildren<{
 export function DataRowBase({ name, label, tooltip, children }: DataRowProps) {
   return (
     <>
-      <Grid item xs={4}>
+      <Grid size={4}>
         <Tooltip
           title={
             <>
               {tooltip && (
-                <Box mb={1}>
+                <Box sx={{ mb: 1 }}>
                   <FormattedMessage {...tooltip} />
                 </Box>
               )}
@@ -77,7 +77,7 @@ export function DataRowBase({ name, label, tooltip, children }: DataRowProps) {
           <span>{label ? <FormattedMessage {...label} /> : name}</span>
         </Tooltip>
       </Grid>
-      <Grid item xs={8}>
+      <Grid size={8}>
         {children}
       </Grid>
     </>

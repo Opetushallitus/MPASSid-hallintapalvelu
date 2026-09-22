@@ -16,7 +16,7 @@ export default function Buttons() {
           Virkailija
         </Typography>
 
-        <Stack direction="row" spacing={1} marginBottom={2}>
+        <Stack direction="row" spacing={1} sx={{ marginBottom: 2 }}>
           <Button>Primary (default)</Button>
           <Button variant="outlined">Secondary</Button>
           <Button variant="text">Tertiary</Button>
@@ -26,7 +26,7 @@ export default function Buttons() {
           Colors
         </Typography>
 
-        <Stack direction="row" spacing={1} marginBottom={2}>
+        <Stack direction="row" spacing={1} sx={{ marginBottom: 2 }}>
           <Button>Primary (default)</Button>
           <Button color="secondary">Secondary</Button>
           <Button color="error">Error</Button>
@@ -40,7 +40,7 @@ export default function Buttons() {
           Variants
         </Typography>
 
-        <Stack direction="row" spacing={1} marginBottom={2}>
+        <Stack direction="row" spacing={1} sx={{ marginBottom: 2 }}>
           <Button>Contained (default)</Button>
           <Button variant="outlined">Outlined</Button>
           <Button variant="text">Text</Button>

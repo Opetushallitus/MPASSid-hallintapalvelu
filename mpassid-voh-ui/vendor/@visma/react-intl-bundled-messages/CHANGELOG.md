@@ -1,3 +1,9 @@
+# 1.4.0
+
+- Widen peer to `react-intl@^5.20.10 || ^6.0.0 || ^10.0.0` so it dedupes to the
+  app's react-intl 10 instead of forcing a nested v6 (avoids an ERESOLVE on
+  install). Local fork for mpassid-voh-ui.
+
 # 1.3.1
 
 - Fix dynamic import path in Windows

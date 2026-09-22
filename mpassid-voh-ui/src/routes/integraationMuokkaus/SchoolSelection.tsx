@@ -988,11 +988,11 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         </Typography>
         
         
-        <Grid container spacing={2} mb={3}>
+        <Grid container size={12} spacing={2} sx={{ mb: 3 }}>
 
           <>
             <DataRowTitle path="showSchools"></DataRowTitle>
-            <Grid item xs={8}>
+            <Grid size={8}>
               <Switch checked={showSchools.current}
                       onChange={handleShowSchoolsChange} />
             </Grid>
@@ -1000,12 +1000,12 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
           
           {showSchools.current&&
             <>
-              <Grid item xs={12}>
-                <Grid container spacing={1} mb={3}>
-                  <Grid item xs={4}>
+              <Grid size={12}>
+                <Grid container spacing={1} sx={{ mb: 3 }}>
+                  <Grid size={4}>
                     <FormattedMessage defaultMessage="Oppilaitostyypit" />
                   </Grid>
-                  <Grid item xs={8}>
+                  <Grid size={8}>
                     {institutionTypeEnums&&<MultiSelectForm 
                               values={configurationEntity?.idp?.institutionTypes?.map(it=>it.toString())||[]}
                               label={"Oppilaitostyypit"}
@@ -1020,9 +1020,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                   </Grid>
                   {adminConfiguration&&!noExistingSchoolConfigurations.current&&institutionTypeList!==null&&institutionTypeList.length>0&&
                         <>
-                        <Grid item xs={4}>
+                        <Grid size={4}>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                         <Alert severity="warning"><FormattedMessage defaultMessage="Valittuja oppilaitostyyppejä jo muissa integraatioissa, muokkaaminen mahdollistaa saman koulun näkymisen useassa integraatiossa" /></Alert>
                         </Grid>
                         </>}         
@@ -1043,7 +1043,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                   { configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
                     <>
                       <DataRowTitle path="extraSchoolsConfiguration"></DataRowTitle>
-                        <Grid item xs={8}>
+                        <Grid size={8}>
                           <Switch checked={extraSchoolsConfiguration}
                                   sx={{ opacity: disableExtraSchoolConfigurationSwitch.current&&environment===1?0.4:1}}
                                   onChange={changeExtraSchoolsConfiguration} 
@@ -1054,10 +1054,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                       {showSchools.current&&configurationEntity&&configurationEntity.idp&&configurationEntity.idp.institutionTypes&&configurationEntity.idp.institutionTypes?.length>0&&
                               (excludeSchools.length===0)&&extraSchoolsConfiguration&&
                       <>
-                        <Grid item xs={4}>
+                        <Grid size={4}>
                           <FormattedMessage defaultMessage="schools" />
                         </Grid>
-                        <Grid item xs={8}>
+                        <Grid size={8}>
                           <MultiSelectForm 
                                   values={schools}
                                   label={"schools"}
@@ -1076,10 +1076,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
                       {showSchools.current&&configurationEntity&&configurationEntity?.idp&&configurationEntity?.idp?.institutionTypes&&configurationEntity?.idp?.institutionTypes?.length>0&&
                           schools.length===0&&extraSchoolsConfiguration&&!hideExcludeSchools&&schoolData !== undefined &&
                       <>
-                        <Grid item xs={4}>
+                        <Grid size={4}>
                           <FormattedMessage defaultMessage="excludedSchools" />
                         </Grid>
-                        <Grid item xs={8}>
+                        <Grid size={8}>
                           <MultiSelectForm 
                                   values={excludeSchools}
                                   label={"excludeSchools"}
@@ -1098,9 +1098,9 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
 
                       {discoveryInformation.excludedSchools !== undefined && excludeSchools.length>0 && existingSchoolsIncluded.current !== null && discoveryInformation.excludedSchools.length === ( possibleSchools.current.length + existingSchoolsIncluded.current.length ) &&
                         <>
-                        <Grid item xs={4}>
+                        <Grid size={4}>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid size={6}>
                         <Alert severity="info"><FormattedMessage defaultMessage="Kouluja ei jäänyt jäljelle!" /></Alert>
                         </Grid>
                         </>}
@@ -1113,7 +1113,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             </>}
           </Grid>
           
-          <Grid container spacing={2} mb={3}>    
+          <Grid container size={12} spacing={2} sx={{ mb: 3 }}>    
           
           {title&&title!==''&&showSchools.current&&<>
           <DataRowTitle></DataRowTitle>
@@ -1152,7 +1152,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             </DataRowValue>               
             
             <DataRowTitle></DataRowTitle>
-            <Grid item xs={8}><img id="integratio-logo-preview" alt={"logo"} hidden/></Grid>
+            <Grid size={8}><img id="integratio-logo-preview" alt={"logo"} hidden/></Grid>
             
             {integration?.configurationEntity?.idp?.logoUrl&&integration.configurationEntity.idp.logoUrl!==''&&!showLogo&&
             <>
@@ -1176,7 +1176,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         </Grid>
         
         {configurationEntity&&
-          <Grid container spacing={2} mb={3}>    
+          <Grid container size={12} spacing={2} sx={{ mb: 3 }}>    
               <SchoolForm 
               isVisible={true} 
               isEditable={true} 
@@ -1196,7 +1196,7 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
         <Typography variant="h2" gutterBottom>
           <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />
         </Typography>
-        <Grid container spacing={2} mb={3}>
+        <Grid container size={12} spacing={2} sx={{ mb: 3 }}>
           <DataRow
             object={integration}
             path="discoveryInformation.customDisplayName"
@@ -1221,10 +1221,10 @@ export default function SchoolSelection({ integration, isEditable=false, setConf
             path="discoveryInformation.title"
           />
           
-            <Grid item xs={4}>
+            <Grid size={4}>
                 <FormattedMessage defaultMessage="Oppilaitostyypit" />
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
                 <TextList
                     value={
                     identityProvider.institutionTypes?.length
@@ -1268,12 +1268,12 @@ function DataRowTitle({path}:DataRowProps) {
 
   return (
     <>
-      <Grid item xs={4}>
+      <Grid size={4}>
         <Tooltip
           title={
             <>
               {tooltip && (
-                <Box mb={1}>
+                <Box sx={{ mb: 1 }}>
                   <FormattedMessage {...tooltip} />
                 </Box>
               )}
@@ -1292,7 +1292,7 @@ function DataRowTitle({path}:DataRowProps) {
 function DataRowValue({children}:DataRowProps) {
 
   return (
-      <Grid item xs={8}>
+      <Grid size={8}>
         {children}
       </Grid>
   );

@@ -1,6 +1,6 @@
 
 import { Box, TextField } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from "lodash";
@@ -104,15 +104,17 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
           variant="standard"
           placeholder={intl.formatMessage({
             defaultMessage: "Lisää {label}"},
-            { label: label} 
+            { label: label}
           )}
           defaultValue={defaultValue}
           fullWidth
           error={!isValid&&!noErros}
           helperText={usedHelperText}
-          inputProps={{
-            ref: inputRef,
-            autoComplete: "off",
+          inputRef={inputRef}
+          slotProps={{
+            htmlInput: {
+              autoComplete: "off",
+            },
           }}
           onChange={updateFormValue}
         />

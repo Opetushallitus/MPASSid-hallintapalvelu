@@ -269,11 +269,11 @@ export default function IntegrationSelection({ integration, newIntegration, setN
             </Secondary>
             </Typography>
             <FormattedMessage defaultMessage="Sivulla MPASSid-pääkäyttäjä voi hallinnoida palveluita, joissa on sallittu kirjautuminen MPASSid-tunnistuksenvälityspalveluun." />
-            <Box display="flex" justifyContent="left" mt={3}> 
+            <Box sx={{ display: "flex", justifyContent: "left", mt: 3 }}> 
               <ServiceLinkButton></ServiceLinkButton>
             </Box>
             <Divider variant="middle" ></Divider>
-            <Box display="flex" justifyContent="center" mt={3}> 
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}> 
             
             <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label={<FormattedMessage defaultMessage="Salli kaikki palvelut" />} />
                   <Button aria-label={intl.formatMessage({
@@ -306,8 +306,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                                     <br></br>
                                     </>}                      
              
-              <Stack direction="row" alignItems="center">
-                <Box flex={1} sx={{ mr: 2 }}>
+              <Stack direction="row" sx={{ alignItems: "center" }}>
+                <Box sx={{ flex: 1, mr: 2 }}>
                   <SearchForm formData={searchParams as unknown as FormData} onSearch={handleSearch} />
                 </Box>
                 <RowsPerPage />
@@ -347,7 +347,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
               {content?.length ? (
                   <TablePaginationWithRouterIntegration count={totalPages} />
               ) : (
-                  <Box display="flex" justifyContent="center" mt={3}>
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
                   <Secondary>
                       <FormattedMessage
                       defaultMessage={`Valitsemillasi hakuehdoilla ei löytynyt yhtään {type, select,
@@ -406,14 +406,14 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                   open={saveDialogState}
                   anchorOrigin={snackbarLocation}>
                   
-                    <Box boxShadow={5} sx={{ width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
+                    <Box sx={{ boxShadow: 5, width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
                     <Container maxWidth="sm">
                     
                         <Typography variant="h6" component="h2" sx={{ my: 2, marginLeft: 'auto', marginRight: 'auto', marginTop: '6%' }}>
                             <FormattedMessage defaultMessage="Tallenna muutokset" />
                         </Typography>
         
-                        <Box display="flex" justifyContent="center" mt={2}> 
+                        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}> 
                             <Button onClick={clearIntegrations} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button> 
                             {!cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
                             {cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}

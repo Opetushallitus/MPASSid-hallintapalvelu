@@ -19,8 +19,8 @@ export default function TableHeaderCellWithMenu({
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <Box display="flex" alignItems="center">
-        <Box flexGrow={1}>{children}</Box>
+      <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ flexGrow: 1 }}>{children}</Box>
         <Menu
           headerName={getStringChild(children)}
           hover={hover}
@@ -37,6 +37,6 @@ export default function TableHeaderCellWithMenu({
 const getStringChild = (children: React.ReactNode): string =>
   typeof children === "string"
     ? children
-    : isValidElement(children)
+    : isValidElement<React.PropsWithChildren>(children)
     ? getStringChild(children.props.children)
     : "";

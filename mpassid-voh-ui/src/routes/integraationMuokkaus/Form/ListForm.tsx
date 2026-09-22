@@ -1,5 +1,5 @@
 import { IconButton, TextField } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, JSX } from "react";
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import Box from '@mui/material/Box';
@@ -176,9 +176,11 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
           fullWidth
           error={!isValid&&!noErrors}
           helperText={usedHelperText}
-          inputProps={{
-            ref: inputRef,
-            autoComplete: "off",
+          inputRef={inputRef}
+          slotProps={{
+            htmlInput: {
+              autoComplete: "off",
+            },
           }}
           onKeyDown={(ev) => {
             if (ev.key === 'Enter') {

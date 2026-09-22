@@ -3,7 +3,7 @@ import type { IntegrationType, UiConfiguration } from "@/config";
 import { defaultIntegrationType } from "@/config";
 import { Grid } from "@mui/material";
 import { useIntl } from 'react-intl';
-import { useRef, type Dispatch} from "react";
+import { useEffect, useRef, type Dispatch, type SetStateAction} from "react";
 import AttributeForm from "./Form";
 import { helperText, validate } from "@/utils/Validators";
 import { devLog } from "@/utils/devLog";
@@ -20,7 +20,7 @@ interface Props {
   initAttributes:string[];
   dataConfiguration:UiConfiguration[];
   addInitAttributes: (attribute: Components.Schemas.Attribute) => void;             
-  setAttributes: Dispatch<Components.Schemas.Attribute[]>;
+  setAttributes: Dispatch<SetStateAction<Components.Schemas.Attribute[]>>;
   setNewConfigurationEntityData: Dispatch<Components.Schemas.ConfigurationEntity>;
   setCanSave: Dispatch<boolean>;
 }
@@ -33,6 +33,15 @@ export default function Attributes({ attributes, role, type, attributeType, newC
   const attributeConfiguration=useRef<UiConfiguration[]>([]);
   const currentAttributes=useRef<Components.Schemas.Attribute[]>([]);
 
+  // React 19 no longer tolerates state updates fired during render (calling
+  // parent setters like setCanSave/setAttributes/addInitAttributes while
+  // rendering caused an infinite parent<->child re-render loop). We queue
+  // those writes while rendering and flush them once, after commit, in the
+  // effect below. They are all idempotent (guarded by refs / value checks),
+  // so the effect settles after the attributes are initialized.
+  const pendingEffects = useRef<Array<() => void>>([]);
+  pendingEffects.current = [];
+
 
   const validateAttributes = () => {
     var result=true;
@@ -40,9 +49,15 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     attributeConfiguration.current.forEach(configuration=>{
       if(result) {
 
-        const name=configuration.name                  
-        var currentAttribute=attributes.find(a=>a.name===name)
-        
+        const name=configuration.name
+        // Prefer the committed `attributes` state (carries the user's manual
+        // edits), but fall back to the locally initialized defaults in
+        // `currentAttributes.current`. The default writes into `attributes`
+        // are deferred to an effect (see reconcile effect below), so during
+        // the render that first computes them `attributes` is still stale —
+        // reading the ref keeps setCanSave correct without waiting a frame.
+        var currentAttribute=attributes.find(a=>a.name===name)||currentAttributes.current.find(a=>a.name===name)
+
         devLog("DEBUG","validateAttributes (attributes)",attributes)
         if(currentAttribute) {
           if((currentAttribute.content === undefined || currentAttribute.content === ''|| (currentAttribute.content !== null && currentAttribute.content.length===0)) && configuration.mandatory ){
@@ -102,6 +117,40 @@ export default function Attributes({ attributes, role, type, attributeType, newC
     
     
   }
+
+  useEffect(() => {
+    const effects = pendingEffects.current;
+    effects.forEach((run) => run());
+  });
+
+  // Reconcile the locally initialized defaults into the shared `attributes`
+  // state. This MERGES (functional update) rather than replacing, so the two
+  // sibling <Attributes> instances (data + user) that share the same
+  // setAttributes never clobber each other. It only fires when something is
+  // genuinely missing, so it settles after one pass and cannot loop.
+  useEffect(() => {
+    const missing = currentAttributes.current.filter(
+      (ca) => ca.name && !attributes.some((a) => a.name === ca.name)
+    );
+    if (missing.length > 0) {
+      setAttributes((prev) => {
+        const merged = cloneDeep(prev);
+        missing.forEach((m) => {
+          if (!merged.some((a) => a.name === m.name)) {
+            merged.push(cloneDeep(m));
+          }
+        });
+        return merged;
+      });
+    }
+  });
+
+  // Render-time initialization helpers: queue the parent state write instead
+  // of performing it during render (see pendingEffects note above).
+  const queueUpdateAttribute = (name: string, value: string, type: string) =>
+    pendingEffects.current.push(() => updateAttribute(name, value, type));
+  const queueAddInitAttributes = (attribute: Components.Schemas.Attribute) =>
+    pendingEffects.current.push(() => addInitAttributes(attribute));
 
   return (
     <Grid container >
@@ -213,10 +262,13 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                         //setAttributes(attributeList)   
                         if(useAttribute.name!==undefined&&!currentAttributes.current.map(a=>a.name).includes(useAttribute.name)&&useAttribute.content!=='') {
                           devLog("DEBUG","Attributes (new init attribute)",useAttribute);
-                          currentAttributes.current.push(useAttribute);   
-                          const attributeList=cloneDeep(currentAttributes.current);
-                          setAttributes(attributeList)                                 
-                        }                        
+                          // Only record the default locally. The commit into the
+                          // shared `attributes` state happens in the reconcile
+                          // effect below via a MERGE — never replace the whole
+                          // array here, or the sibling <Attributes> instance
+                          // (data vs. user) would wipe out each other's defaults.
+                          currentAttributes.current.push(useAttribute);
+                        }
                       } 
                       
                     }
@@ -230,12 +282,12 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     devLog("DEBUG","Attributes (init switch content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                     if(roleConfiguration.defaultValue !== undefined) {
-                      updateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
+                      queueUpdateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
                     } else {
                       if(configuration.enum&&configuration.enum.length>0) {
-                        updateAttribute(configuration.name,String(configuration.enum[0]),type)                          
+                        queueUpdateAttribute(configuration.name,String(configuration.enum[0]),type)                          
                       } else {
-                        updateAttribute(configuration.name,"false",type)                          
+                        queueUpdateAttribute(configuration.name,"false",type)                          
                       }
                       
                     }
@@ -245,31 +297,33 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                       devLog("DEBUG","Attributes (init multiselect content)",configuration.name)            
                       const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                       if(roleConfiguration.defaultValue !== undefined) {
-                        updateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
+                        queueUpdateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
                       } else {
-                        updateAttribute(configuration.name,String(configuration.enum[0]),type)                          
+                        queueUpdateAttribute(configuration.name,String(configuration.enum[0]),type)                          
                       }
                       
                     }
   
                     //Initialize attributes
                     if(useAttribute.content&&newConfigurationEntityData?.attributes&&newConfigurationEntityData.attributes.map(a=>a.name).indexOf(configuration.name)<0){                    
-                      updateAttribute(configuration.name,String(useAttribute.content),type)
+                      queueUpdateAttribute(configuration.name,String(useAttribute.content),type)
                     }
-                    addInitAttributes(useAttribute)
+                    queueAddInitAttributes(useAttribute)
                   }
                   
                 }
                 
                 
                       
-                if(validateAttributes()) {
-                  devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",true)
-                  setCanSave(true)
-                } else {
-                  devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",false)
-                  setCanSave(false)
-                } 
+                pendingEffects.current.push(() => {
+                  if(validateAttributes()) {
+                    devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",true)
+                    setCanSave(true)
+                  } else {
+                    devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",false)
+                    setCanSave(false)
+                  }
+                });
                             
                 devLog("DEBUG","Attributes (useAttribute post)",useAttribute)
                 devLog("DEBUG","Attributes (attribute post)",attributes)                  

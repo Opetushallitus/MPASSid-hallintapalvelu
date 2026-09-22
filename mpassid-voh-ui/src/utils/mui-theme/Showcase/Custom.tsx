@@ -66,7 +66,7 @@ export default function Custom() {
             { title: "Ready" },
             { title: "Update", children: update && <Suspend /> },
           ].map(({ title, children }, index) => (
-            <Grid key={index} item xs={4}>
+            <Grid key={index} size={4}>
               <Typography variant="subtitle1" gutterBottom>
                 {title}
               </Typography>
@@ -90,7 +90,7 @@ export default function Custom() {
             { title: "Ready" },
             { title: "Update", children: update && <Suspend /> },
           ].map(({ title, children }, index) => (
-            <Grid key={index} item xs={4}>
+            <Grid key={index} size={4}>
               <Typography variant="subtitle1" gutterBottom>
                 {title}
               </Typography>

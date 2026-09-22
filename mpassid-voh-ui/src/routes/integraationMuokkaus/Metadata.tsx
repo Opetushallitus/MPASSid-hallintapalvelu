@@ -2,7 +2,7 @@ import type { Components } from "@/api";
 import {  Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import LinkValue from "./LinkValue";
-import { type Dispatch } from "react";
+import { useEffect, useRef, type Dispatch } from "react";
 import type { IntegrationType, UiConfiguration} from '../../config';
 import { defaultIntegrationType, dataConfiguration } from '../../config';
 import { useIntl } from 'react-intl';
@@ -44,7 +44,14 @@ export default function Metadata({
   const specialConfiguration:string[] = configurations.filter(conf=>conf.oid&&conf.oid===oid).map(conf=>conf.name) || [];
   const environmentConfiguration:string[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment).map(conf=>conf.name) || [];
   const mandatoryAttributes:string[] = [];
-  
+
+  // React 19 no longer tolerates state updates fired during render. Queue the
+  // metadata initialization / validation writes performed while rendering and
+  // flush them once after commit (see the effect below). The writes are
+  // idempotent, so the effect settles.
+  const pendingEffects = useRef<Array<() => void>>([]);
+  pendingEffects.current = [];
+
   const createAttributeContent = (name:string,currentData: any,roleConfiguration:IntegrationType,array:boolean,multiselect: boolean|undefined) => {
     devLog("DEBUG","createAttributeContent (name)",name)
 
@@ -177,6 +184,15 @@ export default function Metadata({
   }
   
   
+  useEffect(() => {
+    const effects = pendingEffects.current;
+    effects.forEach((run) => run());
+  });
+
+  // Queue a render-time metadata write instead of performing it during render.
+  const queueUpdateMetadata = (array: boolean, name: string, value: any) =>
+    pendingEffects.current.push(() => updateMetadata(array, name, value));
+
   if(role=="sp") {
 
     const providerData:Components.Schemas.ServiceProvider = configurationEntity[role]!;
@@ -245,7 +261,7 @@ export default function Metadata({
                         }                        
 
                         if(configuration.switch&&configuration.array===false) {
-                          updateMetadata(configuration.array,configuration.name,attribute.content)
+                          queueUpdateMetadata(configuration.array,configuration.name,attribute.content)
                         }
 
                       }
@@ -256,9 +272,9 @@ export default function Metadata({
                           //Initialize switch value                
                           devLog("DEBUG","Metadata (attribute init switch content "+configuration.name+")",attribute.content)                              
                           if(attribute.content==='true') {
-                            updateMetadata(configuration.array,configuration.name,true)                          
+                            queueUpdateMetadata(configuration.array,configuration.name,true)                          
                           } else {
-                            updateMetadata(configuration.array,configuration.name,false)                          
+                            queueUpdateMetadata(configuration.array,configuration.name,false)                          
                           } 
                           
                         }
@@ -267,10 +283,10 @@ export default function Metadata({
                           //Initialize select value                
                           devLog("DEBUG","Metadata (attribute init select content "+configuration.name+")",attribute.content)                              
                           if(roleConfiguration.defaultValue !== undefined) {
-                            updateMetadata(configuration.array,configuration.name,String(roleConfiguration.defaultValue))                          
+                            queueUpdateMetadata(configuration.array,configuration.name,String(roleConfiguration.defaultValue))                          
                           } else {
                             if(configuration.enum[0]!=='null') {
-                              updateMetadata(configuration.array,configuration.name,String(configuration.enum[0]))                          
+                              queueUpdateMetadata(configuration.array,configuration.name,String(configuration.enum[0]))                          
                             }
                             
                           } 
@@ -280,7 +296,7 @@ export default function Metadata({
                         if(configuration.array===true&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize array value            
                           devLog("DEBUG","Metadata (attribute init array content "+configuration.name+")",attribute.content)         
-                          updateMetadata(configuration.array,configuration.name,attribute.content)                          
+                          queueUpdateMetadata(configuration.array,configuration.name,attribute.content)                          
                         }
                         
                       }
@@ -296,14 +312,14 @@ export default function Metadata({
                           
                           if(configuration.array||(configuration.multiselect!==undefined&&configuration.multiselect===true)) {
                             if(attribute.content.length>0) {
-                              updateMetadata(configuration.array,configuration.name,attribute.content)
+                              queueUpdateMetadata(configuration.array,configuration.name,attribute.content)
                             }
                           } else {
                             if(attribute.content&&attribute.content!==''&&!configuration.enum) {
-                              updateMetadata(configuration.array,configuration.name,attribute.content)
+                              queueUpdateMetadata(configuration.array,configuration.name,attribute.content)
                             }
                             if(!attribute.content&&attribute.content!==''&&configuration.enum&&configuration.enum.length>0) {
-                              updateMetadata(configuration.array,configuration.name,attribute.content)
+                              queueUpdateMetadata(configuration.array,configuration.name,attribute.content)
                             }
                           }
                       }
@@ -361,7 +377,7 @@ export default function Metadata({
                       devLog("DEBUG","Metadata (attribute post)",metadata)
                       devLog("DEBUG","updateMeta (attribute post)",metadata)
 
-                      setCanSave(validateMetadata())
+                      pendingEffects.current.push(() => setCanSave(validateMetadata()))
 
                       return (<MetadataForm 
                         key={configuration.name!}
@@ -386,11 +402,11 @@ export default function Metadata({
       
       return (<>
         
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
+        <Grid container size={12} spacing={2} sx={{ mb: 3 }}>
+          <Grid size={4}>
             <FormattedMessage defaultMessage="Metatiedot" />
           </Grid>
-          <Grid item xs={8} sx={{}}>
+          <Grid size={8} sx={{}}>
             <Typography
               sx={{
                 whiteSpace: "pre-wrap",
@@ -409,11 +425,11 @@ export default function Metadata({
     const providerData:Components.Schemas.Azure|Components.Schemas.Gsuite|Components.Schemas.Adfs = configurationEntity[role]!;
     if ((providerData.type==="azure"||providerData.type==="gsuite"||providerData.type==="adfs")&&providerData.metadataUrl) {
       return (
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
+        <Grid container size={12} spacing={2} sx={{ mb: 3 }}>
+          <Grid size={4}>
             <FormattedMessage defaultMessage="Metatiedot" />
           </Grid>
-          <Grid item xs={8}>
+          <Grid size={8}>
             <LinkValue href={providerData.metadataUrl} />
           </Grid>
         </Grid>

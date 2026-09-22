@@ -1,7 +1,7 @@
 import type { Components} from '@/api';
 import { testAttributes, testAttributesAuthorization } from '@/api';
 import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import type { Dispatch} from 'react';
+import type { Dispatch, JSX } from 'react';
 import { useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -102,6 +102,30 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
 
     const onlyUnique = (value: string, index: number, array: string[]) => {
         return array.indexOf(value) === index;
+    }
+
+    const resolveAttributeValue = (source: unknown, path: string): unknown =>
+        path
+            .split(".")
+            .reduce<unknown>(
+                (current, key) =>
+                    current !== null && typeof current === "object"
+                        ? (current as Record<string, unknown>)[key]
+                        : undefined,
+                source
+            );
+
+    const formatAttributeValue = (value: unknown): string => {
+        if (value === undefined || value === null) {
+            return "";
+        }
+        if (Array.isArray(value)) {
+            return value.map(formatAttributeValue).join(", ");
+        }
+        if (typeof value === "object") {
+            return JSON.stringify(value);
+        }
+        return String(value);
     }
 
     const readyToTest = () => {
@@ -233,8 +257,10 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     required={true}
                     error={!isValidClientId}
                     helperText={usedHelperTextClientId}
-                    inputProps={{
-                        autoComplete: "off",
+                    slotProps={{
+                        htmlInput: {
+                            autoComplete: "off",
+                        },
                     }}
                 />
                 <TextField 
@@ -253,7 +279,8 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     onChange={(e) => setClientSecret(e.target.value)}
                     required={true}
                     helperText={usedHelperTextClientSecret}
-                    InputProps={{
+                    slotProps={{
+                        input: {
                         endAdornment: (
                             <InputAdornment position="end">
                             <IconButton
@@ -268,6 +295,7 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                             </InputAdornment>
                         ),
                         autoComplete: "off",
+                        },
                     }}
                     error={!isValidClientSecret}
                     fullWidth />
@@ -290,8 +318,10 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     error={!isValidPrincipal||!isKnown}
                     helperText={usedHelperTextPrincipal}
                     required={true}
-                    inputProps={{
-                        autoComplete: "off",
+                    slotProps={{
+                        htmlInput: {
+                            autoComplete: "off",
+                        },
                     }}
                 />}
                 
@@ -313,19 +343,8 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                         if(visible&&attributes.filter(attribute=>attribute.name===configuration.name).length>0) {
                             const attrib=attributes.filter(attribute=>attribute.name===configuration.name)[0];
                             const key=attrib.content||"";
-                            if(key.includes(".")) {                                                      
-                                if(attrib.content?.split(".",2)[1]) {
-                                    const key1=attrib.content?.split(".",2)[0]
-                                    const key2=attrib.content?.split(".",2)[1]
-                                    if(attributeResult[key1]&&key2) {
-                                        value=(attributeResult[key1])[key2]
-                                    } 
-                                }                                                                    
-                            } else {
-                                if(attrib.content&&attributeResult[attrib.content]) {
-                                    value=attributeResult[attrib.content];
-                                }
-                                
+                            if(key) {
+                                value=formatAttributeValue(resolveAttributeValue(attributeResult,key));
                             }
 
                             return (<TableRow key={key}>

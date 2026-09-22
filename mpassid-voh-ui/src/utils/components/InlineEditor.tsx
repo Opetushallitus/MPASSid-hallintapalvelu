@@ -1,5 +1,6 @@
 import SaveIcon from "@mui/icons-material/Save";
 import { IconButton, InputAdornment, Popover, TextField } from "@mui/material";
+import type { JSX } from "react";
 import { cloneElement, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -51,8 +52,9 @@ export default function InlineEditor({ children, onChange, value }: Props) {
             inputRef={inputRef}
             name="value"
             disabled={isSubmtting}
-            InputProps={{
-              endAdornment: (
+            slotProps={{
+              input: {
+                endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
                     type="submit"
@@ -66,7 +68,8 @@ export default function InlineEditor({ children, onChange, value }: Props) {
                     <SaveIcon />
                   </IconButton>
                 </InputAdornment>
-              ),
+                ),
+              },
             }}
           />
         </form>

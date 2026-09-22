@@ -69,7 +69,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
     const environment = useRef<number>((state?.deploymentPhase)?state.deploymentPhase:-5);
     const originalEnvironment = useRef<number>(-5);
-    const originalIntegration = useRef<Components.Schemas.Integration>();
+    const originalIntegration = useRef<Components.Schemas.Integration | undefined>(undefined);
     const [ integrationEnvironment, setIntegrationEnvironment] = useState<number>((state?.deploymentPhase)?state.deploymentPhase:-5);
     const [name, setName] = useState<string>('');
     const [metadataUrl, setMetadataUrl] = useState<string>('');
@@ -455,7 +455,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         <Typography component={"div"} variant="h2" gutterBottom >
           <FormattedMessage defaultMessage="Organisaation tiedot" />
         </Typography>
-        <Grid container spacing={2} mb={3}>
+        <Grid container size={12} spacing={2} sx={{ mb: 3 }}>
           <DataRow object={integration} path="organization.name" />
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
@@ -468,7 +468,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         {newIntegration&&
         <Role integration={newIntegration} oid={oid} environment={environment} setEnvironment={setIntegrationEnvironment} setMetadataUrl={setMetadataUrl} metadataUrl={metadataUrl} name={name} setName={setName} setCanSave={setIsValidRoleDetails} attributes={attributes} setMetadataFile={setMetadataFile} metadataFile={metadataFile}/>}
 
-        {newConfigurationEntityData&&attributes&& <Grid mb={hasAttributes ? 3 : undefined}>
+        {newConfigurationEntityData&&attributes&& <Grid sx={{ mb: hasAttributes ? 3 : undefined }}>
           <ErrorBoundary>
             <Attributes
             key={"data"}

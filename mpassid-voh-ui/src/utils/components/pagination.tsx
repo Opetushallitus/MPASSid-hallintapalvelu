@@ -11,7 +11,7 @@ export function TablePagination(
   props: React.ComponentProps<typeof Pagination>
 ) {
   return (
-    <Box display="flex" justifyContent="center" mt={3}>
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
       <Pagination {...props} />
     </Box>
   );

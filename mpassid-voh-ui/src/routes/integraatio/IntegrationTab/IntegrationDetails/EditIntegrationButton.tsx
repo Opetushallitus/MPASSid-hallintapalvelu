@@ -28,7 +28,7 @@ function EditIntegrationButton(props:Props) {
   
   if(editor) {
     return (
-      <Box display="flex" alignItems="center" justifyContent="center">
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Fab
           color="primary"
           component={Link} 

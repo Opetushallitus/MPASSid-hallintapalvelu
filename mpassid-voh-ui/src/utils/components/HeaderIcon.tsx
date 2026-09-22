@@ -13,7 +13,7 @@ export function HeaderIcon({ children }: Props) {
   const size = 32;
 
   return (
-    <Box component="span" mr={1}>
+    <Box component="span" sx={{ mr: 1 }}>
       <Fab
         disabled
         size="small"
@@ -26,7 +26,7 @@ export function HeaderIcon({ children }: Props) {
           background: `${styleGuide.colors.gray["lighten-6"]} !important`,
         }}
       >
-        {cloneElement(children as React.ReactElement, {
+        {cloneElement(children as React.ReactElement<any>, {
           fontSize: "small",
           sx: { color: theme.palette.text.primary },
         })}

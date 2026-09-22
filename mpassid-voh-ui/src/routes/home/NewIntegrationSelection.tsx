@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
 import { devLog } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
+import Suspense from "@/utils/components/Suspense";
 import { integrationTypesDefault } from "@/config";
 import { clone } from "lodash";
 
@@ -49,6 +50,11 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const language = toLanguage(useIntl().locale).toLowerCase();
     const possibleOrganizationsOidsIdp = useRef<string[]>([]);
     const possibleOrganizationsOidsAll = useRef<string[]>([]);
+    // Once the user explicitly picks an integration type, the organization
+    // effect below must stop auto-overriding it. Under React 19 the async
+    // organization (re)resolution can re-fire that effect after the user has
+    // chosen, snapping "Palveluintegraatio" back to "Koulutustoimija".
+    const userChoseIntegration = useRef(false);
     
     const intl = useIntl();
     useEffect(() => {
@@ -158,6 +164,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         
         if(open) {
             setService(undefined)
+            userChoseIntegration.current = false
         }
     }, [open]);
 
@@ -172,6 +179,9 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     }, [integration]);
 
     useEffect(() => {
+        if(userChoseIntegration.current) {
+            return;
+        }
         if(possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0) {
             setIntegration('idp')
         } else {
@@ -179,8 +189,6 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         }
     }, [organization]);
 
-
-    
 
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
@@ -223,6 +231,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
 
         devLog("DEBUG","handleIntegration (value)",String(event.target.value))
         const value = String(event.target.value);
+        userChoseIntegration.current = true
         setIntegration(value)
         
         
@@ -256,12 +265,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         </DialogTitle>
         <DialogContent>
             <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid size={4}>
                     <InputLabel id="organisaatio" sx={{ mr: 1, display: "inline", ml: "auto" }}>
                         <FormattedMessage defaultMessage="Organisaatio" />:
                     </InputLabel>
                 </Grid>
-                <Grid item xs={8} >
+                <Grid size={8} >
                     <Select
                         
                         labelId="organisaatio"
@@ -278,12 +287,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         ))}
                     </Select>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                     <InputLabel id="integraatio" sx={{ mr: 1, display: "inline", marginLeft: "auto" }}>
                         <FormattedMessage defaultMessage="integraatio" />:
                     </InputLabel>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                     <Select
                         labelId="integraatio"
                         id="integraatio"
@@ -302,12 +311,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         </MenuItem>
                     </Select>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                     <InputLabel id="tyyppi" sx={{ mr: 1, display: "inline", marginLeft: "auto" }}>
                         <FormattedMessage defaultMessage="tyyppi" />:
                     </InputLabel>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                     <Select
                         labelId="tyyppi"
                         id="tyyppi"
@@ -327,17 +336,15 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     </Select>
                 </Grid>
                 {integration==='sp'&&(<>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                         <InputLabel id="palvelu" sx={{ mr: 1, display: "inline", marginLeft: "auto" }}>
                             <FormattedMessage defaultMessage="palvelu" />:
                         </InputLabel>
                     </Grid>
-                    <Grid item xs={8}>
-                        
-                            
+                    <Grid size={8}>
+                        <Suspense inline>
                             <PossibleServices oid={organization} handleService={handleService} />
-                            
-                        
+                        </Suspense>
                     </Grid>
                 </>)}
             </Grid>

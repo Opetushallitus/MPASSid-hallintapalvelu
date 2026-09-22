@@ -1,7 +1,7 @@
 
 import type { SelectChangeEvent } from "@mui/material";
 import { Box, Checkbox, Chip, FormControl, FormHelperText, Input, ListItemText, MenuItem, Select } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { Components } from '@/api';
@@ -10,10 +10,13 @@ import { devLog } from "@/utils/devLog";
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+  // MUI v9 moved Select/Menu's PaperProps under slotProps.paper.
+  slotProps: {
+    paper: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
     },
   },
 };

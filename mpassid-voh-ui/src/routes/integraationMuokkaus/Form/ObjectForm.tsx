@@ -1,6 +1,6 @@
 
 import { Box, Grid, IconButton, Tooltip, Typography } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, JSX } from "react";
 import { useEffect, useRef, useState, useImperativeHandle } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { IntegrationType, UiConfiguration } from "@/config";
@@ -191,10 +191,10 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
           }
         {object.content.map((content:any,index:number)=>{
             return(<Grid key={object.name+"_"+index} container spacing={2} >
-                        <Grid item xs={11}>
+                        <Grid size={11}>
                             <span >{JSON.stringify(content, null, 2).replace(/^{/g, '').replace(/}$/g, '\n')}</span>
                         </Grid>
-                        <Grid item xs={1}>
+                        <Grid size={1}>
                             <IconButton 
                                 key="muokkaa"
                                 aria-label={intl.formatMessage({
@@ -357,13 +357,13 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     if(roleConfiguration.visible) {
                       return (
                         <Grid key={object.name+"."+configuration.name} container >
-                            <Grid container spacing={2} mb={3} >
-                                <Grid item xs={4}>
+                            <Grid container size={12} spacing={2} sx={{ mb: 3 }} >
+                                <Grid size={4}>
                                     <Tooltip
                                         title={
                                             <>
                                             {configuration.tooltip && (
-                                                <Box mb={1}>
+                                                <Box sx={{ mb: 1 }}>
                                                 {configuration.tooltip}
                                                 </Box>
                                             )}
@@ -374,7 +374,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                                         <span>{label ? <FormattedMessage {...label} /> : configuration.name}</span>
                                     </Tooltip>
                                 </Grid>
-                                <Grid item xs={8} sx={{}}>
+                                <Grid size={8} sx={{}}>
                                     <Typography
                                         sx={{
                                             whiteSpace: "pre-wrap",

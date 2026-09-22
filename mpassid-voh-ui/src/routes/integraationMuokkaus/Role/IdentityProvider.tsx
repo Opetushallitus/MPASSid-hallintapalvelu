@@ -7,7 +7,7 @@ import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../integraatio/IntegrationTab/DataRow"
 import LinkValue from "../LinkValue";
 import Type from "./Type";
-import { type Dispatch, type MutableRefObject } from "react";
+import { type Dispatch, type JSX, type MutableRefObject } from "react";
 import type { oneEnum } from "../Form/MultiSelectForm";
 import MultiSelectForm from "../Form/MultiSelectForm";
 import { useIntl } from 'react-intl';
@@ -136,14 +136,14 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                 <FormattedMessage defaultMessage="OKJ-integraatiotyyppikohtaiset tiedot" />
               </Typography>
         
-              <Grid container spacing={2} mb={2}>                
+              <Grid container spacing={2} sx={{ mb: 2 }}>                
                                       
                     {environment.current>-1&&
                     (<>
-                      <Grid item xs={4}>
+                      <Grid size={4}>
                       <FormattedMessage defaultMessage="Palveluympäristö" />
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid size={8}>
                       <ErrorBoundary>
                         <MultiSelectForm 
                           key={"Palveluymparisto"}
@@ -217,10 +217,10 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                         
                 {identityProvider.flowName&&(
                   <>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                       <FormattedMessage defaultMessage="Testauslinkki" />
                     </Grid>
-                    <Grid item xs={8} zeroMinWidth>
+                    <Grid size={8} sx={{ minWidth: 0 }}>
                       <LinkValue href={testLinkHref} />
                     </Grid>
                   </>
@@ -250,12 +250,12 @@ function DataRowTitle({path}:DataRowProps) {
 
   return (
     <>
-      <Grid item xs={4}>
+      <Grid size={4}>
         <Tooltip
           title={
             <>
               {tooltip && (
-                <Box mb={1}>
+                <Box sx={{ mb: 1 }}>
                   <FormattedMessage {...tooltip} />
                 </Box>
               )}
@@ -274,7 +274,7 @@ function DataRowTitle({path}:DataRowProps) {
 function DataRowValue({children}:DataRowProps) {
 
   return (
-      <Grid item xs={8}>
+      <Grid size={8}>
         {children}
       </Grid>
   );

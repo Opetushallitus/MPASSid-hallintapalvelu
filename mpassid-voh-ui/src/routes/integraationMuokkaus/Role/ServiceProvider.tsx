@@ -62,11 +62,11 @@ export default function ServiceProvider({ integration, setName, setCanSave, name
         <FormattedMessage defaultMessage="Palveluiden yhteiset tiedot" />
       </Typography>
 
-      <Grid container spacing={2} mb={2}>
-        <Grid item xs={4}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={4}>
           <FormattedMessage defaultMessage="Palveluympäristö" />
         </Grid>
-        <Grid item xs={8}>
+        <Grid size={8}>
           <FormattedMessage
             defaultMessage={`{deploymentPhase, select,
               0 {Testi}
@@ -82,10 +82,10 @@ export default function ServiceProvider({ integration, setName, setCanSave, name
         )}
         {isEditable&&(
           <>
-        <Grid item xs={4}>
+        <Grid size={4}>
           <FormattedMessage defaultMessage="Palvelun nimi" />
         </Grid>
-        <Grid item xs={8}>
+        <Grid size={8}>
           <InputForm
                 object={{ content: name }}
                 type={""} label={"palvelun nimi"}

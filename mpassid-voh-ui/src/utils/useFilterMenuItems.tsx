@@ -39,16 +39,20 @@ export default function useFilterMenuItems({
 
   const checked = getChecked(searchParams);
 
-  const handleToggle = (value: string) => {
-    setSearchParams((searchParams) => {
-      const checked = getChecked(searchParams);
+  const currentSearchParams = () =>
+    new URLSearchParams(window.location.search);
 
-      return updateSearchParams(
+  const handleToggle = (value: string) => {
+    const searchParams = currentSearchParams();
+    const checked = getChecked(searchParams);
+
+    setSearchParams(
+      updateSearchParams(
         checked.includes(value)
           ? checked.filter((checkedValue) => checkedValue !== value)
           : [...checked, value]
-      )(searchParams);
-    });
+      )(searchParams)
+    );
   };
 
   const allChecked = checked.length === options.length;
@@ -59,12 +63,14 @@ export default function useFilterMenuItems({
       <>
         <ListItemCheckbox
           buttonProps={{
-            onClick: () =>
+            onClick: () => {
+              const searchParams = currentSearchParams();
               setSearchParams(
                 updateSearchParams(
                   searchParams.has(searchParamName) ? options : []
-                )
-              ),
+                )(searchParams)
+              );
+            },
           }}
           checkboxProps={{ checked: allChecked }}
           textProps={{

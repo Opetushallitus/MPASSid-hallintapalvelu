@@ -1,6 +1,6 @@
 import { handlers } from "@visma/msw-openapi-backend-integration";
 import { mapValues } from "lodash";
-import { setupWorker } from "msw";
+import { setupWorker } from "msw/browser";
 import type { Document } from "openapi-backend";
 import koodistoDefinition from "../../schemas/koodisto.json";
 import käyttöoikeusDefinition from "../../schemas/käyttöoikeus.json";

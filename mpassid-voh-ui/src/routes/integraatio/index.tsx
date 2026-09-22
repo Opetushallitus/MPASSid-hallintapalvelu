@@ -29,7 +29,7 @@ export default function Integraatio() {
   return (
     <>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
-        <Box display="flex" alignItems="baseline">
+        <Box sx={{ display: "flex", alignItems: "baseline" }}>
           <PageHeader
             icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}

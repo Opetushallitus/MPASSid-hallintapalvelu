@@ -11,12 +11,7 @@ import { dirname } from 'node:path';
 import { readPackageUp } from 'read-pkg-up';
 const source = 'lang';
 async function main() {
-    let appDirectory = 'src';
-    try {
-        const { readConfig } = await import('@remix-run/dev/dist/config.js');
-        appDirectory = (await readConfig()).appDirectory;
-    }
-    catch { }
+    const appDirectory = 'src';
     const resultAsString = await extract(await fg([`${appDirectory}/**/*.{j,t}s{,x}`, `!**/*.d.ts`]), {
         idInterpolationPattern: '[sha512:contenthash:base64:6]',
     });

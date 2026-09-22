@@ -8,7 +8,7 @@ import {
     typeTooltips,
   } from "@/routes/home/IntegrationsTable";
 import UniqueId from "./UniqueId";
-import type { MutableRefObject} from "react";
+import type { JSX, MutableRefObject} from "react";
 
 interface Props {
     integration: Components.Schemas.Integration;
@@ -28,20 +28,20 @@ export default function IntegrationBasicDetails({ integration, configurationEnti
                 <FormattedMessage defaultMessage="Integraation perustiedot" />
               </Typography>
 
-              <Grid container spacing={2} mb={3}>
+              <Grid container size={12} spacing={2} sx={{ mb: 3 }}>
                 {integration.id!==0&&<DataRow object={integration} path="id" />}
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <FormattedMessage defaultMessage="Jäsentyyppi" />
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                   <FormattedMessage {...typeAbbreviations[role]} /> (
                   <FormattedMessage {...typeTooltips[role]} />)
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                   <FormattedMessage defaultMessage="Yksilöllinen tunniste" />
                 </Grid>
                                 
-                <Grid item xs={8}>
+                <Grid size={8}>
                   {configurationEntity&&<UniqueId
                     configurationEntity={configurationEntity!}
                     role={role}

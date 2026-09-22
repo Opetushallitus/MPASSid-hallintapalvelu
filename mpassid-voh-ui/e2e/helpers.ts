@@ -276,12 +276,13 @@ export async function toggleExtraSchoolsConfiguration(page: Page) {
   // this label goes through DataRowTitle (SchoolSelection.tsx:1046,
   // 1261-1291), which wraps it in a Tooltip+<span> - siblingRow()'s
   // following-sibling::*[1] would look for a sibling of that inner <span>
-  // (there isn't one) instead of the label's own <Grid item>, so walk up to
-  // the nearest MuiGrid-item first.
+  // (there isn't one) instead of the label's own grid cell, so walk up to
+  // the nearest MuiGrid-root first. (MUI v9's Grid v2 no longer emits the
+  // v5 "MuiGrid-item" class - every grid cell is just "MuiGrid-root".)
   await page
     .getByText("Lisää kouluvalinta säännöt", { exact: true })
     .locator(
-      'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " MuiGrid-item ")][1]/following-sibling::*[1]'
+      'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " MuiGrid-root ")][1]/following-sibling::*[1]'
     )
     .getByRole("checkbox")
     .click();

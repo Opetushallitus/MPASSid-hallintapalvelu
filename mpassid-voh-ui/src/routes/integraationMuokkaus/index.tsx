@@ -246,7 +246,7 @@ export default function IntegraatioMuokkaus() {
   return (
     <>
       <TableContainer component={Paper} sx={{ padding: 3 }}>
-        <Box display="flex" alignItems="baseline">
+        <Box sx={{ display: "flex", alignItems: "baseline" }}>
           <PageHeader
             icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}
@@ -282,7 +282,7 @@ export default function IntegraatioMuokkaus() {
             open={saveDialogState}
             anchorOrigin={snackbarLocation}>
             
-              <Box boxShadow={5} sx={{ width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
+              <Box sx={{ boxShadow: 5, width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
               <Container maxWidth="sm">
               
                   <Typography variant="h6" component="h2" sx={{ my: 2, marginLeft: 'auto', marginRight: 'auto', marginTop: '6%' }}>
@@ -293,7 +293,7 @@ export default function IntegraatioMuokkaus() {
                                       <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
                                   </Button></>}
                   
-                  <Box display="flex" justifyContent="center" mt={2}> 
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}> 
                       {id!=='0'&&<Button component={Link} to={`/integraatio/${id}`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>}
                       {id==='0'&&<Button component={Link} to={`/`} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button>} 
                      
