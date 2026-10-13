@@ -39,6 +39,13 @@ export default function useFilterMenuItems({
 
   const checked = getChecked(searchParams);
 
+  // react-router v7 wraps navigation state updates in React.startTransition,
+  // so the `searchParams` snapshot from useSearchParams (and the one its
+  // functional-updater form reads internally) is not yet committed between two
+  // rapid clicks. Consecutive toggles would then each build off the same stale
+  // base and clobber one another. The browser URL, however, is updated
+  // synchronously by history.pushState on every navigate, so read the live
+  // query string to always build off the latest committed filter state.
   const currentSearchParams = () =>
     new URLSearchParams(window.location.search);
 

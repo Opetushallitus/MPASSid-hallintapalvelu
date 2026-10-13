@@ -3,6 +3,9 @@ import Popover from '@mui/material/Popover';
 import Button from '@mui/material/Button';
 import { useIntegrationSafe } from '@/api';
 import type { Components } from "@/api";
+import { createLogger } from "@/utils/devLog";
+
+const warnLog = createLogger("WARN");
 
 interface Props {
     id: number;
@@ -32,7 +35,7 @@ export default function BasicPopover({ id }: Props) {
         } else if ("entityId" in sp) {
             return sp.entityId;
         } else {
-            console.log("Unknown");
+            warnLog("getId (unknown service provider)",sp);
             return "Unknown";
         }
     };

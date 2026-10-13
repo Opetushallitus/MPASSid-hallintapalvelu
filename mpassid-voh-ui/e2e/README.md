@@ -31,6 +31,17 @@ npx playwright show-report
 # seurattavaksi); ilman --headed selain pysyy näkymättömänä eikä
 # hidastuksesta ole silmämääräistä hyötyä.
 SLOWMO=500 npm run test:e2e -- --headed
+
+# Sama oikotienä: näkyvä selain, SLOWMO=500 ja yksi testi kerrallaan
+# (--workers=1). Hidastuksen voi ylikirjoittaa, ja muut argumentit
+# välitetään --:n jälkeen.
+npm run test:e2e:visual
+npm run test:e2e:visual -- e2e/validation.spec.ts
+SLOWMO=1000 npm run test:e2e:visual -- -g "s8"
+
+# Paikallisesti asennetulla selaimella Playwrightin Chromiumin sijaan
+# (esim. chrome, msedge)
+PW_CHANNEL=chrome npm run test:e2e:visual
 ```
 
 `playwright.config.ts` käynnistää `npm run dev`:n automaattisesti testien
@@ -59,7 +70,7 @@ todellisuudessa renderöityi.
 | `create-*-integration-tuotanto.spec.ts` | Samat luontivirrat Tuotanto-ympäristöön - idp-tyypeille valitaan Palveluympäristö luonnin jälkeen (`selectEnvironment()`), sp-tyypeille (SAML/OIDC) "Tuotanto - uusi" valitaan suoraan luontidialogin "palvelu:"-valikosta (`createNewSpIntegration()`:n `environment`-parametri), koska sp-integraatioilla ei ole muokattavaa ympäristövalitsinta luonnin jälkeen |
 | `school-selection.spec.ts` | Koulunvalintanäkymän (`SchoolSelection.tsx`) koko luonti/muokkaus-matriisi, ks. alla |
 | `delete-integration.spec.ts` | Integraation poisto/deaktivointi ("Poista jäsen"), Passiiviset-suodatin, poiston peruutus |
-| `integration-selection.spec.ts` | "Integraatiovalinnat"-välilehti (palvelusallinta) |
+| `integration-selection.spec.ts` | "Integraatiovalinnat"-välilehti (palvelusallinta) - REDUSOITU LAAJUUS, ks. `EHDOTETUT_TESTIT.md`:n kohta 2 |
 | `validation.spec.ts` | Validoinnin negatiivipolut: pakollinen tyhjänä, https/nolocalhost, virheellinen sertifikaatti, ListForm-duplikaatti, rivin poisto |
 | `cancel-edit.spec.ts` | "Peruuta" luonnissa ja muokkauksessa - tallentamattomat muutokset hylätään |
 | `environment-switch.spec.ts` | Olemassa olevan idp-integraation Testi↔Tuotanto-vaihto muokkaustilassa |
@@ -68,6 +79,7 @@ todellisuudessa renderöityi.
 | `integration-detail-view.spec.ts` | Read-only `/integraatio/:id`-näkymän sisältö + 404-haara |
 | `azure-attribute-test.spec.ts` | Azure "Testaa attribuuttien oikeellisuus" -dialogi (onnistuu/epäonnistuu/pakolliset kentät) |
 | `misc-ui.spec.ts` | Disabloitu "Luo"-nappi (sp ilman palveluvalintaa), metadataUrl/tiedostolataus-poissulkevuus (ADFS) |
+| `EHDOTETUT_TESTIT.md` | Kaikkien yllä olevien uusien testien tausta-analyysi: mitä katetaan, mitä rajattiin pois ja miksi |
 | `helpers.ts` | Jaetut apufunktiot kaikille yllä oleville (ei sisällä testejä) |
 
 ### Mock-only lisäys: virhepolkujen simulointi
@@ -75,7 +87,7 @@ todellisuudessa renderöityi.
 `save-error.spec.ts` ja `azure-attribute-test.spec.ts`:n epäonnistumistesti
 vaativat deterministisen tavan saada tallennus/attribuuttitesti epäonnistumaan
 - MSW on täällä oikea Service Worker, joten Playwrightin `page.route()` ei
-tavoita sen jo käsittelemiä pyyntöjä.
+tavoita sen jo käsittelemiä pyyntöjä (ks. `EHDOTETUT_TESTIT.md`:n kohta 7).
 Ratkaisuna `src/mocks/requestLogicHandlers.ts`:ään lisättiin kolme
 "taika-arvoa" (`E2E_TRIGGER_409`, `E2E_TRIGGER_GENERIC_ERROR`,
 `E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE`), jotka `createIntegration`/
@@ -241,3 +253,40 @@ tarjoaa moni-oppilaitostyyppisille integraatioille aina KAIKKI valitun
 tyypin koulut eSI/eSE:stä riippumatta. Tämän seurauksena m8/m9/m10 ovat
 todellisuudessa "ok"-tapauksia - tämä on vahvistettu oikealla testiajolla.
 
+### Löydetyt sovellusbugit
+
+Testien kirjoittaminen paljasti neljä todellista bugia sovelluskoodista
+(ei mockista) - kaksi koulunvalinnan testimatriisia kirjoitettaessa (ks.
+`COMMIT_MESSAGE_KOULUNVALINTA.txt`), kaksi myöhemmin muita uusia testejä
+(kohdat 1-10, ks. `EHDOTETUT_TESTIT.md`) kirjoitettaessa/ajettaessa:
+
+1. **`IntegrationDetails.tsx`** - SP-integraation (SAML/OIDC) pelkkä
+   nimenmuutos muokkaustilassa ei enää tallentunut, koska
+   `canSaveDiscoveryInformation`-efekti ei tiennyt nimenmuutoksesta.
+2. **`SchoolSelection.tsx`** - `isExtraSchoolConfigurationOk()` luki yhden
+   renderöinnin jäljessä olevaa `discoveryInformation`-propsia
+   `discoveryInformationRef`:in sijaan, minkä takia "Tallenna" jäi pysyvästi
+   pois käytöstä aina kun pakolliseen koulukenttään riitti täsmälleen yksi
+   valinta.
+3. **`IntegrationTab/index.tsx`** - `getRole(origInteg)` kutsuttiin
+   ehdoitta ennen `error?.response?.status===404`-tarkistusta; kun haku
+   epäonnistuu (`origInteg===undefined`), `getRole` lukee
+   `row.configurationEntity` ilman optional chainingia `row`:n itsensä
+   osalta ja heittää poikkeuksen - `ErrorBoundary` nappasi tämän geneeriseksi
+   "Virhe"-viestiksi oikean "Integraatiota X ei löydy" -viestin sijaan
+   (löytyi `integration-detail-view.spec.ts`:n 404-testiä kirjoitettaessa).
+4. **`Form/ListForm.tsx`** - array-kenttien (redirect_uris,
+   signingCertificates, ym.) Enter-lisäys laukaisi KAKSI käsittelijää
+   samasta painalluksesta: `onKeyUp` (`updateFormValue()`, ei
+   duplikaattitarkistusta) ja lomakkeen natiivi `onSubmit` (jolla OLI
+   tarkistus, mutta näki jo tyhjennetyn kentän). Koska
+   `Metadata.tsx`:n `updateMultivalueMetadata()` TOGGLAA jäsenyyden (poistaa
+   jos jo olemassa), saman arvon lisääminen uudelleen poisti sen
+   hiljaisesti "jo olemassa" -varoituksen sijaan. Korjattu kolmella
+   muutoksella: poistopainikkeelle `type="button"` (ei enää lomakkeen
+   oletus-submit), duplikaattitarkistus myös `updateFormValue()`:iin (käytti
+   aiemmin virheellisesti `defaultValue.indexOf` - `object.content.indexOf`
+   sen sijaan, koska `defaultValue` on koko attribuutti-wrapperiobjekti, ei
+   taulukko), ja `onKeyDown`:iin `preventDefault()` joka estää koko
+   kaksoislaukaisun (löytyi `validation.spec.ts`:n duplikaattitestiä
+   ajettaessa).

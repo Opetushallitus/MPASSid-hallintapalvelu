@@ -1,11 +1,25 @@
-import { expect, test, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillAzureFields,
   fillCommonIdpSteps,
-  logBrowserConsole,
   mockInstitutionTypes,
+  openEditFromViewPage,
+  saveIntegration,
 } from "./helpers";
+
+// Covers EHDOTETUT_TESTIT.md's "9. Azure-attribuuttitesti" -
+// AttributeTest.tsx, shown for type==='azure' once `canSave` is true, or
+// always when editing an existing integration (id !== '0')
+// (integraationMuokkaus/index.tsx:297). testAttributesAuthorization's
+// mock handler (requestLogicHandlers.ts) always returns 200 for any input -
+// there is no deterministic way to trigger the "Tilin authentikointi
+// epäonnistui!" failure path without a mock-side hook, so it now recognizes
+// a magic Client ID value (E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE) the same way
+// createIntegration/updateIntegration recognize the save-error triggers
+// (see save-error.spec.ts) - mock-only test infrastructure, not a
+// production change.
 
 const E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE = "__e2e_trigger_403__";
 
@@ -19,7 +33,6 @@ test("'Testaa attribuuttien oikeellisuus' -nappi vaatii täytetyt pakolliset ken
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Azure");
   await expect(
@@ -43,11 +56,33 @@ test("'Testaa attribuuttien oikeellisuus' -nappi vaatii täytetyt pakolliset ken
   ).toBeDisabled();
 });
 
+test("'Testaa attribuuttien oikeellisuus' -nappi näkyy olemassa olevaa integraatiota muokatessa, vaikka tallennus ei ole sallittu", async ({
+  page,
+}) => {
+  await mockInstitutionTypes(page);
+
+  await fillCompleteAzureIntegration(page);
+  await saveIntegration(page);
+  await expect(page).toHaveURL(/\/integraatio\/\d+/);
+
+  await openEditFromViewPage(page);
+  await expect(page).toHaveURL(/\/muokkaa\/idp\/azure\/\d+/);
+
+  // Emptying a mandatory field makes canSave false - for an existing
+  // integration (id !== '0') the button must still be shown.
+  await page.getByPlaceholder("Lisää Client ID", { exact: true }).fill("");
+  await expect(
+    page.getByRole("button", { name: "Tallenna", exact: true })
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Testaa attribuuttien oikeellisuus" })
+  ).toBeVisible();
+});
+
 test("attribuuttitesti onnistuu ja näyttää attribuuttitaulukon", async ({
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await fillCompleteAzureIntegration(page);
   await page
@@ -76,7 +111,6 @@ test("attribuuttitesti epäonnistuu tuntemattomalla tilillä", async ({
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await fillCompleteAzureIntegration(page);
   await page

@@ -2,10 +2,13 @@ import { type Components } from '@/api';
 import { getRole } from "@/routes/home/IntegrationsTable";
 import type { RequestLogicHandlers } from "@visma/msw-openapi-backend-integration";
 import { clone, get, orderBy } from "lodash";
+import { createLogger } from "@/utils/devLog";
 import definition from "../../schemas/schema.json";
 import exampleData from "../../schemas/response.json"
 import blankData from "../../schemas/blankIdpIntegration.json"
 import exampleOrganisations from "../../schemas/organizations.json"
+
+const debugLog = createLogger("DEBUG");
 
 
 export { definition };
@@ -96,6 +99,15 @@ const defaults = {
   size: 25,
 };
 
+// E2E-testien virhesimulointi: koska tämä (openapi-backend-integrationin)
+// requestLogicHandler-hook tukee {status,mock}-paluuarvoa (ks.
+// vendor/@visma/msw-openapi-backend-integration/lib/main.js:13-25) mutta
+// mikään olemassa oleva handler ei koskaan käytä sitä, e2e-testeillä ei ole
+// muuten deterministististä tapaa saada tallennus epäonnistumaan - sama
+// ongelma kuin id===999995:n käyttö getIntegration()-handlerissa (rivi 259)
+// erikoisdatan palauttamiseen, vain virhevastauksille. Näitä tunnisteita ei
+// käytetä sovelluksen tuotantokoodissa, ainoastaan e2e-testien datassa
+// (ks. e2e/save-error.spec.ts, e2e/azure-attribute-test.spec.ts).
 const E2E_TRIGGER_409 = "__e2e_trigger_409__";
 const E2E_TRIGGER_GENERIC_ERROR = "__e2e_trigger_500__";
 const E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE = "__e2e_trigger_403__";
@@ -117,6 +129,14 @@ const triggerIntegrationSaveError = (body: Components.Schemas.Integration) => {
   return undefined;
 };
 
+// index.tsx:350's client_secret reminder (`!client_secret.includes("***")`)
+// assumes a real backend only ever reveals the raw secret once, on the
+// exchange that first generates it - the reminder condition is checked
+// against `newIntegration` (the CLIENT's own live editing state), which is
+// only ever repopulated from a *fresh* fetch (e.g. re-opening an integration
+// for edit from its view page), never from the immediate save response
+// itself. So masking has to happen on create too, not just update - it's
+// what a later, independent fetch of this same integration will see.
 const maskClientSecret = (body: Components.Schemas.Integration) => {
   const metadata = body?.configurationEntity?.sp?.metadata as any;
   if (metadata?.client_secret) {
@@ -181,7 +201,7 @@ const getIntegrationDiscoveryInformationValue = (oid:string,id:string,institutio
 
 export default {
   inactivateIntegration(request) {
-    console.log("inactivateIntegration: ",request.path)
+    debugLog("inactivateIntegration",request.path)
   },
   getIntegrationDiscoveryInformation(request) {    
     discoveryInformation.value = getIntegrationDiscoveryInformationValue(request.query.organizationOid,request.query.id,request.query.institutionType)
@@ -235,8 +255,17 @@ export default {
           attributeResponse.onPremisesExtensionAttributes.extensionAttribute15=""
           
           break; 
-        }
-        case "deepTestAttributes": {           
+        } 
+        case "deepTestAttributes": { 
+          // AttributeTest.tsx reads an attribute's content as a path into
+          // this response, but only the path's root is sent in `select`
+          // (getAttributeList), so the mock cannot tell how deep a path the
+          // caller has configured. This root therefore serves a fixed deep
+          // structure that exercises the recursive lookup: set an
+          // attribute's content to "deepTestAttributes.level2.level3" for a
+          // 3-level path, "deepTestAttributes.level2.level3Object.level4"
+          // for a 4-level one, or "deepTestAttributes.level2" to see an
+          // intermediate object rendered as JSON.
           attributeResponse.deepTestAttributes={}
           attributeResponse.deepTestAttributes.level2={}
           attributeResponse.deepTestAttributes.level2.level3="test_value_depth_3"
@@ -257,7 +286,7 @@ export default {
     attributes.value=attributeResponse;
   },
   testAttributesAuthorization(request) {
-    console.log("testAttributesAuthorization: ",request.requestBody)
+    debugLog("testAttributesAuthorization",request.requestBody)
     if (request.requestBody?.clientId === E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE) {
       return { status: 403, mock: {} };
     }
@@ -282,6 +311,14 @@ export default {
     const id = Math.max(9000000,...allIntegrations.map(i=>i.id!))+1;
     request.requestBody.id=id;
     const index=allIntegrations.map(i=>i.id).indexOf(id);
+    // Masking here (not just on update) matters because index.tsx:350's
+    // reminder check reads `newIntegration` - the client's own live editing
+    // state, generated locally and never rewritten from this call's own
+    // response - so masking the create response doesn't affect whether the
+    // reminder shows the FIRST time. It's what a LATER, independent look at
+    // this integration (e.g. reopening it for edit from its view page) sees
+    // stored server-side, which is what makes a second save correctly not
+    // show the reminder again.
     maskClientSecret(request.requestBody);
     if (index !== -1) {
       allIntegrations[index] = request.requestBody;
@@ -298,6 +335,11 @@ export default {
     integration.value = allIntegrations.find((row) => row.id === id);
 
     if (integration.value === undefined) {
+      // Without this, IntegrationTab/index.tsx's error?.response?.status===404
+      // branch (the "Integraatiota {id} ei löydy" message) never fires - the
+      // mock previously always answered 200 with an empty body, leaving the
+      // page stuck on its loading spinner forever for an unknown id. See
+      // e2e/integration-detail-view.spec.ts's 404 test.
       return { status: 404, mock: {} };
     }
 

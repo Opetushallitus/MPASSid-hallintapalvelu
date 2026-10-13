@@ -9,7 +9,9 @@ import { useIntl } from 'react-intl';
 import { helperText, trimCertificate, validate } from "@/utils/Validators";
 import { MetadataForm } from "./Form";
 import { clone, cloneDeep, isEqual } from "lodash";
-import { devLog } from "@/utils/devLog";
+import { createLogger, logEnabled, redactSecretValue, redactSecrets } from "@/utils/devLog";
+
+const debugLog = createLogger("DEBUG");
 
 
 export default function Metadata({
@@ -53,15 +55,15 @@ export default function Metadata({
   pendingEffects.current = [];
 
   const createAttributeContent = (name:string,currentData: any,roleConfiguration:IntegrationType,array:boolean,multiselect: boolean|undefined) => {
-    devLog("DEBUG","createAttributeContent (name)",name)
+    debugLog("createAttributeContent (name)",name)
 
     if(currentData&&currentData!== undefined) {
-      devLog("DEBUG","createAttributeContent (currentData)",currentData)
+      debugLog("createAttributeContent (currentData)",currentData)
       return currentData
     }
 
     if(newConfigurationEntityData&&newConfigurationEntityData?.sp&&newConfigurationEntityData.sp?.metadata&&newConfigurationEntityData.sp?.metadata[name]!== undefined) {
-      devLog("DEBUG","createAttributeContent (newConfigurationEntityData)",newConfigurationEntityData.sp?.metadata[name])
+      debugLog("createAttributeContent (newConfigurationEntityData)",redactSecretValue(name,newConfigurationEntityData.sp?.metadata[name]))
       return newConfigurationEntityData.sp?.metadata[name]
     }
 
@@ -70,7 +72,7 @@ export default function Metadata({
     } 
 
     if(roleConfiguration?.defaultValue !== undefined) {
-      devLog("DEBUG","createAttributeContent (defaultValue)",roleConfiguration.defaultValue)
+      debugLog("createAttributeContent (defaultValue)",roleConfiguration.defaultValue)
       if(multiselect!==undefined&&multiselect===true) {
         return [ roleConfiguration.defaultValue ]
       } else {
@@ -78,7 +80,7 @@ export default function Metadata({
       }
       
     }
-    devLog("DEBUG","createAttributeContent (empty)",'')
+    debugLog("createAttributeContent (empty)")
     if(array) {
       return []
     } else {
@@ -92,7 +94,7 @@ export default function Metadata({
     mandatoryAttributes.forEach(ma=>{
       
 
-      devLog("DEBUG","validateMetadata (mandatoryAttribute "+ma+")",metadata[ma])
+      debugLog("validateMetadata (mandatoryAttribute "+ma+")",redactSecretValue(ma,metadata[ma]))
       if(metadata[ma] === undefined) {
         result = false
       }
@@ -104,9 +106,9 @@ export default function Metadata({
     return result
   }
   const updateMetadata = (array: boolean,name:string, value:any) => {  
-    devLog("DEBUG","updateArrayMetadata (mandatoryAttributes)",mandatoryAttributes)
-    devLog("DEBUG","updateMetadata ("+name+" array)",array)
-    devLog("DEBUG","updateMetadata ("+name+")",value)
+    debugLog("updateMetadata (mandatoryAttributes)",mandatoryAttributes)
+    debugLog("updateMetadata ("+name+" array)",array)
+    debugLog("updateMetadata ("+name+")",value)
     
     var newMetadata
     if(value===null) {
@@ -132,9 +134,12 @@ export default function Metadata({
       }    
       newConfigurationEntityData.sp.metadata=newMetadata
     }
-    devLog("DEBUG","updateMetadata (validateMetadata)", validateMetadata())
-    devLog("DEBUG","updateMetadata (isEqual)", isEqual(newConfigurationEntityData,configurationEntity))
-    if(validateMetadata()) {
+    const metadataIsValid = validateMetadata()
+    debugLog("updateMetadata (validateMetadata)", metadataIsValid)
+    if(logEnabled("DEBUG")) {
+      debugLog("updateMetadata (isEqual)", isEqual(newConfigurationEntityData,configurationEntity))
+    }
+    if(metadataIsValid) {
       setCanSave(true)
     } else {
       setCanSave(false)
@@ -145,8 +150,8 @@ export default function Metadata({
 
   const updateMultivalueMetadata = (name:string, value:String) => {
 
-    devLog("DEBUG","updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
-    devLog("DEBUG","updateMultivalueMetadata (metadata[name])",metadata[name])
+    debugLog("updateMultivalueMetadata (mandatoryAttributes)",mandatoryAttributes)
+    debugLog("updateMultivalueMetadata (metadata[name])",redactSecretValue(name,metadata[name]))
     if(metadata[name]) {
         const index = metadata[name].indexOf(value)
         if(index>=0) {
@@ -157,10 +162,10 @@ export default function Metadata({
     } else {
       metadata[name]=[ value ]
       
-      devLog("DEBUG","updateMultivalueMetadata (new metadata[name])",metadata[name])
+      debugLog("updateMultivalueMetadata (new metadata[name])",redactSecretValue(name,metadata[name]))
     }
     setMetadata({...metadata} )
-    devLog("DEBUG","updateMultivalueMetadata (metadata)",metadata)
+    debugLog("updateMultivalueMetadata (metadata)",redactSecrets(metadata))
     return metadata
     
     
@@ -227,12 +232,14 @@ export default function Metadata({
               .map((configuration) => {
                       if(configuration.mandatory) {
                         mandatoryAttributes.push(configuration.name);
-                       devLog("DEBUG","validateMetadata (mandatoryAttributes)",validateMetadata())
+                        if(logEnabled("DEBUG")) {
+                          debugLog("Metadata render (validateMetadata)",validateMetadata())
+                        }
                       }
                       const validator = (value:string) => {
-                        devLog("DEBUG","validator",configuration.name)
-                        devLog("DEBUG","validator",configuration.validation)
-                        devLog("DEBUG","validator",value)
+                        debugLog("validator",configuration.name)
+                        debugLog("validator",configuration.validation)
+                        debugLog("validator",value)
                         return validate(configuration.validation,value);
                       }
                       const helpGeneratorText = (value:string) => {
@@ -240,15 +247,15 @@ export default function Metadata({
                       }
 
                       const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
-                      devLog("DEBUG","Metadata (roleConfiguration)",roleConfiguration) 
+                      debugLog("Metadata (roleConfiguration)",roleConfiguration) 
                       var attribute = { type: 'metadata', 
                                           content: createAttributeContent(configuration.name,metadata[configuration.name],roleConfiguration,configuration.array,configuration.multiselect),                                          
                                           name: configuration.name,
                                           role: role}
                                           
-                      devLog("DEBUG","Metadata (attribute init)",attribute)
+                      debugLog("Metadata (attribute init)",redactSecrets(attribute))
                       if(attribute.content === undefined) {
-                        devLog("DEBUG","Metadata (attribute init content undefined)",attribute)
+                        debugLog("Metadata (attribute init content undefined)",redactSecrets(attribute))
                         if(configuration.array) {
                           attribute.content=[];
                         }
@@ -270,7 +277,7 @@ export default function Metadata({
                         
                         if(configuration.array===false&&configuration.switch&&configuration.enum.length===2&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize switch value                
-                          devLog("DEBUG","Metadata (attribute init switch content "+configuration.name+")",attribute.content)                              
+                          debugLog("Metadata (attribute init switch content "+configuration.name+")",redactSecretValue(attribute.name,attribute.content))                              
                           if(attribute.content==='true') {
                             queueUpdateMetadata(configuration.array,configuration.name,true)                          
                           } else {
@@ -281,7 +288,7 @@ export default function Metadata({
 
                         if(configuration.array===false&&!configuration.switch&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize select value                
-                          devLog("DEBUG","Metadata (attribute init select content "+configuration.name+")",attribute.content)                              
+                          debugLog("Metadata (attribute init select content "+configuration.name+")",redactSecretValue(attribute.name,attribute.content))                              
                           if(roleConfiguration.defaultValue !== undefined) {
                             queueUpdateMetadata(configuration.array,configuration.name,String(roleConfiguration.defaultValue))                          
                           } else {
@@ -295,7 +302,7 @@ export default function Metadata({
 
                         if(configuration.array===true&&configuration.enum.length>0&&(metadata[configuration.name]===undefined||metadata[configuration.name]==='')) {
                           //Initialize array value            
-                          devLog("DEBUG","Metadata (attribute init array content "+configuration.name+")",attribute.content)         
+                          debugLog("Metadata (attribute init array content "+configuration.name+")",redactSecretValue(attribute.name,attribute.content))         
                           queueUpdateMetadata(configuration.array,configuration.name,attribute.content)                          
                         }
                         
@@ -303,8 +310,8 @@ export default function Metadata({
                         
 
                       if(configuration.name==='authnRequestsSigned') {
-                        devLog("DEBUG","Metadata validateMeta(metadata[configuration.name])",metadata[configuration.name])
-                        devLog("DEBUG","Metadata validateMeta(attribute.content)",attribute.content)
+                        debugLog("Metadata validateMeta(metadata[configuration.name])",redactSecretValue(configuration.name,metadata[configuration.name]))
+                        debugLog("Metadata validateMeta(attribute.content)",redactSecretValue(attribute.name,attribute.content))
                       }
                       
                       //Initialize metadata
@@ -326,21 +333,21 @@ export default function Metadata({
                       
                       //console.log("*** metadata (attribute): ",attribute);
                       const onUpdate = (name:string,value:string) => {
-                        devLog("DEBUG","MetadataForm onUpdate (name)",name)
-                        devLog("DEBUG","MetadataForm onUpdate (value)",value)
+                        debugLog("MetadataForm onUpdate (name)",name)
+                        debugLog("MetadataForm onUpdate (value)",value)
                         var trimmeValue=value
                         if(configuration.trim&&configuration.trim==='cert') {
                            trimmeValue=trimCertificate(value);                          
                         } 
                         if(configuration?.enum&&configuration.enum.length>0) {
-                          devLog("DEBUG","MetadataForm onUpdate (attribute enum)",attribute)
+                          debugLog("MetadataForm onUpdate (attribute enum)",redactSecrets(attribute))
                           return updateMetadata(false,name,value);
                         } else {
                           if(configuration.array) {
-                            devLog("DEBUG","MetadataForm onUpdate (attribute array)",attribute)    
+                            debugLog("MetadataForm onUpdate (attribute array)",redactSecrets(attribute))    
                             return updateMetadata(configuration.array,name,trimmeValue);
                           } else {
-                            devLog("DEBUG","MetadataForm onUpdate (attribute siglevalue)",attribute)
+                            debugLog("MetadataForm onUpdate (attribute siglevalue)",redactSecrets(attribute))
                             return updateMetadata(false,name,trimmeValue);
                           }
                           
@@ -349,9 +356,9 @@ export default function Metadata({
                       }
 
                       const onDelete = (name:string,index:number) => {
-                        devLog("DEBUG","MetadataForm onDelete (metadata)",metadata)
-                        devLog("DEBUG","MetadataForm onDelete (name)",name)
-                        devLog("DEBUG","MetadataForm onDelete (index)",index)
+                        debugLog("MetadataForm onDelete (metadata)",redactSecrets(metadata))
+                        debugLog("MetadataForm onDelete (name)",name)
+                        debugLog("MetadataForm onDelete (index)",index)
                         const newMetadata=clone(metadata)
                         if(metadata[attribute.name]&&metadata[attribute.name].length>=index) {
                           metadata[attribute.name].splice(index, 1);
@@ -365,17 +372,16 @@ export default function Metadata({
                       }
 
                       const onEdit = (name:string,value:string) => {
-                        devLog("DEBUG","MetadataForm onEdit (name)",name)
-                        devLog("DEBUG","MetadataForm onEdit (value)",value)      
+                        debugLog("MetadataForm onEdit (name)",name)
+                        debugLog("MetadataForm onEdit (value)",value)      
                         attribute= { type: 'metadata', 
                           content: metadata[configuration.name],
                           name: name,
                           role: role}                                                                
                       }
 
-                      devLog("DEBUG","Metadata (attribute post)",attribute)
-                      devLog("DEBUG","Metadata (attribute post)",metadata)
-                      devLog("DEBUG","updateMeta (attribute post)",metadata)
+                      debugLog("Metadata (attribute post)",redactSecrets(attribute))
+                      debugLog("Metadata (attribute post)",redactSecrets(metadata))
 
                       pendingEffects.current.push(() => setCanSave(validateMetadata()))
 

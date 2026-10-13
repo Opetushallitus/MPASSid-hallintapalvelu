@@ -2,6 +2,7 @@ import { updateIntegration } from "@/api";
 import type { Components } from "@/api";
 import { useIntegrationsSpecSearchPageable } from "@/api";
 import { useMe } from "@/api/käyttöoikeus";
+import { createLogger } from "@/utils/devLog";
 import { roles, mpassIdUserAttributeTestService } from "@/config";
 import { TablePaginationWithRouterIntegration } from "@/utils/components/pagination";
 import { Secondary } from "@/utils/components/react-intl-values";
@@ -39,6 +40,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import ServiceLinkButton from "@/utils/components/ServiceLinkButton";
 import Suspense from "@/utils/components/Suspense";
 
+const debugLog = createLogger("DEBUG");
+
 interface Props {
   integration: Components.Schemas.Integration;
   newIntegration?: Components.Schemas.Integration;
@@ -67,10 +70,10 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   useEffect(() => {
     if(me?.groups) {
-      console.log("me?.groups: ",me?.groups)
+      debugLog("me?.groups",me?.groups)
       setGroups(me.groups)
     } else {
-      console.log("me?.groups: false")
+      debugLog("me?.groups (none)")
     }
   }, [me]);
 

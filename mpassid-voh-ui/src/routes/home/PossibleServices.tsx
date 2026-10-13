@@ -3,9 +3,11 @@ import MenuItem from "@mui/material/MenuItem";
 import type { Components } from "@/api";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import Select from "@mui/material/Select";
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
 import { useState } from "react";
 import { FormattedMessage } from 'react-intl';
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
     oid:string;
@@ -24,7 +26,7 @@ function PossibleServices({oid,handleService}: Props) {
 
     const handleServiceView = (event: SelectChangeEvent) => {
         
-        devLog('DEBUG','handleServiceView',event.target.value)
+        debugLog('handleServiceView',event.target.value)
         if(Number(event.target.value)===-2) {
             handleService({environment: 0, name: 'uusi', setId: 0})
             setServiceIndex(Number(event.target.value))
@@ -34,7 +36,7 @@ function PossibleServices({oid,handleService}: Props) {
             setServiceIndex(Number(event.target.value))
         }
         if(Number(event.target.value)>-1&&possibleServices.content&&possibleServices.content.length>0) {
-            devLog('DEBUG','handleServiceView (possibleService)',possibleServices.content[Number(event.target.value)])
+            debugLog('handleServiceView (possibleService)',possibleServices.content[Number(event.target.value)])
             const integration=possibleServices.content[Number(event.target.value)]
             if(integration.deploymentPhase!==undefined&&integration?.configurationEntity?.set?.name&&integration.id!==undefined) {
                 handleService({environment: integration.deploymentPhase, name: integration.configurationEntity.set.name, setId: integration.id})
@@ -74,7 +76,7 @@ function PossibleServices({oid,handleService}: Props) {
     );
 
     if(possibleServices.content) {
-        devLog("DEBUG","possibleServices (content)",possibleServices.content)
+        debugLog("possibleServices (content)",possibleServices.content)
         return (<Select
             labelId="palvelu"
             id="palvelu"

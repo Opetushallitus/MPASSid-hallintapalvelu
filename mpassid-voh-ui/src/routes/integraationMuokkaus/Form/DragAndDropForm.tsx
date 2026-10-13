@@ -3,7 +3,9 @@ import './DragAndDropForm.css';
 import { FormattedMessage } from 'react-intl';
 import { Grid, IconButton } from '@mui/material';
 import Clear from '@mui/icons-material/Clear';
-import { devLog } from '@/utils/devLog';
+import { createLogger } from '@/utils/devLog';
+
+const debugLog = createLogger("DEBUG");
 
 interface FileUploaderInterface {
   fileExist: boolean;
@@ -31,7 +33,7 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false,
   const handleDrop = async (event: React.DragEvent) => {
     let files = Object.values(event.dataTransfer.files);
 
-    devLog("DEBUG",'files =>', files);
+    debugLog('files =>', files);
 
     setFiles(files);
 

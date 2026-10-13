@@ -12,12 +12,14 @@ import type { oneEnum } from "../Form/MultiSelectForm";
 import MultiSelectForm from "../Form/MultiSelectForm";
 import { useIntl } from 'react-intl';
 import { envAbbreviationValues } from "@/routes/home/IntegrationsTable";
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InputForm from "../Form/InputForm";
 import { helperText, validate } from "@/utils/Validators";
 import { last, toPath } from "lodash";
 import FileUploader from "../Form/DragAndDropForm";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
   integration: Components.Schemas.Integration;
@@ -55,16 +57,16 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
     
     
     const canSave = (value: boolean) => {  
-      devLog("DEBUG","canSave (name)",name)
-      devLog("DEBUG","canSave (value)",value)
+      debugLog("canSave (name)",name)
+      debugLog("canSave (value)",value)
     }
 
     const updateMetadataUrl = (name: string, value: string, type: string) => {
 
       
-      devLog("DEBUG","updateMetadataUrl (name)",name)
-      devLog("DEBUG","updateMetadataUrl (value)",value)
-      devLog("DEBUG","updateMetadataUrl (type)",type)
+      debugLog("updateMetadataUrl (name)",name)
+      debugLog("updateMetadataUrl (value)",value)
+      debugLog("updateMetadataUrl (type)",type)
       setMetadataUrl(value);
       if(value!== undefined && value !== "") {
         setMetadataFile([])
@@ -77,7 +79,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
         environment.current=+values[0];
         setEnvironment(+values[0]);        
       }
-      devLog("DEBUG","updateEnvironment (values)",values)
+      debugLog("updateEnvironment (values)",values)
     }   
 
     const environmentValues: oneEnum[] = environments.filter(env=>(env!=="0"||integration.deploymentPhase===0)).map(env => {

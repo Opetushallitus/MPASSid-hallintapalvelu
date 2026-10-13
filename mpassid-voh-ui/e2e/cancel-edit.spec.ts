@@ -1,17 +1,21 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillCommonIdpSteps,
   fillWilmaFields,
-  logBrowserConsole,
   mockInstitutionTypes,
   openEditFromViewPage,
   saveIntegration,
 } from "./helpers";
 
+// Covers EHDOTETUT_TESTIT.md's "4. 'Peruuta' muokkauksessa" -
+// integraationMuokkaus/index.tsx:297-298. "Peruuta" is a plain
+// react-router `<Link>` styled as a Button (not a save-adjacent action), so
+// it renders with role="link", not "button" - it navigates away without
+// ever calling createIntegrationRaw/updateIntegrationRaw.
+
 test("Peruuta luonnissa ei luo integraatiota", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Wilma");
   const hostname = "peruutettu-luonti.inschool.fi";
@@ -29,7 +33,6 @@ test("Peruuta muokkauksessa hylkää tallentamattomat muutokset", async ({
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Wilma");
   const originalHostname = "alkuperainen.inschool.fi";

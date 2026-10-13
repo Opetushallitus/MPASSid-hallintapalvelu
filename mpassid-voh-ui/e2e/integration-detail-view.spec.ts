@@ -1,18 +1,39 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillCommonIdpSteps,
   fillWilmaFields,
-  logBrowserConsole,
   mockInstitutionTypes,
   saveIntegration,
 } from "./helpers";
+
+// Covers EHDOTETUT_TESTIT.md's "8. Read-only-näkymän sisällön tarkistus" -
+// IntegrationDetails/index.tsx (the "Integraatiotiedot" tab) and
+// IntegrationTab/index.tsx:102-118 (404 branch).
+//
+// Confirmed against a real run: doing a hard `page.goto()` reload to
+// /integraatio/:id right after creating the integration in the SAME test
+// does NOT "prove the fetch path independently" as originally assumed - it
+// wipes the mock's in-memory `allIntegrations` (a fresh page load re-inits
+// the whole module, same as every other "hard reload loses mock state"
+// caveat throughout this suite), so the just-created integration is gone by
+// the time the reloaded page fetches it. `saveIntegration()` already lands
+// on /integraatio/:id via a normal SPA navigation, which exercises the same
+// real `useIntegrationSafe({id})` fetch (IntegrationTab/index.tsx does not
+// read from router state at all, unlike /muokkaa/...) without needing a
+// reload - so the assertions just run directly from there.
+//
+// The 404 test needed a small mock fix: requestLogicHandlers.ts's
+// getIntegration() previously always answered 200 (with an empty body) even
+// for an unknown id, so IntegrationTab/index.tsx's `error?.response?.
+// status===404` branch could never fire - the page just spun on its loading
+// indicator forever. It now returns {status:404} when the id isn't found
+// (mirrors how a real backend would behave).
 
 test("luodun integraation kentät näkyvät oikein integraatio-sivulla", async ({
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Wilma");
   const hostname = "nakymatesti.inschool.fi";
@@ -47,8 +68,6 @@ test("luodun integraation kentät näkyvät oikein integraatio-sivulla", async (
 });
 
 test("olematon integraatio näyttää 404-viestin", async ({ page }) => {
-  logBrowserConsole(page);
-
   await page.goto("/integraatio/999999");
 
   await expect(

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   createNewIdpIntegrationHere,
@@ -6,7 +6,6 @@ import {
   fillCommonIdpSteps,
   fillWilmaFields,
   getMultiSelectOptions,
-  logBrowserConsole,
   mockInstitutionTypes,
   openEditFromViewPage,
   saveIntegration,
@@ -88,7 +87,6 @@ test.describe("koulunvalinta - ei vanhoja saman oppilaitostyypin integraatioita"
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createNewIdpIntegration(page, "Wilma");
     await fillWilmaFields(page, "s0.inschool.fi");
@@ -113,7 +111,6 @@ test.describe("koulunvalinta - ei vanhoja saman oppilaitostyypin integraatioita"
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createNewIdpIntegration(page, "Wilma");
     await fillWilmaFields(page, "m0.inschool.fi");
@@ -138,7 +135,6 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio (s-sarja
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createSiblingIdpIntegration(page, {
       institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -200,7 +196,6 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio (s-sarja
       page,
     }) => {
       await mockInstitutionTypes(page);
-      logBrowserConsole(page);
 
       await createSiblingIdpIntegration(page, {
         institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -234,7 +229,6 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio (s-sarja
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     // A schools+excludedSchools combination can't come from one sibling
     // (SchoolSelection.tsx only ever shows one of the two fields at a time) -
@@ -275,7 +269,6 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio (s-sarja
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createSiblingIdpIntegration(page, {
       institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -311,7 +304,6 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio, ei tall
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createSiblingIdpIntegration(page, {
       institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -358,7 +350,6 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio, ei tall
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createSiblingIdpIntegration(page, {
       institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -406,7 +397,6 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio (s10)", 
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createSiblingIdpIntegration(page, {
       institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -487,7 +477,6 @@ test.describe("koulunvalinta - vanha oppilaitostyyppien setti, vähintään yksi
       page,
     }) => {
       await mockInstitutionTypes(page);
-      logBrowserConsole(page);
 
       await createSiblingIdpIntegration(page, {
         institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -540,7 +529,6 @@ test.describe("koulunvalinta - vanha oppilaitostyyppien setti, vähintään yksi
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createSiblingIdpIntegration(page, {
       institutionTypeLabels: [PERUSKOULUT, LUKIOT],
@@ -581,7 +569,6 @@ test.describe("koulunvalinta - vanha oppilaitostyyppien setti, vähintään yksi
     page,
   }) => {
     await mockInstitutionTypes(page);
-    logBrowserConsole(page);
 
     await createSiblingIdpIntegration(page, {
       institutionTypeLabels: [PERUSKOULUT, LUKIOT],

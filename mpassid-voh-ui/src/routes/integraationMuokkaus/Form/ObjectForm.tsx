@@ -11,7 +11,9 @@ import ListForm from "./ListForm";
 import InputForm from "./InputForm";
 import ClearIcon from '@mui/icons-material/Clear';
 import EditIcon from '@mui/icons-material/Edit';
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecretValue, redactSecrets } from "@/utils/devLog";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
   object: any;
@@ -67,21 +69,21 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
 
   useImperativeHandle(objectData, (editObject?:any) => ({
     clean() {
-      devLog("DEBUG","ObjectForm (clean)",object)
-      devLog("DEBUG","ObjectForm (clean)",currentObject.current)
+      debugLog("ObjectForm (clean)",object)
+      debugLog("ObjectForm (clean)",redactSecrets(currentObject.current))
 
       setReload(!reload)
       currentObject.current={}
       setCanSave(validateObject())
-      devLog("DEBUG","ObjectForm (clean)",currentObject.current)
+      debugLog("ObjectForm (clean)",redactSecrets(currentObject.current))
       
     },
     validate() {
-      devLog("DEBUG","ObjectForm (validateObject)",currentObject.current)
+      debugLog("ObjectForm (validateObject)",redactSecrets(currentObject.current))
       return validateObject()
     },
     edit(editObject?:any) {
-      devLog("DEBUG","ObjectForm (editObject)",editObject)
+      debugLog("ObjectForm (editObject)",editObject)
       inputValue.current=editObject
       //setReload(!reload)
     }
@@ -89,21 +91,21 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   }));
 
   const createAttributeContent = (name:string,inputValue: React.MutableRefObject<any>,currentObject: React.MutableRefObject<any>,roleConfiguration:IntegrationType) => {
-    devLog("DEBUG","createAttributeContent (name)",name)
+    debugLog("createAttributeContent (name)",name)
     if(inputValue.current&&inputValue.current[name]) {
-      devLog("DEBUG","createAttributeContent (inputValue)",inputValue.current[name])
+      debugLog("createAttributeContent (inputValue)",redactSecretValue(name,inputValue.current[name]))
       return inputValue.current[name]
     }
     
     if(currentObject.current&&currentObject.current[name]!== undefined) {
-      devLog("DEBUG","createAttributeContent (currentObject)",currentObject.current[name])
+      debugLog("createAttributeContent (currentObject)",redactSecretValue(name,currentObject.current[name]))
       return currentObject.current[name]
     }
     if(roleConfiguration?.defaultValue) {
-      devLog("DEBUG","createAttributeContent (defaultValue)",roleConfiguration.defaultValue)
+      debugLog("createAttributeContent (defaultValue)",roleConfiguration.defaultValue)
       return roleConfiguration.defaultValue
     }
-    devLog("DEBUG","createAttributeContent (empty)",'')
+    debugLog("createAttributeContent (empty)")
     return ''
   }
 
@@ -112,7 +114,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     
     objectConfiguration.forEach(configuration=>{
       const name=configuration.name
-      devLog("DEBUG","validateObject (attribute "+name+")",currentObject.current[name])
+      debugLog("validateObject (attribute "+name+")",redactSecretValue(name,currentObject.current[name]))
     
       if(configuration) {
         if((currentObject.current[name] === undefined|| currentObject.current[name].length===0) && configuration.mandatory ){
@@ -125,24 +127,21 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
       }      
     })
     
-    devLog("DEBUG","validateObject (result)",result)
+    debugLog("validateObject (result)",redactSecrets(result))
     return result
   }
   
   const updateObjectInputFormValue = (name: string,value: string,type: string) => {
     
-    devLog("DEBUG","updateObjectInputFormValue (name)",name)
-    devLog("DEBUG","updateObjectInputFormValue (value)",value)
-    devLog("DEBUG","updateObjectInputFormValue (type)",type)
-    devLog("DEBUG","updateObjectInputFormValue (object)",object)
-    devLog("DEBUG","updateObjectInputFormValue (attributeType)",attributeType)
-    devLog("DEBUG","updateObjectInputFormValue (objectConfiguration)",objectConfiguration)
+    debugLog("updateObjectInputFormValue", { name, value, type, object, attributeType, objectConfiguration })
     var currentObjectConfiguration=objectConfiguration.filter(o=>o.name===name)||[]
     if(currentObjectConfiguration.length>0){
-      devLog("DEBUG","updateObjectInputFormValue (isValid)",validate(currentObjectConfiguration[0].validation,value))
-      if(!validate(currentObjectConfiguration[0].validation,value)) {
-        devLog("DEBUG","updateObjectInputFormValue (vHelperText)",vHelperText(currentObjectConfiguration[0].validation,value))
-        setUsedHelperText(vHelperText(currentObjectConfiguration[0].validation,value))
+      const valueIsValid = validate(currentObjectConfiguration[0].validation,value)
+      debugLog("updateObjectInputFormValue (isValid)",valueIsValid)
+      if(!valueIsValid) {
+        const validationHelperText = vHelperText(currentObjectConfiguration[0].validation,value)
+        debugLog("updateObjectInputFormValue (vHelperText)",validationHelperText)
+        setUsedHelperText(validationHelperText)
       }
       
     }
@@ -158,25 +157,22 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
   }
 
   const updateObjectSwitchFormValue = (name: string,value: boolean,type: string) => {
-    devLog("DEBUG","updateObjectSwitchFormValue (name)",name)
-    devLog("DEBUG","updateObjectSwitchFormValue (value)",value)
-    devLog("DEBUG","updateObjectSwitchFormValue (type)",type)
+    debugLog("updateObjectSwitchFormValue (name)",name)
+    debugLog("updateObjectSwitchFormValue (value)",value)
+    debugLog("updateObjectSwitchFormValue (type)",type)
     currentObject.current[name]=value;
-    devLog("DEBUG","updateObjectSwitchFormValue (currentObject.current)",currentObject.current)
+    debugLog("updateObjectSwitchFormValue (currentObject.current)",redactSecrets(currentObject.current))
     onUpdate(name,String(value))
     
   }
 
   const deleteObject = (index:number) => {
-    devLog("DEBUG","deleteObject (index) ",index)
+    debugLog("deleteObject (index)",index)
     onDelete(object.type,index);
   };
 
   const editObject = (name:string,index:number) => {
-    devLog("DEBUG","editObject (name) ",name)
-    devLog("DEBUG","editObject (index) ",index)
-    devLog("DEBUG","editObject (object) ",object)
-    devLog("DEBUG","editObject (edited content) ",object.content[index])
+    debugLog("editObject", { name, index, object, editedContent: object.content[index] })
     onEdit(object.type,object.content[index],index);
     
   };
@@ -185,12 +181,12 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     
     return (<Grid key={object.name} container >
       
-      {object.content.length===0&&mandatory&&(<Box sx={{ color: "#db2828" }}><FormattedMessage defaultMessage="ei arvoja, pakollinen" /></Box>)
+      {object.content.length===0&&mandatory&&(<Grid size={12}><Box sx={{ color: "#db2828" }}><FormattedMessage defaultMessage="ei arvoja, pakollinen" /></Box></Grid>)
           }
-          {object.content.length===0&&!mandatory&&(<FormattedMessage defaultMessage="ei arvoja" />)
+          {object.content.length===0&&!mandatory&&(<Grid size={12}><FormattedMessage defaultMessage="ei arvoja" /></Grid>)
           }
         {object.content.map((content:any,index:number)=>{
-            return(<Grid key={object.name+"_"+index} container spacing={2} >
+            return(<Grid key={object.name+"_"+index} container size={12} spacing={2} >
                         <Grid size={11}>
                             <span >{JSON.stringify(content, null, 2).replace(/^{/g, '').replace(/}$/g, '\n')}</span>
                         </Grid>
@@ -235,33 +231,33 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
           )
           .map((configuration) => {
                   var resetSwitchValue=false;                
-                  devLog("DEBUG","ObjectForm (configuration)",configuration)                  
+                  debugLog("ObjectForm (configuration)",configuration)                  
 
                   const validator = (value:string) => {
-                    devLog("DEBUG","validator ( configuration.name)", configuration.name)
-                    devLog("DEBUG","validator (configuration)",configuration)
-                    devLog("DEBUG","validator (value)",value)
+                    debugLog("validator (configuration.name)", configuration.name)
+                    debugLog("validator (configuration)",configuration)
+                    debugLog("validator (value)",value)
                     return validate(configuration.validation,value);
                   }
 
                   const helpGeneratorText = (value:string) => {
-                    devLog("DEBUG","helpGeneratorText ( configuration.name)", configuration.name)
-                    devLog("DEBUG","helpGeneratorText (configuration)",configuration)
-                    devLog("DEBUG","helpGeneratorText (value)",value)
+                    debugLog("helpGeneratorText (configuration.name)", configuration.name)
+                    debugLog("helpGeneratorText (configuration)",configuration)
+                    debugLog("helpGeneratorText (value)",value)
                     
                     return vHelperText(configuration.validation,value)
                   }
                                   
                   const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===integrationType) || defaultIntegrationType;
 
-                  devLog("DEBUG","ObjectForm (roleConfiguration)",roleConfiguration) 
+                  debugLog("ObjectForm (roleConfiguration)",roleConfiguration) 
                   //configuration.integrationType.find(i=>i.name===integrationType)
                   const attribute = { type: configuration.type, 
                                           content: createAttributeContent(configuration.name,inputValue,currentObject,roleConfiguration),
                                           name: configuration.name}
                   
                   if(!currentObject.current.hasOwnProperty(configuration.name)) {
-                    devLog("DEBUG","ObjectForm (reset)",configuration.name)   
+                    debugLog("ObjectForm (reset)",configuration.name)   
                     if(roleConfiguration.defaultValue !== undefined) {
                       attribute.content=roleConfiguration?.defaultValue
                     } else {
@@ -272,40 +268,40 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
 
                   //If not default value for switch, then take first enum
                   if(configuration.switch&&configuration?.enum?.length===2&&attribute.content==='') {
-                    devLog("DEBUG","ObjectForm (SwitchForm init)",attribute.content)
+                    debugLog("ObjectForm (SwitchForm init)",redactSecretValue(attribute.name,attribute.content))
                     attribute.content=configuration.enum[0];
                   }
                   
                   //if(configuration?.enum?.length===2&&configuration.array===false&&!currentObject.current.hasOwnProperty(configuration.name)) {
                   if(configuration.switch&&configuration?.enum?.length===2&&configuration.array===false) {
-                    devLog("DEBUG","ObjectForm (switch init)",configuration.name)                    
-                    devLog("DEBUG","ObjectForm (switch init attribute.content value)",attribute.content);
-                    devLog("DEBUG","ObjectForm (switch init)",(String(attribute.content).toLowerCase() === 'true'));
+                    debugLog("ObjectForm (switch init)",configuration.name)                    
+                    debugLog("ObjectForm (switch init attribute.content value)",redactSecretValue(attribute.name,attribute.content));
+                    debugLog("ObjectForm (switch init)",(String(attribute.content).toLowerCase() === 'true'));
                     currentObject.current[configuration.name]=(String(attribute.content).toLowerCase() === 'true');
-                    devLog("DEBUG","ObjectForm (SwitchForm resetValue)",true)
+                    debugLog("ObjectForm (SwitchForm resetValue)",true)
                     resetSwitchValue=true
                     //updateObjectSwitchFormValue(configuration.name,attribute.content,attribute.type)
                   }
                   
-                  devLog("DEBUG","ObjectForm (attribute init)",attribute)  
-                  devLog("DEBUG","ObjectForm (currentObject.current)",currentObject.current)  
+                  debugLog("ObjectForm (attribute init)",redactSecrets(attribute))  
+                  debugLog("ObjectForm (currentObject.current)",redactSecrets(currentObject.current))  
                     
                     //Initialize array currentObject
                     if(configuration.array&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                        devLog("DEBUG","ObjectForm (array init)",configuration.name)  
+                        debugLog("ObjectForm (array init)",configuration.name)  
                         currentObject.current[configuration.name]=attribute.content||[];
                     }
                     
                     //Initialize siglevalue currentObject
                     if(!configuration.array&&!currentObject.current.hasOwnProperty(configuration.name)) {
-                        devLog("DEBUG","ObjectForm (siglevalue init)",configuration.name)                             
+                        debugLog("ObjectForm (siglevalue init)",configuration.name)                             
                         currentObject.current[configuration.name]=attribute.content||'';
                     }    
 
                     
                     
                     if(roleConfiguration?.index&&roleConfiguration.index==='auto') {
-                        devLog("DEBUG","ObjectForm (index init)",configuration.name)
+                        debugLog("ObjectForm (index init)",configuration.name)
                         var newIndex=0
                         var newIndexFound=false
                         object.content.forEach((element: any) => {
@@ -328,7 +324,7 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                     }
 
                     if(roleConfiguration?.index&&roleConfiguration.index==='randomsha1') {
-                      devLog("DEBUG","ObjectForm (index init)",configuration.name)
+                      debugLog("ObjectForm (index init)",configuration.name)
                       calculateSHA1(String(getRandom())).then(sha=>{
                         attribute.content=String(sha);
                         currentObject.current[configuration.name]=sha;
@@ -339,24 +335,24 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
                   }
 
                     if(inputValue.current&&inputValue.current.hasOwnProperty(configuration.name)){
-                      devLog("DEBUG","ObjectForm (reset)",configuration.name)
-                      devLog("DEBUG","ObjectForm (inputValue.current)",inputValue.current[configuration.name])
+                      debugLog("ObjectForm (reset)",configuration.name)
+                      debugLog("ObjectForm (inputValue.current)",redactSecretValue(configuration.name,inputValue.current[configuration.name]))
                       currentObject.current[configuration.name]=inputValue.current[configuration.name]
                       attribute.content=inputValue.current[configuration.name]
                       delete inputValue.current[configuration.name]
-                      devLog("DEBUG","ObjectForm (inputValue.current)",inputValue.current)
-                      devLog("DEBUG","ObjectForm editObject (inputValue.current)",attribute)
-                      devLog("DEBUG","ObjectForm (inputValue.current)",currentObject.current)
+                      debugLog("ObjectForm (inputValue.current)",inputValue.current)
+                      debugLog("ObjectForm editObject (inputValue.current)",redactSecrets(attribute))
+                      debugLog("ObjectForm (inputValue.current)",redactSecrets(currentObject.current))
                       //setReload(!reload)
                     }
                     
                     //setCanSave(validateObject())
-                    devLog("DEBUG","ObjectForm (currentObject post)",currentObject.current)
-                    devLog("DEBUG","ObjectForm (attribute post)",attribute)                                        
+                    debugLog("ObjectForm (currentObject post)",redactSecrets(currentObject.current))
+                    debugLog("ObjectForm (attribute post)",redactSecrets(attribute))                                        
                   
                     if(roleConfiguration.visible) {
                       return (
-                        <Grid key={object.name+"."+configuration.name} container >
+                        <Grid key={object.name+"."+configuration.name} container size={12} >
                             <Grid container size={12} spacing={2} sx={{ mb: 3 }} >
                                 <Grid size={4}>
                                     <Tooltip
@@ -445,12 +441,20 @@ export default function ObjectForm({ object, type, isEditable=false, mandatory=f
     );
   } else {
     
+    // Lukutila: samat arvot samassa muodossa kuin muokkaustilassa, ilman
+    // muokkaus-/poistopainikkeita ja alikenttien syöttörivejä. Tyhjä lista ei
+    // näytä mitään - sama linja kuin ListForm.tsx:n ja InputForm.tsx:n
+    // lukutilahaaroissa.
     return( <Box
       sx={(theme) => ({
         ...theme.typography.body1
         
       })}
-    >{"aaaa"}</Box>)
+    >{object.content.map((content:unknown,index:number)=>(
+        <Box key={object.name+"_"+index}>
+          <span>{JSON.stringify(content, null, 2).replace(/^{/g, '').replace(/}$/g, '\n')}</span>
+        </Box>
+      ))}</Box>)
   }
   
 }

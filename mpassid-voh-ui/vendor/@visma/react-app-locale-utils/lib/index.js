@@ -4,6 +4,5 @@ export { default as locales } from './locales.js';
 export { default as useDateFnsLocale } from './useDateFnsLocale.js';
 export { default as useDisplayName } from './useDisplayName.js';
 export { default as useLocale } from './useLocale.js';
-export { default as useMaterialUILocale } from './useMaterialUILocale.js';
 export { default as useMUILocale } from './useMUILocale.js';
 //# sourceMappingURL=index.js.map

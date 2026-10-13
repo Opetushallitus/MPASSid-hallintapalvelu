@@ -41,6 +41,11 @@ function TableSortLabelWithRouterIntegration({
       active={Boolean(direction)}
       direction={direction || undefined}
       onClick={() => {
+        // react-router v7 defers the committed searchParams under
+        // React.startTransition, so the `direction` closure can be stale on
+        // rapid clicks. The browser URL is updated synchronously by
+        // history.pushState, so derive the current direction from the live
+        // query string to always toggle off the latest committed state.
         const searchParams = new URLSearchParams(window.location.search);
         const pathsArray = Array.isArray(paths) ? paths : [paths];
         const liveDirection: SortDirection =

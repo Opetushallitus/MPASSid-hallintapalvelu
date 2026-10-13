@@ -4,7 +4,9 @@ import type { Dispatch, JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from "lodash";
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
   object: any;
@@ -66,12 +68,13 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   }, [attributeType, helperText, label, mandatory, onUpdate, onValidate, reload, setCanSave, type]);  
 
   const updateFormValue = () => {
-    devLog("DEBUG","updateFormValue (value)",inputRef.current?.value)
-    devLog("DEBUG","updateFormValue (onValidate )",onValidate(inputRef.current?.value))
-    if(onValidate(inputRef.current?.value)) {
+    debugLog("updateFormValue (value)",inputRef.current?.value)
+    const valueIsValid = onValidate(inputRef.current?.value)
+    debugLog("updateFormValue (onValidate )",valueIsValid)
+    if(valueIsValid) {
       
       setIsValid(true)
-      devLog("DEBUG","updateFormValue (mandatory)",mandatory)
+      debugLog("updateFormValue (mandatory)",mandatory)
       if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
         setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
         setIsValid(false)

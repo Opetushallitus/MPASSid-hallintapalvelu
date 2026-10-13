@@ -1,8 +1,10 @@
 
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
 import { Switch } from "@mui/material";
 import type { Dispatch, JSX } from "react";
 import { useEffect, useState } from "react";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
   object: any;
@@ -26,25 +28,25 @@ export default function SwitchForm({ object, type, isEditable=false, mandatory=f
 
 
   useEffect(() => {
-      devLog("DEBUG","SwitchForm (object)",object)
-      devLog("DEBUG","SwitchForm (resetValue)",resetValue)    
+      debugLog("SwitchForm (object)",object)
+      debugLog("SwitchForm (resetValue)",resetValue)    
       if(resetValue) {
         setValue((object.content!==undefined)?JSON.parse(object.content):false)
-        devLog("DEBUG","SwitchForm (value)",(object.content!==undefined)?JSON.parse(object.content):false)        
+        debugLog("SwitchForm (value)",(object.content!==undefined)?JSON.parse(object.content):false)        
       }  
   }, [object, resetValue, setValue]);
 
 
   const updateFormValue = (event: any) => {
     
-        devLog("DEBUG","SwitchForm (event.target.checked)",event.target.checked)   
+        debugLog("SwitchForm (event.target.checked)",event.target.checked)   
         setCanSave(true) 
         onUpdate(type,event.target.checked,attributeType);
         setValue(JSON.parse(event.target.checked))
       
   };
-  devLog("DEBUG","SwitchForm (value for "+object.name+")",object)
-  devLog("DEBUG","SwitchForm (value for "+object.name+")",value)
+  debugLog("SwitchForm (value for "+object.name+")",object)
+  debugLog("SwitchForm (value for "+object.name+")",value)
   if(isEditable) {
     return (
         <Switch checked={value}

@@ -1,15 +1,25 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   dropTextFile,
   fillCommonIdpSteps,
-  logBrowserConsole,
   mockInstitutionTypes,
 } from "./helpers";
 
+// See create-wilma-integration.spec.ts and helpers.ts for general caveats.
+// GSuite, like ADFS, has only one type-specific field: `metadataUrl`
+// (config.ts:1113-1137, mandatory). Unlike ADFS, Role/IdentityProvider.tsx:
+// 201-214 renders ONLY the drag-and-drop file zone for gsuite - no text
+// field alternative - so this test must exercise the synthetic-drop
+// workaround documented on helpers.ts's dropTextFile (the zone is a bare
+// <div onDrop=...> with no <input type=file>, DragAndDropForm.tsx:70-97).
+// The dropped file's *content* is never validated by the app (it's just
+// stored as a File and later uploaded as configurationEntity.idp.
+// metadataFile - IdentityProvider.tsx only checks metadataFile.length===1),
+// so a placeholder XML body is fine.
+
 test("luo uusi Google: Gsuite -integraatio", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Google: Gsuite");
 

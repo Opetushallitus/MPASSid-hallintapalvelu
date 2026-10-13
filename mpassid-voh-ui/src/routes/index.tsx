@@ -13,7 +13,6 @@ import defaultMessages from "../../lang/fi-FI.json";
 import Home from "./home";
 import Integraatio from "./integraatio";
 import IntegraatioMuokkaus from "./integraationMuokkaus";
-import { devLog } from "@/utils/devLog";
 
 export default function Routes() {
   const defaultMessages = useDefaultMessagesWithAvailableAttributeKeys();

@@ -7,6 +7,9 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import type { UiConfiguration } from '@/config';
 import { attributePreferredOrder } from '@/config';
+import { createLogger } from "@/utils/devLog";
+
+const warnLog = createLogger("WARN");
 
 interface Props {
     id: string;
@@ -104,6 +107,10 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
         return array.indexOf(value) === index;
     }
 
+    // Attribuutin content on polku testAttributes-vastaukseen ("nimi",
+    // "nimi.attribuutti", "nimi.attribuutti.taso1", ...). Polku puretaan
+    // askel kerrallaan, joten vastaus saa olla miten syvästi tahansa
+    // sisäkkäinen - aiemmin luettiin vain kaksi ensimmäistä tasoa.
     const resolveAttributeValue = (source: unknown, path: string): unknown =>
         path
             .split(".")
@@ -115,6 +122,9 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                 source
             );
 
+    // Polku voi osoittaa myös välitasolle tai monikolliseen arvoon, ja React
+    // kaatuu jos soluun päätyy objekti, joten muu kuin alkeisarvo muunnetaan
+    // näytettävään muotoon.
     const formatAttributeValue = (value: unknown): string => {
         if (value === undefined || value === null) {
             return "";
@@ -193,11 +203,13 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                             setAttributeResult(result)                            
                             setLoading(false);
                         }).catch(error=>{
+                            warnLog("testAttributes (attribuuttihaku epäonnistui)", error)
                             setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
                             setLoading(false);
                             setIsKnown(false);
                         })
                     }).catch(error=>{
+                        warnLog("testAttributesAuthorization (istunnon valtuutus epäonnistui)", error)
                         setSessionAuthenticated(false)
                         setAuthenticationAlert(true)
                         setLoading(false);
@@ -213,6 +225,7 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     setAttributeResult(result)                            
                     setLoading(false);
                 }).catch(error=>{
+                    warnLog("testAttributes (attribuuttihaku epäonnistui)", error)
                     setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
                     setLoading(false);
                     setIsKnown(false);

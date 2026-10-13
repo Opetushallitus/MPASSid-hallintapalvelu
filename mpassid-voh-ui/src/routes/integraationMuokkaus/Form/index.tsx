@@ -15,10 +15,12 @@ import ObjectForm from "./ObjectForm";
 import { IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import LockResetIcon from '@mui/icons-material/LockReset';
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecretValue, redactSecrets } from "@/utils/devLog";
 import type { oneEnum } from "./MultiSelectForm";
 import MultiSelectForm from "./MultiSelectForm";
 import { calculateSHA1, getRandom } from '@/config';
+
+const debugLog = createLogger("DEBUG");
 
 interface AttributeProps {
     uiConfiguration: UiConfiguration;
@@ -42,34 +44,22 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
     const configuration=uiConfiguration;
     const roleConfiguration:IntegrationType=configuration.integrationType.find(i=>i.name===type) || defaultIntegrationType;
     
-    devLog("DEBUG","AttributeForm (attribute)",attribute)
+    debugLog("AttributeForm (attribute)",redactSecrets(attribute))
 
     const updateInputItem = (name: string,value: string,type: string) => {
-        devLog("DEBUG","updateInputItem (name)",name)
-        devLog("DEBUG","updateInputItem (checked)",value)
-        devLog("DEBUG","updateInputItem (type)",type)
-        
-        devLog("DEBUG","updateInputItem (attribute)",attribute)        
+        debugLog("updateInputItem", { name, value, type, attribute: redactSecrets(attribute) })
         onUpdate(name,value,type)
         //currentObject.current={}
     }
 
     const updateSwitchItem = (name: string,value: boolean,type: string) => {
-        devLog("DEBUG","updateSwitchItem (name)",name)
-        devLog("DEBUG","updateSwitchItem (checked)",value)
-        devLog("DEBUG","updateSwitchItem (type)",type)
-        
-        devLog("DEBUG","updateSwitchItem (attribute)",attribute)
+        debugLog("updateSwitchItem", { name, value, type, attribute: redactSecrets(attribute) })
         onUpdate(name,String(value),type)
         //currentObject.current={}
     }
 
     const updateMultiSelectItem = (value: string[]) => {
-        devLog("DEBUG","updateMultiSelectItem (name)",attribute.name)
-        devLog("DEBUG","updateMultiSelectItem (checked)",value)
-        devLog("DEBUG","updateMultiSelectItem (type)",attribute.type)
-        
-        devLog("DEBUG","updateMultiSelectItem (attribute)",attribute)
+        debugLog("updateMultiSelectItem", { name: attribute.name, value, type: attribute.type, attribute: redactSecrets(attribute) })
         if(attribute.name !== undefined&&attribute.type) {
             onUpdate(attribute.name,value[0],attribute.type)
         }
@@ -206,30 +196,30 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     //const [ object, setObject ] = useState<any>(attribute)
 
     useEffect(() => {
-        devLog("DEBUG","MetadataForm (canSaveItem)",canSaveItem)
+        debugLog("MetadataForm (canSaveItem)",canSaveItem)
     }, [canSaveItem]);
 
     const objectOnValidate  = (data:string) => {
-        devLog("DEBUG","objectOnValidate (data)",data)
-        devLog("DEBUG","objectOnValidate (canSaveItem)",canSaveItem)
+        debugLog("objectOnValidate (data)",data)
+        debugLog("objectOnValidate (canSaveItem)",canSaveItem)
         return onValidate(data);
     }
 
     const listOnValidate  = (data:string) => {
-        devLog("DEBUG","listOnValidate (data)",data)
-        devLog("DEBUG","listOnValidate (canSaveItem)",canSaveItem)
+        debugLog("listOnValidate (data)",data)
+        debugLog("listOnValidate (canSaveItem)",canSaveItem)
         return onValidate(data);
     }
     
     const updatObjectItem  = (name: string, data:any) => {
         
-        devLog("DEBUG","updatObjectItem (name)",name)
-        devLog("DEBUG","updatObjectItem (data)",data)
-        devLog("DEBUG","updatObjectItem (uiConfiguration)",uiConfiguration)
+        debugLog("updatObjectItem (name)",name)
+        debugLog("updatObjectItem (data)",data)
+        debugLog("updatObjectItem (uiConfiguration)",uiConfiguration)
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
-        devLog("DEBUG","updatObjectItem (mandatory)",uiConfiguration.mandatory)
+        debugLog("updatObjectItem (mandatory)",uiConfiguration.mandatory)
         
         if(data.content) {
             if(objectOnValidate(data.content)) {
@@ -241,16 +231,13 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                 currentObject.current[name]=data;    
             }
         }
-        devLog("DEBUG","updatObjectItem (result)",currentObject.current)
+        debugLog("updatObjectItem (result)",redactSecrets(currentObject.current))
         
     }
 
     const editObject  = (name: string, data:any, index:number) => {
         
-        devLog("DEBUG","editObject (name)",name)
-        devLog("DEBUG","editObject (data)",data)
-        devLog("DEBUG","editObject (uiConfiguration)",uiConfiguration)
-        devLog("DEBUG","editObject (attribute)",attribute)
+        debugLog("editObject", { name, data, uiConfiguration, attribute: redactSecrets(attribute) })
         //console.log("*** currentObject.current: ",currentObject.current)
         //TODO: MANDATORY CHECK for object values, if valid update ....
         //onUpdate(attribute.name,currentObject.current)
@@ -265,28 +252,22 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
 
     const deleteObjectItem  = (name: string, index:number) => {
         
-        devLog("DEBUG","deleteObjectItem (name)",name)
-        devLog("DEBUG","deleteObjectItem (index)",index)
-        devLog("DEBUG","deleteObjectItem (uiConfiguration)",uiConfiguration)
-        devLog("DEBUG","deleteObjectItem (attribute)",attribute)
+        debugLog("deleteObjectItem", { name, index, uiConfiguration, attribute: redactSecrets(attribute) })
         
         onDelete(attribute.name,index);
-        devLog("DEBUG","deleteObjectItem (result)",currentObject.current)
+        debugLog("deleteObjectItem (result)",redactSecrets(currentObject.current))
         
     }
 
     const updateMultiSelectItem = (configuration: UiConfiguration, value: string[]) => {
         
-        devLog("DEBUG","updateMultiSelectItem ("+attribute.name+")",value)
-        devLog("DEBUG","updateMultiSelectItem (type)",attribute.type)        
-        devLog("DEBUG","updateMultiSelectItem (attribute)",attribute)
-        devLog("DEBUG","updateMultiSelectItem (configuration)",configuration)
+        debugLog("updateMultiSelectItem", { name: attribute.name, value, type: attribute.type, attribute: redactSecrets(attribute), configuration })
         
         if(configuration.multiselect !== undefined && configuration.multiselect) {
-            devLog("DEBUG","updateMultiSelectItem (multiselect)",configuration.multiselect)
+            debugLog("updateMultiSelectItem (multiselect)",configuration.multiselect)
             onUpdate(attribute.name,value)
         } else {
-            devLog("DEBUG","updateMultiSelectItem (multiselect)","false")
+            debugLog("updateMultiSelectItem (not multiselect)")
             if(value.length>0) {
                 if(value[0]==='null') {
                     onUpdate(attribute.name,null)
@@ -303,19 +284,19 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     }
 
     const updateSwitchItem = (name:any,value:boolean) => {
-        devLog("DEBUG","updateSwitchItem ("+name+")",value)
+        debugLog("updateSwitchItem ("+name+")",value)
         
         
-        devLog("DEBUG","updateSwitchItem (attribute)",attribute)
-        devLog("DEBUG","updateSwitchItem (currentObject)",currentObject.current)
+        debugLog("updateSwitchItem (attribute)",redactSecrets(attribute))
+        debugLog("updateSwitchItem (currentObject)",redactSecrets(currentObject.current))
         
         onUpdate(name,value)
         //currentObject.current={}
     }
     const updateListObject = () => {
         
-        devLog("DEBUG","updateListObject (attribute)",attribute)
-        devLog("DEBUG","updateListObject (currentObject)",currentObject.current)
+        debugLog("updateListObject (attribute)",redactSecrets(attribute))
+        debugLog("updateListObject (currentObject)",redactSecrets(currentObject.current))
         
         if(objectDataRef.current.validate()) {
             onUpdate(attribute.name,currentObject.current)
@@ -340,7 +321,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     if(roleConfiguration.visible) {
         var buttonColor:"default" | "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning"="default";
         if(configuration.mandatory&&attribute.content&&attribute.content.length===0) {
-            devLog("DEBUG","MetadataForm (buttonColor)",attribute.content)
+            debugLog("MetadataForm (buttonColor)",redactSecretValue(attribute.name,attribute.content))
             buttonColor="error"
         } 
         var enumValues: oneEnum[] = [];

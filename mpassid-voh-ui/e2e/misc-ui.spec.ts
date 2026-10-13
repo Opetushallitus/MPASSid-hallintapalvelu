@@ -1,5 +1,18 @@
-import { expect, test } from "@playwright/test";
-import { dropTextFile, mockInstitutionTypes } from "./helpers";
+import { expect, test } from "./fixtures";
+import {
+  dropTextFile,
+  mockInstitutionTypes,
+} from "./helpers";
+
+// Covers EHDOTETUT_TESTIT.md's "10. Muut/matalampi prioriteetti" - only the
+// two sub-scenarios that are actually reachable through the UI/mock.
+// "Olemassa olevan palvelun valinta" and "ServiceProvider 'Palvelun nimi'
+// lukittu" are both skipped: they require a `configurationEntity.set`
+// integration to exist so `PossibleServices.tsx`'s "existing service"
+// picker has something to list - and (per school-selection.spec.ts's/
+// integration-selection.spec.ts's file-level research notes) nothing
+// anywhere in this app/mock ever constructs one, so there is currently no
+// way to reach either scenario at all.
 
 test("'Luo' pysyy pois käytöstä kunnes palvelu on valittu (sp-integraatio)", async ({
   page,

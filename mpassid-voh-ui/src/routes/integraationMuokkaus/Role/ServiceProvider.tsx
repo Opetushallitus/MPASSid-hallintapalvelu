@@ -5,10 +5,12 @@ import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
 import InputForm from "../Form/InputForm";
 import type { Dispatch, MutableRefObject} from "react";
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
 import { helperText, validate } from "@/utils/Validators";
 import type { UiConfiguration } from "@/config";
 import { defaultDataConfiguration } from "@/config";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
   integration: Components.Schemas.Integration;
@@ -32,26 +34,26 @@ export default function ServiceProvider({ integration, setName, setCanSave, name
   const isEditable = (integration.integrationSets&&integration.integrationSets.length>0&&integration.integrationSets[0].id&&integration.integrationSets[0].id!==0)?false:true;
 
   const updateName = (name: string,value: string,type: string) => {
-    devLog("DEBUG","ServiceProvider (updateName)",value)
+    debugLog("ServiceProvider (updateName)",value)
     setName(value)
   }
 
   const canSave = (data:boolean) => {
-    devLog("DEBUG","ServiceProvider (canSave)",data)
+    debugLog("ServiceProvider (canSave)",data)
     setCanSave(data)
   }
 
   const validator = (value:string) => {
-    devLog("DEBUG","ServiceProvider validator ( configuration.name)", configuration.name)
-    devLog("DEBUG","ServiceProvider validator (configuration)",configuration)
-    devLog("DEBUG","ServiceProvider validator (value)",value)
+    debugLog("ServiceProvider validator (configuration.name)", configuration.name)
+    debugLog("ServiceProvider validator (configuration)",configuration)
+    debugLog("ServiceProvider validator (value)",value)
     return validate(configuration.validation,value);
   }
 
   const helpGeneratorText = (value:string) => {
-    devLog("DEBUG","helpGeneratorText ( configuration.name)", configuration.name)
-    devLog("DEBUG","helpGeneratorText (configuration)",configuration)
-    devLog("DEBUG","helpGeneratorText (value)",value)
+    debugLog("helpGeneratorText (configuration.name)", configuration.name)
+    debugLog("helpGeneratorText (configuration)",configuration)
+    debugLog("helpGeneratorText (value)",value)
     
     return helperText(configuration.validation,value)
   }

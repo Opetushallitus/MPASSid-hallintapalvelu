@@ -5,7 +5,9 @@ import type { Dispatch, JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import type { Components } from '@/api';
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
+
+const debugLog = createLogger("DEBUG");
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -58,12 +60,12 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
 
   const handleChange = (event: SelectChangeEvent<typeof selection>) => {
     
-    devLog("DEBUG","MultiSelectForm (handleChange event)",event )
+    debugLog("MultiSelectForm (handleChange event)",event )
     const {
       target: { value },
     } = event;
     
-    devLog("DEBUG","MultiSelectForm (handleChange value)",value )
+    debugLog("MultiSelectForm (handleChange value)",value )
     
 
     
@@ -82,7 +84,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
 
 
   useEffect(() => {
-    devLog("DEBUG","MultiSelectForm (mandatory)",inputRef?.current?.value)
+    debugLog("MultiSelectForm (mandatory)",inputRef?.current?.value)
     if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
       setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
       setCanSave(false)  

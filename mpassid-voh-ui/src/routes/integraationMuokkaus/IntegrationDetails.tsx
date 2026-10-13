@@ -21,7 +21,9 @@ import IntegrationBasicDetails from "./IntegrationBasicDetails";
 import type { IntegrationType, UiConfiguration } from '../../config';
 import { defaultDataConfiguration, defaultIntegrationType, integrationTypesDefault } from '../../config';
 import SchoolSelection from "./SchoolSelection";
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecrets } from "@/utils/devLog";
+
+const debugLog = createLogger("DEBUG");
 
 
 const integrationTypes = clone(integrationTypesDefault);
@@ -87,7 +89,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType;     
     
     useEffect(() => {
-      devLog("DEBUG","IntegrationDetails (integrationEnvironment)",integrationEnvironment)      
+      debugLog("IntegrationDetails (integrationEnvironment)",integrationEnvironment)      
       environment.current=integrationEnvironment   
       deploymentPhase.current=integrationEnvironment;
       if(environment.current!==originalEnvironment.current&&environment.current>=0&&originalEnvironment.current>=0) {
@@ -102,7 +104,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
       if(newConfigurationEntityData!==undefined) {
                 
         const unInitAttr = removeStrings(attributes.filter(a=>a.name!==undefined&&a.content!==''&&!initAttr.current.includes(a.name)),newConfigurationEntityData.attributes) 
-        devLog("DEBUG","IntegrationDetails (unInitAttr)",unInitAttr)
+        debugLog("IntegrationDetails (unInitAttr)",unInitAttr)
         //const unInitAttr = removeStrings(attributes,newConfigurationEntityData.attributes) 
 
         if(unInitAttr.length>0) {
@@ -117,12 +119,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               initAttr.current.push(attr.name);
             }
           })
-          devLog("DEBUG","IntegrationDetails (initialized done attributes)",attributes);                        
+          debugLog("IntegrationDetails (initialized done attributes)",redactSecrets(attributes));                        
           setNewConfigurationEntityData(updatedConfigurationEntityData);
           
         }
-        //devLog("DEBUG","Attributes (initialized done attribute.length)",attributes?.length); 
-        //devLog("DEBUG","Attributes (initialized done newConfigurationEntityData?.attributes)",newConfigurationEntityData?.attributes);
+        //debugLog("Attributes (initialized done attribute.length)",attributes?.length); 
+        //debugLog("Attributes (initialized done newConfigurationEntityData?.attributes)",newConfigurationEntityData?.attributes);
       }
       
             
@@ -132,7 +134,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
       if(newConfigurationEntityData?.idp&&metadataUrl!=='') {        
         const changedIdp:Components.Schemas.Integration|Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite=clone(newConfigurationEntityData.idp);
         if(changedIdp?.metadataUrl!==metadataUrl) {
-          devLog("DEBUG","IntegrationDetails (metadataUrl)",metadataUrl)  
+          debugLog("IntegrationDetails (metadataUrl)",metadataUrl)  
           changedIdp.metadataUrl=metadataUrl
           const changedConfigurationEntityData=clone(newConfigurationEntityData)
           changedConfigurationEntityData.idp=changedIdp;      
@@ -142,30 +144,30 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     }, [metadataUrl, newConfigurationEntityData]);
 
     useEffect(() => {
-      devLog("DEBUG","IntegrationDetails (integration)",integration)
+      debugLog("IntegrationDetails (integration)",redactSecrets(integration))
       if(integration?.configurationEntity?.sp?.name) {
         setName(integration.configurationEntity.sp.name)
       }
       if(integration?.deploymentPhase!==undefined&&integration.deploymentPhase>=0) {
         if(environment.current===-5) {
-          devLog("DEBUG","IntegrationDetails (init environment)",integration.deploymentPhase)
+          debugLog("IntegrationDetails (init environment)",integration.deploymentPhase)
           environment.current=integration.deploymentPhase
         }        
         if(originalEnvironment.current===-5) {
-          devLog("DEBUG","IntegrationDetails (init originalEnvironment)",integration.deploymentPhase)
+          debugLog("IntegrationDetails (init originalEnvironment)",integration.deploymentPhase)
           originalEnvironment.current=integration.deploymentPhase
         }
       } 
       if(!originalIntegration.current) {
-        devLog("DEBUG","IntegrationDetails (originalIntegration)",integration)
+        debugLog("IntegrationDetails (originalIntegration)",redactSecrets(integration))
         originalIntegration.current=cloneDeep(integration)
       }
       
     }, [integration]);
 
     useEffect(() => {
-      devLog("DEBUG","IntegrationDetails (canSaveConfigurationEntity)",canSaveConfigurationEntity)
-      devLog("DEBUG","IntegrationDetails (canSaveDiscoveryInformation)",canSaveDiscoveryInformation)
+      debugLog("IntegrationDetails (canSaveConfigurationEntity)",canSaveConfigurationEntity)
+      debugLog("IntegrationDetails (canSaveDiscoveryInformation)",canSaveDiscoveryInformation)
       if((canSaveConfigurationEntity&&canSaveDiscoveryInformation)) {
         setCanSave(true)
       } else {
@@ -177,8 +179,8 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
     useEffect(() => {
       
       if(role !== undefined) {
-        devLog("DEBUG","IntegrationDetails (deploymentPhase)",integration.deploymentPhase)
-        devLog("DEBUG","IntegrationDetails (environment)",environment.current)
+        debugLog("IntegrationDetails (deploymentPhase)",integration.deploymentPhase)
+        debugLog("IntegrationDetails (environment)",environment.current)
         if(environment.current>=0) {
           integration.deploymentPhase=environment.current
         }
@@ -221,27 +223,27 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         
         if(typeConf.attribute&&testNewConfigurationEntityData.idp){
           const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.idp?.[typeConf.attribute]||''; 
-          devLog("DEBUG","uniqueIdType",uniqueIdType)
+          debugLog("uniqueIdType",uniqueIdType)
           const updatedIdentityProvider: any = testNewConfigurationEntityData.idp;
-          devLog('DEBUG','updatedIdentityProvider[typeConf.attribute]',updatedIdentityProvider[typeConf.attribute])
+          debugLog('updatedIdentityProvider[typeConf.attribute]',updatedIdentityProvider[typeConf.attribute])
           updatedIdentityProvider[typeConf.attribute]=uniqueIdType;
           newConfigurationEntityData.idp=updatedIdentityProvider;
-          devLog("DEBUG","newConfigurationEntityData for show",newConfigurationEntityData)
+          debugLog("newConfigurationEntityData for show",redactSecrets(newConfigurationEntityData))
           setShowConfigurationEntityData(newConfigurationEntityData);
         }
         if(typeConf.attribute&&testNewConfigurationEntityData.sp){
           const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.sp?.[typeConf.attribute]||''; 
-          devLog("DEBUG","uniqueIdType",uniqueIdType)
+          debugLog("uniqueIdType",uniqueIdType)
           const updatedServiceProvider: any = testNewConfigurationEntityData.sp;
           updatedServiceProvider[typeConf.attribute]=uniqueIdType;
           newConfigurationEntityData.sp=updatedServiceProvider;
-          devLog("DEBUG","newConfigurationEntityData (metadata)",metadata)
+          debugLog("newConfigurationEntityData (metadata)",redactSecrets(metadata))
           if(type==='saml') {
             if(metadata.entityId&&newConfigurationEntityData.sp) {
               const samlServiceProvider:Components.Schemas.SamlServiceProvider = cloneDeep(newConfigurationEntityData.sp)
               samlServiceProvider.entityId=metadata.entityId;
               if(name) {
-                devLog("DEBUG","newConfigurationEntityData (saml name)",name)
+                debugLog("newConfigurationEntityData (saml name)",name)
                 samlServiceProvider.name=name;
               }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
@@ -258,7 +260,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               oidcServiceProvider.clientId=metadata.client_id;
               
               if(name) {
-                devLog("DEBUG","newConfigurationEntityData (oidc name)",name)
+                debugLog("newConfigurationEntityData (oidc name)",name)
                 oidcServiceProvider.name=name;
               }
               const newConfiguration = cloneDeep(newConfigurationEntityData)
@@ -286,45 +288,54 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
             }
         
             const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails&&isValidMetadataIdp;
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidDataAttribute)",isValidDataAttribute)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidUserAttribute)",isValidUserAttribute)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata sp)",isValidMetadata)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata idp)",isValidMetadataIdp)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidSchoolSelection)",isValidSchoolSelection)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidRoleDetails)",isValidRoleDetails)
+            debugLog("isValid newConfigurationEntityData", {
+              isValidDataAttribute,
+              isValidUserAttribute,
+              isValidMetadata,
+              isValidMetadataIdp,
+              isValidSchoolSelection,
+              isValidRoleDetails,
+            })
             
-            devLog("DEBUG","logoOK newConfigurationEntityData (role)",role)
-            devLog("DEBUG","logoOK newConfigurationEntityData (newLogo)",newLogo)
-            devLog("DEBUG","logoOK newConfigurationEntityData (metadataFile.length)",metadataFile.length)
-            devLog("DEBUG","logoOK newConfigurationEntityData (newConfigurationEntityData?.idp?.logoUrl)",newConfigurationEntityData?.idp?.logoUrl)
+            debugLog("logoOK newConfigurationEntityData", {
+              role,
+              newLogo,
+              metadataFile: metadataFile.length,
+              logoUrl: newConfigurationEntityData?.idp?.logoUrl,
+            })
             
             const logoOK=(role==='sp'||
                           newLogo||
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
                         )
-            devLog("DEBUG","logoOK )",logoOK)
+            debugLog("logoOK newConfigurationEntityData (logoOK)",logoOK)
 
             setSaveDialogState(true);
-            devLog("DEBUG","setCanSave (newConfigurationEntityData)",newConfigurationEntityData)
-            devLog("DEBUG","setCanSave (originalIntegration.current?.configurationEntity)",originalIntegration.current?.configurationEntity)
+            debugLog("setCanSave (newConfigurationEntityData)",redactSecrets(newConfigurationEntityData))
+            debugLog("setCanSave (originalIntegration.current?.configurationEntity)",redactSecrets(originalIntegration.current?.configurationEntity))
+            // name (Palvelun nimi) lives in its own `name` state, not in
+            // newConfigurationEntityData, so an isEqual check against it alone
+            // misses a name-only edit - that would skip the branch below that
+            // merges `name` into sp.name and calls setNewIntegration, silently
+            // dropping the new name from the saved integration.
             const nameChanged = role==='sp'&&name!==(originalIntegration.current?.configurationEntity?.sp?.name||'');
             if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)&&!nameChanged){
-              devLog("DEBUG","setCanSave (environmentChanged)",environmentChanged)
-              devLog("DEBUG","setCanSave (isValid)",isValid)
-              devLog("DEBUG","setCanSave (logoOK)",logoOK)
+              debugLog("setCanSave (environmentChanged)",environmentChanged)
+              debugLog("setCanSave (isValid)",isValid)
+              debugLog("setCanSave (logoOK)",logoOK)
               if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)||metadataFile.length===1||newLogo||environmentChanged)&&isValid&&logoOK) {      
-                devLog("DEBUG","setCanSave","1")
+                debugLog("setCanSave (canSaveConfigurationEntity)",true)
                 setCanSaveConfigurationEntity(true)
               } else {
-                devLog("DEBUG","setCanSave","2")
+                debugLog("setCanSave (canSaveConfigurationEntity)",false)
                 setCanSaveConfigurationEntity(false)
               }       
             } else {                      
               if(isValid&&logoOK) {         
-                devLog("DEBUG","setCanSave","3")
+                debugLog("setCanSave (canSaveConfigurationEntity)",true)
                 setCanSaveConfigurationEntity(true)
               } else {
-                devLog("DEBUG","setCanSave","4")
+                debugLog("setCanSave (canSaveConfigurationEntity)",false)
                 setCanSaveConfigurationEntity(false)
               }
               if(integration) {            
@@ -370,11 +381,13 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
       //Update newDiscoveryInformation
       if(newDiscoveryInformation !== undefined) {
         const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidDataAttribute)",isValidDataAttribute)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidUserAttribute)",isValidUserAttribute)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidMetadata)",isValidMetadata)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidSchoolSelection)",isValidSchoolSelection)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidRoleDetails)",isValidRoleDetails)
+        debugLog("isValid newDiscoveryInformation", {
+          isValidDataAttribute,
+          isValidUserAttribute,
+          isValidMetadata,
+          isValidSchoolSelection,
+          isValidRoleDetails,
+        })
             
         
         const logoOK=(role==='sp'||
@@ -382,23 +395,30 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                           (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
         )
         setSaveDialogState(true);
-        devLog("DEBUG","setCanSave (newDiscoveryInformation)",newDiscoveryInformation)
-        devLog("DEBUG","setCanSave (originalIntegration.current?.discoveryInformation)",originalIntegration.current?.discoveryInformation)
+        debugLog("setCanSave (newDiscoveryInformation)",newDiscoveryInformation)
+        debugLog("setCanSave (originalIntegration.current?.discoveryInformation)",redactSecrets(originalIntegration.current?.discoveryInformation))
+        // name (Palvelun nimi) lives in its own `name` state, not in
+        // newConfigurationEntityData - see the identical comment/check in the
+        // newConfigurationEntityData effect above. Without it, a name-only sp
+        // edit never flips this branch's OR to true (newConfigurationEntityData
+        // itself never changes), so canSaveDiscoveryInformation gets stuck at
+        // its mount-time `false` forever - `name` isn't even in this effect's
+        // dependency array, so it wouldn't re-run on a name-only change anyway.
         const nameChanged = role==='sp'&&name!==(originalIntegration.current?.configurationEntity?.sp?.name||'');
         if(isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)){
           if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||metadataFile.length===1||environmentChanged||nameChanged)&&logoOK&&isValid) {
-            devLog("DEBUG","setCanSave","5")
+            debugLog("setCanSave (canSaveDiscoveryInformation)",true)
             setCanSaveDiscoveryInformation(true)
           } else {
-            devLog("DEBUG","setCanSave","6")
+            debugLog("setCanSave (canSaveDiscoveryInformation)",false)
             setCanSaveDiscoveryInformation(false)
           }  
         } else {               
           if(isValid) {                
-            devLog("DEBUG","setCanSave","7")
+            debugLog("setCanSave (canSaveDiscoveryInformation)",true)
             setCanSaveDiscoveryInformation(true)
           } else {
-            devLog("DEBUG","setCanSave","8")
+            debugLog("setCanSave (canSaveDiscoveryInformation)",false)
             setCanSaveDiscoveryInformation(false)
           }
           if(integration) {            

@@ -15,9 +15,13 @@ import { tallentajaOphGroup, dataConfiguration } from '../../config';
 import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecrets } from "@/utils/devLog";
 import { cloneDeep, clone } from 'lodash';
 import { integrationTypesDefault } from '@/config';
+
+const debugLog = createLogger("DEBUG");
+const warnLog = createLogger("WARN");
+const errorLog = createLogger("ERROR");
 
 export default function IntegraatioMuokkaus() {
   const { type } = useParams();
@@ -106,9 +110,9 @@ export default function IntegraatioMuokkaus() {
 
   const writeAccess = () => {
 
-    devLog("DEBUG","writeAccess (type)",newIntegration?.configurationEntity?.idp?.type)
-    devLog("DEBUG","writeAccess (oid)",newIntegration?.organization?.oid)
-    devLog("DEBUG","writeAccess (groups)",groups)
+    debugLog("writeAccess (type)",newIntegration?.configurationEntity?.idp?.type)
+    debugLog("writeAccess (oid)",newIntegration?.organization?.oid)
+    debugLog("writeAccess (groups)",groups)
     //if((newIntegration?.configurationEntity?.idp?.type === "azure" ||  newIntegration?.configurationEntity?.idp?.type === "wilma" ||  newIntegration?.configurationEntity?.idp?.type === "opinsys") && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid)||groups?.includes(tallentajaOphGroup))) {
     if((newIntegration?.configurationEntity?.idp?.type && integrationTypesDefault.typesOKJ.includes(newIntegration.configurationEntity.idp.type)) && newIntegration.organization?.oid!=null&&(groups?.includes("APP_MPASSID_TALLENTAJA_"+newIntegration.organization.oid))) {
       return true;
@@ -162,7 +166,7 @@ export default function IntegraatioMuokkaus() {
                 }
                 result.current = (await updateIntegrationRaw({ id },updateIntegration)).data;                
               }
-              devLog("DEBUG","Integration save result",result.current)
+              debugLog("Integration save result",redactSecrets(result.current))
               if(logo){
                 const formData = new FormData();
                 formData.append("file", logo);
@@ -187,8 +191,8 @@ export default function IntegraatioMuokkaus() {
               setLoading(false)
             } catch (error:any) {   
               setLoading(false)           
-              devLog('DEBUG','Integration error data:', error?.response?.data);
-              devLog('DEBUG','Integration error status:', error?.response?.status);
+              errorLog("saveIntegration (integraation tallennus epäonnistui)",
+                { id, status: error?.response?.status, data: error?.response?.data }, error);
               if(error?.response?.status===409) {
                 setOpenIntegrationErrorText(error?.response?.data?.message)
               } else {
@@ -231,10 +235,11 @@ export default function IntegraatioMuokkaus() {
                     authRequest.clientSecret=clientKey;
                     
                     testAttributesAuthorization({},authRequest).then(result=>{ 
-                          devLog("DEBUG","testAttributesAuthorization",result)                           
+                          debugLog("testAttributesAuthorization",redactSecrets(result))                           
                         }).catch(error=>{
-                          return (<Alert severity="error"><FormattedMessage defaultMessage="Testi valtuutus epäonnistui nykyisillä arvoilla!"/></Alert>)
-                          
+                          // Huom: aiempi versio palautti tästä <Alert>-elementin, joka ei
+                          // koskaan renderöitynyt (callback ratkeaa renderin jälkeen).
+                          warnLog("testAzureAccess (testivaltuutus epäonnistui)", error)
                         })
                     
         //return (<Alert severity="error">TBD: azure tunnisteiden toimivuus testi!!!</Alert>)
@@ -289,7 +294,7 @@ export default function IntegraatioMuokkaus() {
                       <FormattedMessage defaultMessage="Tallenna muutokset" />
                   </Typography>
                   
-                  {isEntraId()&&canSave&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
+                  {isEntraId()&&(canSave||id!=='0')&&<><Button  variant="text" onClick={()=>setOpenAttributeTest(true)} startIcon={<RuleIcon />}>
                                       <FormattedMessage defaultMessage="Testaa attribuuttien oikeellisuus" />
                                   </Button></>}
                   

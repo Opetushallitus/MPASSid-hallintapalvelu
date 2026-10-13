@@ -1,19 +1,23 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   createNewSpIntegration,
   fieldRow,
   fillCommonIdpSteps,
   fillServiceName,
-  logBrowserConsole,
   mockInstitutionTypes,
 } from "./helpers";
+
+// Covers EHDOTETUT_TESTIT.md's "3. Validoinnin negatiivipolut" -
+// src/utils/Validators.tsx, config.ts's per-field `validation` arrays,
+// Form/ListForm.tsx. No field in config.ts uses the "ip" validator (grepped
+// - only `redirect_uris`/nohash and signingCertificates/cert exist among
+// the ones originally proposed), so that specific rule is not covered here.
 
 test("pakollinen kenttä tyhjänä estää tallennuksen (Wilma hostname)", async ({
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Wilma");
   // Deliberately NOT calling fillWilmaFields() - hostname (config.ts:1008-
@@ -31,8 +35,6 @@ test("pakollinen kenttä tyhjänä estää tallennuksen (Wilma hostname)", async
 test("https-validointi: OIDC redirect_uris Tuotannossa vaatii https:n", async ({
   page,
 }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect", "Tuotanto");
   await fillServiceName(page, "Https-validointitesti");
 
@@ -54,8 +56,6 @@ test("https-validointi: OIDC redirect_uris Tuotannossa vaatii https:n", async ({
 test("nolocalhost-validointi: OIDC redirect_uris Tuotannossa kieltää localhostin", async ({
   page,
 }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect", "Tuotanto");
   await fillServiceName(page, "Nolocalhost-validointitesti");
 
@@ -72,8 +72,6 @@ test("nolocalhost-validointi: OIDC redirect_uris Tuotannossa kieltää localhost
 test("virheellinen sertifikaatti: SAML signingCertificates", async ({
   page,
 }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "SAML");
   await fillServiceName(page, "Sertifikaattivirhe-testi");
 
@@ -96,8 +94,6 @@ test("virheellinen sertifikaatti: SAML signingCertificates", async ({
 test("duplikaattiarvo ListForm-kentässä: OIDC redirect_uris", async ({
   page,
 }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect");
   await fillServiceName(page, "Duplikaattitesti");
 
@@ -125,8 +121,6 @@ test("duplikaattiarvo ListForm-kentässä: OIDC redirect_uris", async ({
 test("array-kentän rivin poisto tekee pakollisesta kentästä taas tyhjän", async ({
   page,
 }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect");
   await fillServiceName(page, "Rivinpoistotesti");
 

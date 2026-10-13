@@ -6,8 +6,10 @@ import { useIntl } from 'react-intl';
 import { useEffect, useRef, type Dispatch, type SetStateAction} from "react";
 import AttributeForm from "./Form";
 import { helperText, validate } from "@/utils/Validators";
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecrets } from "@/utils/devLog";
 import { clone, cloneDeep } from "lodash";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
   role?: any;
@@ -58,7 +60,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
         // reading the ref keeps setCanSave correct without waiting a frame.
         var currentAttribute=attributes.find(a=>a.name===name)||currentAttributes.current.find(a=>a.name===name)
 
-        devLog("DEBUG","validateAttributes (attributes)",attributes)
+        debugLog("validateAttributes (attributes)",redactSecrets(attributes))
         if(currentAttribute) {
           if((currentAttribute.content === undefined || currentAttribute.content === ''|| (currentAttribute.content !== null && currentAttribute.content.length===0)) && configuration.mandatory ){
             result = false
@@ -78,7 +80,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
             result=true
           } 
         }     
-        //devLog("DEBUG","validateAttributes ("+name+")",result)             
+        //debugLog("validateAttributes ("+name+")",result)             
       }      
     })
     
@@ -87,7 +89,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
   const updateAttribute = (name:string, value:string, type:string ) => { 
     if(name!==undefined&&value!==undefined&&value!==attributes.find(a=>a.name===name&&a.type===type)?.content) {
-      devLog("DEBUG","updateAttribute ("+name+")",value) 
+      debugLog("updateAttribute ("+name+")",value) 
       const attributeList=cloneDeep(attributes);
       const index=attributeList.map(a=>a.name).indexOf(name);
       if(index>-1) {
@@ -106,10 +108,10 @@ export default function Attributes({ attributes, role, type, attributeType, newC
       }
 
       if(validateAttributes()) {
-        devLog("DEBUG","updateAttribute (validateAttribute "+name+")",true)
+        debugLog("updateAttribute (validateAttribute "+name+")",true)
         setCanSave(true)
       } else {
-        devLog("DEBUG","updateAttribute (validateAttribute "+name+")",false)
+        debugLog("updateAttribute (validateAttribute "+name+")",false)
         setCanSave(false)
       }
 
@@ -208,19 +210,19 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                 }
 
                 const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
-                devLog("DEBUG","Metadata (roleConfiguration for "+configuration.name+")",roleConfiguration) 
+                debugLog("Metadata (roleConfiguration for "+configuration.name+")",roleConfiguration) 
                 
                 var useAttribute:Components.Schemas.Attribute ={}
                 var attributeExists:boolean=false
 
                 
-                devLog("DEBUG","Attributes (init attribute)",configuration.name);                                    
+                debugLog("Attributes (init attribute)",configuration.name);                                    
                 if(!initAttributes.includes(configuration.name)) {
                   if(attributes.find(a => a.name&&a.name === configuration.name)) {
                     //attiribute already exists
                     attributeExists=true
                     useAttribute=attributes.find(a => a.name&&a.name === configuration.name)||{ type: attributeType, content: '', name: 'configurationError' }                    
-                    devLog("DEBUG","Attributes (init using existing attribute)",useAttribute);
+                    debugLog("Attributes (init using existing attribute)",useAttribute);
                   } else {
                     //attiribute not exists                    
                     const testConfigurationEntity:any = clone(newConfigurationEntityData) 
@@ -228,19 +230,19 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                     //initilize using existing integration values
                     if(configuration?.name&&testConfigurationEntity?.idp?.[configuration.name]) {
                       useAttribute={ type: attributeType, content: String(testConfigurationEntity.idp[configuration.name]), name: configuration.name }
-                      devLog("DEBUG","Attributes (init using configurationEntity.idp)",useAttribute);
+                      debugLog("Attributes (init using configurationEntity.idp)",useAttribute);
                     }
                     
                     if(configuration?.name&&testConfigurationEntity?.sp?.[configuration.name]) {
                       useAttribute={ type: attributeType, content: String(testConfigurationEntity.sp[configuration.name]), name: configuration.name }
-                      devLog("DEBUG","Attributes (init using configurationEntity.sp)",useAttribute);
+                      debugLog("Attributes (init using configurationEntity.sp)",useAttribute);
                     }
                     
                     if(useAttribute.content === undefined) {
-                      devLog("DEBUG","Attributes (init empty content)",configuration.name)
+                      debugLog("Attributes (init empty content)",configuration.name)
                       if(configuration.name) {
                         if(roleConfiguration.defaultValue) {
-                          devLog("DEBUG","Attributes (init roleConfiguration.defaultValue)",roleConfiguration.defaultValue)
+                          debugLog("Attributes (init roleConfiguration.defaultValue)",roleConfiguration.defaultValue)
                           useAttribute={ type: attributeType, content: String(roleConfiguration.defaultValue), name: configuration.name }
                         } else {
                           if(configuration.enum&&configuration.enum.length>0) {
@@ -261,7 +263,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                         //attributeList.push(useAttribute)    
                         //setAttributes(attributeList)   
                         if(useAttribute.name!==undefined&&!currentAttributes.current.map(a=>a.name).includes(useAttribute.name)&&useAttribute.content!=='') {
-                          devLog("DEBUG","Attributes (new init attribute)",useAttribute);
+                          debugLog("Attributes (new init attribute)",useAttribute);
                           // Only record the default locally. The commit into the
                           // shared `attributes` state happens in the reconcile
                           // effect below via a MERGE — never replace the whole
@@ -273,13 +275,13 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                       
                     }
                   }
-                  devLog("DEBUG","Attributes (initialized attribute)",useAttribute)                          
+                  debugLog("Attributes (initialized attribute)",useAttribute)                          
                 
-                  devLog("DEBUG","Attributes (initialized attributes)",initAttributes)
+                  debugLog("Attributes (initialized attributes)",initAttributes)
         
                   if(!attributeExists&&configuration.array===false&&configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
                     //Initialize switch value        
-                    devLog("DEBUG","Attributes (init switch content)",configuration.name)            
+                    debugLog("Attributes (init switch content)",configuration.name)            
                     const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                     if(roleConfiguration.defaultValue !== undefined) {
                       queueUpdateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
@@ -294,7 +296,7 @@ export default function Attributes({ attributes, role, type, attributeType, newC
 
                     if(!attributeExists&&configuration.array!==false&&configuration.enum&&configuration.enum.length>0&&!configuration.switch&&(useAttribute.content===undefined||useAttribute.content==='')) {
                       //Initialize multiselect value        
-                      devLog("DEBUG","Attributes (init multiselect content)",configuration.name)            
+                      debugLog("Attributes (init multiselect content)",configuration.name)            
                       const roleConfiguration:IntegrationType=configuration.integrationType.find(c=>c.name===type) || defaultIntegrationType;
                       if(roleConfiguration.defaultValue !== undefined) {
                         queueUpdateAttribute(configuration.name,String(roleConfiguration.defaultValue),type)                          
@@ -317,16 +319,16 @@ export default function Attributes({ attributes, role, type, attributeType, newC
                       
                 pendingEffects.current.push(() => {
                   if(validateAttributes()) {
-                    devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",true)
+                    debugLog("Attributes (validateAttribute "+configuration.name+")",true)
                     setCanSave(true)
                   } else {
-                    devLog("DEBUG","Attributes (validateAttribute "+configuration.name+")",false)
+                    debugLog("Attributes (validateAttribute "+configuration.name+")",false)
                     setCanSave(false)
                   }
                 });
                             
-                devLog("DEBUG","Attributes (useAttribute post)",useAttribute)
-                devLog("DEBUG","Attributes (attribute post)",attributes)                  
+                debugLog("Attributes (useAttribute post)",useAttribute)
+                debugLog("Attributes (attribute post)",redactSecrets(attributes))                  
 
                 const visible = (configuration.integrationType.filter(it=>it.visible).length>0)?true:false;
                 if(visible&&configuration.name!==undefined) {

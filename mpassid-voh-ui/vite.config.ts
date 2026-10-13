@@ -11,7 +11,6 @@ import babel from "vite-plugin-babel";
 import dynamicImport from "vite-plugin-dynamic-import";
 import envCompatible from "vite-plugin-env-compatible";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 // vite 8 rebuild: the vendored @visma/vite-plugin-super-template hard-pins
 // vite-3-era plugins (@vitejs/plugin-react@2, old esbuild/rollup node-polyfill
@@ -22,12 +21,21 @@ import tsconfigPaths from "vite-tsconfig-paths";
 // @esbuild-plugins + rollup-plugin-node-polyfills) → vite-plugin-node-polyfills.
 // Dropped vs. super-template: dynamicBase (was already filtered out) and
 // faviconsPlugin (no src/images/icon.png → it was already a no-op).
+
+// Matches modules of the given node_modules packages (names may be regex).
+const nodeModules = (...packages: string[]) =>
+  new RegExp(`[\\\\/]node_modules[\\\\/](${packages.join("|")})[\\\\/]`);
+
 export default defineConfig({
   base:
     (process.env.NODE_ENV === "production" && process.env.VITE_BASENAME) ||
     undefined,
   server: { port: 3000 },
   resolve: {
+    // Native replacement for the `vite-tsconfig-paths` plugin (which pulled the
+    // now-unmaintained `tsconfck`). Resolves tsconfig.json `compilerOptions.paths`
+    // (`@/*` and `~/*` → `src/*`). NOTE: vite 8 marks this @experimental.
+    tsconfigPaths: true,
     // https://github.com/vitejs/vite/issues/3040
     alias:
       process.env.NODE_ENV !== "production"
@@ -51,12 +59,92 @@ export default defineConfig({
     exclude: ["@/api"],
   },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       onwarn(warning, warn) {
         // Dependencies ship a 'use client' directive for Next.js/RSC bundlers;
         // Vite doesn't use it and Rollup only warns that it's ignored.
         if (warning.code === "MODULE_LEVEL_DIRECTIVE") return;
         warn(warning);
+      },
+      output: {
+        // Required with the groups below: reflect-metadata (main.tsx) is a
+        // CommonJS module that rolldown otherwise runs lazily, after the x509
+        // chunk has already evaluated tsyringe, which then throws "tsyringe
+        // requires a reflect polyfill". This keeps the source import order.
+        strictExecutionOrder: true,
+        // Split the large libraries out of the app entry chunk so they are
+        // cached separately across releases. Only libraries the app itself
+        // loads are listed: no catch-all node_modules group, or the mock-only
+        // libraries (msw, openapi-backend, ...) of the dynamically imported
+        // src/mocks/browser.js would end up in a chunk the app loads eagerly.
+        codeSplitting: {
+          groups: [
+            {
+              name: "react",
+              test: nodeModules(
+                "react",
+                "react-dom",
+                "scheduler",
+                "react-router",
+                "react-router-dom",
+                "@remix-run/router"
+              ),
+            },
+            {
+              name: "mui",
+              test: nodeModules(
+                "@mui/[^/]+",
+                "@emotion/[^/]+",
+                "@popperjs/core",
+                "react-transition-group",
+                "stylis",
+                "styled-components",
+                "polished"
+              ),
+            },
+            {
+              name: "intl",
+              test: nodeModules(
+                "react-intl",
+                "@formatjs/[^/]+",
+                "intl-messageformat"
+              ),
+            },
+            {
+              name: "markdown",
+              test: nodeModules(
+                "react-markdown",
+                "micromark[^/]*",
+                "mdast-[^/]+",
+                "hast-[^/]+",
+                "unist-[^/]+",
+                "unified",
+                "vfile[^/]*",
+                "property-information",
+                "remark-[^/]+"
+              ),
+            },
+            {
+              name: "x509",
+              test: nodeModules(
+                "@peculiar/[^/]+",
+                "asn1js",
+                "pvtsutils",
+                "pvutils",
+                "tsyringe"
+              ),
+            },
+            {
+              name: "libs",
+              test: nodeModules(
+                "lodash",
+                "lodash-es",
+                "axios",
+                "openapi-client-axios"
+              ),
+            },
+          ],
+        },
       },
     },
   },
@@ -98,7 +186,6 @@ export default defineConfig({
       globals: { Buffer: true, global: false, process: false },
       protocolImports: true,
     }),
-    tsconfigPaths(),
     {
       name: "html-transform",
       transformIndexHtml(html: string) {

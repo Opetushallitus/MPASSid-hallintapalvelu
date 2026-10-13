@@ -16,7 +16,7 @@ rebuild `lib/` locally:
 - `vite-plugin-super-template`
 - `formatjs-scripts`
 
-The remaining packages (`babel-preset-formatjs`, `eslint-config-super-template`,
+The remaining packages (`babel-preset-formatjs`,
 `msw-openapi-backend-integration`, `react-openapi-client-generator`, `tsconfig`)
 are config/pre-built only and are not built here.
 
@@ -63,6 +63,18 @@ upstream updates):
 - `vite-plugin-super-template/src/gitInfoPlugin.ts` — `git()` now falls back to
   `"unknown"` instead of throwing when no `.git` directory / `git` binary is
   available, so a build outside a git checkout doesn't fail.
+- `react-app-locale-utils`, `react-intl-bundled-messages`,
+  `vite-plugin-super-template` `tsconfig.json` — added `"module": "node16"` and
+  `"moduleResolution": "node16"`. Vite 8 exposes its types only via the
+  `exports` field, which the inherited `"moduleResolution": "node"` ignores
+  (`Cannot find module 'vite'`). The packages build with their own TS 4.9,
+  which has no `"bundler"` option. Emitted `.js` is unchanged. Do not apply this
+  to `formatjs-scripts`: it deep-imports `@formatjs/cli/src/compile`, which
+  `exports` blocks under node16.
+- `react-intl-bundled-messages/src/IntlProvider.tsx` — props typed as
+  `Partial<React.ComponentProps<typeof ReactIntlProvider>>` instead of
+  `Partial<ReactIntlProvider['props']>`. In react-intl 10 `IntlProvider` is
+  a function component, not a class. Runtime-neutral.
 
 ### `lib/` is committed to git
 
@@ -95,7 +107,6 @@ then `npm run vendor:build` and commit.
 | Package                         | Version | Buildable here |
 | ------------------------------- | ------- | -------------- |
 | babel-preset-formatjs           | 0.1.0   | no (config)    |
-| eslint-config-super-template    | 0.1.0   | no (config)    |
 | formatjs-scripts                | 1.0.0   | yes            |
 | msw-openapi-backend-integration | 1.0.1   | no (pre-built) |
 | public.config                   | 1.1.0   | yes            |

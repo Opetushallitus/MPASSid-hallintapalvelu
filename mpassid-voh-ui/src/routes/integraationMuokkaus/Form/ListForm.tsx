@@ -65,6 +65,14 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
       setCanSave(true)
       setIsValid(true)
       if(inputRef.current?.value) {
+        // Reject a value that's already in the list instead of silently
+        // calling onUpdate - Metadata.tsx's updateMultivalueMetadata()
+        // TOGGLES membership (removes if already present), so calling it
+        // again with an existing value would silently delete that entry
+        // rather than warn about the duplicate. This is the same guard
+        // the form's onSubmit handler below has - needed here too since
+        // this function (not onSubmit) is what actually runs on both
+        // Enter (onKeyUp) and the separate "Lisää" button.
         if(object.content.indexOf(inputRef.current.value)===-1) {
           setUsedHelperText(helperText(inputRef.current!.value))
           onUpdate(type,inputRef.current.value);
@@ -183,6 +191,15 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
             },
           }}
           onKeyDown={(ev) => {
+            // Without this, pressing Enter in a text input inside a <form>
+            // also triggers the browser's own native implicit submission
+            // (firing onSubmit) IN ADDITION to onKeyUp below - two
+            // independent code paths reacting to one keypress, racing over
+            // the same `inputRef`/`object` state. onKeyUp's updateFormValue()
+            // already does everything onSubmit did (validate, dedupe, add),
+            // so the native submission is pure redundant risk, not a second
+            // required behavior - suppress it and let onKeyUp be the only
+            // handler.
             if (ev.key === 'Enter') {
               ev.preventDefault()
             }

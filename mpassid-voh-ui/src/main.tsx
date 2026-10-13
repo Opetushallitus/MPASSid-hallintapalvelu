@@ -20,7 +20,7 @@ declare global {
     PROD: boolean;
     RAAMIT_PATH: string;
     SUPPORT_URI?: string;
-    LOG_LEVEL?: "DEBUG"|"INFO";
+    LOG_LEVEL?: "ERROR" | "WARN" | "INFO" | "DEBUG";
   };
 }
 
@@ -36,7 +36,9 @@ if (ENV.API_BASE_URL) {
 
 
 async function main() {
-  if (ENV.MOCK === "msw") {
+  // import.meta.env.DEV is statically false in production builds, so the mock
+  // backend (src/mocks/browser.js and its dependencies) is left out of them.
+  if (import.meta.env.DEV && ENV.MOCK === "msw") {
     const { worker } = await import("./mocks/browser.js");
 
     await worker.start({

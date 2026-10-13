@@ -9,11 +9,14 @@ import { useEffect, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecrets } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
 import Suspense from "@/utils/components/Suspense";
 import { integrationTypesDefault } from "@/config";
 import { clone } from "lodash";
+
+const debugLog = createLogger("DEBUG");
+const warnLog = createLogger("WARN");
 
 const defaults = clone(integrationTypesDefault);
 
@@ -70,7 +73,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             });
             me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).forEach(o=>possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')));
             
-            devLog("DEBUG","NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll.current)
+            debugLog("NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll.current)
             possibleOrganizationsOidsAll.current.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
@@ -95,6 +98,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     }
                 })
                 .catch(error=>{
+                    warnLog("NewIntegrationSelection (organisaation nimen haku epäonnistui, näytetään OID)", oid, error)
                     const newOrganizationName = { oid: oid, name: oid }
                     organizationNames.push(newOrganizationName)
                     if(possibleOrganizationsOidsAll.current.length===organizationNames.length) {
@@ -118,7 +122,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             const organizationNames: Organization[] = [];
             const possibleOrganizationsOids = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
             //possibleOrganizationsOids.concat(me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')) || []);
-            devLog("DEBUG","NewIntegrationSelection (possibleOrganizationsOids)",possibleOrganizationsOids)
+            debugLog("NewIntegrationSelection (possibleOrganizationsOids)",possibleOrganizationsOids)
             possibleOrganizationsOids.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
@@ -193,12 +197,20 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
-                devLog("DEBUG","createIntegration (result)",result)
+                debugLog("createIntegration (result)",redactSecrets(result))
                 result.id=0;
                 if(result?.configurationEntity?.sp) {
-                    devLog("DEBUG","createIntegration (oldSet)",service)
+                    debugLog("createIntegration (oldSet)",service)
                     if(service!==undefined) {
                         if(service.setId!==0) {
+                          // setId 0 marks the "create a brand-new environment"
+                          // options in PossibleServices.tsx, whose `name` is
+                          // just the literal sentinel "uusi" used to render
+                          // their dropdown label ("Testi - uusi") - not a real
+                          // service name to carry over. Only an actual existing
+                          // set (setId!==0) has a real name worth reusing, so
+                          // that a service keeps the same display name across
+                          // its environments.
                           result.configurationEntity.sp.name=service.name
                         }
                         result.deploymentPhase=service.environment
@@ -206,8 +218,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         result.integrationSets.push( { id: service.setId })
 
                         
-                        devLog("DEBUG","createIntegration (type service.environment)",(typeof service.environment))
-                        devLog("DEBUG","createIntegration (service.environment)",service.environment)
+                        debugLog("createIntegration (type service.environment)",(typeof service.environment))
+                        debugLog("createIntegration (service.environment)",service.environment)
                     }
                     
                 }
@@ -217,7 +229,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                 if(result?.configurationEntity?.sp&&result.configurationEntity.sp.metadata===null) {
                     result.configurationEntity.sp.metadata={}
                 }
-                devLog("DEBUG","createIntegration (integration)",result)
+                debugLog("createIntegration (integration)",redactSecrets(result))
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
             })       
       };
@@ -229,7 +241,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
       
       const handleIntegration = (event: SelectChangeEvent) => {
 
-        devLog("DEBUG","handleIntegration (value)",String(event.target.value))
+        debugLog("handleIntegration (value)",String(event.target.value))
         const value = String(event.target.value);
         userChoseIntegration.current = true
         setIntegration(value)
@@ -249,7 +261,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     }; 
 
     const handleService = (value: serviceProps) => {
-        devLog("DEBUG","handleService",value)
+        debugLog("handleService",value)
         setService(value)
     }; 
     

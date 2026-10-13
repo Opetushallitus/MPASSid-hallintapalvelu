@@ -1,5 +1,12 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
+// NOTE: shared by all e2e specs. Like create-wilma-integration.spec.ts, none
+// of this could be run/iterated in the authoring environment (no network
+// access to download Playwright's browser binaries there) - selectors are
+// derived from source (src/config.ts dataConfiguration, src/routes/home/*,
+// src/routes/integraationMuokkaus/*) and from the Wilma spec's proven
+// selectors. Expect to adjust a selector or two on first real run.
+
 /**
  * Overrides the koodisto lookup for institution types so it matches the
  * fixture organization's only "peruskoulu" school (oppilaitostyyppi_11, see
@@ -25,21 +32,6 @@ export async function mockInstitutionTypes(page: Page) {
         ]),
       })
   );
-}
-
-/** Surfaces browser console/page errors in the test output - see
- * create-wilma-integration.spec.ts for why this matters (MSW worker.start()
- * has no .catch() in src/main.tsx, so failures there show up as a silent
- * blank page otherwise). */
-export function logBrowserConsole(page: Page) {
-  page.on("console", (msg) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:${msg.type()}] ${msg.text()}`);
-  });
-  page.on("pageerror", (err) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:pageerror] ${err.message}`);
-  });
 }
 
 /**
