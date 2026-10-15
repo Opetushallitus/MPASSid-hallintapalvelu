@@ -1,10 +1,10 @@
-import Tab from "@mui/material/Tab";
+import Tab, { type TabProps } from "@mui/material/Tab";
 import { merge } from "lodash";
 import { Link } from "react-router-dom";
 
-interface Props
-  extends React.ComponentProps<typeof Tab>,
-    Pick<React.ComponentProps<typeof Link>, "to"> {
+// Tab rendered as a router Link: TabProps<typeof Link> carries Link's props
+// (`to` etc.) so `component={Link}` type-checks without a cast.
+interface Props extends TabProps<typeof Link> {
   value: string;
 }
 
@@ -12,7 +12,7 @@ export default function TabLink(props: Props) {
   return (
     <Tab
       {...props}
-      component={Link as any}
+      component={Link}
       sx={merge(
         {
           minHeight: "inherit",

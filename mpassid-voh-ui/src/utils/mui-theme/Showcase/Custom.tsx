@@ -17,7 +17,10 @@ import { useEffect, useState } from "react";
 export default function Custom() {
   const [update, setUpdate] = useState(false);
 
+  // Showcase: the "Update" tabs suspend on a re-render after mount, which is
+  // what this effect deliberately triggers.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUpdate(true);
   }, []);
 

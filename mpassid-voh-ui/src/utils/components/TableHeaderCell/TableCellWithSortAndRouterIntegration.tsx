@@ -95,11 +95,9 @@ function useSortDirection(paths: string | string[]) {
     [searchParams]
   );
 
-  if (!Array.isArray(paths)) {
-    paths = [paths];
-  }
+  const pathList = Array.isArray(paths) ? paths : [paths];
 
-  const [, direction] = sort.find(([path]) => paths.includes(path)) ?? [
+  const [, direction] = sort.find(([path]) => pathList.includes(path)) ?? [
     undefined,
     false,
   ];

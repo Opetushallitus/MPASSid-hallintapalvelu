@@ -26,7 +26,7 @@ export function HeaderIcon({ children }: Props) {
           background: `${styleGuide.colors.gray["lighten-6"]} !important`,
         }}
       >
-        {cloneElement(children as React.ReactElement<any>, {
+        {cloneElement(children as React.ReactElement<{ fontSize?: string; sx?: object }>, {
           fontSize: "small",
           sx: { color: theme.palette.text.primary },
         })}

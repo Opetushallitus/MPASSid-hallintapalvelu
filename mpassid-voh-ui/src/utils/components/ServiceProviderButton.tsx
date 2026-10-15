@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function BasicPopover({ id }: Props) {
-    const [error, integration] = useIntegrationSafe({ id });
+    const [, integration] = useIntegrationSafe({ id });
 
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 

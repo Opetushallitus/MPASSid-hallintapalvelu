@@ -20,10 +20,12 @@ export function handlers(options, requestLogicHandlers = {}) {
   // call, so no explicit api.init() is needed (matching the v1 integration).
   api.register('notFound', () => new HttpResponse(null, { status: 404 }));
 
-  api.register('notImplemented', (c) => {
+  // async: a requestLogicHandler may return a Promise (e.g. an e2e hook that
+  // delays a response); openapi-backend awaits whatever this returns.
+  api.register('notImplemented', async (c) => {
     const requestLogicHandler = requestLogicHandlers[c.operation.operationId];
     if (requestLogicHandler) {
-      const response = requestLogicHandler(c.request);
+      const response = await requestLogicHandler(c.request);
       if (response) {
         const { status, mock } = response;
         return HttpResponse.json(mock, { status });
