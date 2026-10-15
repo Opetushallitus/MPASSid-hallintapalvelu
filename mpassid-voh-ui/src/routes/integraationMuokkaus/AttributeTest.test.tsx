@@ -23,7 +23,8 @@ vi.setConfig({ testTimeout: 20000 });
 
 beforeEach(() => {
   testAttributesAuthorization.mockReset();
-  testAttributesAuthorization.mockResolvedValue({});
+  // The backend answers true when authorized.
+  testAttributesAuthorization.mockResolvedValue(true);
   testAttributes.mockReset();
   testAttributes.mockResolvedValue({});
 });
@@ -34,7 +35,6 @@ beforeEach(() => {
 
 const ORG_OID = "1.2.246.562.10.00000000001";
 const SPECIAL_OID = "1.2.246.562.10.21199106507";
-const TENANT_ID = "66666666-7777-8888-9999-000000000000";
 
 const user = (name: string, content: string): Components.Schemas.Attribute => ({ type: "user", name, content });
 
@@ -71,7 +71,6 @@ interface Latest {
 interface Options {
   id?: string;
   attributes?: Components.Schemas.Attribute[];
-  tenantId?: string;
   oid?: string;
   environment?: number;
   configuration?: UiConfiguration[];
@@ -80,7 +79,6 @@ interface Options {
 const renderAttributeTest = ({
   id = "5",
   attributes = ATTRIBUTES,
-  tenantId = TENANT_ID,
   oid = ORG_OID,
   environment = 1,
   configuration = dataConfiguration,
@@ -103,7 +101,6 @@ const renderAttributeTest = ({
         setOpen={setOpen}
         oid={oid}
         environment={environment}
-        tenantId={tenantId}
         dataConfiguration={configuration}
       />
     );
@@ -239,23 +236,9 @@ describe("testin suoritus", () => {
     });
   });
 
-  it("uudelle integraatiolle (id '0') lähetetään myös tenantId", async () => {
+  it("uudelle integraatiolle (id '0') ei lähetetä tenantId:tä (backend lukee sen tallennetusta integraatiosta)", async () => {
     const actor = userEvent.setup();
     renderAttributeTest({ id: "0" });
-    await fillCredentials(actor);
-
-    await actor.click(testButton());
-
-    await waitFor(() => expect(testAttributesAuthorization).toHaveBeenCalled());
-    expect(testAttributesAuthorization).toHaveBeenCalledWith(
-      {},
-      { id: 0, tenantId: TENANT_ID, clientId: "client-1", clientSecret: "salainen" }
-    );
-  });
-
-  it("uudelle integraatiolle ilman tenantId:tä sitä ei lähetetä", async () => {
-    const actor = userEvent.setup();
-    renderAttributeTest({ id: "0", tenantId: "" });
     await fillCredentials(actor);
 
     await actor.click(testButton());
@@ -357,6 +340,21 @@ describe("testin suoritus", () => {
 
     await act(async () => resolve(RESPONSE));
     expect(await screen.findByRole("table", { name: "attribute table" })).toBeInTheDocument();
+  });
+
+  it("valtuutus palauttaa false (esim. tallentamaton integraatio): virhe näytetään eikä attribuutteja haeta", async () => {
+    const actor = userEvent.setup();
+    testAttributesAuthorization.mockResolvedValue(false);
+    renderAttributeTest({ id: "0" });
+    await fillCredentials(actor);
+
+    await actor.click(testButton());
+
+    expect(await screen.findByText("Tilin authentikointi epäonnistui!")).toBeInTheDocument();
+    expect(testAttributes).not.toHaveBeenCalled();
+    expect(screen.queryByText("Tuntematon tilaaja")).not.toBeInTheDocument();
+    expect(testButton()).toBeEnabled();
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
   });
 
   it("valtuutuksen epäonnistuminen näyttää virheen, attribuutteja ei haeta ja tunnisteet voi syöttää uudelleen", async () => {

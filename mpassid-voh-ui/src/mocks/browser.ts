@@ -8,25 +8,32 @@ import localisationDefinition from "../../schemas/localisation.json";
 import organisaatioDefinition from "../../schemas/organisaatio.json";
 import requestLogicHandlers, { definition } from "./requestLogicHandlers.js";
 
-function mapDeep(object: any, callback: any): any {
-  const callback_ = (value: any) => {
+function mapDeep<T>(object: T, callback: (value: unknown) => unknown): T {
+  const callback_ = (value: unknown) => {
     value = callback(value);
     return typeof value === "object" ? mapDeep(value, callback) : value;
   };
 
-  Array.isArray(object) ? object.map(callback_) : mapValues(object, callback_);
+  if (Array.isArray(object)) {
+    object.map(callback_);
+  } else if (typeof object === "object" && object !== null) {
+    mapValues(object, callback_);
+  }
 
   return object;
 }
 
 // Fixes: unknown format "date" / "date-time" ignored in schema at path
 const patchSchema = (schema: Document) =>
-  mapDeep(schema, (value: any) => {
+  mapDeep(schema, (value: unknown) => {
     if (
       typeof value === "object" &&
-      ["date", "date-time"].includes(value?.format)
+      value !== null &&
+      "format" in value &&
+      typeof value.format === "string" &&
+      ["date", "date-time"].includes(value.format)
     ) {
-      delete value.format;
+      delete (value as { format?: string }).format;
     }
     return value;
   });

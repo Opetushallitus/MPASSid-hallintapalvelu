@@ -465,8 +465,8 @@ describe("newIntegrationin kokoaminen: palautettu muutos", () => {
     expect(draftDiscoveryInformation().title).toBeUndefined();
   });
 
-  // Korjattu (löytyi lint-vaiheessa 4): newIntegration koottiin vain, kun
-  // luonnos poikkesi alkuperäisestä, joten palautettu muutos jäi voimaan.
+  // Tallennettava integraatio kootaan aina nykyisistä luonnoksista, joten
+  // palautettu muutos ei jää voimaan.
   it("palautettu otsikko ei jää tallennettavaksi, kun sen jälkeen vaihdetaan ympäristö", async () => {
     const { latest } = renderDetails(wilma());
     await ready("school");

@@ -524,11 +524,46 @@ describe("Salli kaikki palvelut", () => {
     await snackbar(true);
     expect(saveButton()).toBeEnabled();
 
+    // The saved individual services (10, 11) are removed: confirmed first.
     await user.click(saveButton());
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Olet sallimassa kaikki palvelut")).toBeInTheDocument();
+    expect(updateIntegration).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("button", { name: "OK" }));
     expect(updateIntegration).toHaveBeenCalledTimes(1);
     expect(updateIntegration.mock.calls[0][1].permissions).toEqual([{ to: { id: TEST_SERVICE } }]);
-    // Not empty: saved straight away, without the confirmation dialog.
     expect(await screen.findByText("Muutokset tallennettu onnistuneesti")).toBeInTheDocument();
+  });
+
+  it("päälle kytkeminen ja tallennus: PERUUTA ei tallenna, ja tallennuspalkki palaa", async () => {
+    const user = userEvent.setup();
+    renderSelection(idp([permission(TEST_SERVICE), permission(10)]));
+    await writable();
+
+    await user.click(allSwitch());
+    await user.click(saveButton());
+    await user.click(await screen.findByRole("button", { name: "PERUUTA" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(updateIntegration).not.toHaveBeenCalled();
+    expect(allSwitch()).toBeChecked();
+    await snackbar(true);
+  });
+
+  it("ilman tallennettuja yksittäisiä palveluja kaikki sallittu tallennetaan ilman vahvistusta", async () => {
+    // Only the test service saved: nothing individual is removed.
+    const user = userEvent.setup();
+    updateIntegration.mockResolvedValue(idp([permission(TEST_SERVICE)]));
+    renderSelection(idp([]));
+    await writable();
+
+    await user.click(screen.getByRole("button", { name: "poista" }));
+    await user.click(saveButton());
+
+    expect(updateIntegration).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("Muutokset tallennettu onnistuneesti")).toBeInTheDocument();
+    expect(screen.queryByText("Olet sallimassa kaikki palvelut")).not.toBeInTheDocument();
   });
 
   it("pois kytkeminen (tyhjä lista): tallennuspalkki näkyy, tallennus estetty", async () => {
@@ -666,9 +701,11 @@ describe("Poista valinnat", () => {
 });
 
 describe("vahvistusdialogi (tyhjä lista tallennettaessa)", () => {
-  // Not reachable through the UI (every path to an empty list either keeps
-  // the save button disabled or replaces the list with the test service), so
-  // the draft is set directly through the parent's setters.
+  // An empty list is not reachable through the UI (every path to it either
+  // keeps the save button disabled or replaces the list with the test
+  // service), so the draft is set directly through the parent's setters.
+  // Through the UI the dialog opens when "allow all" is saved over
+  // individually allowed services (describe "Salli kaikki palvelut").
   const openWithEmptyDraft = async () => {
     const user = userEvent.setup();
     const utils = renderSelection(idp([permission(TEST_SERVICE), permission(10), permission(11)]));

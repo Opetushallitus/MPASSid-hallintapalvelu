@@ -334,6 +334,8 @@ export default {
     if (request.requestBody?.clientId === E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE) {
       return { status: 403, mock: {} };
     }
+    // Like the backend: true when authorized.
+    return { status: 200, mock: true };
   },
   updateIntegration(request) {
     const errorResponse = triggerIntegrationSaveError(request.requestBody);

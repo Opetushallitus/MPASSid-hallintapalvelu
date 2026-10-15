@@ -209,7 +209,7 @@ beforeEach(() => {
     data: { ...structuredClone(body), id: params.id },
   }));
   api.inactivateIntegration.mockResolvedValue({ id: 5, active: false });
-  api.testAttributesAuthorization.mockResolvedValue({});
+  api.testAttributesAuthorization.mockResolvedValue(true);
   me.current = { groups: [PALVELU_TALLENTAJA] };
   locationRef.current = undefined;
 });
@@ -776,7 +776,6 @@ describe("Entra ID (azure)", () => {
 
     expect(prop("attributeTest", "open")).toBe(true);
     expect(prop("attributeTest", "id")).toBe("5");
-    expect(prop("attributeTest", "tenantId")).toBe("vuokralainen");
     expect(prop("attributeTest", "attributes")).toEqual([
       { type: "user", name: "firstName", content: "givenName" },
     ]);
@@ -797,7 +796,7 @@ describe("Entra ID (azure)", () => {
     expect(screen.queryByRole("button", { name: "Testaa attribuuttien oikeellisuus" })).not.toBeInTheDocument();
   });
 
-  it("Tallenna testaa tunnukset kerran (tenantId mukana muokattaessa)", async () => {
+  it("Tallenna testaa tunnukset kerran (tenantId:tä ei lähetetä: backend lukee sen tallennetusta integraatiosta)", async () => {
     const user = await renderLoaded(azure(), { path: "/muokkaa/idp/azure/5" });
     await clickSave(user);
     await dialogWith("Haluatko varmasti tallentaa?");
@@ -805,7 +804,7 @@ describe("Entra ID (azure)", () => {
     expect(api.testAttributesAuthorization).toHaveBeenCalledTimes(1);
     expect(api.testAttributesAuthorization).toHaveBeenCalledWith(
       {},
-      { id: 5, tenantId: "vuokralainen", clientId: "asiakas-id", clientSecret: "salainen" }
+      { id: 5, clientId: "asiakas-id", clientSecret: "salainen" }
     );
   });
 

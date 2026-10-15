@@ -62,6 +62,19 @@ virheilmoituksessa, esim. `test-results/<testi>/error-context.md`) sisältää
 sivun tilan tallennushetkellä - hyvä ensimmäinen paikka katsoa mitä
 todellisuudessa renderöityi.
 
+Selaimen konsoli kirjoitetaan jokaisesta testistä tiedostoon
+`test-results/<testi>/browser-console.log` (myös HTML-raportin liitteenä),
+ei terminaaliin (`fixtures.ts`). Lokitaso on oletuksena INFO (varoitukset ja
+virheet):
+
+```bash
+# Kaikki lokit (DEBUG)
+npm run test:e2e:debug
+
+# Selaimen konsoli myös terminaaliin
+E2E_LOG_STDOUT=1 npm run test:e2e -- e2e/create-wilma-integration.spec.ts
+```
+
 ## Testitiedostot
 
 | Tiedosto | Kattaa |

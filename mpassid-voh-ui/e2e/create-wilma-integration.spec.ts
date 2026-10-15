@@ -34,22 +34,6 @@ test("luo uusi Wilma-integraatio", async ({ page }) => {
       })
   );
 
-  // Surface browser console/page errors in the test output. The app gates
-  // its entire render behind MSW's worker.start() in src/main.tsx with no
-  // .catch(), so a failed/hung service worker registration (e.g. a version
-  // mismatch between public/mockServiceWorker.js and the installed msw
-  // package) shows up as a permanently blank page with no visible error -
-  // this is the fastest way to see what's actually happening instead of
-  // guessing.
-  page.on("console", (msg) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:${msg.type()}] ${msg.text()}`);
-  });
-  page.on("pageerror", (err) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:pageerror] ${err.message}`);
-  });
-
   await page.goto("/");
 
   // AddIntegrationButton.tsx: <Fab aria-label={intl.formatMessage({defaultMessage:"lisää"})}>
