@@ -16,14 +16,13 @@ interface Props {
     attributes: Components.Schemas.Attribute[];
     open: boolean;
     oid: string;
-    tenantId: string| undefined;
     environment: number;
     dataConfiguration: UiConfiguration[];
     setOpen: Dispatch<boolean>;
   }
 
 
-export default function AttributeTest({ id,attributes, open, setOpen, oid, environment,tenantId,dataConfiguration }: Props){
+export default function AttributeTest({ id,attributes, open, setOpen, oid, environment,dataConfiguration }: Props){
     const intl = useIntl();
     const [isKnown, setIsKnown] = useState(true);
     const [sessionAuthenticated, setSessionAuthenticated] = useState(false);
@@ -174,15 +173,22 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
             if(principal&&clientId&&clientSecret) {
                 attributeList=getAttributeList()||[];
                 if(!sessionAuthenticated){
+                    // The backend reads the tenant id from the saved integration.
                     const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
                     authRequest.id=parseInt(id);
-                    if(id==='0'&&tenantId&&tenantId!=="") {
-                        authRequest.tenantId=tenantId;
-                    }
                     authRequest.clientId=clientId;
                     authRequest.clientSecret=clientSecret;
                     
-                    testAttributesAuthorization({},authRequest).then(()=>{ 
+                    testAttributesAuthorization({},authRequest).then((authorized)=>{ 
+                        // false (HTTP 200): the backend could not authorize, e.g.
+                        // the integration is not saved yet.
+                        if(authorized!==true) {
+                            warnLog("testAttributesAuthorization (istuntoa ei valtuutettu)", authorized)
+                            setSessionAuthenticated(false)
+                            setAuthenticationAlert(true)
+                            setLoading(false);
+                            return
+                        }
                         setSessionAuthenticated(true)
                         testAttributes({ principal: principal, select: attributeList}).then(result=>{
                             setAttributeResult(result as unknown as Record<string, unknown>)                            
