@@ -414,8 +414,8 @@ export default {
         gsuiteIdp.signingCertificateValidUntil="2028-11-30"
         gsuiteIdp.encryptionCertificateValidUntil="2028-11-30"
         gsuiteIdp.metadataValidUntil="2028-11-30"
-        gsuiteIdp.logoUrl="https://mpass-proxy.csc.fi/images/buttons/btn-hausjarvi.png"
-        gsuiteIdp.metadataUrl="https://mpass-proxy.csc.fi/idp_local_metadata/shib_hausjarvi-metadata.xml"
+        gsuiteIdp.logoUrl="https://mpass-proxy.csc.fi/images/buttons/btn-mansikkala.png"
+        gsuiteIdp.metadataUrl="https://mpass-proxy.csc.fi/idp_local_metadata/shib_mansikkala-metadata.xml"
         integration.value.configurationEntity.idp=gsuiteIdp;
       }
       if(integration.value.configurationEntity.idp.type==='adfs') {
