@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { useMe } from "@/api/käyttöoikeus";
 import {
   katselijaOphGroup,
@@ -51,7 +51,8 @@ export default function Home() {
   const [addIntegration, setAddIntegration] = useState(false); 
   const intl = useIntl();
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>();
+  // useMe suspends until loaded, so the groups are there on the first render.
+  const groups = me?.groups;
   const { state } = useLocation();
 
   const [tabs, setValue] = useSessionStorage<string[]>(
@@ -61,15 +62,9 @@ export default function Home() {
   
   useLayoutEffect(() => {
     if (tabs.includes(state!)) {
-      setValue([ ...tabs.splice(state,1)]);
+      setValue(tabs.filter((tab) => tab !== state));
     }
   }, [state, setValue, tabs]);
-
-  useEffect(() => {
-    if(me?.groups) {
-      setGroups(me.groups)
-    }
-  }, [me]);
 
   const writeAccess = () => {
     

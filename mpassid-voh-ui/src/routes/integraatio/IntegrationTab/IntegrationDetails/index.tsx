@@ -20,7 +20,6 @@ import Role from "./Role";
 import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
 import { integrationTypesDefault } from '../../../../config';
-import { useEffect, useState } from "react";
 import { clone } from "lodash";
 
 export const integrationTypes = clone(integrationTypesDefault);
@@ -31,15 +30,8 @@ interface Props {
 
 export default function IntegrationDetails({ integration }: Props) {
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>();
-  
-  
-
-  useEffect(() => {
-    if(me?.groups) {
-      setGroups(me.groups)
-    }
-  }, [me]);
+  // useMe suspends until loaded, so the groups are there on the first render.
+  const groups = me?.groups;
   
   const writeAccess = () => {
     
@@ -58,7 +50,7 @@ export default function IntegrationDetails({ integration }: Props) {
   const hasAttributes =
     role === "idp" &&
     !["opinsys", "wilma", "adfs", "gsuite" ].includes(
-      integration.configurationEntity?.[role]?.type!
+      integration.configurationEntity?.[role]?.type ?? ""
     );
 
   return (
@@ -152,14 +144,6 @@ export default function IntegrationDetails({ integration }: Props) {
                   ValueComponent={UniqueIdValue}
                 />
               </Grid>
-                  
-                {role === "sp" && false && (
-                    <DataRow
-                    object={integration}
-                    path="integrationSets"
-                    type="service-list"
-                  />
-                )}
             </Grid>
           </>
       )}    

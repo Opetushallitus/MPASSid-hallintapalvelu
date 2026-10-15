@@ -1,6 +1,6 @@
 import { useIntegrationsSpecSearchPageable } from "@/api/client";
 import MenuItem from "@mui/material/MenuItem";
-import type { Components } from "@/api";
+import type { Components, Paths } from "@/api";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import Select from "@mui/material/Select";
 import { createLogger } from "@/utils/devLog";
@@ -66,13 +66,16 @@ function PossibleServices({oid,handleService}: Props) {
         
     }
     
-    const possibleServices: Components.Schemas.PageIntegration = useIntegrationsSpecSearchPageable(
-        {
+    // Spring flattens Pageable into page/size query parameters, whereas the
+    // generated parameter type models it as a nested `pageable` object.
+    const query: Omit<Paths.GetIntegrationsSpecSearchPageable.QueryParameters, "pageable"> & { page: number; size: number } = {
             search: oid,
             role: 'set',
             page: 0,
             size: 100,
-          } as any
+          };
+    const possibleServices: Components.Schemas.PageIntegration = useIntegrationsSpecSearchPageable(
+        query as unknown as Parameters<typeof useIntegrationsSpecSearchPageable>[0]
     );
 
     if(possibleServices.content) {
@@ -88,10 +91,10 @@ function PossibleServices({oid,handleService}: Props) {
             <MenuItem key={'valitse'} value={-3} tabIndex={0}>
                 <FormattedMessage defaultMessage="Valitse" />
             </MenuItem>
-            <MenuItem key={'uusi_2'} value={-2} tabIndex={1}>
+            <MenuItem key={'uusi_2'} value={-2}>
                 {addEnv(0)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
-            <MenuItem key={'uusi_1'} value={-1} tabIndex={2}>
+            <MenuItem key={'uusi_1'} value={-1}>
                 {addEnv(1)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
             {possibleServices.content.map((integration,index) => {          

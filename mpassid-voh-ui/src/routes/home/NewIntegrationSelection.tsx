@@ -5,7 +5,7 @@ import { getOrganisaatioNimet } from "@/api/organisaatio";
 import type { SelectChangeEvent} from "@mui/material";
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
 import type { Dispatch} from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
@@ -45,19 +45,23 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const [organization, setOrganization] = useState('');
     const [integration, setIntegration] = useState('sp');
     const [type, setType] = useState(defaults.typePI);
-    const [types, setTypes] = useState(defaults.typesPI);
     const [service, setService] = useState<serviceProps>();
     const me = useMe();
     const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
     const language = toLanguage(useIntl().locale).toLowerCase();
-    const possibleOrganizationsOidsIdp = useRef<string[]>([]);
-    const possibleOrganizationsOidsAll = useRef<string[]>([]);
-    // Once the user explicitly picks an integration type, the organization
-    // effect below must stop auto-overriding it. Under React 19 the async
-    // organization (re)resolution can re-fire that effect after the user has
-    // chosen, snapping "Palveluintegraatio" back to "Koulutustoimija".
-    const userChoseIntegration = useRef(false);
+    // The organizations the user may create integrations for: idp (OKJ)
+    // ones, and all (idp + service integration ones).
+    const { idp: possibleOrganizationsOidsIdp, all: possibleOrganizationsOidsAll } = useMemo(() => {
+        const idp = me?.groups?.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) ?? [];
+        const sp = me?.groups?.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')) ?? [];
+        return { idp, all: [...idp, ...sp] };
+    }, [me]);
+    // Once the user explicitly picks an integration type, a new organization
+    // must stop auto-overriding it. Under React 19 the async organization
+    // (re)resolution can change it after the user has chosen, snapping
+    // "Palveluintegraatio" back to "Koulutustoimija".
+    const [userChoseIntegration, setUserChoseIntegration] = useState(false);
     
     const intl = useIntl();
     useEffect(() => {
@@ -65,19 +69,11 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         
         if(me?.groups) {
             const organizationNames: Organization[] = [];
-            possibleOrganizationsOidsIdp.current=[];
-            possibleOrganizationsOidsAll.current=[];
-            me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).forEach(o=>{
-                possibleOrganizationsOidsIdp.current.push(o.replace('APP_MPASSID_TALLENTAJA_',''))
-                possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_TALLENTAJA_',''))
-            });
-            me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).forEach(o=>possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')));
-            
-            debugLog("NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll.current)
-            possibleOrganizationsOidsAll.current.forEach(oid=>{
+            debugLog("NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll)
+            possibleOrganizationsOidsAll.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
-                    var found=false;
+                    let found=false;
                     response.forEach(organisation=>{
                         if(organisation?.oid===oid&&organisation?.nimi) {
                             if(organisation?.nimi[language]) {
@@ -92,7 +88,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         newOrganizationName.name=oid;
                     }
                     organizationNames.push(newOrganizationName);
-                    if(possibleOrganizationsOidsAll.current.length===organizationNames.length) {
+                    if(possibleOrganizationsOidsAll.length===organizationNames.length) {
                         setOrganizations(organizationNames)
                         setOrganization(organizationNames[0].oid)
                     }
@@ -101,7 +97,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     warnLog("NewIntegrationSelection (organisaation nimen haku epäonnistui, näytetään OID)", oid, error)
                     const newOrganizationName = { oid: oid, name: oid }
                     organizationNames.push(newOrganizationName)
-                    if(possibleOrganizationsOidsAll.current.length===organizationNames.length) {
+                    if(possibleOrganizationsOidsAll.length===organizationNames.length) {
                         setOrganizations(organizationNames)
                         setOrganization(organizationNames[0].oid)
                     }
@@ -113,7 +109,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             
             
         }
-    }, [language, me]);
+    }, [language, me, possibleOrganizationsOidsAll]);
     /*
     useEffect(() => {
         
@@ -163,35 +159,33 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         }
     }, [language, me]);
     */
-    useEffect(() => {
-        
-        
+    const organizationHasIdp = possibleOrganizationsOidsIdp.indexOf(organization)>=0;
+    const types = integration==="sp" ? defaults.typesPI : defaults.typesOKJ;
+
+    // Adjusted while rendering instead of in effects (same triggers):
+    // opening the dialog clears the service and the user's integration choice,
+    const [prevOpen, setPrevOpen] = useState(open);
+    if(open!==prevOpen) {
+        setPrevOpen(open);
         if(open) {
             setService(undefined)
-            userChoseIntegration.current = false
+            setUserChoseIntegration(false)
         }
-    }, [open]);
-
-    useEffect(() => {
-        if(integration==="sp") {
-            setType(defaults.typePI)
-            setTypes(defaults.typesPI)
-        } else {
-            setType(defaults.typeOKJ)
-            setTypes(defaults.typesOKJ)
+    }
+    // a new integration (idp/sp) resets the type to its default,
+    const [prevIntegration, setPrevIntegration] = useState(integration);
+    if(integration!==prevIntegration) {
+        setPrevIntegration(integration);
+        setType(integration==="sp" ? defaults.typePI : defaults.typeOKJ)
+    }
+    // and a new organization picks the integration, unless the user chose one.
+    const [prevOrganization, setPrevOrganization] = useState(organization);
+    if(organization!==prevOrganization) {
+        setPrevOrganization(organization);
+        if(!userChoseIntegration) {
+            setIntegration(organizationHasIdp ? 'idp' : 'sp')
         }
-    }, [integration]);
-
-    useEffect(() => {
-        if(userChoseIntegration.current) {
-            return;
-        }
-        if(possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0) {
-            setIntegration('idp')
-        } else {
-            setIntegration('sp')
-        }
-    }, [organization]);
+    }
 
 
     const createIntegration = async () => {
@@ -243,7 +237,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
 
         debugLog("handleIntegration (value)",String(event.target.value))
         const value = String(event.target.value);
-        userChoseIntegration.current = true
+        setUserChoseIntegration(true)
         setIntegration(value)
         
         
@@ -314,7 +308,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         sx={{ marginRight: "auto"}}
                     >
 
-                        {possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0&&
+                        {organizationHasIdp&&
                             <MenuItem key={'koulutustoimija'} value={'idp'}>
                                 <FormattedMessage defaultMessage='Koulutustoimija'/>
                             </MenuItem>}

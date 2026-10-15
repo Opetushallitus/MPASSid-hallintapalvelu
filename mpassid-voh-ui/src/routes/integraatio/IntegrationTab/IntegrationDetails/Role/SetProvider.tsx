@@ -2,7 +2,6 @@ import type { Components } from "@/api";
 import { Grid, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../DataRow";
-import Type from "./Type";
 
 interface Props {
   integration: Components.Schemas.Integration;

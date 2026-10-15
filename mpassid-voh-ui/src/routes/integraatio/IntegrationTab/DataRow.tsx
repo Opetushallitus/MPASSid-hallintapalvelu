@@ -22,11 +22,14 @@ export function DataRowContainer({
   const label = id in intl.messages ? { id } : undefined;
   const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
 
-  const TypeComponent =
-    typeof type === "function" ? type : typeComponents[type];
+  // Each value component expects its own value type; the value at `path`
+  // is whatever the integration holds there.
+  const TypeComponent = (
+    typeof type === "function" ? type : typeComponents[type]
+  ) as (props: { value: unknown }) => JSX.Element;
 
   return cloneElement(
-    children as React.ReactElement<any>,
+    children as React.ReactElement<DataRowProps>,
     {
       name,
       label,
@@ -41,8 +44,14 @@ interface Props {
   path: Parameters<typeof get>[1];
   type?:
     | keyof typeof typeComponents
-    | (({ value }: { value: any }) => JSX.Element);
+    | ValueComponent;
 }
+
+/**
+ * A component rendering one value. `never` lets any component with a
+ * `value` prop of its own type be passed (e.g. `Type`).
+ */
+export type ValueComponent = (props: { value: never }) => JSX.Element;
 
 export function DataRow(props: Props) {
   return (
@@ -133,7 +142,7 @@ export function TextList({ value = [] }: { value?: string[] }) {
   );
 }
 
-export function ServiceList({ value = [] }: { value?: { name?: String ; id?: BigInteger;  }[] }) {
+export function ServiceList({ value = [] }: { value?: { name?: string ; id?: BigInteger;  }[] }) {
   return (
     <>
       {value.length
@@ -185,7 +194,7 @@ const getType = (sp: ServiceProvider|undefined) => {
   
 };
 
-export function SPList({ value = [] }: { value?: { configurationEntity?: { sp?: { name?: String } }; organization?: { name?: String };  }[] } ) {
+export function SPList({ value = [] }: { value?: { configurationEntity?: { sp?: { name?: string } }; organization?: { name?: string };  }[] } ) {
   return (
     <>
       {value.length

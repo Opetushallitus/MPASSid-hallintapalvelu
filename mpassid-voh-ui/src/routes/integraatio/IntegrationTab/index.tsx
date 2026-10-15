@@ -13,7 +13,7 @@ import {
   Tabs,
   CircularProgress
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { Link, useLocation } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
@@ -59,13 +59,20 @@ function a11yProps(index: number) {
   };
 }
 
+// No permissions, or only the test service, means all services are allowed.
+const allServicesActive = (integration?: Components.Schemas.Integration) =>
+  integration?.permissions === undefined || integration?.permissions?.length===0 || (integration?.permissions?.length===1&&integration.permissions.map(i=>i.to?.id).indexOf(mpassIdUserAttributeTestService)>=0 );
+
 export default function IntegrationTab({ id }: Props) {
   const [error, origInteg] = useIntegrationSafe({ id });
   const [value, setValue] = useState(0);
   const [newIntegration, setNewIntegration] = useState<Components.Schemas.Integration | undefined>(undefined);
-  const [integration, setIntegration] = useState<Components.Schemas.Integration| undefined>(undefined);
-  const [activateAllServices, setActivateAllServices] = useState(false);
   const { state } = useLocation();
+  // The navigation's integration (same id) wins over the loaded one, as the
+  // former effects (in this order) had it.
+  const pickIntegration = () => state?.id===id ? state : (origInteg!==undefined&&state?.id!==origInteg.id ? origInteg : undefined);
+  const [integration, setIntegration] = useState<Components.Schemas.Integration| undefined>(pickIntegration);
+  const [activateAllServices, setActivateAllServices] = useState(() => allServicesActive(integration));
 
   const role = origInteg ? getRole(origInteg) : undefined;
 
@@ -73,31 +80,34 @@ export default function IntegrationTab({ id }: Props) {
     setValue(newValue);
   };
 
-  useEffect(() => {
-    if(state?.id===id) {
-      setIntegration(state)
+  // Adjusted while rendering instead of in effects, with the former effects'
+  // triggers and order: a new navigation state or id takes the state's
+  // integration, a new loaded integration (or state) the loaded one. A saved
+  // integration (setIntegration from IntegrationSelection) stays until then.
+  const [prevSources, setPrevSources] = useState({ state, id, origInteg });
+  if(state!==prevSources.state||id!==prevSources.id||origInteg!==prevSources.origInteg) {
+    setPrevSources({ state, id, origInteg });
+    let picked: Components.Schemas.Integration | undefined;
+    if((state!==prevSources.state||id!==prevSources.id)&&state?.id===id) {
+      picked = state;
     }
-  }, [state,id]);
+    if((origInteg!==prevSources.origInteg||state!==prevSources.state)&&origInteg!==undefined&&state?.id!==origInteg.id) {
+      picked = origInteg;
+    }
+    if(picked!==undefined) {
+      setIntegration(picked);
+    }
+  }
+  const [prevIntegration, setPrevIntegration] = useState(integration);
+  if(integration!==prevIntegration) {
+    setPrevIntegration(integration);
+    setActivateAllServices(allServicesActive(integration));
+  }
 
-  useEffect(() => {
-    if(origInteg!==undefined&&state?.id!==origInteg?.id) {
-      setIntegration(origInteg)
-    }
-  }, [origInteg,state]);
-
-  useEffect(() => {
-    if(integration?.permissions === undefined || integration?.permissions?.length===0 || (integration?.permissions?.length===1&&integration.permissions.map(i=>i.to?.id).indexOf(mpassIdUserAttributeTestService)>=0 )) {
-      setActivateAllServices(true);
-    } else {
-      setActivateAllServices(false);
-    }
-  }, [integration]);
-
-  useEffect(() => {
-    if((role==="sp"||role==="set")&&value===1) {
-      setValue(0);  
-    }
-  }, [id, role, value]);
+  // sp and set integrations have no second tab.
+  if((role==="sp"||role==="set")&&value===1) {
+    setValue(0);
+  }
 
   if (error?.response?.status === 404) {
     return (

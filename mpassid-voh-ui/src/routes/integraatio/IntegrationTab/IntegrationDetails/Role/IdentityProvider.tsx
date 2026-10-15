@@ -22,7 +22,6 @@ export default function IdentityProvider({ integration }: Props) {
   const identityProvider = integration.configurationEntity!.idp!;
 
   const testLinkHref =
-    // eslint-disable-next-line no-new-func
     new Function("flowName", `return \`${testLink}\``)(
       identityProvider.flowName
     );

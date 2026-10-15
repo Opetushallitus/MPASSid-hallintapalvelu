@@ -2,6 +2,7 @@ import type { Components } from "@/api";
 import type { JSX, PropsWithChildren } from "react";
 import { cloneElement } from "react";
 import { useIntl } from "react-intl";
+import type { DataRowProps, ValueComponent } from "../DataRow";
 import { DataRowBase, typeComponents } from "../DataRow";
 
 export function AttributeRowContainer({
@@ -12,7 +13,7 @@ export function AttributeRowContainer({
 }: PropsWithChildren<Props>) {
   const value = configurationEntity.attributes?.find(
     (attribute) => attribute.name === name
-  )?.content as any;
+  )?.content;
 
   const intl = useIntl();
   const id = `attribuutti.${name}`;
@@ -20,11 +21,14 @@ export function AttributeRowContainer({
   const label = id in intl.messages ? { id } : undefined;
   const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
 
-  const TypeComponent =
-    typeof type === "function" ? type : typeComponents[type];
+  // Each value component expects its own value type; the value at `path`
+  // is whatever the integration holds there.
+  const TypeComponent = (
+    typeof type === "function" ? type : typeComponents[type]
+  ) as (props: { value: unknown }) => JSX.Element;
 
   return cloneElement(
-    children as React.ReactElement<any>,
+    children as React.ReactElement<DataRowProps>,
     {
       name,
       label,
@@ -39,7 +43,7 @@ interface Props {
   name: string;
   type?:
     | keyof typeof typeComponents
-    | (({ value }: { value: any }) => JSX.Element);
+    | ValueComponent;
 }
 
 export function Attribute(props: Props) {

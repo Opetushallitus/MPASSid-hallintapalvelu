@@ -15,7 +15,7 @@ function EditIntegrationButton(props:Props) {
   const id = props.integration.id || "new"
   const type = props.integration.configurationEntity!.idp?.type || props.integration.configurationEntity!.sp?.type || props.integration.configurationEntity!.set?.type || "unknown"
   const editor: boolean = true;
-  var to = ""
+  let to = ""
   if(integration?.configurationEntity?.idp) {
     to = "/muokkaa/idp/"+type+"/"+id
   }

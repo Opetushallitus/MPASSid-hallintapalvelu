@@ -10,11 +10,9 @@ export const attributePreferredOrder = ["firstName", "surname"]
 export const category = "mpassid-hallinta";
 
 export const testLink =
-  // eslint-disable-next-line no-template-curly-in-string
   "https://firmitas.csc.fi/mpass/Shibboleth.sso/Login?entityID=https://mpass-proxy.csc.fi/idp/shibboleth&authnContextClassRef=urn:mpass.id:authnsource:${flowName}";
 
   export const azureMetadataUrlTemplate =
-  // eslint-disable-next-line no-template-curly-in-string
   "https://login.microsoftonline.com/${tenantId}/FederationMetadata/2007-06/FederationMetadata.xml";  
 
 export const tallentajaOphGroup =
