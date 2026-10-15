@@ -1,22 +1,24 @@
-import { inactivateIntegration, type Components, uploadLogo, uploadSamlMetadata, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization, useDataUserInterfaceConfigurationRawSafe } from "@/api";
+import { inactivateIntegration, type Components, type Paths, uploadLogo, uploadSamlMetadata, createIntegrationRaw, updateIntegrationRaw, testAttributesAuthorization, useDataUserInterfaceConfigurationRawSafe } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import HelpLinkButton from "@/utils/components/HelpLinkButton";
 import PageHeader from "@/utils/components/PageHeader";
 import Suspense from "@/utils/components/Suspense";
 import { Box, Button, Container, Paper, Snackbar, TableContainer, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, Alert, AlertTitle, Link as MuiLink, CircularProgress } from '@mui/material';
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useNavigate, useParams } from "react-router-dom";
 import IntegrationDetails from "./IntegrationDetails";
 import MpassSymboliIcon from "@/utils/components/MpassSymboliIcon";
 import { useMe } from "@/api/käyttöoikeus";
 import type { UiConfiguration } from '../../config';
-import { tallentajaOphGroup, dataConfiguration } from '../../config';
+import { dataConfiguration } from '../../config';
+import { withDevUiConfiguration } from './devUiConfiguration';
 import RuleIcon from '@mui/icons-material/Rule';
 import AttributeTest from "./AttributeTest";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { createLogger, redactSecrets } from "@/utils/devLog";
-import { cloneDeep, clone } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { isAxiosError } from 'axios';
 import { integrationTypesDefault } from '@/config';
 
 const debugLog = createLogger("DEBUG");
@@ -36,40 +38,29 @@ export default function IntegraatioMuokkaus() {
   const [openIntegrationError, setOpenIntegrationError] = useState(false);
   const [openIntegrationErrorText, setOpenIntegrationErrorText] = useState<string>('');
   
-  const [isConfirmed, setConfirmed] = useState(false);
+  const [isConfirmed] = useState(false);
   const [isDisabled, setDisabled] = useState(false);
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>();
+  // useMe suspends until loaded, so the groups are there on the first render.
+  const groups = me?.groups;
   const [openNotice, setOpenNotice] = useState(false);
   const [logo, setLogo] = useState<Blob>();
   const [ metadataFile, setMetadataFile ] = useState<File[]>([]);
   const result = useRef<Components.Schemas.Integration>({});
   const [loading, setLoading] = useState<boolean>(false);
   const intl = useIntl();
-  const [uiConfiguration, setUiConfiguration] = useState<UiConfiguration[]>([]);
-  const [ uiError, uiConfig ] = useDataUserInterfaceConfigurationRawSafe();
+  // Called for its side effect (loads the UI configuration); its data is
+  // not used yet. Note: use uiConfig.data when the backend supports it.
+  useDataUserInterfaceConfigurationRawSafe();
   const deploymentPhase = useRef<number>(-5);
   
 
-  useEffect(() => {
-    if(me?.groups) {
-      setGroups(me.groups)
-    }
-  }, [me]);
+  // The built-in configuration (+ the dev additions from localStorage),
+  // read once.
+  const uiConfiguration = useMemo<UiConfiguration[]>(() => withDevUiConfiguration(dataConfiguration), []);
 
-  useEffect(() => {
-    if(uiConfig&&uiConfig.status===200) {
-      //Note: Update to user uiconfig.data when backend supports
-      //setUiConfiguration(uiConfig.data)
-
-      setUiConfiguration(dataConfiguration)
-    } else {
-      setUiConfiguration(dataConfiguration)
-    }
-  }, [uiConfig,uiError]);
-
-  var oid:string = newIntegration?.organization?.oid || "";
-  var environment:number = newIntegration?.deploymentPhase || 0;
+  const oid:string = newIntegration?.organization?.oid || "";
+  const environment:number = newIntegration?.deploymentPhase || 0;
 
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
@@ -133,33 +124,41 @@ export default function IntegraatioMuokkaus() {
     return false;
   }
   
-  const saveIntegration = async (event:any) => {
+  const saveIntegration = async (_event?:React.MouseEvent) => {
     
     if(writeAccess()) {
-      var catchError=false
+      let catchError=false
       if(newIntegration!==undefined) {
         if(!isConfirmed&&!openConfirmation) {
           setOpenConfirmation(true);
         } else {
           const id = newIntegration.id!;
+          // The integration to save: a copy, the draft state is not modified.
+          const integrationToSave = cloneDeep(newIntegration);
           if(isDisabled) {
-            result.current = await inactivateIntegration({ id });
+            try {
+              result.current = await inactivateIntegration({ id });
+            } catch (error) {
+              errorLog("saveIntegration (integraation poisto epäonnistui)", { id }, error);
+              setOpenIntegrationErrorText('')
+              catchError=true;
+            }
           } else {            
-            newIntegration.permissions?.forEach((permission)=>{
+            integrationToSave.permissions?.forEach((permission)=>{
               delete permission.lastUpdatedOn;
             })
-            if(newIntegration?.configurationEntity&&newIntegration?.configurationEntity.attributes&&newIntegration?.configurationEntity.attributes.length>0) {
-              newIntegration.configurationEntity.attributes=newIntegration.configurationEntity.attributes.filter(a=>!(a.content===''&&a.type==='user'))
+            if(integrationToSave.configurationEntity&&integrationToSave.configurationEntity.attributes&&integrationToSave.configurationEntity.attributes.length>0) {
+              integrationToSave.configurationEntity.attributes=integrationToSave.configurationEntity.attributes.filter(a=>!(a.content===''&&a.type==='user'))
             }
             
             try {
               setLoading(true)
               if(id===0) {
-                result.current = (await createIntegrationRaw({},newIntegration)).data;   
+                result.current = (await createIntegrationRaw({},integrationToSave)).data;   
               } else {
-                const updateIntegration = cloneDeep(newIntegration);
-                if(newIntegration.integrationSets&&newIntegration.integrationSets.length>0) {
-                  updateIntegration.integrationSets = newIntegration.integrationSets.map(i=> { return { id: i.id}})
+                const updateIntegration = integrationToSave;
+                if(integrationToSave.integrationSets&&integrationToSave.integrationSets.length>0) {
+                  updateIntegration.integrationSets = integrationToSave.integrationSets.map(i=> { return { id: i.id}})
                 }
                 if(deploymentPhase.current>=0) {
                   updateIntegration.deploymentPhase=deploymentPhase.current;
@@ -172,7 +171,8 @@ export default function IntegraatioMuokkaus() {
                 formData.append("file", logo);
                 const logoId:number = result.current.id||0;
                 if(logoId!==0) {
-                  const logoResult= await uploadLogo({ id: logoId },formData as any);
+                  // Multipart body: the generated type models the form field, not FormData.
+                  const logoResult= await uploadLogo({ id: logoId },formData as unknown as Paths.UploadLogo.RequestBody);
                   if(result.current.configurationEntity?.idp) {
                     result.current.configurationEntity.idp.logoUrl=logoResult
                   }                
@@ -182,19 +182,21 @@ export default function IntegraatioMuokkaus() {
                 const formData = new FormData();
                 formData.append("file", metadataFile[0]);
                 const metadataId:number = result.current.id||0;                
-                const metadataResult= await uploadSamlMetadata({ id: metadataId },formData as any);
+                // Multipart body: the generated type models the form field, not FormData.
+                const metadataResult= await uploadSamlMetadata({ id: metadataId },formData as unknown as Paths.UploadSAMLMetadata.RequestBody);
                 
                 if(result.current.configurationEntity?.idp) {
                   result.current=metadataResult;
                 }
               }
               setLoading(false)
-            } catch (error:any) {   
+            } catch (error) {   
               setLoading(false)           
+              const response = isAxiosError<{ message?: string }>(error) ? error.response : undefined
               errorLog("saveIntegration (integraation tallennus epäonnistui)",
-                { id, status: error?.response?.status, data: error?.response?.data }, error);
-              if(error?.response?.status===409) {
-                setOpenIntegrationErrorText(error?.response?.data?.message)
+                { id, status: response?.status, data: response?.data }, error);
+              if(response?.status===409) {
+                setOpenIntegrationErrorText(response?.data?.message ?? '')
               } else {
                 setOpenIntegrationErrorText('')
               }
@@ -227,15 +229,16 @@ export default function IntegraatioMuokkaus() {
       if(clientKey !== undefined && !clientKey.includes("***") && id !== undefined) {
         setAzureTestDone(true)
         const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
+                    // The backend reads the tenant id from the saved integration.
                     authRequest.id=parseInt(id);
-                    if(id!=='0'&&newIntegration.configurationEntity.attributes.find(a=>a.name==='tenantId'&&a.type==='data')) {
-                      authRequest.tenantId=newIntegration.configurationEntity.attributes.find(a=>a.name==='tenantId'&&a.type==='data')?.content
-                    }
                     authRequest.clientId=clientId;
                     authRequest.clientSecret=clientKey;
                     
                     testAttributesAuthorization({},authRequest).then(result=>{ 
-                          debugLog("testAttributesAuthorization",redactSecrets(result))                           
+                          debugLog("testAttributesAuthorization",redactSecrets(result))
+                          if(result!==true) {
+                            warnLog("testAzureAccess (testivaltuutus ei onnistunut)", result)
+                          }
                         }).catch(error=>{
                           // Huom: aiempi versio palautti tästä <Alert>-elementin, joka ei
                           // koskaan renderöitynyt (callback ratkeaa renderin jälkeen).
@@ -256,7 +259,7 @@ export default function IntegraatioMuokkaus() {
             icon={<MpassSymboliIcon />}
             sx={{ flexGrow: 1 }}
           >
-            {id==='0'&&<FormattedMessage defaultMessage="Uusi jäsen" values={{id: Number(id)}} />}
+            {id==='0'&&<FormattedMessage defaultMessage="Uusi jäsen" />}
             {id!=='0'&&<FormattedMessage defaultMessage="Jäsenen {id} muokkaus" values={{id: Number(id)}} />}
           </PageHeader>
           <HelpLinkButton />
@@ -264,7 +267,7 @@ export default function IntegraatioMuokkaus() {
         
         <Suspense>
           <ErrorBoundary>
-            <IntegrationDetails id={Number(id)} dataConfiguration={uiConfiguration} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile} deploymentPhase={deploymentPhase}/>
+            <IntegrationDetails id={Number(id)} dataConfiguration={uiConfiguration} setSaveDialogState={setSaveDialogState} setCanSave={setCanSave} newIntegration={newIntegration} setNewIntegration={setNewIntegration} setLogo={setLogo} metadataFile={metadataFile} setMetadataFile={setMetadataFile} deploymentPhaseRef={deploymentPhase}/>
           </ErrorBoundary>
           
         </Suspense>
@@ -409,7 +412,7 @@ export default function IntegraatioMuokkaus() {
               </Alert>
                   
               </Dialog>
-              <AttributeTest id={id||'0'} dataConfiguration={uiConfiguration} open={openAttributeTest} setOpen={setOpenAttributeTest} tenantId={newIntegration?.configurationEntity?.attributes?.find(a=>a.type==='data'&&a.name==='tenantId')?.content } attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
+              <AttributeTest id={id||'0'} dataConfiguration={uiConfiguration} open={openAttributeTest} setOpen={setOpenAttributeTest} attributes={newIntegration?.configurationEntity?.attributes?.filter(a=>a.type==='user') || []} oid={oid} environment={environment} />
       </>
   );
 }

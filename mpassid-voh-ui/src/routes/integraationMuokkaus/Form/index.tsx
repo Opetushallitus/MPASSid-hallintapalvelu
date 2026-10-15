@@ -19,13 +19,15 @@ import { createLogger, redactSecretValue, redactSecrets } from "@/utils/devLog";
 import type { oneEnum } from "./MultiSelectForm";
 import MultiSelectForm from "./MultiSelectForm";
 import { calculateSHA1, getRandom } from '@/config';
+import type { FormObject, ListFormHandle, MetadataEntry, MetadataFormObject, MetadataUpdate, ObjectFormHandle } from "./types";
+import { hasLength } from "./types";
 
 const debugLog = createLogger("DEBUG");
 
 interface AttributeProps {
     uiConfiguration: UiConfiguration;
-    role?: any;
-    type?: any;
+    role?: string;
+    type?: string;
     attribute: Components.Schemas.Attribute;
     attributeType: string;
     newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
@@ -35,7 +37,7 @@ interface AttributeProps {
     setCanSave: Dispatch<boolean>
 }
 
-export default function AttributeForm({ attribute, helperText, role, type, attributeType,  newConfigurationEntityData, uiConfiguration,onUpdate,onValidate,setCanSave }: AttributeProps) {
+export default function AttributeForm({ attribute, helperText, type, attributeType, uiConfiguration,onUpdate,onValidate,setCanSave }: AttributeProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
@@ -69,7 +71,7 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
 
 
     if(roleConfiguration.visible) {
-        var enumValues: oneEnum[] = [];
+        let enumValues: oneEnum[] = [];
         if(configuration.enum) {
             enumValues=configuration.enum.map(e=> {return ({label: String(e), value: String(e) })})
         }
@@ -171,27 +173,27 @@ export default function AttributeForm({ attribute, helperText, role, type, attri
  interface MetadataProps {
     uiConfiguration: UiConfiguration;
     dataConfiguration: UiConfiguration[];
-    role?: any;
-    type?: any;
-    attribute: any;
+    role?: string;
+    type?: string;
+    attribute: MetadataFormObject;
     newConfigurationEntityData: Components.Schemas.ConfigurationEntity; 
     helperText: (data:string) => JSX.Element;
-    onUpdate: (name: string,value: any) => void;
+    onUpdate: (name: string,value: MetadataUpdate) => void;
     onEdit: (name: string,value: string) => void;
-    onDelete: (name: string,index: number) => void;
+    onDelete: (name: string | undefined,index: number) => void;
     onValidate: (data:string) => boolean;
     setCanSave: Dispatch<boolean>
 }
 
-export function MetadataForm({ attribute, helperText, role, type,  newConfigurationEntityData, uiConfiguration,onUpdate, onEdit,onDelete,onValidate,setCanSave,dataConfiguration }: MetadataProps) {
+export function MetadataForm({ attribute, helperText, type, uiConfiguration,onUpdate,onDelete,onValidate,dataConfiguration }: MetadataProps) {
     const intl = useIntl();
     const id = `attribuutti.${attribute.name}`;
     const label = id in intl.messages ? { id } : undefined;           
     const tooltipId = `työkaluvihje.${attribute.name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
-    const currentObject= useRef<any>({});
-    const pressButtonRef= useRef<any>(true);
-    const objectDataRef= useRef<any>(true);
+    const currentObject= useRef<MetadataEntry>({});
+    const pressButtonRef= useRef<ListFormHandle>(null);
+    const objectDataRef= useRef<ObjectFormHandle>(null);
     const [ canSaveItem, setCanSaveItem ] = useState(true)
     //const [ object, setObject ] = useState<any>(attribute)
 
@@ -211,7 +213,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         return onValidate(data);
     }
     
-    const updatObjectItem  = (name: string, data:any) => {
+    const updatObjectItem  = (name: string, data:string) => {
         
         debugLog("updatObjectItem (name)",name)
         debugLog("updatObjectItem (data)",data)
@@ -221,21 +223,16 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         //onUpdate(attribute.name,currentObject.current)
         debugLog("updatObjectItem (mandatory)",uiConfiguration.mandatory)
         
-        if(data.content) {
-            if(objectOnValidate(data.content)) {
-                currentObject.current[name]=data.content;    
-            }
-            
-        } else {
-            if(objectOnValidate(data)) {
-                currentObject.current[name]=data;    
-            }
+        // ObjectForm always reports a plain string here (its onUpdate is
+        // typed (name, string)); the former `data.content` branch was dead.
+        if(objectOnValidate(data)) {
+            currentObject.current[name]=data;    
         }
         debugLog("updatObjectItem (result)",redactSecrets(currentObject.current))
         
     }
 
-    const editObject  = (name: string, data:any, index:number) => {
+    const editObject  = (name: string | undefined, data:MetadataEntry, index:number) => {
         
         debugLog("editObject", { name, data, uiConfiguration, attribute: redactSecrets(attribute) })
         //console.log("*** currentObject.current: ",currentObject.current)
@@ -245,12 +242,12 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         //objectDataRef.current.clean()
         
         onDelete(attribute.name,index);
-        objectDataRef.current.edit(data)
+        objectDataRef.current?.edit(data)
         //onEdit(name,data)
         
     }
 
-    const deleteObjectItem  = (name: string, index:number) => {
+    const deleteObjectItem  = (name: string | undefined, index:number) => {
         
         debugLog("deleteObjectItem", { name, index, uiConfiguration, attribute: redactSecrets(attribute) })
         
@@ -283,7 +280,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
 
     }
 
-    const updateSwitchItem = (name:any,value:boolean) => {
+    const updateSwitchItem = (name:string,value:boolean) => {
         debugLog("updateSwitchItem ("+name+")",value)
         
         
@@ -298,9 +295,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
         debugLog("updateListObject (attribute)",redactSecrets(attribute))
         debugLog("updateListObject (currentObject)",redactSecrets(currentObject.current))
         
-        if(objectDataRef.current.validate()) {
+        if(objectDataRef.current?.validate()) {
             onUpdate(attribute.name,currentObject.current)
-            objectDataRef.current.clean()
+            objectDataRef.current?.clean()
         }
         
     }
@@ -319,12 +316,12 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     }
     
     if(roleConfiguration.visible) {
-        var buttonColor:"default" | "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning"="default";
-        if(configuration.mandatory&&attribute.content&&attribute.content.length===0) {
+        let buttonColor:"default" | "inherit" | "primary" | "secondary" | "error" | "info" | "success" | "warning"="default";
+        if(configuration.mandatory&&attribute.content&&hasLength(attribute.content)&&attribute.content.length===0) {
             debugLog("MetadataForm (buttonColor)",redactSecretValue(attribute.name,attribute.content))
             buttonColor="error"
         } 
-        var enumValues: oneEnum[] = [];
+        let enumValues: oneEnum[] = [];
         if(configuration.enum) {
             enumValues=configuration.enum.map(e=> {return (
                                     {label: (e===null||e==='null')?intl.formatMessage({defaultMessage: "Ei arvoa" }):String(e), 
@@ -368,8 +365,9 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             (<ErrorBoundary>
                             <ObjectForm key={attribute.name+"_"+configuration.name} 
                                 dataConfiguration={dataConfiguration}
-                                integrationType={type}
-                                object={attribute} 
+                                integrationType={type ?? ''}
+                                // configuration.object: a list of objects
+                                object={attribute as MetadataFormObject & { content: MetadataEntry[] }} 
                                 path="content" 
                                 type={attribute.name!} 
                                 isEditable={roleConfiguration.editable} 
@@ -383,7 +381,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                 helperText={helperText}
                                 setCanSave={setCanSaveItem}
                                 objectData={objectDataRef}
-                                currentObject={currentObject}/>
+                                currentObjectRef={currentObject}/>
                                 </ErrorBoundary>)
                             }
                             {configuration&&roleConfiguration&&configuration.switch&&configuration.enum&&configuration.enum.length===2&&
@@ -406,11 +404,12 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                     //object={attribute} 
                                     //path="content" 
                                     //type={attribute.name!} 
-                                    values={attribute.content}
+                                    // enum (non-switch) attributes hold the selected values
+                                    values={attribute.content as string[]}
                                     isEditable={roleConfiguration.editable}
                                     //onUpdate={onUpdate} 
                                     onValidate={onValidate}
-                                    mandatory={configuration.mandatory&&attribute.content.length===0}
+                                    mandatory={configuration.mandatory&&hasLength(attribute.content)&&attribute.content.length===0}
                                     label={label ? intl.formatMessage(label) : attribute.name!}
                                     //attributeType={"metadata"}
                                     helperText={helperText}
@@ -451,7 +450,8 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                             }
                             {configuration&&roleConfiguration&&configuration.array&&!configuration.enum&&!configuration.object&&
                                 (<ListForm key={attribute.name}
-                                object={attribute}
+                                // configuration.array without enum/object: a list of strings
+                                object={attribute as FormObject<string[]> & { content: string[] }}
                                 noErrors={true}
                                 type={attribute.name!}
                                 isEditable={roleConfiguration.editable}
@@ -470,7 +470,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                                         <IconButton 
                                             size="small"
                                             color={buttonColor}
-                                            onClick={()=>pressButtonRef.current.pressEnter()} >
+                                            onClick={()=>pressButtonRef.current?.pressEnter()} >
                                             <AddIcon />
                                             <FormattedMessage defaultMessage="Lisää" />
                                         </IconButton>
@@ -520,7 +520,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     setCanSave: Dispatch<boolean>
  }
 
- export function SchoolForm({ name, value, isVisible, isEditable, isMandatory, helperText, newConfigurationEntityData,onUpdate,onValidate,setCanSave }: SchoolProps) {
+ export function SchoolForm({ name, value, isVisible, isEditable, isMandatory, helperText, onUpdate,onValidate,setCanSave }: SchoolProps) {
 
     const intl = useIntl();
     const id = `attribuutti.${name}`;
@@ -528,7 +528,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
     const tooltipId = `työkaluvihje.${name}`;
     const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
     const attribute = { type: "data" ,name: name, content: value }
-    const onUpdateData = (name: string,value: string,type: string) => {
+    const onUpdateData = (name: string,value: string,_type: string) => {
         onUpdate(value);
     }
 
@@ -560,7 +560,7 @@ export function MetadataForm({ attribute, helperText, role, type,  newConfigurat
                         }}
                         variant="caption"
                     >
-                    {true&&
+                    {
                         (<InputForm key={attribute.name} 
                             object={attribute} 
                             path="content" 

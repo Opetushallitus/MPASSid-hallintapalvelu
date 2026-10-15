@@ -1,4 +1,4 @@
-export const inits:any = {
+export const inits = {
     idp: {
       wilma: {
         id: 0,

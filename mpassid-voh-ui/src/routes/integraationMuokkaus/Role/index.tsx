@@ -3,7 +3,7 @@ import { getRole } from "../../home/IntegrationsTable";
 import IdentityProvider from "./IdentityProvider";
 import ServiceProvider from "./ServiceProvider";
 import SetProvider from "./SetProvider";
-import type { Dispatch, MutableRefObject } from "react";
+import type { Dispatch } from "react";
 import { createLogger } from "@/utils/devLog";
 import { dataConfiguration } from "@/config";
 
@@ -14,7 +14,8 @@ const debugLog = createLogger("DEBUG");
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
-  environment: MutableRefObject<number>;
+  /** The chosen environment (deploymentPhase); negative while unknown. */
+  environment: number;
   name: string;
   attributes?: Components.Schemas.Attribute[];
   metadataUrl: string;

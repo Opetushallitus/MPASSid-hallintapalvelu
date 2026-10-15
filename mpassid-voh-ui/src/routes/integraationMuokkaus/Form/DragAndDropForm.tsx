@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './DragAndDropForm.css';
 import { FormattedMessage } from 'react-intl';
 import { Grid, IconButton } from '@mui/material';
@@ -11,7 +11,7 @@ interface FileUploaderInterface {
   fileExist: boolean;
   mandatoryColor: boolean;
   emptyFiles: boolean; 
-  onFilesDrop?: (files: File[], event: React.DragEvent) => any;
+  onFilesDrop?: (files: File[], event: React.DragEvent) => void | Promise<void>;
   onDelete: () => void;
 }
 
@@ -19,11 +19,15 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false,
   const [files, setFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {  
+  // emptyFiles turning false clears the chosen files (adjusted while
+  // rendering instead of in an effect).
+  const [prevEmptyFiles, setPrevEmptyFiles] = useState(emptyFiles);
+  if(emptyFiles!==prevEmptyFiles) {
+    setPrevEmptyFiles(emptyFiles);
     if(!emptyFiles) {
       setFiles([]);
-    }    
-  }, [setFiles,emptyFiles]);
+    }
+  }
 
   /**
    * This function is responsible for handle drop event for drag and drop input and executing
@@ -31,7 +35,12 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false,
    * @param event drag event
    */
   const handleDrop = async (event: React.DragEvent) => {
-    let files = Object.values(event.dataTransfer.files);
+    // Must run synchronously: after an await the browser has already handled the drop.
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+
+    const files = Object.values(event.dataTransfer.files);
 
     debugLog('files =>', files);
 
@@ -40,9 +49,6 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false,
     if (onFilesDrop) {
       await onFilesDrop(files, event);
     }
-
-    event.preventDefault();
-    event.stopPropagation();
   };
 
   //------ Necessary functions for onDrop event to behave correctly. Don't remove !
@@ -84,7 +90,7 @@ function FileUploader({ onFilesDrop, onDelete, fileExist=true, emptyFiles=false,
 
         {files.length===1&&                             
             <Grid>
-                <IconButton onClick={(event)=>handleRemoveFiles()}>
+                <IconButton onClick={()=>handleRemoveFiles()}>
                     <Clear />
                 </IconButton>
                 <FormattedMessage defaultMessage="{filename}" values={{ filename: files[0].name}} />

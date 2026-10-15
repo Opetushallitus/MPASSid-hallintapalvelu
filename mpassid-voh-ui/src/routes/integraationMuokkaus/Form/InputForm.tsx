@@ -5,17 +5,18 @@ import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from "lodash";
 import { createLogger } from "@/utils/devLog";
+import type { FormObject } from "./types";
 
 const debugLog = createLogger("DEBUG");
 
 interface Props {
-  object: any;
+  object: FormObject;
   type: string;
   label: string;
   attributeType: string;
   isEditable: boolean;
   mandatory: boolean;
-  path: any;
+  path: string;
   reload?: boolean;
   noErros?: boolean;
   helperText: (data:string) => JSX.Element;

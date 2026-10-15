@@ -1,13 +1,13 @@
 import { useParams } from "react-router-dom";
 import type { Components } from "@/api";
 import type { UiConfiguration } from "@/config";
-import { azureMetadataUrlTemplate, environments, testLink } from "@/config";
+import { environments, testLink } from "@/config";
 import { Box, Grid, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../integraatio/IntegrationTab/DataRow"
 import LinkValue from "../LinkValue";
 import Type from "./Type";
-import { type Dispatch, type JSX, type MutableRefObject } from "react";
+import { type Dispatch, type JSX } from "react";
 import type { oneEnum } from "../Form/MultiSelectForm";
 import MultiSelectForm from "../Form/MultiSelectForm";
 import { useIntl } from 'react-intl';
@@ -25,7 +25,8 @@ interface Props {
   integration: Components.Schemas.Integration;
   name?: string;
   tenantId?: string;
-  environment: MutableRefObject<number>;
+  /** The chosen environment (deploymentPhase); negative while unknown. */
+  environment: number;
   metadataUrl: string;
   metadataFile: File[];
   dataConfiguration: UiConfiguration[];
@@ -36,24 +37,16 @@ interface Props {
   setMetadataFile: Dispatch<File[]>;
 }
 
-export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl,metadataUrl="",metadataFile, setMetadataFile,dataConfiguration }: Props) {
+export default function Koulutustoimija({ integration, environment, setEnvironment, setMetadataUrl,metadataUrl="",metadataFile, setMetadataFile }: Props) {
     const { role } = useParams();
     const intl = useIntl();
     const identityProvider: Components.Schemas.Integration|Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite= integration.configurationEntity!.idp!;
-    const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===identityProvider.type).length>0)
-    const environmentConfiguration:UiConfiguration[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment.current) || [];
     
     const testLinkHref =
-      // eslint-disable-next-line no-new-func
       new Function("flowName", `return \`${testLink}\``)(
         identityProvider.flowName
       );
     
-    const metadataUrlTemplate =
-      // eslint-disable-next-line no-new-func
-        new Function("tenantId", `return (tenantId!=='')?\`${azureMetadataUrlTemplate}\`:''`)(
-          tenantId
-        );
     
     
     const canSave = (value: boolean) => {  
@@ -74,9 +67,8 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
       
     }      
 
-    const updateEnvironment = (values: String[]) => {
+    const updateEnvironment = (values: string[]) => {
       if(values.length>0) {
-        environment.current=+values[0];
         setEnvironment(+values[0]);        
       }
       debugLog("updateEnvironment (values)",values)
@@ -140,7 +132,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
         
               <Grid container spacing={2} sx={{ mb: 2 }}>                
                                       
-                    {environment.current>-1&&
+                    {environment>-1&&
                     (<>
                       <Grid size={4}>
                       <FormattedMessage defaultMessage="Palveluympäristö" />
@@ -149,7 +141,7 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                       <ErrorBoundary>
                         <MultiSelectForm 
                           key={"Palveluymparisto"}
-                          values={[String(environment.current)]}
+                          values={[String(environment)]}
                           isEditable={true}
                           //onValidate={onValidate}
                           mandatory={false}
@@ -161,9 +153,9 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                           createEmpty={false}
                           multiple={false}
                           onUpdate={value => updateEnvironment(value)} 
-                          helperText={function (data: string): JSX.Element { return(<></>);} } 
+                          helperText={function (_data: string): JSX.Element { return(<></>);} } 
                           setCanSave={canSave} 
-                          onValidate={function (data: string): boolean {
+                          onValidate={function (_data: string): boolean {
                             throw new Error("Function not implemented.");
                           } }/>
                       </ErrorBoundary>

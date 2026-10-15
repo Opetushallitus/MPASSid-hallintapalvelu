@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { DataRow } from "@/routes/integraatio/IntegrationTab/DataRow";
 import Type from "./Type";
 import InputForm from "../Form/InputForm";
-import type { Dispatch, MutableRefObject} from "react";
+import type { Dispatch } from "react";
 import { createLogger } from "@/utils/devLog";
 import { helperText, validate } from "@/utils/Validators";
 import type { UiConfiguration } from "@/config";
@@ -15,7 +15,7 @@ const debugLog = createLogger("DEBUG");
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
-  environment: MutableRefObject<number>;
+  environment: number;
   name: string;
   tenantId?: string;
   metadataUrl?: string;
@@ -33,7 +33,7 @@ export default function ServiceProvider({ integration, setName, setCanSave, name
   const configuration:UiConfiguration = dataConfiguration.filter(conf=>conf.type&&conf.type==='integrationDetails').find(conf=>conf.name&&conf.name==='serviceName') || defaultDataConfiguration;
   const isEditable = (integration.integrationSets&&integration.integrationSets.length>0&&integration.integrationSets[0].id&&integration.integrationSets[0].id!==0)?false:true;
 
-  const updateName = (name: string,value: string,type: string) => {
+  const updateName = (name: string,value: string,_type: string) => {
     debugLog("ServiceProvider (updateName)",value)
     setName(value)
   }

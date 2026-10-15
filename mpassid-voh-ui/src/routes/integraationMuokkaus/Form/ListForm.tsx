@@ -7,8 +7,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ClearIcon from '@mui/icons-material/Clear';
+import type { FormObject, ListFormHandle } from "./types";
 interface Props {
-  object?: any;
+  object: FormObject<string[]> & { content: string[] };
   label: string;
   type: string;
   isEditable?: boolean;
@@ -17,13 +18,13 @@ interface Props {
   attributeType: string;
   index?: number;
   helperText: (data: string) => JSX.Element;
-  onUpdate: (name: string, data: any) => void;
-  onValidate: (data: any) => boolean;
+  onUpdate: (name: string, data: string) => void;
+  onValidate: (data: string) => boolean;
   setCanSave: Dispatch<boolean>;
-  pressButton?: any;
+  pressButton?: React.Ref<ListFormHandle>;
 }
 
-export default function ListForm({ object, type, isEditable=false, mandatory=false, index=0, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton, noErrors=false }: Props) {
+export default function ListForm({ object, type, isEditable=false, mandatory=false, setCanSave,  helperText, onValidate, onUpdate, pressButton, noErrors=false }: Props) {
   const intl = useIntl();
   const defaultValue = object;
   const [isDirty, setIsDirty] = useState(false);
@@ -32,14 +33,6 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
   const inputRef = useRef<HTMLFormElement>(null);
   
   
-  useImperativeHandle(pressButton, () => ({
-    pressEnter() {
-      setIsValid(onValidate(inputRef.current!.value))
-      updateFormValue();
-    }
-    
-  }));
-
   const updateFormState = useCallback(
     function updateFormState() {
       if(inputRef.current) {
@@ -93,8 +86,17 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
 
   };
 
+  // After updateFormValue: the handle calls it.
+  useImperativeHandle(pressButton, () => ({
+    pressEnter() {
+      setIsValid(onValidate(inputRef.current!.value))
+      updateFormValue();
+    }
+    
+  }));
+
   const validateFormValue = () => {
-    var value=''
+    let value=''
     if(inputRef.current?.value) {
       value=inputRef.current.value
     }
@@ -152,7 +154,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
           }
           {object.content.length===0&&!mandatory&&(<FormattedMessage defaultMessage="ei arvoja" />)
           }
-          {object.content.map((value: any,index: number) => (
+          {object.content.map((value: string,index: number) => (
             <ListItem
               key={index}
               disableGutters
@@ -160,10 +162,10 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
                 <IconButton
                   type="button"
                   aria-label={intl.formatMessage({
-                    defaultMessage: "kommentti",
+                    defaultMessage: "poista",
                   })}
                   value={value}
-                  onClick={(e)=>{deleteFormValue(value); setUsedHelperText(<></>)}}>
+                  onClick={()=>{deleteFormValue(value); setUsedHelperText(<></>)}}>
                   <ClearIcon />
                 </IconButton>
               }
@@ -217,7 +219,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     );
   } else {
     return(<List >
-      {object.content.map((value: any,index: number) => (
+      {object.content.map((value: string) => (
         <ListItem
           key={value}
           disableGutters
