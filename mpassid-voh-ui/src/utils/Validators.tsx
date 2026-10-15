@@ -43,8 +43,8 @@ const validateIpAddress = (value:string) => {
 
 const validateHostname = (value:string) => {
       
-    // Labels separated by dots, and an optional port (existing integrations
-    // have e.g. wilmalukio.lappajarvi.fi:8445).
+    // Labels separated by dots, and an optional port (some existing
+    // integrations have one, e.g. wilma.mansikkala.fi:8445).
     const regExpPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])(:[0-9]{1,5})?$'); 
     return !!regExpPattern.test(value);
 

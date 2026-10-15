@@ -4,7 +4,6 @@ import { webcrypto } from "node:crypto";
 import type { JSX } from "react";
 import { IntlProvider } from "react-intl";
 import { beforeAll, describe, expect, it } from "vitest";
-import wilmaHostnames from "../test/fixtures/wilma-hostnames.json";
 import { helperText, trimCertificate, validate } from "./Validators";
 
 // validate(validators, value) and helperText(validators, value) with the
@@ -137,8 +136,15 @@ describe.each([
   },
   {
     rule: "hostname",
-    // Port allowed: existing integrations have e.g. wilmalukio.lappajarvi.fi:8445.
-    valid: ["wilma.example.fi", "localhost", "a", "wilma-1.example.fi", "wilmalukio.lappajarvi.fi:8445"],
+    // Port allowed: some existing integrations have one.
+    valid: [
+      "wilma.example.fi",
+      "localhost",
+      "a",
+      "wilma-1.example.fi",
+      "mansikkala.inschool.fi",
+      "wilma.mansikkala.fi:8445",
+    ],
     invalid: [
       "https://wilma.example.fi",
       "wilma.example.fi/",
@@ -193,14 +199,6 @@ describe.each([
   it.each(invalid)("hylkää %j", (value) => {
     expect(validate([rule], value)).toBe(false);
   });
-});
-
-// The Wilma hostnames of real integrations (from an API response export,
-// schemas/response_1706792827801.json, which is gitignored): every one must
-// still be accepted.
-it("validate: hostname hyväksyy kaikki oikean aineiston Wilma-hostnamet", () => {
-  expect(wilmaHostnames.length).toBeGreaterThan(100);
-  expect(wilmaHostnames.filter((hostname) => !validate(["hostname"], hostname))).toEqual([]);
 });
 
 // ---------------------------------------------------------------------------

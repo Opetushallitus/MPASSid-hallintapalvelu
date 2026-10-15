@@ -33,7 +33,7 @@ beforeEach(() => {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ORG_OID = "1.2.246.562.10.00000000001";
+const ORG_OID = "1.2.246.562.99.00000000001";
 const SPECIAL_OID = "1.2.246.562.10.21199106507";
 
 const user = (name: string, content: string): Components.Schemas.Attribute => ({ type: "user", name, content });

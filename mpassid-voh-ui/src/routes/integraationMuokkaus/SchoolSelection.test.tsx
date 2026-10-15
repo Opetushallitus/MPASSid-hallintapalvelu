@@ -32,7 +32,7 @@ vi.mock("@/api/koodisto", () => {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ORG_OID = "1.2.246.562.10.00000000001";
+const ORG_OID = "1.2.246.562.99.00000000001";
 const ORG_NAME = "Mansikkalan testi kunta";
 
 // organisaatio children carry the institution type as "oppilaitostyyppi_<n>#<version>".

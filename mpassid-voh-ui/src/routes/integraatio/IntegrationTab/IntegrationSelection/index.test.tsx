@@ -34,7 +34,7 @@ vi.mock("@/api/käyttöoikeus", () => ({ useMe: () => me.current }));
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ORG_OID = "1.2.246.562.10.00000000001";
+const ORG_OID = "1.2.246.562.99.00000000001";
 const WRITER = `APP_MPASSID_TALLENTAJA_${ORG_OID}`;
 const DATE = "2024-01-02T12:00:00Z";
 

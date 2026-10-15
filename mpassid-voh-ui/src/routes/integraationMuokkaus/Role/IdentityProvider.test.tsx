@@ -25,7 +25,7 @@ const integration = (
 ): Components.Schemas.Integration => ({
   id: 5,
   deploymentPhase,
-  organization: { oid: "1.2.246.562.10.00000000001", name: "Mansikkalan kunta" },
+  organization: { oid: "1.2.246.562.99.00000000001", name: "Mansikkalan kunta" },
   configurationEntity: {
     attributes: [],
     idp: { type, flowName, idpId: `${type}_x`, institutionTypes: [11], metadataUrl } as Components.Schemas.IdentityProvider,

@@ -41,7 +41,7 @@ beforeEach(() => {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ORG_OID = "1.2.246.562.10.00000000001";
+const ORG_OID = "1.2.246.562.99.00000000001";
 /** The organisation with extra (oid-specific) azure user attributes in config.ts. */
 const SPECIAL_OID = "1.2.246.562.10.21199106507";
 

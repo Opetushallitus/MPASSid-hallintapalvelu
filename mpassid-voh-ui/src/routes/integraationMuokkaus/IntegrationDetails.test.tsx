@@ -78,7 +78,7 @@ const prop = <T,>(child: string, name: string) => children[child][name] as T;
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ORG = { oid: "1.2.246.562.10.00000000001", name: "Mansikkalan testi kunta" };
+const ORG = { oid: "1.2.246.562.99.00000000001", name: "Mansikkalan testi kunta" };
 const LOGO = "https://example.test/logo.png";
 
 const wilma = ({

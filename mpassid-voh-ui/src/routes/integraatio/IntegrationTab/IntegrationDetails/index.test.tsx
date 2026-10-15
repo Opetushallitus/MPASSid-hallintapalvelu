@@ -61,7 +61,7 @@ beforeEach(() => {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ORG_OID = "1.2.246.562.10.00000000001";
+const ORG_OID = "1.2.246.562.99.00000000001";
 const ORG = { oid: ORG_OID, name: "Mansikkalan testi kunta", ytunnus: "1234567-8" };
 const LOGO = "https://example.test/logo.png";
 const ATTRIBUTES = [

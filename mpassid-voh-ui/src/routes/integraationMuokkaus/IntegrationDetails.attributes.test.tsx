@@ -29,7 +29,7 @@ vi.mock("./Metadata", () => ({ default: () => null }));
 vi.mock("./IntegrationBasicDetails", () => ({ default: () => null }));
 vi.mock("../integraatio/IntegrationTab/DataRow", () => ({ DataRow: () => null }));
 
-const ORG = { oid: "1.2.246.562.10.00000000001", name: "Mansikkalan testi kunta" };
+const ORG = { oid: "1.2.246.562.99.00000000001", name: "Mansikkalan testi kunta" };
 
 const integrationWith = (
   idp: Record<string, unknown>,

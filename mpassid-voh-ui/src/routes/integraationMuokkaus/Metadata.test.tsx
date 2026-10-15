@@ -41,7 +41,7 @@ beforeEach(() => {
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const ORG_OID = "1.2.246.562.10.00000000001";
+const ORG_OID = "1.2.246.562.99.00000000001";
 const ENTITY_ID = "https://palvelu.example.fi/saml";
 const CERT = "MIIBszCCAVmgAwIBAgIUQmFzZTY0";
 const ACS = { index: "1", isDefault: "true", binding: "HTTP-POST", location: "https://palvelu.example.fi/acs" };
