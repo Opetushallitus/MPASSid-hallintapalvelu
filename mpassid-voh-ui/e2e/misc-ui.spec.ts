@@ -4,7 +4,7 @@ import {
   mockInstitutionTypes,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "10. Muut/matalampi prioriteetti" - only the
+// Muut/matalampi prioriteetti - only the
 // two sub-scenarios that are actually reachable through the UI/mock.
 // "Olemassa olevan palvelun valinta" and "ServiceProvider 'Palvelun nimi'
 // lukittu" are both skipped: they require a `configurationEntity.set`

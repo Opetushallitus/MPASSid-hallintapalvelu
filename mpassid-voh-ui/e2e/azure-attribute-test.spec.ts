@@ -9,7 +9,7 @@ import {
   saveIntegration,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "9. Azure-attribuuttitesti" -
+// Azure-attribuuttitesti -
 // AttributeTest.tsx, shown for type==='azure' once `canSave` is true, or
 // always when editing an existing integration (id !== '0')
 // (integraationMuokkaus/index.tsx:297). testAttributesAuthorization's

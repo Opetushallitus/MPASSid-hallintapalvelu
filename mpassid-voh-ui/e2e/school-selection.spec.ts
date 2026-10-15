@@ -346,7 +346,7 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio, ei tall
     await expect(page.getByRole("button", { name: "Tallenna" })).toBeDisabled();
   });
 
-  test("s9: sibling schools=[A] - luonti ok, muokkaus nok (mock-rajoitus)", async ({
+  test("s9: sibling schools=[A] - luonti ok, muuttamaton muokkaus ei tallennettavissa", async ({
     page,
   }) => {
     await mockInstitutionTypes(page);
@@ -384,9 +384,9 @@ test.describe("koulunvalinta - vanha saman oppilaitostyypin integraatio, ei tall
     await saveIntegration(page);
     await expect(page).toHaveURL(/\/integraatio\/\d+/);
 
-    // Confirmed against a real run: re-opening this same integration for
-    // edit does NOT re-enable "Tallenna" even without changing anything
-    // further, matching the given matrix exactly.
+    // Intended (decided 2026-10-14): re-opened without changes, there is
+    // nothing to save - IntegrationDetails' "no changes" gate keeps
+    // "Tallenna" disabled. Not a mock limitation nor a SchoolSelection bug.
     await openEditFromViewPage(page);
     await expect(page.getByRole("button", { name: "Tallenna" })).toBeDisabled();
   });

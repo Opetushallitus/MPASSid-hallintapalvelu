@@ -70,7 +70,7 @@ todellisuudessa renderöityi.
 | `create-*-integration-tuotanto.spec.ts` | Samat luontivirrat Tuotanto-ympäristöön - idp-tyypeille valitaan Palveluympäristö luonnin jälkeen (`selectEnvironment()`), sp-tyypeille (SAML/OIDC) "Tuotanto - uusi" valitaan suoraan luontidialogin "palvelu:"-valikosta (`createNewSpIntegration()`:n `environment`-parametri), koska sp-integraatioilla ei ole muokattavaa ympäristövalitsinta luonnin jälkeen |
 | `school-selection.spec.ts` | Koulunvalintanäkymän (`SchoolSelection.tsx`) koko luonti/muokkaus-matriisi, ks. alla |
 | `delete-integration.spec.ts` | Integraation poisto/deaktivointi ("Poista jäsen"), Passiiviset-suodatin, poiston peruutus |
-| `integration-selection.spec.ts` | "Integraatiovalinnat"-välilehti (palvelusallinta) - REDUSOITU LAAJUUS, ks. `EHDOTETUT_TESTIT.md`:n kohta 2 |
+| `integration-selection.spec.ts` | "Integraatiovalinnat"-välilehti (palvelusallinta): kytkimet ja yksittäisten palvelujen salliminen syötetyillä set-integraatioilla |
 | `validation.spec.ts` | Validoinnin negatiivipolut: pakollinen tyhjänä, https/nolocalhost, virheellinen sertifikaatti, ListForm-duplikaatti, rivin poisto |
 | `cancel-edit.spec.ts` | "Peruuta" luonnissa ja muokkauksessa - tallentamattomat muutokset hylätään |
 | `environment-switch.spec.ts` | Olemassa olevan idp-integraation Testi↔Tuotanto-vaihto muokkaustilassa |
@@ -79,7 +79,6 @@ todellisuudessa renderöityi.
 | `integration-detail-view.spec.ts` | Read-only `/integraatio/:id`-näkymän sisältö + 404-haara |
 | `azure-attribute-test.spec.ts` | Azure "Testaa attribuuttien oikeellisuus" -dialogi (onnistuu/epäonnistuu/pakolliset kentät) |
 | `misc-ui.spec.ts` | Disabloitu "Luo"-nappi (sp ilman palveluvalintaa), metadataUrl/tiedostolataus-poissulkevuus (ADFS) |
-| `EHDOTETUT_TESTIT.md` | Kaikkien yllä olevien uusien testien tausta-analyysi: mitä katetaan, mitä rajattiin pois ja miksi |
 | `helpers.ts` | Jaetut apufunktiot kaikille yllä oleville (ei sisällä testejä) |
 
 ### Mock-only lisäys: virhepolkujen simulointi
@@ -87,7 +86,7 @@ todellisuudessa renderöityi.
 `save-error.spec.ts` ja `azure-attribute-test.spec.ts`:n epäonnistumistesti
 vaativat deterministisen tavan saada tallennus/attribuuttitesti epäonnistumaan
 - MSW on täällä oikea Service Worker, joten Playwrightin `page.route()` ei
-tavoita sen jo käsittelemiä pyyntöjä (ks. `EHDOTETUT_TESTIT.md`:n kohta 7).
+tavoita sen jo käsittelemiä pyyntöjä.
 Ratkaisuna `src/mocks/requestLogicHandlers.ts`:ään lisättiin kolme
 "taika-arvoa" (`E2E_TRIGGER_409`, `E2E_TRIGGER_GENERIC_ERROR`,
 `E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE`), jotka `createIntegration`/
@@ -104,9 +103,8 @@ korjausta samaan tiedostoon:
   200:lla tyhjällä bodylla, jolloin sivu jäi ikuisesti latausanimaatioon.
 - `updateIntegration()` maskaa `client_secret`:n `"***"`:ksi jokaisen
   PÄIVITYKSEN (ei ensimmäisen luonnin) yhteydessä
-  (`create-oidc-integration.spec.ts`:n "ei toistu" -testi) - vastaa sitä
-  miten sovellus jo olettaa oikean taustajärjestelmän käyttäytyvän
-  (`index.tsx:350`:n `!client_secret.includes("***")`-tarkistus).
+  (`create-oidc-integration.spec.ts`:n "ei toistu" -testi), kuten oikea
+  taustajärjestelmä.
 
 ## Koulunvalinnan testimatriisi (`school-selection.spec.ts`)
 
@@ -130,10 +128,9 @@ vastaus). Koulut viittaavat näihin neljään testikiinteistöön
 
 ### eSI/eSE:n arvojen merkitys
 
-`existingIncluded`/`existingExcluded` (eSI/eSE) lasketaan
-`requestLogicHandlers.ts`:n `getIntegrationDiscoveryInformationValue`:ssä
-(rivit 104-152) käymällä läpi kaikki muut samaa oppilaitostyyppiä käyttävät,
-aktiiviset Tuotanto-integraatiot. Arvon merkitys:
+`existingIncluded`/`existingExcluded` (eSI/eSE) lasketaan kaikista muista
+samaa oppilaitostyyppiä käyttävistä, aktiivisista Tuotanto-integraatioista.
+Arvon merkitys:
 
 - **`null`**: ei yhtään olemassa olevaa include- tai exclude-määrittelyä -
   joko yksikään sibling ei jaa oppilaitostyyppiä, tai (eSE:n tapauksessa)
@@ -150,17 +147,14 @@ aktiiviset Tuotanto-integraatiot. Arvon merkitys:
   sisällytetty (pois lukien poissuljetut)". Tästä syystä s1-s7/m1-m7
   (sibling käyttää vain excludedSchools) näkyvät testimatriisissa eSI=[]:nä,
   ei null:na.
-- **`existingExcluded = []` ei ole mahdollinen**: koodi asettaa
-  `existingExcluded`:n vain, kun löytyneiden siblingien poissuljettujen
-  koulujen joukko on epätyhjä (`if (allExcluded.size > 0)`) - se on siis
+- **`existingExcluded = []` ei ole mahdollinen**: `existingExcluded` on
   aina joko `null` tai vähintään yhden koulun sisältävä taulukko, ei
   koskaan tyhjä taulukko.
 
 **s-sarja**: testattava integraatio valitsee vain Peruskoulut (yksi
 oppilaitostyyppi). **m-sarja**: testattava integraatio valitsee
-Peruskoulut+Lukiot (kaksi oppilaitostyyppiä) - `SchoolSelection.tsx`:n
-tallennusehto (`isExtraSchoolConfigurationOk()`) käyttäytyy näissä kahdessa
-tapauksessa eri tavalla (ks. "Huomio m-sarjasta" alla).
+Peruskoulut+Lukiot (kaksi oppilaitostyyppiä) - tallennusehto käyttäytyy
+näissä kahdessa tapauksessa eri tavalla (ks. "Huomio m-sarjasta" alla).
 
 | Testi | Sibling(it) | eSI (existingIncluded) | eSE (existingExcluded) | Odotettu tulos |
 |---|---|---|---|---|
@@ -193,29 +187,21 @@ tapauksessa eri tavalla (ks. "Huomio m-sarjasta" alla).
 m1-m11 tarkistavat lisäksi, että kun molemmat oppilaitostyypit on valittu,
 näkyviin tulee varoitus "Valittuja oppilaitostyyppejä jo muissa
 integraatioissa, muokkaaminen mahdollistaa saman koulun näkymisen useassa
-integraatiossa" (`SchoolSelection.tsx`:n `adminConfiguration`-Alert). m0
-(ei sibling-integraatiota) tarkistaa, ettei varoitus näy. Koodin
-(`analyseExistingExclude`/`analyseExistingInclude`) mukaan varoitus riippuu
-käytännössä vain siitä, löytyykö sibling ollenkaan (`
-noExistingSchoolConfigurations.current`) - ei eSI/eSE:n tarkasta sisällöstä -
-minkä takia sama toBeVisible()-tarkistus pätee kaikkiin m1-m11:een.
+integraatiossa". m0 (ei sibling-integraatiota) tarkistaa, ettei varoitus
+näy. Varoitus näkyy aina, kun sibling-integraatio on olemassa, eSI/eSE:n
+sisällöstä riippumatta, joten sama tarkistus pätee kaikkiin m1-m11:een.
 
 ### Huomio "Kaikki koulut ovat jo käytössä muissa integraatioissa" -varoituksesta
 
-Tämä varoitus (`Validators.tsx`:n `allSchoolsUsed`, näytetään
-"Oppilaitostyypit"-kentän helperText:inä `mandatoryinstitutionTypesText`:n
-kautta, ks. `SchoolSelection.tsx:859-874`) tulee näkyviin, kun
-`possibleSchools.current` on tyhjä - eli kun sibling(it) ovat jo sisällyttäneet
-kaikki kyseisen oppilaitostyypin koulut. Tämä toteutuu koodin mukaan
-**vain s8:ssa** (yksi oppilaitostyyppi, sibling schools=[A,B,C,D] kattaa
-kaikki kolme Peruskoulut-koulua) - s8 tarkistaa varoituksen näkyvän. s9 ja
-s10 tarkistavat, ettei varoitus näy (eSI ei kata kaikkia kouluja). m-sarjassa
-`updateExtraSchoolsConfigurationData`:n moni-oppilaitostyyppi-override
-(`SchoolSelection.tsx:605-608`) tarjoaa aina KAIKKI valitun tyypin koulut
-eSI/eSE:stä riippumatta, joten `possibleSchools.current` ei voi olla tyhjä -
-m1-m5/m8-m11-looppi tarkistaa tämän eksplisiittisesti (mm. m8, jolla on
-täsmälleen s8:n sibling-data mutta EI varoitusta, koska oppilaitostyyppejä on
-kaksi).
+Varoitus näytetään "Oppilaitostyypit"-kentän ohjetekstinä, kun sibling(it)
+ovat jo sisällyttäneet kaikki kyseisen oppilaitostyypin koulut. Matriisissa
+tämä toteutuu **vain s8:ssa** (yksi oppilaitostyyppi, sibling
+schools=[A,B,C,D] kattaa kaikki kolme Peruskoulut-koulua) - s8 tarkistaa
+varoituksen näkyvän. s9 ja s10 tarkistavat, ettei varoitus näy (eSI ei kata
+kaikkia kouluja). m-sarjassa tarjolla ovat aina kaikki valitun tyypin koulut
+eSI/eSE:stä riippumatta, joten varoitusta ei näytetä - m1-m5/m8-m11-looppi
+tarkistaa tämän (mm. m8, jolla on täsmälleen s8:n sibling-data mutta EI
+varoitusta, koska oppilaitostyyppejä on kaksi).
 
 ### Huomio "schools"/"excludedSchools"-valikkojen sisällöstä
 
@@ -225,68 +211,22 @@ sallimat koulut - ei vain, että yksi tietty valinta sattuu toimimaan:
 
 - s1-s7: "schools" = allSchools(Peruskoulut) ∩ eSE ∩ (ei eSI:ssä) -
   vaihtelee per skenaario (esim. s1/s2 = {A,B,C}, s3 = {A,B}, s4/s5/s6/s7 =
-  {A}). "excludedSchools" on piilotettu (`hideExcludeSchools`) näissä.
-- s8: EI tarkistusta - `mandatoryExtraSchoolConfiguration()`
-  (`SchoolSelection.tsx:389-409`) sammuttaa koko "Lisää kouluvalinta
-  säännöt" -kytkimen aina kun `possibleSchools.current` on tyhjä, jolloin
-  "schools" JA "excludedSchools" jäävät molemmat kokonaan renderöimättä
-  (vahvistettu oikean ajon page-snapshotista) - vain "Oppilaitostyypit"-
-  varoitus ja pois käytöstä oleva "Tallenna" ovat havaittavissa.
-- s9: "schools" = {B,C}, "excludedSchools" = {A,B,C} - `possibleSchools`
-  ei ole tyhjä, joten kytkin (ja molemmat kentät) pysyvät päällä toisin
-  kuin s8:ssa.
+  {A}). "excludedSchools" on piilotettu näissä.
+- s8: EI tarkistusta - kun tarjolla ei ole yhtään koulua, "Lisää
+  kouluvalinta säännöt" -kytkin sammuu ja "schools" JA "excludedSchools"
+  jäävät molemmat näyttämättä - vain "Oppilaitostyypit"-varoitus ja pois
+  käytöstä oleva "Tallenna" ovat havaittavissa.
+- s9: "schools" = {B,C}, "excludedSchools" = {A,B,C} - tarjolla on kouluja,
+  joten kytkin (ja molemmat kentät) pysyvät päällä toisin kuin s8:ssa.
 - s10: "schools" = {B,C}, "excludedSchools" = {A,B,C}.
-- m1-m11 (looppi + m6/m7): moni-oppilaitostyyppi-overriden takia MOLEMMAT
-  kentät (kun vielä molemmat näkyvissä, ennen omaa valintaa) tarjoavat aina
-  kaikki neljä koulua ({A,B,C,D}) - eSI/eSE ei rajoita kumpaakaan.
+- m1-m11 (looppi + m6/m7): MOLEMMAT kentät (kun vielä molemmat näkyvissä,
+  ennen omaa valintaa) tarjoavat aina kaikki neljä koulua ({A,B,C,D}) -
+  eSI/eSE ei rajoita kumpaakaan.
 
 ### Huomio m-sarjasta (m8-m10)
 
 Alkuperäisen matriisin mukaan m8/m9/m10:n piti peilata s8/s9/s10:n
-"ei tallennu" -tuloksia. Toteutuksen aikana selvisi, että
-`isExtraSchoolConfigurationOk()`:n moni-oppilaitostyyppihaara
-(`SchoolSelection.tsx:270-275`, käytössä kun integraatiolla on useampi kuin
-yksi oppilaitostyyppi) ei tarkista eSI/eSE:tä lainkaan - se vaatii vain,
-että jokin oma valinta on tehty. Sama koskee koulujen tarjontaa:
-`updateExtraSchoolsConfigurationData` (`SchoolSelection.tsx:593-596`)
-tarjoaa moni-oppilaitostyyppisille integraatioille aina KAIKKI valitun
-tyypin koulut eSI/eSE:stä riippumatta. Tämän seurauksena m8/m9/m10 ovat
-todellisuudessa "ok"-tapauksia - tämä on vahvistettu oikealla testiajolla.
-
-### Löydetyt sovellusbugit
-
-Testien kirjoittaminen paljasti neljä todellista bugia sovelluskoodista
-(ei mockista) - kaksi koulunvalinnan testimatriisia kirjoitettaessa (ks.
-`COMMIT_MESSAGE_KOULUNVALINTA.txt`), kaksi myöhemmin muita uusia testejä
-(kohdat 1-10, ks. `EHDOTETUT_TESTIT.md`) kirjoitettaessa/ajettaessa:
-
-1. **`IntegrationDetails.tsx`** - SP-integraation (SAML/OIDC) pelkkä
-   nimenmuutos muokkaustilassa ei enää tallentunut, koska
-   `canSaveDiscoveryInformation`-efekti ei tiennyt nimenmuutoksesta.
-2. **`SchoolSelection.tsx`** - `isExtraSchoolConfigurationOk()` luki yhden
-   renderöinnin jäljessä olevaa `discoveryInformation`-propsia
-   `discoveryInformationRef`:in sijaan, minkä takia "Tallenna" jäi pysyvästi
-   pois käytöstä aina kun pakolliseen koulukenttään riitti täsmälleen yksi
-   valinta.
-3. **`IntegrationTab/index.tsx`** - `getRole(origInteg)` kutsuttiin
-   ehdoitta ennen `error?.response?.status===404`-tarkistusta; kun haku
-   epäonnistuu (`origInteg===undefined`), `getRole` lukee
-   `row.configurationEntity` ilman optional chainingia `row`:n itsensä
-   osalta ja heittää poikkeuksen - `ErrorBoundary` nappasi tämän geneeriseksi
-   "Virhe"-viestiksi oikean "Integraatiota X ei löydy" -viestin sijaan
-   (löytyi `integration-detail-view.spec.ts`:n 404-testiä kirjoitettaessa).
-4. **`Form/ListForm.tsx`** - array-kenttien (redirect_uris,
-   signingCertificates, ym.) Enter-lisäys laukaisi KAKSI käsittelijää
-   samasta painalluksesta: `onKeyUp` (`updateFormValue()`, ei
-   duplikaattitarkistusta) ja lomakkeen natiivi `onSubmit` (jolla OLI
-   tarkistus, mutta näki jo tyhjennetyn kentän). Koska
-   `Metadata.tsx`:n `updateMultivalueMetadata()` TOGGLAA jäsenyyden (poistaa
-   jos jo olemassa), saman arvon lisääminen uudelleen poisti sen
-   hiljaisesti "jo olemassa" -varoituksen sijaan. Korjattu kolmella
-   muutoksella: poistopainikkeelle `type="button"` (ei enää lomakkeen
-   oletus-submit), duplikaattitarkistus myös `updateFormValue()`:iin (käytti
-   aiemmin virheellisesti `defaultValue.indexOf` - `object.content.indexOf`
-   sen sijaan, koska `defaultValue` on koko attribuutti-wrapperiobjekti, ei
-   taulukko), ja `onKeyDown`:iin `preventDefault()` joka estää koko
-   kaksoislaukaisun (löytyi `validation.spec.ts`:n duplikaattitestiä
-   ajettaessa).
+"ei tallennu" -tuloksia. Kun integraatiolla on useampi kuin yksi
+oppilaitostyyppi, eSI/eSE ei kuitenkaan rajoita tallennusta eikä
+tarjottavia kouluja - riittää, että jokin oma valinta on tehty. Siksi
+m8/m9/m10 ovat "ok"-tapauksia.

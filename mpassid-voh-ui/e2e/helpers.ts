@@ -37,15 +37,16 @@ export async function mockInstitutionTypes(page: Page) {
 /**
  * Navigates back to "/" via the app's own client-side router (clicking the
  * "Integraatiot" nav tab) instead of page.goto("/"). page.goto() is a real
- * browser navigation - it re-executes every JS module from scratch, which
- * resets requestLogicHandlers.ts's module-scope `let allIntegrations =
- * exampleData...` back to its pristine initial state. That's invisible to
- * single-integration-per-test specs (goto only ever happens once, at the very
- * start), but school-selection.spec.ts's tests create a "sibling" integration
- * and then a second, tested one in the SAME test - if anything between them
- * did a hard navigation, the sibling saved into the mock's in-memory
- * "database" would vanish before the second integration's
- * getIntegrationDiscoveryInformation call ever sees it.
+ * browser navigation - it re-executes every JS module from scratch, including
+ * requestLogicHandlers.ts's mock "database".
+ *
+ * Until 2026-10-14 that reset the database, so school-selection.spec.ts's
+ * tests (a "sibling" integration, then a second, tested one in the SAME test)
+ * had to avoid any hard navigation in between - the comments throughout this
+ * suite saying a page.goto() "would wipe" the mock refer to that. The mock now
+ * keeps its integrations in sessionStorage, so a reload in the same test keeps
+ * them (each test still starts empty: a fresh browser context). The SPA
+ * navigation is kept: it is faster and does not re-start the mock worker.
  */
 export async function goHomeWithoutReload(page: Page) {
   // exact:true - a substring match against "Integraatiot" also matches the
@@ -514,9 +515,9 @@ export async function saveIntegration(page: Page) {
  * `<Link state={props.integration}>` to `/muokkaa/<role>/<type>/<id>` with
  * the real, already-saved integration as `location.state`
  * (EditIntegrationButton.tsx:18-27,34-36) - unlike a fresh
- * `page.goto('/muokkaa/...')`, which would NOT work here since
- * IntegrationDetails.tsx:56-57 reads the integration unconditionally from
- * `useLocation().state`, with no id-based fallback fetch.
+ * `page.goto('/muokkaa/...')`, which reloads the page and makes
+ * IntegrationDetails.tsx load the integration by id (no location.state; see
+ * edit-direct-url.spec.ts).
  */
 export async function openEditFromViewPage(page: Page) {
   await page.getByLabel("lisää").click();

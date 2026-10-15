@@ -11,8 +11,8 @@ import {
   saveIntegration,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "6. Home-sivun haku/suodatus/lajittelu/
-// sivutus" - src/routes/home/index.tsx, SearchForm.tsx, IntegrationsTable.tsx.
+// Etusivun haku/suodatus/lajittelu/sivutus -
+// src/routes/home/index.tsx, SearchForm.tsx, IntegrationsTable.tsx.
 // NOTE on search: the mock's getIntegrationsSpecSearchPageable
 // (requestLogicHandlers.ts:305-317) matches "search" only against
 // configurationEntity.name (never populated by anything in this app) and

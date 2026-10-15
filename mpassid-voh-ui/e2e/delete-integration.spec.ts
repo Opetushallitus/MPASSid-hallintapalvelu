@@ -9,7 +9,7 @@ import {
   saveIntegration,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "1. Integraation poisto/deaktivointi" -
+// Integraation poisto/deaktivointi -
 // integraationMuokkaus/index.tsx:266-337. Deleting reuses the exact same
 // saveIntegration()-click-handler/dialog chain as a normal save (only
 // `isDisabled` differs, swapping "Tallenna" for "Poista" and calling

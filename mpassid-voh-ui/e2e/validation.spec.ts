@@ -8,7 +8,7 @@ import {
   mockInstitutionTypes,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "3. Validoinnin negatiivipolut" -
+// Validoinnin negatiivipolut -
 // src/utils/Validators.tsx, config.ts's per-field `validation` arrays,
 // Form/ListForm.tsx. No field in config.ts uses the "ip" validator (grepped
 // - only `redirect_uris`/nohash and signingCertificates/cert exist among
@@ -132,11 +132,10 @@ test("array-kentän rivin poisto tekee pakollisesta kentästä taas tyhjän", as
   const saveButton = page.getByRole("button", { name: "Tallenna", exact: true });
   await expect(saveButton).toBeEnabled({ timeout: 15_000 });
 
-  // ListForm.tsx:146-154's delete IconButton - "kommentti" aria-label is
-  // shared by every row on the page (a copy/paste leftover, see helpers.ts/
-  // EHDOTETUT_TESTIT.md), but redirect_uris is the only array field with an
-  // entry here, so it's unambiguous.
-  await page.getByLabel("kommentti", { exact: true }).click();
+  // ListForm's delete IconButton - the "poista" aria-label is shared by every
+  // row on the page, but redirect_uris is the only array field with an entry
+  // here, so it's unambiguous.
+  await page.getByLabel("poista", { exact: true }).click();
 
   await expect(page.getByText("ei arvoja, pakollinen")).toBeVisible();
   await expect(saveButton).toBeDisabled();

@@ -44,7 +44,7 @@ test("luo uusi SAML-palveluintegraatio", async ({ page }) => {
 
   await expect(page.getByText("Palvelun metadata tiedot")).toBeVisible();
 
-  // Covers EHDOTETUT_TESTIT.md's area 5 config-difference note:
+  // Testi/Tuotanto configuration difference:
   // wantAssertionsSigned's Testi variant (config.ts:711-732) has
   // defaultValue:'false' and editable:true - contrast with the Tuotanto
   // variant asserted in create-saml-integration-tuotanto.spec.ts. SP

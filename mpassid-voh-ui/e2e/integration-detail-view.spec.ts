@@ -7,14 +7,15 @@ import {
   saveIntegration,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "8. Read-only-näkymän sisällön tarkistus" -
+// Read-only-näkymän sisällön tarkistus -
 // IntegrationDetails/index.tsx (the "Integraatiotiedot" tab) and
 // IntegrationTab/index.tsx:102-118 (404 branch).
 //
 // Confirmed against a real run: doing a hard `page.goto()` reload to
 // /integraatio/:id right after creating the integration in the SAME test
 // does NOT "prove the fetch path independently" as originally assumed - it
-// wipes the mock's in-memory `allIntegrations` (a fresh page load re-inits
+// wiped the mock's in-memory `allIntegrations` (until 2026-10-14, see
+// helpers.ts goHomeWithoutReload(); a fresh page load re-inits
 // the whole module, same as every other "hard reload loses mock state"
 // caveat throughout this suite), so the just-created integration is gone by
 // the time the reloaded page fetches it. `saveIntegration()` already lands

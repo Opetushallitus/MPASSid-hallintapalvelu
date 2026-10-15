@@ -42,21 +42,19 @@ const updateIntegration = definition.paths["/api/v2/integration/{id}"].put.respo
   value?: Components.Schemas.Integration;
 };
 
-const inactivateIntegration = definition.paths["/api/v2/integration/{id}/inactive"].delete.responses[
-  "200"
-].content["application/json"].examples.integration as {
-  value?: Components.Schemas.Integration;
-};
-
 const searchIntegrations: { value?: Components.Schemas.PageIntegration } = 
 definition.paths["/api/v2/integration/search"].get.responses["200"].content[
   "application/json"
 ].examples.searchIntegrations;
 
+/** A (possibly nested) value in the mocked attribute test response. */
+type AttributeTestValue = string | { [key: string]: AttributeTestValue };
+
 const attributes = definition.paths["/api/v2/attribute/test"].get.responses[
   "200"
 ].content["application/json"].examples.items as {
-  value?: Array<any>;
+  // The schema example is an empty list; testAttributes replaces it with the response object.
+  value?: unknown[] | { [name: string]: AttributeTestValue };
 }; 
 
 const discoveryInformation = definition.paths["/api/v2/integration/discoveryinformation"].get.responses[
@@ -79,7 +77,32 @@ type DiscoveryInformationResult = {
   existingExcluded: string[]|null;
 };
 
-allIntegrations = [ ...allIntegrations.map((row) => ({
+// The mock "database" lives in this page's memory, so a full page load (an
+// address typed into the URL bar, F5) used to reset it. It is kept in
+// sessionStorage: it survives reloads in the same tab, a new tab starts from
+// the example data (and so does every Playwright test - each gets a fresh
+// browser context).
+const STORAGE_KEY = "mpassid-mock-integrations";
+
+const loadIntegrations = (): Components.Schemas.Integration[] | undefined => {
+  try {
+    const stored = globalThis.sessionStorage?.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/** Call after every change to allIntegrations. */
+const saveIntegrations = () => {
+  try {
+    globalThis.sessionStorage?.setItem(STORAGE_KEY, JSON.stringify(allIntegrations));
+  } catch (error) {
+    debugLog("saveIntegrations (sessionStorage)", error);
+  }
+};
+
+allIntegrations = loadIntegrations() ?? [ ...allIntegrations.map((row) => ({
     ...row,
     configurationEntity: {
       entityId: undefined as unknown as string,
@@ -112,6 +135,24 @@ const E2E_TRIGGER_409 = "__e2e_trigger_409__";
 const E2E_TRIGGER_GENERIC_ERROR = "__e2e_trigger_500__";
 const E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE = "__e2e_trigger_403__";
 
+// E2E-testien koukut koulutietojen haulle (getIntegrationDiscoveryInformation).
+// MSW:n handlerit ajetaan sivun omassa JS-kontekstissa, joten testi asettaa ne
+// localStorageen (page.evaluate) - page.route() ei näe MSW:n vastauksia.
+// Ks. e2e/school-selection-extra.spec.ts.
+//  - E2E_DISCOVERY_FAIL = "1": vastaa 500.
+//  - E2E_DISCOVERY_DELAY_SINGLE_TYPE_MS = "<ms>": viivästää vastausta
+//    pyynnöille, joissa on täsmälleen yksi oppilaitostyyppi (kilpailutilanne).
+export const E2E_DISCOVERY_FAIL = "e2e-discovery-fail";
+export const E2E_DISCOVERY_DELAY_SINGLE_TYPE_MS = "e2e-discovery-delay-single-type-ms";
+
+const readE2eFlag = (key: string): string | null => {
+  try {
+    return globalThis.localStorage?.getItem(key) ?? null;
+  } catch {
+    return null;
+  }
+};
+
 const triggerIntegrationSaveError = (body: Components.Schemas.Integration) => {
   const marker =
     body?.discoveryInformation?.customDisplayName ||
@@ -138,7 +179,8 @@ const triggerIntegrationSaveError = (body: Components.Schemas.Integration) => {
 // itself. So masking has to happen on create too, not just update - it's
 // what a later, independent fetch of this same integration will see.
 const maskClientSecret = (body: Components.Schemas.Integration) => {
-  const metadata = body?.configurationEntity?.sp?.metadata as any;
+  // client_secret is a single string value; the schema types metadata values as objects.
+  const metadata = body?.configurationEntity?.sp?.metadata as { client_secret?: string } | undefined;
   if (metadata?.client_secret) {
     metadata.client_secret = "***"
   }
@@ -151,9 +193,9 @@ const hasCommon = (a: string[], b: number[]): boolean => {
 
 const getIntegrationDiscoveryInformationValue = (oid:string,id:string,institutionTypes:string[]) => {
   
-    var di:DiscoveryInformationResult = {existingIncluded: null, existingExcluded: null}
+    const di:DiscoveryInformationResult = {existingIncluded: null, existingExcluded: null}
     // Find all integrations of the given organization
-    var integrations: Components.Schemas.Integration[] = allIntegrations.filter(i => String(i.organization?.oid) === oid);
+    const integrations: Components.Schemas.Integration[] = allIntegrations.filter(i => String(i.organization?.oid) === oid);
 
     const allExcluded = new Set<string>();
     const allIncluded = new Set<string>();
@@ -204,7 +246,20 @@ export default {
     debugLog("inactivateIntegration",request.path)
   },
   getIntegrationDiscoveryInformation(request) {    
-    discoveryInformation.value = getIntegrationDiscoveryInformationValue(request.query.organizationOid,request.query.id,request.query.institutionType)
+    if (readE2eFlag(E2E_DISCOVERY_FAIL) === "1") {
+      return { status: 500, mock: {} };
+    }
+    const value = getIntegrationDiscoveryInformationValue(request.query.organizationOid,request.query.id,request.query.institutionType)
+    discoveryInformation.value = value
+    const delay = Number(readE2eFlag(E2E_DISCOVERY_DELAY_SINGLE_TYPE_MS)) || 0;
+    const institutionTypes = ([] as unknown[]).concat(request.query.institutionType ?? []);
+    if (delay > 0 && institutionTypes.length === 1) {
+      // Captured `value`, not discoveryInformation.value: a later, faster
+      // request may overwrite the shared example before this one resolves.
+      return new Promise((resolve) =>
+        setTimeout(() => resolve({ status: 200, mock: value }), delay)
+      );
+    }
   },
   getBlankIntegration(request) {
     if(request?.query?.type&&blankIntegrations.filter(b=>b?.configurationEntity?.idp?.type === request.query.type).length>0) {
@@ -217,8 +272,8 @@ export default {
     }
   },
   testAttributes(request) {
-    let attributeResponse:any={};
-    let selectArray: Array<string> = request?.query?.select as string[] || [];
+    const attributeResponse: { [name: string]: AttributeTestValue } = {};
+    const selectArray: Array<string> = request?.query?.select as string[] || [];
     
     let i=0;
     
@@ -226,33 +281,21 @@ export default {
       
       switch(element) { 
         case "opentunti_desku": { 
-          attributeResponse.opentunti_desku={}
-          attributeResponse.opentunti_desku.role="role"
-          attributeResponse.opentunti_desku.class="class"
-          attributeResponse.opentunti_desku.classLevel="classLevel"
-          attributeResponse.opentunti_desku.oid="oid"
-          attributeResponse.opentunti_desku.schoolNumber="school number"
-          attributeResponse.opentunti_desku.materialChargeSchool="material charge school"
+          attributeResponse.opentunti_desku={
+            role: "role",
+            class: "class",
+            classLevel: "classLevel",
+            oid: "oid",
+            schoolNumber: "school number",
+            materialChargeSchool: "material charge school",
+          }
            
           break; 
         } 
         case "onPremisesExtensionAttributes": { 
-          attributeResponse.onPremisesExtensionAttributes={}
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute1=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute2=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute3=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute4=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute5=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute6=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute7=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute8=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute9=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute10=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute11=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute12=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute13=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute14=""
-          attributeResponse.onPremisesExtensionAttributes.extensionAttribute15=""
+          attributeResponse.onPremisesExtensionAttributes=Object.fromEntries(
+            Array.from({ length: 15 }, (_, n) => [`extensionAttribute${n + 1}`, ""])
+          )
           
           break; 
         } 
@@ -266,11 +309,12 @@ export default {
           // 3-level path, "deepTestAttributes.level2.level3Object.level4"
           // for a 4-level one, or "deepTestAttributes.level2" to see an
           // intermediate object rendered as JSON.
-          attributeResponse.deepTestAttributes={}
-          attributeResponse.deepTestAttributes.level2={}
-          attributeResponse.deepTestAttributes.level2.level3="test_value_depth_3"
-          attributeResponse.deepTestAttributes.level2.level3Object={}
-          attributeResponse.deepTestAttributes.level2.level3Object.level4="test_value_depth_4"
+          attributeResponse.deepTestAttributes={
+            level2: {
+              level3: "test_value_depth_3",
+              level3Object: { level4: "test_value_depth_4" },
+            },
+          }
           
           break; 
         } 
@@ -303,6 +347,7 @@ export default {
     request.requestBody?.permissions?.forEach((p: Components.Schemas.IntegrationPermission)=>{
       p.lastUpdatedOn = new Date().toISOString();
     })
+    saveIntegrations()
     updateIntegration.value = request.requestBody
   },
   createIntegration(request) {
@@ -328,6 +373,7 @@ export default {
     request.requestBody?.permissions?.forEach((p: Components.Schemas.IntegrationPermission)=>{
       p.lastUpdatedOn = new Date().toISOString();
     })
+    saveIntegrations()
     createIntegration.value = request.requestBody
   },
   getIntegration(request) {
@@ -343,8 +389,14 @@ export default {
       return { status: 404, mock: {} };
     }
 
-    integration.value.organization = {}
-    integration.value.organization = organisations
+    // The fixture organization (with its schools) for integrations of the
+    // fixture organization or without one. An integration stored with
+    // another organization keeps it (e2e: an organization the mock user may
+    // only view, integration-selection.spec.ts).
+    const storedOid = integration.value.organization?.oid
+    if (storedOid === undefined || storedOid === organisations.oid) {
+      integration.value.organization = organisations
+    }
 
     if(id===999995&&integration.value?.configurationEntity?.idp){
       integration.value.configurationEntity.idp.logoUrl="https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/999995"
@@ -386,6 +438,7 @@ export default {
     const found = allIntegrations.find((row) => row.id === id);
     if (found?.configurationEntity?.idp) {
       found.configurationEntity.idp.logoUrl = `https://virkailija.untuvaopintopolku.fi/mpassid/api/v2/integration/discoveryinformation/logo/${id}`;
+      saveIntegrations()
     }
   },
   getIntegrationsSpecSearchPageable(request) {

@@ -14,11 +14,9 @@ import {
 // edit round trip within a single test is required for every "muokkaa"
 // spec in this directory: there are no pre-existing per-id fixtures in this
 // mock (schemas/response.json, the backing store for `allIntegrations` in
-// src/mocks/requestLogicHandlers.ts, starts as an empty array), and
-// IntegrationDetails.tsx:56-57 reads the integration unconditionally from
-// `useLocation().state` with no id-based fetch fallback - so a fresh
-// `page.goto('/muokkaa/...')` would just show "Integraatiota ... ei
-// löydy" instead of a form.
+// src/mocks/requestLogicHandlers.ts, starts as an empty array). The edit
+// button passes the integration as location.state; opening the edit URL
+// without it is covered by edit-direct-url.spec.ts.
 
 test("muokkaa olemassa olevaa Wilma-integraatiota", async ({ page }) => {
   await mockInstitutionTypes(page);
@@ -52,4 +50,12 @@ test("muokkaa olemassa olevaa Wilma-integraatiota", async ({ page }) => {
   // "Tallenna" (IntegrationDetails.tsx:301-304,379-382 - logoOK is already
   // true once `newConfigurationEntityData?.idp?.logoUrl` is non-empty).
   await saveIntegration(page);
+  await expect(page).toHaveURL(/\/integraatio\/\d+/);
+
+  // "Yksilöllinen tunniste" reads the saved idp.hostname (UniqueId.tsx), not
+  // the hostname attribute: the edit form copies the attribute into it
+  // (IntegrationDetails.tsx, config.ts "uniqueId": wilma -> hostname).
+  await expect(
+    page.getByText("Yksilöllinen tunniste", { exact: true }).locator("xpath=following-sibling::*[1]")
+  ).toContainText("toinenkoulu.inschool.fi");
 });

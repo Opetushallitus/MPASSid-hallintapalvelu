@@ -8,7 +8,7 @@ import {
   saveIntegration,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "4. 'Peruuta' muokkauksessa" -
+// "Peruuta" muokkauksessa -
 // integraationMuokkaus/index.tsx:297-298. "Peruuta" is a plain
 // react-router `<Link>` styled as a Button (not a save-adjacent action), so
 // it renders with role="link", not "button" - it navigates away without

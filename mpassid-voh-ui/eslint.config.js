@@ -11,11 +11,14 @@ import globals from "globals";
 
 export default tseslint.config(
   {
-    // Generated clients, build output, vendored packages and the MSW worker
-    // are not linted.
+    // Generated clients, build output, vendored packages, test reports and
+    // the MSW worker are not linted (ESLint does not read .gitignore).
     ignores: [
       "dist/**",
       "build/**",
+      "target/**",
+      "playwright-report/**",
+      "test-results/**",
       "node_modules/**",
       "vendor/**",
       "src/api/**",
@@ -68,6 +71,42 @@ export default tseslint.config(
 
       // tsc already resolves modules; the import resolver would only add noise.
       "import/no-unresolved": "off",
+
+      // Only check real DOM elements: `role` is also a prop of our own
+      // components (e.g. UniqueId), and autoFocus is used on MUI dialog
+      // buttons to focus the dialog's primary action.
+      "jsx-a11y/aria-role": ["error", { ignoreNonDOM: true }],
+      "jsx-a11y/no-autofocus": ["error", { ignoreNonDOM: true }],
+
+      // `_`-prefixed parameters/variables and unused `catch (e)` bindings are
+      // intentional.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "none",
+        },
+      ],
+    },
+  },
+
+  {
+    // Playwright e2e tests run their steps one after another (`await` in a
+    // loop), so loops are allowed there.
+    files: ["e2e/**/*.ts"],
+    rules: {
+      "no-loops/no-loops": "off",
+    },
+  },
+
+  {
+    // Node scripts (message export/import tooling).
+    files: ["scripts/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
     },
   },
 

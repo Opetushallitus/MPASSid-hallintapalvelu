@@ -4,13 +4,12 @@ import {
   fillServiceName,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "7. Tallennuksen virhetilanteet" -
+// Tallennuksen virhetilanteet -
 // integraationMuokkaus/index.tsx:151-200,367-406. There is no existing
 // magic value in the mock and no proven precedent in this repo for
-// page.route()-intercepting an MSW-service-worker-handled endpoint (see
-// EHDOTETUT_TESTIT.md's notes) - a synthetic Response manufactured inside
-// the SW never touches the actual network layer, so route() has nothing to
-// intercept. Instead, src/mocks/requestLogicHandlers.ts's createIntegration/
+// page.route()-intercepting an MSW-service-worker-handled endpoint - a
+// synthetic Response manufactured inside the SW never touches the actual
+// network layer, so route() has nothing to intercept. Instead, src/mocks/requestLogicHandlers.ts's createIntegration/
 // updateIntegration now recognize two magic "Palvelun nimi" values
 // (E2E_TRIGGER_409/E2E_TRIGGER_GENERIC_ERROR) and return an error response
 // via the {status,mock} hook the underlying openapi-backend-integration

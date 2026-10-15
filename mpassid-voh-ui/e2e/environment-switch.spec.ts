@@ -10,8 +10,8 @@ import {
   selectEnvironment,
 } from "./helpers";
 
-// Covers EHDOTETUT_TESTIT.md's "5. Testi->Tuotanto-vaihto olemassa olevalle
-// idp-integraatiolle" - Role/IdentityProvider.tsx:141-169's "Palveluympäristö"
+// Testi->Tuotanto-vaihto olemassa olevalle idp-integraatiolle -
+// Role/IdentityProvider.tsx:141-169's "Palveluympäristö"
 // selector, rendered (and editable) any time `environment.current>-1`, which
 // is true for both create and edit.
 //
@@ -53,11 +53,10 @@ test("olemassa olevan idp-integraation ympäristön vaihto Tuotanto -> Tuotanto-
   await expect(page).toHaveURL(/\/integraatio\/\d+/);
 
   await expect(page.getByText("Tuotanto-Testi", { exact: true })).toBeVisible();
-  // NOT re-verified across a page.reload() - a hard reload wipes the mock's
-  // in-memory allIntegrations (same caveat as everywhere else in this
-  // suite), so the integration created earlier in this same test would
-  // simply no longer exist afterward - that would test the 404 path, not
-  // persistence.
+  // NOT re-verified across a page.reload(): written when a hard reload wiped
+  // the mock's in-memory allIntegrations, so the integration would no longer
+  // have existed afterward (the mock now keeps it in sessionStorage, see
+  // helpers.ts goHomeWithoutReload()).
 });
 
 test("'Testi' ei ole enää valittavissa kun idp-integraatio on jo Tuotannossa", async ({
