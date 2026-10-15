@@ -8,14 +8,16 @@ const debugLog = createLogger("DEBUG");
 
 const validateDn = (value:string) => {
 
-    var regExpPattern = new RegExp('^((UID|uid=([^,]*)),)?((CN=([^,]*)),)?((((?:CN|OU|cn|ou)=[^,]+,?)+),)?((?:DC|dc=[^,]+,?)+)$')
+    // Optional uid=, cn= and cn=/ou= parts, then one or more dc= parts;
+    // attribute names in any case.
+    const regExpPattern = new RegExp('^(uid=[^,]+,)?(cn=[^,]+,)?((cn|ou)=[^,]+,)*dc=[^,]+(,dc=[^,]+)*$','i')
     return !!regExpPattern.test(value);
 
 }
 
 const validateUri = (value:string) => {
     
-    var regExpPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
+    const regExpPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|localhost|'+ // validate domain name 
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
       '(\\:\\d+)?(\\/[-a-z\\d%_@.:~+]*)*'+ // validate port and path
@@ -27,21 +29,23 @@ const validateUri = (value:string) => {
 
   const validateHttps = (value:string) => {
       
-    var regExpPattern = new RegExp('^((https):\\/\\/)'); 
+    const regExpPattern = new RegExp('^((https):\\/\\/)'); 
       return !!regExpPattern.test(value);
 
   }  
 
 const validateIpAddress = (value:string) => {
       
-    const regExpPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
+    const regExpPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
     return !!regExpPattern.test(value);
 
   }
 
 const validateHostname = (value:string) => {
       
-    const regExpPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'); 
+    // Labels separated by dots, and an optional port (existing integrations
+    // have e.g. wilmalukio.lappajarvi.fi:8445).
+    const regExpPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])(:[0-9]{1,5})?$'); 
     return !!regExpPattern.test(value);
 
 }
@@ -262,7 +266,7 @@ export const helperText = (validators:string[],value:string) => {
                         }
                         break;  
                 case "number":
-                    validateStatus=validateIpAddress(value);
+                    validateStatus=validateNumber(value);
                     if(!validateStatus) {
                         helperText=<FormattedMessage defaultMessage="Kentän arvon pitää olla numero!" />
                     }

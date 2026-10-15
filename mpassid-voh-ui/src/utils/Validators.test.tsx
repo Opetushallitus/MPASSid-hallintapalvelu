@@ -4,7 +4,7 @@ import { webcrypto } from "node:crypto";
 import type { JSX } from "react";
 import { IntlProvider } from "react-intl";
 import { beforeAll, describe, expect, it } from "vitest";
-import realIntegrations from "../../schemas/response_1706792827801.json";
+import wilmaHostnames from "../test/fixtures/wilma-hostnames.json";
 import { helperText, trimCertificate, validate } from "./Validators";
 
 // validate(validators, value) and helperText(validators, value) with the
@@ -195,18 +195,12 @@ describe.each([
   });
 });
 
-// Real integrations (an API response export, 621 integrations): every Wilma
-// hostname stored there must still be accepted.
+// The Wilma hostnames of real integrations (from an API response export,
+// schemas/response_1706792827801.json, which is gitignored): every one must
+// still be accepted.
 it("validate: hostname hyväksyy kaikki oikean aineiston Wilma-hostnamet", () => {
-  const integrations = realIntegrations as {
-    configurationEntity?: { idp?: { type?: string; hostname?: string } | null } | null;
-  }[];
-  const hostnames = integrations
-    .map((integration) => integration.configurationEntity?.idp)
-    .filter((idp) => idp?.type === "wilma" && idp.hostname)
-    .map((idp) => idp!.hostname!);
-  expect(hostnames.length).toBeGreaterThan(100);
-  expect(hostnames.filter((hostname) => !validate(["hostname"], hostname))).toEqual([]);
+  expect(wilmaHostnames.length).toBeGreaterThan(100);
+  expect(wilmaHostnames.filter((hostname) => !validate(["hostname"], hostname))).toEqual([]);
 });
 
 // ---------------------------------------------------------------------------
