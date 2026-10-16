@@ -75,6 +75,12 @@ upstream updates):
   `Partial<React.ComponentProps<typeof ReactIntlProvider>>` instead of
   `Partial<ReactIntlProvider['props']>`. In react-intl 10 `IntlProvider` is
   a function component, not a class. Runtime-neutral.
+- `msw-openapi-backend-integration` (pre-built, so patched in `lib/main.js`
+  and `index.d.ts` directly; 2.0.1, see its CHANGELOG) — the `notImplemented`
+  handler awaits a `requestLogicHandler` that returns a Promise, and the
+  handlers' return type is `unknown`. Needed by the e2e hook that delays the
+  mock's discovery information response
+  (`src/mocks/requestLogicHandlers.ts`, `E2E_DISCOVERY_DELAY_SINGLE_TYPE_MS`).
 
 ### `lib/` is committed to git
 
@@ -83,7 +89,9 @@ that excluded `lib/` have been removed). A fresh checkout must have a working
 `lib/` even before anyone runs `vendor:build`, and the Maven/CI build does not
 run `vendor:build`. So: after editing source and running `npm run vendor:build`,
 **commit the regenerated `lib/`** along with your `src/` change. Don't re-add a
-`lib/`-ignoring `.gitignore` to any of these packages.
+`lib/`-ignoring `.gitignore` to any of these packages. The exception is `lib/.temp/`: the dev server's Vite plugins write
+generated modules there (e.g. the date-fns locale import map), so
+`mpassid-voh-ui/.gitignore` excludes `/vendor/@visma/*/lib/.temp/`.
 
 Note: rebuilding with the app's TypeScript (4.9) produces cosmetic `.d.ts`
 differences vs. the originally published output (e.g. `type X` instead of
@@ -108,10 +116,10 @@ then `npm run vendor:build` and commit.
 | ------------------------------- | ------- | -------------- |
 | babel-preset-formatjs           | 0.1.0   | no (config)    |
 | formatjs-scripts                | 1.0.0   | yes            |
-| msw-openapi-backend-integration | 1.0.1   | no (pre-built) |
+| msw-openapi-backend-integration | 2.0.1   | no (pre-built) |
 | public.config                   | 1.1.0   | yes            |
 | react-app-locale-utils          | 1.1.2   | yes            |
-| react-intl-bundled-messages     | 1.3.1   | yes            |
-| react-openapi-client-generator  | 1.0.1   | no (pre-built) |
+| react-intl-bundled-messages     | 1.4.0   | yes            |
+| react-openapi-client-generator  | 1.0.2   | no (pre-built) |
 | tsconfig                        | 1.1.3   | no (config)    |
 | vite-plugin-super-template      | 0.1.7   | yes            |

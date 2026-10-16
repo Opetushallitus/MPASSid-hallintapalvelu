@@ -1,3 +1,10 @@
+# 2.0.1
+
+- A `requestLogicHandler` may return a Promise (e.g. an e2e hook that delays
+  a response): the `notImplemented` handler is `async` and awaits it.
+  `RequestLogicHandlers` functions return `unknown` instead of `void`.
+  Local fork for mpassid-voh-ui.
+
 # 2.0.0
 
 - **Breaking:** rewrite the handler for `msw@2`. `rest` → `http`,
