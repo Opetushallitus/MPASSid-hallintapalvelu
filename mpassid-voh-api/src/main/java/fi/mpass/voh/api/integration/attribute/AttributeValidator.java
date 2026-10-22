@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -45,7 +46,11 @@ public class AttributeValidator {
         this.authzScope = authzScope;
         this.usersPath = usersPath;
 
-        restClient = RestClient.builder().requestFactory(new HttpComponentsClientHttpRequestFactory())
+        // content compression is disabled, since httpclient5 5.6.x keeps the compressed Content-Length
+        // after decompression, which truncates response bodies
+        restClient = RestClient.builder()
+                .requestFactory(new HttpComponentsClientHttpRequestFactory(
+                        HttpClients.custom().useSystemProperties().disableContentCompression().build()))
                 .build();
     }
 

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 import org.w3c.dom.Document;
@@ -66,7 +67,12 @@ public class SamlMetadataProvider {
         }
         registry.setParserPool(getParserPool());
 
-        restClient = RestClient.builder().requestFactory(new HttpComponentsClientHttpRequestFactory()).build();
+        // content compression is disabled, since httpclient5 5.6.x keeps the compressed Content-Length
+        // after decompression, which truncates the metadata
+        restClient = RestClient.builder()
+                .requestFactory(new HttpComponentsClientHttpRequestFactory(
+                        HttpClients.custom().useSystemProperties().disableContentCompression().build()))
+                .build();
 
         // catching an exception here vs. propagating it further to handle the error in,
         // e.g., an integration loader
