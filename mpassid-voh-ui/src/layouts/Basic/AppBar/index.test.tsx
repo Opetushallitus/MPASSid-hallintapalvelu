@@ -6,13 +6,17 @@ import {
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { IntlProvider } from "react-intl";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
+import { MemoryRouter, Outlet, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import Integraatio from "@/routes/integraatio";
 import AppBar from ".";
 
 // useMe must return the same object between renders (effect dependency).
 const me = vi.hoisted(() => ({ current: {} as { oid?: string; groups?: string[] } }));
 vi.mock("@/api/käyttöoikeus", () => ({ useMe: () => me.current }));
+// The integration page without its content (only its tab handling is used).
+vi.mock("@/routes/integraatio/IntegrationTab", () => ({ default: () => null }));
+vi.mock("@/utils/components/HelpLinkButton", () => ({ default: () => null }));
 
 const USER_OID = "1.2.246.562.24.00000000001";
 const ORG_GROUP = "APP_MPASSID_TALLENTAJA_1.2.246.562.10.00000000002";
@@ -210,5 +214,105 @@ describe("käyttäjän vaihtuminen ja sessionStorage", () => {
     renderAppBar();
     expect(JSON.parse(storedTabs()!)).toEqual(["5", "8"]);
     expect(tabNames(openNav())).toEqual(["5", "8"]);
+  });
+});
+
+describe("avoimet integraatiot integraatiosivun kanssa", () => {
+  // As in the app: AppBar in the layout route, the integration page in its
+  // child route. The page opens its own tab, so closing that tab must not
+  // let the page (still shown until the navigation is done) add it back.
+  const appUi = (path: string) => (
+    <IntlProvider locale="fi" defaultLocale="fi" onError={() => {}}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route
+            element={
+              <>
+                <AppBar />
+                <Outlet />
+              </>
+            }
+          >
+            <Route index element={<div />} />
+            <Route path="integraatio/:integrationId" element={<Integraatio />} />
+          </Route>
+        </Routes>
+        <LocationProbe />
+      </MemoryRouter>
+    </IntlProvider>
+  );
+
+  const closeTab = async (user: ReturnType<typeof userEvent.setup>, name: string) => {
+    const tab = within(openNav()).getByRole("tab", { name });
+    await user.hover(tab);
+    await user.click(within(tab).getByTestId("CloseIcon"));
+  };
+
+  beforeEach(() => {
+    sessionStorage.setItem(`${openIntegrationsSessionStorageKey}-oid`, USER_OID);
+  });
+
+  it("integraatiosivu avaa välilehtensä ensimmäiseksi", () => {
+    storeTabs(["5", "9"]);
+    render(appUi("/integraatio/8"));
+    expect(tabNames(openNav())).toEqual(["8", "5", "9"]);
+    expect(JSON.parse(storedTabs()!)).toEqual(["8", "5", "9"]);
+  });
+
+  it("avoimen integraation välilehden sulkeminen siirtyy seuraavaan, eikä suljettu palaa", async () => {
+    const user = userEvent.setup();
+    storeTabs(["5", "8", "9"]);
+    render(appUi("/integraatio/8"));
+
+    await closeTab(user, "8");
+
+    expect(screen.getByTestId("location")).toHaveTextContent(/^\/integraatio\/9$/);
+    expect(tabNames(openNav())).toEqual(["5", "9"]);
+    expect(JSON.parse(storedTabs()!)).toEqual(["5", "9"]);
+  });
+
+  it("viimeisen välilehden sulkeminen siirtyy edelliseen", async () => {
+    const user = userEvent.setup();
+    storeTabs(["5", "8", "9"]);
+    render(appUi("/integraatio/9"));
+
+    await closeTab(user, "9");
+
+    expect(screen.getByTestId("location")).toHaveTextContent(/^\/integraatio\/8$/);
+    expect(tabNames(openNav())).toEqual(["5", "8"]);
+  });
+
+  it("ainoan välilehden sulkeminen vie etusivulle, eikä välilehti palaa", async () => {
+    const user = userEvent.setup();
+    storeTabs(["8"]);
+    render(appUi("/integraatio/8"));
+
+    await closeTab(user, "8");
+
+    expect(screen.getByTestId("location")).toHaveTextContent(/^\/$/);
+    expect(tabNames(openNav())).toEqual([]);
+    expect(JSON.parse(storedTabs()!)).toEqual([]);
+  });
+
+  it("toisen välilehden sulkeminen pysyy sivulla", async () => {
+    const user = userEvent.setup();
+    storeTabs(["5", "8", "9"]);
+    render(appUi("/integraatio/8"));
+
+    await closeTab(user, "5");
+
+    expect(screen.getByTestId("location")).toHaveTextContent(/^\/integraatio\/8$/);
+    expect(tabNames(openNav())).toEqual(["8", "9"]);
+  });
+
+  it("etusivulla välilehden sulkeminen ei navigoi", async () => {
+    const user = userEvent.setup();
+    storeTabs(["5", "8"]);
+    render(appUi("/"));
+
+    await closeTab(user, "8");
+
+    expect(screen.getByTestId("location")).toHaveTextContent(/^\/$/);
+    expect(tabNames(openNav())).toEqual(["5"]);
   });
 });

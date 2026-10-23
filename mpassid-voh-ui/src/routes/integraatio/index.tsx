@@ -14,17 +14,19 @@ import { openIntegrationsSessionStorageKey } from '../../config';
 export default function Integraatio() {
   const { integrationId } = useParams();
 
-  const [tabs, setValue] = useSessionStorage<string[]>(
+  const [, setValue] = useSessionStorage<string[]>(
     openIntegrationsSessionStorageKey,
     []
   );
-  
 
+  // Opens the tab when the page shows a new integration - not on every tab
+  // list change: closing this page's tab navigates away, but this page is
+  // still shown when the shorter list arrives and would add the tab back.
   useLayoutEffect(() => {
-    if (!tabs.includes(integrationId!)) {
-      setValue([integrationId!, ...tabs]);
-    }
-  }, [integrationId, setValue, tabs]);
+    setValue((tabs) =>
+      tabs.includes(integrationId!) ? tabs : [integrationId!, ...tabs]
+    );
+  }, [integrationId, setValue]);
 
   return (
     <>

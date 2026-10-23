@@ -90,6 +90,7 @@ E2E_LOG_STDOUT=1 npm run test:e2e -- e2e/create-wilma-integration.spec.ts
 | `home-search-filter.spec.ts` | Etusivun haku/tyhjennys/tyhjä tulos, sarakelajittelu, Ympäristö-suodatin, "Näytä sivulla" |
 | `save-error.spec.ts` | Tallennuksen 409/yleinen virhedialogi (vaatii mock-lisäyksen, ks. alla) |
 | `integration-detail-view.spec.ts` | Read-only `/integraatio/:id`-näkymän sisältö + 404-haara |
+| `open-integration-tabs.spec.ts` | Avointen integraatioiden välilehdet yläpalkissa: avaus, järjestys, sulkeminen (avoin/muu/ainoa, etusivulla), suljettu ei palaa, uudelleenlataus |
 | `azure-attribute-test.spec.ts` | Azure "Testaa attribuuttien oikeellisuus" -dialogi (onnistuu/epäonnistuu/pakolliset kentät) |
 | `misc-ui.spec.ts` | Disabloitu "Luo"-nappi (sp ilman palveluvalintaa), metadataUrl/tiedostolataus-poissulkevuus (ADFS) |
 | `helpers.ts` | Jaetut apufunktiot kaikille yllä oleville (ei sisällä testejä) |
