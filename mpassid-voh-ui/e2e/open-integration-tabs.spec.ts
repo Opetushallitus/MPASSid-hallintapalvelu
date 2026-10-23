@@ -57,7 +57,9 @@ async function closeTab(page: Page, id: string) {
 /** The integration page of `id` is shown (and its content has loaded). */
 async function expectOnIntegrationPage(page: Page, id: string) {
   await expect(page).toHaveURL(new RegExp(`/integraatio/${id}$`));
-  await expect(page.getByText(`Jäsen ${id}`, { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: `Jäsen ${id}`, exact: true, level: 2 })
+  ).toBeVisible();
 }
 
 test("avatut integraatiot näkyvät välilehtinä, uusin ensin, ja avoin on valittuna", async ({
