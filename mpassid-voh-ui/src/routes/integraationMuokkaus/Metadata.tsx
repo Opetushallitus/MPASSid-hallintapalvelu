@@ -345,16 +345,14 @@ export default function Metadata({
                         debugLog("MetadataForm onDelete (metadata)",redactSecrets(metadata))
                         debugLog("MetadataForm onDelete (name)",name)
                         debugLog("MetadataForm onDelete (index)",index)
-                        const newMetadata=clone(metadata)
+                        // The whole new list as the value (array=false), as in
+                        // the initialization: updates the metadata, the draft
+                        // and canSave. (It used to splice the current list and
+                        // never update the draft, so a deletion alone was not
+                        // saved.)
                         const list = metadata[attribute.name]
-                        if(list&&Array.isArray(list)&&list.length>=index) {
-                          list.splice(index, 1);
-                        }
-                        setMetadata(newMetadata)
-                        if(validateMetadata()) {
-                          setCanSave(true)
-                        } else {
-                          setCanSave(false)
+                        if(Array.isArray(list)&&index>=0&&index<list.length) {
+                          updateMetadata(false,attribute.name,(list as Array<string | MetadataEntry>).filter((_, i) => i !== index) as string[] | MetadataEntry[])
                         }
                       }
 

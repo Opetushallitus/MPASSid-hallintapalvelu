@@ -134,6 +134,11 @@ const defaults = {
 const E2E_TRIGGER_409 = "__e2e_trigger_409__";
 const E2E_TRIGGER_GENERIC_ERROR = "__e2e_trigger_500__";
 const E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE = "__e2e_trigger_403__";
+// testAttributesAuthorization: HTTP 200 with false (not authorized, e.g. the
+// integration is not saved yet) - a different branch from the 403 above.
+const E2E_TRIGGER_ATTRIBUTE_TEST_UNAUTHORIZED = "__e2e_trigger_unauthorized__";
+// testAttributes: an unknown principal (404) -> "Tuntematon tilaaja".
+const E2E_TRIGGER_UNKNOWN_PRINCIPAL = "__e2e_unknown_principal__";
 
 // E2E-testien koukut koulutietojen haulle (getIntegrationDiscoveryInformation).
 // MSW:n handlerit ajetaan sivun omassa JS-kontekstissa, joten testi asettaa ne
@@ -151,6 +156,21 @@ const readE2eFlag = (key: string): string | null => {
   } catch {
     return null;
   }
+};
+
+// E2E-koukku koodistohaulle (getKoodisByKoodisto), sama localStorage-
+// mekanismi kuin yllä: page.route() ei näe pyyntöä, kun MSW:n service worker
+// ohjaa sivua (esim. uudelleenlatauksen jälkeen). Ks.
+// e2e/integration-detail-view.spec.ts (ErrorFallback).
+//  - E2E_KOODISTO_FAIL = "1": vastaa 500. Muuten mockin oletusvastaus.
+export const E2E_KOODISTO_FAIL = "e2e-koodisto-fail";
+
+export const koodistoRequestLogicHandlers: RequestLogicHandlers = {
+  getKoodisByKoodisto() {
+    if (readE2eFlag(E2E_KOODISTO_FAIL) === "1") {
+      return { status: 500, mock: {} };
+    }
+  },
 };
 
 const triggerIntegrationSaveError = (body: Components.Schemas.Integration) => {
@@ -272,6 +292,9 @@ export default {
     }
   },
   testAttributes(request) {
+    if (request?.query?.principal === E2E_TRIGGER_UNKNOWN_PRINCIPAL) {
+      return { status: 404, mock: {} };
+    }
     const attributeResponse: { [name: string]: AttributeTestValue } = {};
     const selectArray: Array<string> = request?.query?.select as string[] || [];
     
@@ -333,6 +356,9 @@ export default {
     debugLog("testAttributesAuthorization",request.requestBody)
     if (request.requestBody?.clientId === E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE) {
       return { status: 403, mock: {} };
+    }
+    if (request.requestBody?.clientId === E2E_TRIGGER_ATTRIBUTE_TEST_UNAUTHORIZED) {
+      return { status: 200, mock: false };
     }
     // Like the backend: true when authorized.
     return { status: 200, mock: true };

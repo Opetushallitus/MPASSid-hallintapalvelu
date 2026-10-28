@@ -390,6 +390,20 @@ describe("saml: käyttäjän muutokset", () => {
 
     await waitFor(() => expect(latest.metadata.assertionConsumerServiceUrls).toEqual([]));
     await waitFor(() => expect(lastCanSave(latest)).toBe(false));
+    // The deletion reaches the draft too (it used to update only the
+    // metadata state, so a deletion alone was not saved).
+    expect(latest.entity.sp?.metadata?.assertionConsumerServiceUrls).toEqual([]);
+  });
+
+  it("onDelete ei muuta nykyistä listaa paikallaan", async () => {
+    const { latest } = renderMetadata(saml(completeSaml()));
+    await waitFor(() => expect(forms.assertionConsumerServiceUrls).toBeDefined());
+    const before = latest.metadata.assertionConsumerServiceUrls;
+
+    await formCall("assertionConsumerServiceUrls", "onDelete", "assertionConsumerServiceUrls", 0);
+
+    await waitFor(() => expect(latest.metadata.assertionConsumerServiceUrls).toEqual([]));
+    expect(before).toEqual([ACS]);
   });
 
   it("objektilistan onUpdate lisää objektin listaan", async () => {

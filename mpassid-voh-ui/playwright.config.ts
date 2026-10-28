@@ -16,6 +16,14 @@ export default defineConfig({
   // below (dev-server startup) which is unrelated.
   timeout: 60_000,
   reporter: "html",
+  // e2e-kattavuus (npm run test:e2e:coverage, ks. e2e/coverage/options.ts):
+  // setup tyhjentää edellisen raportin, teardown yhdistää workereiden datan.
+  ...(process.env.E2E_COVERAGE === "1"
+    ? {
+        globalSetup: "./e2e/coverage/setup.ts",
+        globalTeardown: "./e2e/coverage/teardown.ts",
+      }
+    : {}),
   use: {
     // App runs unprefixed in dev (App.tsx only applies ENV.BASENAME when
     // ENV.PROD is true), and the dev server listens on :3000, not Vite's

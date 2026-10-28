@@ -62,9 +62,13 @@ test("muokkaus-URL kirjoitettuna osoiteriville (sivun uudelleenlataus) lataa int
   await expect(page).toHaveURL(/\/integraatio\/\d+/);
   const id = new URL(page.url()).pathname.split("/").pop();
 
+  // A full load re-fetches every module from the dev server, which can take
+  // longer than the default 5 s under parallel workers (and e2e coverage).
   await page.goto(`/integraatio/${id}`);
-  await expect(page.getByText("osoiterivi.inschool.fi").first()).toBeVisible();
+  await expect(page.getByText("osoiterivi.inschool.fi").first()).toBeVisible({ timeout: 15_000 });
 
   await page.goto(`/muokkaa/idp/wilma/${id}`);
-  await expect(page.getByPlaceholder("Lisää hostname")).toHaveValue("osoiterivi.inschool.fi");
+  await expect(page.getByPlaceholder("Lisää hostname")).toHaveValue("osoiterivi.inschool.fi", {
+    timeout: 15_000,
+  });
 });

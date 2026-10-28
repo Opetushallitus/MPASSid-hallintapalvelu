@@ -173,6 +173,10 @@ export default defineConfig({
         parserOpts: { plugins: ["jsx", "typescript"] },
         presets: ["@visma/formatjs"],
         plugins: ["codegen"],
+        // Without a map from this step Vite's sourcemap chain breaks here:
+        // babel reformats the code, so devtools and the e2e coverage report
+        // pointed at babel's output lines instead of the source.
+        sourceMaps: true,
       },
     }),
     react(),

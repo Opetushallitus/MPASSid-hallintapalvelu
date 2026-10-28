@@ -9,7 +9,8 @@ import {
 
 // Read-only-näkymän sisällön tarkistus -
 // IntegrationDetails/index.tsx (the "Integraatiotiedot" tab) and
-// IntegrationTab/index.tsx:102-118 (404 branch).
+// IntegrationTab/index.tsx:102-118 (404 branch) and the ErrorBoundary
+// fallback (components/ErrorFallback.tsx).
 //
 // Confirmed against a real run: doing a hard `page.goto()` reload to
 // /integraatio/:id right after creating the integration in the SAME test
@@ -77,4 +78,97 @@ test("olematon integraatio näyttää 404-viestin", async ({ page }) => {
 
   await page.getByRole("link", { name: "etusivulle" }).click();
   await expect(page).toHaveURL("/");
+});
+
+test("tietojen haun virhe näyttää yleisen virheilmoituksen (ErrorFallback)", async ({
+  page,
+}) => {
+  await mockInstitutionTypes(page);
+  await createNewIdpIntegration(page, "Wilma");
+  await fillWilmaFields(page, "virhenakyma.inschool.fi");
+  await fillCommonIdpSteps(page, "Virhenäkymän koulu");
+  await saveIntegration(page);
+  await expect(page).toHaveURL(/\/integraatio\/\d+/);
+
+  // The view page's IdentityProvider reads the institution types with the
+  // throwing (suspense) koodisto hook, so a failed request reaches the
+  // layout's ErrorBoundary. page.route() cannot fail it: after the reload the
+  // MSW service worker answers it, so the mock's localStorage hook does
+  // (src/mocks/requestLogicHandlers.ts E2E_KOODISTO_FAIL). The reload drops
+  // the cached response; the mock keeps the integration in sessionStorage.
+  await page.evaluate(() => window.localStorage.setItem("e2e-koodisto-fail", "1"));
+  await page.reload();
+
+  // Full load: see edit-direct-url.spec.ts for the longer timeout.
+  await expect(page.getByText("Virhe", { exact: true })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/Ongelma näytettäessä tietoja/)).toBeVisible();
+});
+
+// DataRow "set-list" (SetProvider.tsx): a set integration's
+// "Palvelun integraatiot". Nothing in the UI creates a set integration, so it
+// is seeded into the mock database (sessionStorage, see
+// integration-selection.spec.ts) before the app loads.
+test("set-integraation näkymä listaa sen integraatiot nimellä ja tunnistetyypillä", async ({
+  page,
+}) => {
+  const member = (id: number, sp: Record<string, string>) => ({
+    id,
+    deploymentPhase: 1,
+    active: true,
+    configurationEntity: { sp },
+  });
+  const set = (id: number, name: string, integrationSets: unknown[]) => ({
+    id,
+    deploymentPhase: 1,
+    active: true,
+    organization: { oid: "1.2.246.562.10.00000000099", name: "Palveluorganisaatio" },
+    configurationEntity: { set: { type: "set", name } },
+    permissions: [],
+    integrationSets,
+  });
+  const integrations = [
+    set(8000001, "E2E-palvelukokonaisuus", [
+      member(8000011, { type: "oidc", clientId: "e2e-oidc-client" }),
+      member(8000012, { type: "saml", entityId: "https://sp.esimerkki.fi/e2e" }),
+      member(8000013, { type: "saml", name: "E2E-nimellä" }),
+    ]),
+    set(8000002, "E2E-tyhjä kokonaisuus", []),
+  ];
+  await page.addInitScript(
+    ({ key, value }) => {
+      if (!window.sessionStorage.getItem(key)) {
+        window.sessionStorage.setItem(key, value);
+      }
+    },
+    { key: "mpassid-mock-integrations", value: JSON.stringify(integrations) }
+  );
+
+  await page.goto("/integraatio/8000001");
+  await expect(page.getByText("Palvelun integraatiot")).toBeVisible({ timeout: 15_000 });
+  // The identifier shown depends on the service provider's type.
+  await expect(page.getByText("(Client-ID)")).toBeVisible();
+  await expect(page.getByRole("link", { name: "e2e-oidc-client" })).toHaveAttribute(
+    "href",
+    "/integraatio/8000011"
+  );
+  await expect(page.getByText("(Entity-ID)")).toBeVisible();
+  await expect(page.getByRole("link", { name: "https://sp.esimerkki.fi/e2e" })).toHaveAttribute(
+    "href",
+    "/integraatio/8000012"
+  );
+  await expect(page.getByText("(Name)")).toBeVisible();
+  await expect(page.getByRole("link", { name: "E2E-nimellä" })).toHaveAttribute(
+    "href",
+    "/integraatio/8000013"
+  );
+
+  await page.goto("/integraatio/8000002");
+  await expect(page.getByText("Palvelun integraatiot")).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page
+      .getByText("Integraatio lista", { exact: true })
+      .locator(
+        'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " MuiGrid-root ")][1]/following-sibling::*[1]'
+      )
+  ).toHaveText("–");
 });

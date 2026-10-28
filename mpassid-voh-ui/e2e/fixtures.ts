@@ -1,5 +1,6 @@
 import { test as base } from "@playwright/test";
 import { appendFileSync } from "node:fs";
+import coverageOptions, { coverageEnabled } from "./coverage/options";
 
 export { expect } from "@playwright/test";
 
@@ -20,7 +21,7 @@ const logLevel = process.env.E2E_LOG_LEVEL ?? "INFO";
 /** Kaiuta selaimen konsoli myös testin stdoutiin: E2E_LOG_STDOUT=1 */
 const echoToStdout = process.env.E2E_LOG_STDOUT === "1";
 
-export const test = base.extend<{ browserLog: void }>({
+export const test = base.extend<{ browserLog: void; coverage: void }>({
   /**
    * Automaattinen fixture: ei tarvitse kutsua spekeistä. Asettaa lokitason ja
    * kirjoittaa selaimen konsolin testikohtaiseen tiedostoon.
@@ -62,6 +63,53 @@ export const test = base.extend<{ browserLog: void }>({
         path: file,
         contentType: "text/plain",
       });
+    },
+    { auto: true },
+  ],
+
+  /**
+   * Selaimen JS-kattavuus (vain E2E_COVERAGE=1, ks. coverage/options.ts).
+   * Kirjasto ladataan vasta tarvittaessa, joten tavallinen ajo ei riipu
+   * siitä.
+   *
+   * Täysi sivunlataus (page.goto()/reload()) hävittää edellisen dokumentin
+   * skriptit ja niiden kattavuuden - resetOnNavigation: false ei sitä estä.
+   * Siksi kertynyt kattavuus kerätään talteen ennen jokaista testin omaa
+   * goto()/reload()-kutsua. (Sovellus itse navigoi vain SPA-reitityksellä.)
+   */
+  coverage: [
+    async ({ page, browserName }, use) => {
+      if (!coverageEnabled || browserName !== "chromium") {
+        await use();
+        return;
+      }
+      const { MCR } = await import("monocart-coverage-reports");
+      const mcr = MCR(coverageOptions);
+      const start = () => page.coverage.startJSCoverage({ resetOnNavigation: false });
+      const collect = async () => {
+        const entries = await page.coverage.stopJSCoverage();
+        if (entries.length > 0) {
+          await mcr.add(entries);
+        }
+      };
+
+      const goto = page.goto.bind(page);
+      const reload = page.reload.bind(page);
+      page.goto = async (...args) => {
+        await collect();
+        await start();
+        return goto(...args);
+      };
+      page.reload = async (...args) => {
+        await collect();
+        await start();
+        return reload(...args);
+      };
+
+      await start();
+      // Playwright ajaa use():n jälkeisen osan myös epäonnistuneelle testille.
+      await use();
+      await collect();
     },
     { auto: true },
   ],

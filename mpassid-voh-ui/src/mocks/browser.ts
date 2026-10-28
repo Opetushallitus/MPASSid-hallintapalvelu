@@ -6,7 +6,7 @@ import koodistoDefinition from "../../schemas/koodisto.json";
 import käyttöoikeusDefinition from "../../schemas/käyttöoikeus.json";
 import localisationDefinition from "../../schemas/localisation.json";
 import organisaatioDefinition from "../../schemas/organisaatio.json";
-import requestLogicHandlers, { definition } from "./requestLogicHandlers.js";
+import requestLogicHandlers, { definition, koodistoRequestLogicHandlers } from "./requestLogicHandlers.js";
 
 function mapDeep<T>(object: T, callback: (value: unknown) => unknown): T {
   const callback_ = (value: unknown) => {
@@ -48,9 +48,12 @@ export const worker = setupWorker(
   ...handlers({
     definition: patchSchema(käyttöoikeusDefinition as unknown as Document),
   }),
-  ...handlers({
-    definition: patchSchema(koodistoDefinition as Document),
-  }),
+  ...handlers(
+    {
+      definition: patchSchema(koodistoDefinition as Document),
+    },
+    koodistoRequestLogicHandlers
+  ),
   ...handlers({
     definition: patchSchema(localisationDefinition as Document),
   }),

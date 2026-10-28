@@ -37,6 +37,10 @@ const C = "Mansikkalan testi peruskoulu"; // 30076
 const D = "Mansikkalan testi lukio"; // 30077
 const CODE = { A: "30074", B: "30075", C: "30076", D: "30077" };
 
+// Kirjoitusvirhe "integraatiohin" on sovelluksen tekstissä (Validators.tsx).
+const EXTRA_EXCLUDES_HELPER =
+  "Kaikki muihin integraatiohin lisätyt koulut lisätään automaattisesti";
+
 const E2E_DISCOVERY_FAIL = "e2e-discovery-fail";
 const E2E_DISCOVERY_DELAY_SINGLE_TYPE_MS = "e2e-discovery-delay-single-type-ms";
 
@@ -95,6 +99,8 @@ test.describe("koulunvalinta: tallennettu data", () => {
     await mockInstitutionTypes(page);
     await createIntegrationUnderTest(page, "omat-poissulut");
     await toggleExtraSchoolsConfiguration(page);
+    // Ei sisarta -> ei muiden integraatioiden kouluja lisättäväksi.
+    await expect(page.getByText(EXTRA_EXCLUDES_HELPER)).not.toBeVisible();
     await selectExcludedSchools(page, [A]);
     // Poissulun valinta piilottaa sisällytysvalinnan (SchoolSelection.tsx:1070-1071).
     await expect(page.getByText("schools", { exact: true })).not.toBeVisible();
@@ -168,10 +174,11 @@ test.describe("koulunvalinta: saman organisaation muut integraatiot", () => {
     // A on jo toisessa integraatiossa, joten sitä ei voi sisällyttää.
     expect(sorted(await getMultiSelectOptions(page, "schools"))).toEqual(sorted([B, C]));
 
+    // Poissulkukentän ohje (fieldHelpers.tsx excludedSchoolsHelperText):
+    // näytetään, kun sisarilla on omia sisällytyksiä (eSI ei tyhjä).
+    await expect(page.getByText(EXTRA_EXCLUDES_HELPER)).toBeVisible();
+
     await selectExcludedSchools(page, [B]);
-    // Huom: MultiSelectForm ei näytä "Kaikki muihin integraatioihin lisätyt
-    // koulut lisätään automaattisesti" -ohjetta (sen helperText-tilaa ei
-    // renderöidä), joten sitä ei tarkisteta tässä.
     await saveIntegration(page);
     await expect(page).toHaveURL(/\/integraatio\/\d+/);
 
@@ -353,6 +360,127 @@ test.describe("koulunvalinta: integraatio A -> B samassa istunnossa", () => {
     await expect(schoolSwitch(page, "Lisää kouluvalinta säännöt")).toBeChecked();
     await expect(page.getByText("schools", { exact: true })).toBeVisible();
     await expect(page.getByText("excludedSchools", { exact: true })).not.toBeVisible();
+  });
+});
+
+// Valintanäkymän kytkimet ja nimet (SchoolSelection.tsx
+// handleShowSchoolsChange, changeExtraSchoolsConfiguration,
+// handleCustomDisplayNameChange, updateInstitutionTypes).
+const ORGANIZATION = "Mansikkalan testi kunta";
+const ADMIN_CONFIG_NOTICE =
+  "Valittuja oppilaitostyyppejä jo muissa integraatioissa, muokkaaminen mahdollistaa saman koulun näkymisen useassa integraatiossa";
+const displayNameInput = (page: Page) => page.getByPlaceholder("Lisää OKJ:n näyttönimi", { exact: true });
+const titleInput = (page: Page) => page.getByPlaceholder("Lisää title", { exact: true });
+
+test.describe("koulunvalinta: näkymän kytkimet ja nimet", () => {
+  test("koulunäkymä takaisin päälle: otsikoksi organisaatio, organisaation nimen näyttönimi tyhjenee", async ({
+    page,
+  }) => {
+    await mockInstitutionTypes(page);
+    await createIntegrationUnderTest(page, "nakyma-takaisin");
+    await expect(titleInput(page)).toHaveValue(ORGANIZATION);
+
+    // Off: the title goes, an own display name stays.
+    await schoolSwitch(page, "Näytetäänkö koulut").click();
+    await expect(titleInput(page)).toHaveCount(0);
+    await expect(displayNameInput(page)).toHaveValue("nakyma-takaisin-koulu");
+
+    // Back on: the title is the organisation's name again, the own display
+    // name is kept, and the school view (types empty) is shown again.
+    await schoolSwitch(page, "Näytetäänkö koulut").click();
+    await expect(titleInput(page)).toHaveValue(ORGANIZATION);
+    await expect(displayNameInput(page)).toHaveValue("nakyma-takaisin-koulu");
+    await expect(page.getByText("Oppilaitostyypit", { exact: true })).toBeVisible();
+
+    // A display name that is just the organisation's name (the default with
+    // the view off) is cleared when the view is switched on.
+    await schoolSwitch(page, "Näytetäänkö koulut").click();
+    await displayNameInput(page).fill(ORGANIZATION);
+    await schoolSwitch(page, "Näytetäänkö koulut").click();
+    await expect(displayNameInput(page)).toHaveValue("");
+    await expect(titleInput(page)).toHaveValue(ORGANIZATION);
+  });
+
+  test("koulunäkymän pois kytkeminen tyhjällä näyttönimellä: näyttönimeksi organisaatio", async ({
+    page,
+  }) => {
+    await mockInstitutionTypes(page);
+    await createIntegrationUnderTest(page, "nakyma-pois-tyhja");
+
+    await displayNameInput(page).fill("");
+    await schoolSwitch(page, "Näytetäänkö koulut").click();
+    await expect(displayNameInput(page)).toHaveValue(ORGANIZATION);
+
+    await saveIntegration(page);
+    await expect(page).toHaveURL(/\/integraatio\/\d+/);
+    await expect(viewRowValue(page, "OKJ:n näyttönimi")).toHaveText(ORGANIZATION);
+    await expect(viewRowValue(page, "Näytetäänkö koulut")).toHaveText("Ei");
+  });
+
+  test("kouluvalintasääntöjen pois kytkeminen tyhjentää valitut koulut", async ({ page }) => {
+    await mockInstitutionTypes(page);
+    await createIntegrationUnderTest(page, "saannot-pois");
+    await toggleExtraSchoolsConfiguration(page);
+    await selectSchools(page, [B]);
+
+    await schoolSwitch(page, "Lisää kouluvalinta säännöt").click();
+    await expect(schoolSwitch(page, "Lisää kouluvalinta säännöt")).not.toBeChecked();
+    await expect(page.getByText("schools", { exact: true })).toHaveCount(0);
+
+    // Back on: the earlier choice is gone.
+    await schoolSwitch(page, "Lisää kouluvalinta säännöt").click();
+    await expect(schoolSwitch(page, "Lisää kouluvalinta säännöt")).toBeChecked();
+    await expect(page.getByText(B, { exact: true })).toHaveCount(0);
+    await schoolSwitch(page, "Lisää kouluvalinta säännöt").click();
+
+    await saveIntegration(page);
+    await expect(page).toHaveURL(/\/integraatio\/\d+/);
+    await expect(viewRowValue(page, "schools")).toHaveText("–");
+    await expect(viewRowValue(page, "excludedSchools")).toHaveText("–");
+  });
+
+  test("OKJ:n näyttönimen tyhjennys poistaa sen tallennetusta datasta", async ({ page }) => {
+    await mockInstitutionTypes(page);
+    await createIntegrationUnderTest(page, "nayttonimi-tyhja");
+    await saveIntegration(page);
+    await expect(page).toHaveURL(/\/integraatio\/\d+/);
+    await expect(viewRowValue(page, "OKJ:n näyttönimi")).toHaveText("nayttonimi-tyhja-koulu");
+
+    await openEditFromViewPage(page);
+    await displayNameInput(page).fill("");
+    await saveIntegration(page);
+    await expect(page).toHaveURL(/\/integraatio\/\d+/);
+    await expect(viewRowValue(page, "OKJ:n näyttönimi")).toHaveText("");
+
+    await openEditFromViewPage(page);
+    await expect(displayNameInput(page)).toHaveValue("");
+  });
+
+  test("monityyppinen tuotantointegraatio: varoitus palaa, kun toinen tyyppi lisätään takaisin", async ({
+    page,
+  }) => {
+    await mockInstitutionTypes(page);
+    // The notice needs another production integration of the same types.
+    await createSiblingIdpIntegration(page, {
+      institutionTypeLabels: [PERUSKOULUT, LUKIOT],
+      schools: [C],
+    });
+    await createIntegrationUnderTest(page, "monityyppi", true);
+    await selectInstitutionTypes(page, [LUKIOT]);
+    await selectSchools(page, [A]);
+    await expect(page.getByText(ADMIN_CONFIG_NOTICE)).toBeVisible();
+    await saveIntegration(page);
+    await expect(page).toHaveURL(/\/integraatio\/\d+/);
+
+    // Saved with several types and its own schools: the notice is on.
+    await openEditFromViewPage(page);
+    await expect(page.getByText(ADMIN_CONFIG_NOTICE)).toBeVisible();
+
+    // One type left: off. Both again: on (updateInstitutionTypes).
+    await selectInstitutionTypes(page, [LUKIOT]);
+    await expect(page.getByText(ADMIN_CONFIG_NOTICE)).not.toBeVisible();
+    await selectInstitutionTypes(page, [LUKIOT]);
+    await expect(page.getByText(ADMIN_CONFIG_NOTICE)).toBeVisible();
   });
 });
 

@@ -496,12 +496,17 @@ export async function saveIntegration(page: Page) {
   await expect(saveButton).toBeEnabled({ timeout: 15_000 });
   await saveButton.click();
 
+  await expect(page.getByText("Olet muuttamassa integraation tietoja")).toBeVisible();
+  await expect(page.getByText("Haluatko varmasti tallentaa?")).toBeVisible();
   const okButton = page.getByRole("button", { name: "OK" });
   await okButton.click();
 
   await expect(
     page.getByText("Muutokset tallennettu onnistuneesti")
   ).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByText(/Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa/)
+  ).toBeVisible();
 
   await okButton.click();
 }

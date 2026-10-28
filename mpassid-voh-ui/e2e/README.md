@@ -75,6 +75,33 @@ npm run test:e2e:debug
 E2E_LOG_STDOUT=1 npm run test:e2e -- e2e/create-wilma-integration.spec.ts
 ```
 
+## Kattavuus
+
+```bash
+# Kertaalleen
+npm install -D monocart-coverage-reports
+
+npm run test:e2e:coverage
+# tai osa testeistä
+npm run test:e2e:coverage -- e2e/school-selection.spec.ts
+```
+
+Kerää selaimen V8-kattavuuden jokaisesta testistä (`fixtures.ts`) ja tekee
+lopuksi raportin `coverage-e2e/`-hakemistoon: `coverage-e2e/index.html`
+(rivit, haarat ja funktiot tiedostoittain), yhteenveto terminaaliin ja
+`lcov.info`. Mukana on vain sovelluksen oma `src/`-koodi - ei MSW-mockia,
+generoituja API-clienttejä eikä yksikkötestejä (`e2e/coverage/options.ts`).
+Tiedostot, joita mikään testi ei lataa, näkyvät 0 %:lla. Ilman
+`E2E_COVERAGE=1`:tä keruu on pois päältä eikä kirjastoa tarvita. Vaatii
+Node.js >= 22.15 ja Chromiumin (ei toimi `PW_CHANNEL`-selaimilla muilla kuin
+Chromium-pohjaisilla).
+
+Huom: uudelleen yritetyn (retries) testin molemmat ajot lasketaan mukaan.
+Täysi sivunlataus hävittää selaimesta edellisen dokumentin kattavuuden, joten
+fixture kerää sen talteen ennen jokaista testin `page.goto()`/`page.reload()`
+-kutsua. Muilla tavoin tehty täysi lataus (esim. `location.href` testissä)
+hukkaisi sitä edeltävän kattavuuden.
+
 ## Testitiedostot
 
 | Tiedosto | Kattaa |
@@ -82,16 +109,20 @@ E2E_LOG_STDOUT=1 npm run test:e2e -- e2e/create-wilma-integration.spec.ts
 | `create-*-integration.spec.ts`, `edit-*-integration.spec.ts` | Yhden integraatiotyypin (Wilma/Opinsys/Azure/ADFS/Google:Gsuite/SAML/OIDC) perus luonti- ja muokkausvirta, Testi-ympäristöön |
 | `create-*-integration-tuotanto.spec.ts` | Samat luontivirrat Tuotanto-ympäristöön - idp-tyypeille valitaan Palveluympäristö luonnin jälkeen (`selectEnvironment()`), sp-tyypeille (SAML/OIDC) "Tuotanto - uusi" valitaan suoraan luontidialogin "palvelu:"-valikosta (`createNewSpIntegration()`:n `environment`-parametri), koska sp-integraatioilla ei ole muokattavaa ympäristövalitsinta luonnin jälkeen |
 | `school-selection.spec.ts` | Koulunvalintanäkymän (`SchoolSelection.tsx`) koko luonti/muokkaus-matriisi, ks. alla |
+| `school-selection-extra.spec.ts` | Koulunvalinnan tallennettu data, sisarintegraatioiden vaikutukset, virhe- ja kilpailutilanteet, Tuotanto-Testi → Tuotanto, oppilaitostyypin poisto, näkymän ja sääntöjen kytkimet, OKJ:n näyttönimi ja otsikko, monityyppisen integraation varoitus |
 | `delete-integration.spec.ts` | Integraation poisto/deaktivointi ("Poista jäsen"), Passiiviset-suodatin, poiston peruutus |
 | `integration-selection.spec.ts` | "Integraatiovalinnat"-välilehti (palvelusallinta): kytkimet ja yksittäisten palvelujen salliminen syötetyillä set-integraatioilla |
-| `validation.spec.ts` | Validoinnin negatiivipolut: pakollinen tyhjänä, https/nolocalhost, virheellinen sertifikaatti, ListForm-duplikaatti, rivin poisto |
+| `validation.spec.ts` | Validoinnin negatiivipolut: pakollinen tyhjänä, https/nolocalhost, binddn (Opinsys), päivämäärä (Azure), expert-varoitus (Wilma), virheellinen sertifikaatti ja sertifikaatin voimassaolovaroitukset (`certs.ts` luo sertifikaatit ajonaikaisesti), ListForm-duplikaatti, rivin poisto |
+| `metadata-fields.spec.ts` | Palvelun metadata: OIDC:n yksivalintaiset kentät (token_endpoint_auth_method, id_token_signed_response_alg ja "Ei arvoa"), client_secretin uudelleengenerointi, SAML:n authnRequestsSigned-kytkin ja encryptionCertificates (PEM-otsakkeiden karsinta) |
+| `list-object-forms.spec.ts` | Lista- ja objektilomakkeiden reunatapaukset: SAML assertionConsumerServiceUrls (ObjectForm: rivin muokkaus/poisto, isDefault, automaattinen index, virheellinen rivi) ja OIDC redirect_uris (ListForm: Lisää-nappi, näppäilyvalidointi, tyhjä Enter, poisto muokkauksessa) |
 | `cancel-edit.spec.ts` | "Peruuta" luonnissa ja muokkauksessa - tallentamattomat muutokset hylätään |
 | `environment-switch.spec.ts` | Olemassa olevan idp-integraation Testi↔Tuotanto-vaihto muokkaustilassa |
 | `home-search-filter.spec.ts` | Etusivun haku/tyhjennys/tyhjä tulos, sarakelajittelu, Ympäristö-suodatin, "Näytä sivulla" |
 | `save-error.spec.ts` | Tallennuksen 409/yleinen virhedialogi (vaatii mock-lisäyksen, ks. alla) |
-| `integration-detail-view.spec.ts` | Read-only `/integraatio/:id`-näkymän sisältö + 404-haara |
+| `integration-detail-view.spec.ts` | Read-only `/integraatio/:id`-näkymän sisältö + 404-haara + yleinen virheilmoitus (ErrorFallback) + set-integraation integraatiolista |
+| `logo.spec.ts` | Logon pienennys (leveä/korkea/mahtuva kuva) ja kuva, jota ei voi avata |
 | `open-integration-tabs.spec.ts` | Avointen integraatioiden välilehdet yläpalkissa: avaus, järjestys, sulkeminen (avoin/muu/ainoa, etusivulla), suljettu ei palaa, uudelleenlataus |
-| `azure-attribute-test.spec.ts` | Azure "Testaa attribuuttien oikeellisuus" -dialogi (onnistuu/epäonnistuu/pakolliset kentät) |
+| `azure-attribute-test.spec.ts` | Azure "Testaa attribuuttien oikeellisuus" -dialogi: onnistuu/epäonnistuu (403 ja 200 false)/pakolliset kentät, tuntematon käyttäjä, Client Keyn näyttö, istunnon uudelleenkäyttö, sisäkkäiset attribuuttipolut tulostaulukossa |
 | `misc-ui.spec.ts` | Disabloitu "Luo"-nappi (sp ilman palveluvalintaa), metadataUrl/tiedostolataus-poissulkevuus (ADFS) |
 | `helpers.ts` | Jaetut apufunktiot kaikille yllä oleville (ei sisällä testejä) |
 
@@ -103,7 +134,8 @@ vaativat deterministisen tavan saada tallennus/attribuuttitesti epäonnistumaan
 tavoita sen jo käsittelemiä pyyntöjä.
 Ratkaisuna `src/mocks/requestLogicHandlers.ts`:ään lisättiin kolme
 "taika-arvoa" (`E2E_TRIGGER_409`, `E2E_TRIGGER_GENERIC_ERROR`,
-`E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE`), jotka `createIntegration`/
+`E2E_TRIGGER_ATTRIBUTE_TEST_FAILURE`; myöhemmin myös
+`E2E_TRIGGER_ATTRIBUTE_TEST_UNAUTHORIZED` ja `E2E_TRIGGER_UNKNOWN_PRINCIPAL`), jotka `createIntegration`/
 `updateIntegration`/`testAttributesAuthorization` tunnistavat ja joiden
 perusteella ne palauttavat virhevastauksen kirjaston valmiiksi tukeman
 `{status,mock}`-paluuarvon kautta - sama mekanismi kuin sovelluksessa jo
