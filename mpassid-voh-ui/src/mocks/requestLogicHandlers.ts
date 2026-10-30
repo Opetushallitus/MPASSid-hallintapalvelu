@@ -173,6 +173,20 @@ export const koodistoRequestLogicHandlers: RequestLogicHandlers = {
   },
 };
 
+/**
+ * A save response's organisation, like the backend's: only the stored
+ * organisation (oid, name, ytunnus). The backend adds the schools
+ * (children) only to GET responses (IntegrationService.getSpecIntegrationById
+ * fetches them from the organisaatio service; they are never stored).
+ */
+const saveResponse = (integration: Components.Schemas.Integration): Components.Schemas.Integration => {
+  if (!integration?.organization) {
+    return integration;
+  }
+  const { children: _children, ...organization } = integration.organization;
+  return { ...integration, organization };
+};
+
 const triggerIntegrationSaveError = (body: Components.Schemas.Integration) => {
   const marker =
     body?.discoveryInformation?.customDisplayName ||
@@ -376,7 +390,7 @@ export default {
       p.lastUpdatedOn = new Date().toISOString();
     })
     saveIntegrations()
-    updateIntegration.value = request.requestBody
+    updateIntegration.value = saveResponse(request.requestBody)
   },
   createIntegration(request) {
     const errorResponse = triggerIntegrationSaveError(request.requestBody);
@@ -402,7 +416,7 @@ export default {
       p.lastUpdatedOn = new Date().toISOString();
     })
     saveIntegrations()
-    createIntegration.value = request.requestBody
+    createIntegration.value = saveResponse(request.requestBody)
   },
   getIntegration(request) {
     const id = Number(request.params.id);

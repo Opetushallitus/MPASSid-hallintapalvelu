@@ -147,6 +147,10 @@ korjausta samaan tiedostoon:
 - `getIntegration()` palauttaa nyt `{status:404}` kun id:tä ei löydy
   (`integration-detail-view.spec.ts`:n 404-testi) - aiemmin se vastasi aina
   200:lla tyhjällä bodylla, jolloin sivu jäi ikuisesti latausanimaatioon.
+- `createIntegration()`/`updateIntegration()` palauttavat organisaation
+  ilman kouluja (`organization.children`), kuten oikea backend, joka liittää
+  ne vain GET-vastaukseen. Muokkausnappi hakee siksi tallennuksen jälkeen
+  integraation uudelleen (`EditIntegrationButton.tsx`).
 - `updateIntegration()` maskaa `client_secret`:n `"***"`:ksi jokaisen
   PÄIVITYKSEN (ei ensimmäisen luonnin) yhteydessä
   (`create-oidc-integration.spec.ts`:n "ei toistu" -testi), kuten oikea

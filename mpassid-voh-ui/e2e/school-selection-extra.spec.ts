@@ -568,6 +568,60 @@ test.describe("koulunvalinta: Tuotanto-Testi -> Tuotanto, kun koulut ovat jo kä
   });
 });
 
+test.describe("koulunvalinta: Tuotanto-Testi -> Tuotanto, ainoa koulu omassa käytössä", () => {
+  // Raportoitu 2026-10-30: oppilaitostyypillä on vain yksi koulu. Uusi
+  // Wilma Tuotanto-Testiin tällä koululla, tallennus, heti muokkaus ja
+  // vaihto Tuotantoon -> "Kaikki koulut ovat jo käytössä muissa
+  // integraatioissa", vaikka muita integraatioita ei ole. Ei toistu, jos
+  // sivu ladataan tallennuksen ja muokkauksen välissä. Ero polkujen välillä:
+  // heti tallennuksen jälkeen muokkaus sai navigoinnin mukana
+  // tallennusvastauksen, jossa backend ei palauta organisaation kouluja
+  // (mock tekee samoin, requestLogicHandlers.ts saveResponse).
+  // Korjaus: EditIntegrationButton hakee tällöin integraation uudelleen ja
+  // muokkaus lataa sen id:llä.
+  const createOnlyLukioInTuotantoTesti = async (page: Page) => {
+    await mockInstitutionTypes(page);
+    await createNewIdpIntegration(page, "Wilma");
+    await fillWilmaFields(page, "ainoa-koulu.inschool.fi");
+    await selectEnvironment(page, "Tuotanto-Testi");
+    await fillCommonIdpSteps(page, "Ainoan koulun koulu");
+    // Only Lukiot (one school, D): add it and drop Peruskoulut.
+    await selectInstitutionTypes(page, [LUKIOT, PERUSKOULUT]);
+    await toggleExtraSchoolsConfiguration(page);
+    expect(await getMultiSelectOptions(page, "schools")).toEqual([D]);
+    await selectSchools(page, [D]);
+    await saveIntegration(page);
+    await expect(page).toHaveURL(/\/integraatio\/\d+/);
+    await expect(viewRowValue(page, "schools")).toHaveText(CODE.D);
+  };
+
+  const expectOwnSchoolStillAllowed = async (page: Page) => {
+    await selectEnvironment(page, "Tuotanto");
+    // Wait for the production load: the switch is enabled again afterwards.
+    await expect(schoolSwitch(page, "Lisää kouluvalinta säännöt")).toBeEnabled();
+    await page.waitForTimeout(1000);
+    await expect(
+      page.getByText("Kaikki koulut ovat jo käytössä muissa integraatioissa")
+    ).not.toBeVisible();
+    await expect(page.getByText(/eivät ole sallittuja Tuotannossa/)).not.toBeVisible();
+    expect(await getMultiSelectOptions(page, "schools")).toEqual([D]);
+  };
+
+  test("heti tallennuksen jälkeen avattu muokkaus", async ({ page }) => {
+    await createOnlyLukioInTuotantoTesti(page);
+    await openEditFromViewPage(page);
+    await expectOwnSchoolStillAllowed(page);
+  });
+
+  test("uudelleenlatauksen jälkeen avattu muokkaus (vertailu)", async ({ page }) => {
+    await createOnlyLukioInTuotantoTesti(page);
+    await page.reload();
+    await expect(viewRowValue(page, "schools")).toHaveText(CODE.D, { timeout: 15_000 });
+    await openEditFromViewPage(page);
+    await expectOwnSchoolStillAllowed(page);
+  });
+});
+
 test.describe("koulunvalinta: oppilaitostyypin poisto karsii sen tyypin koulut", () => {
   // Päätös 2026-10-13: kun oppilaitostyyppi poistetaan, sen tyypin valitut ja
   // poissuljetut koulut poistetaan (myös Tuotannossa, jossa ennen ei karsittu).
