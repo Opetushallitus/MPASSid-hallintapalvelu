@@ -1,11 +1,19 @@
-import { expect, test } from "@playwright/test";
-import { createNewSpIntegration, logBrowserConsole } from "./helpers";
+import { expect, test } from "./fixtures";
+import {
+  createNewSpIntegration,
+} from "./helpers";
+
+// Tuotanto-versio create-oidc-integration.spec.ts:sta - identtinen muuten,
+// paitsi että "palvelu:"-valikosta valitaan "Tuotanto - uusi"
+// "Testi - uusi":n sijaan (PossibleServices.tsx:86-94). SP-integraatioilla
+// ei ole Palveluympäristö-valitsinta luonnin jälkeen
+// (ServiceProvider.tsx:66-79 vain näyttää sen), niin ympäristö on
+// valittava tässä, luontivaiheessa - ks. createNewSpIntegration()'s
+// helpers.ts:ssä oleva kommentti.
 
 test("luo uusi OIDC-palveluintegraatio Tuotanto-ympäristöön", async ({
   page,
 }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect", "Tuotanto");
 
   await expect(page).toHaveURL(/\/muokkaa\/sp\/oidc\/0/);

@@ -1,19 +1,22 @@
 
 import { Box, TextField } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from "lodash";
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
+import type { FormObject } from "./types";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
-  object: any;
+  object: FormObject;
   type: string;
   label: string;
   attributeType: string;
   isEditable: boolean;
   mandatory: boolean;
-  path: any;
+  path: string;
   reload?: boolean;
   noErros?: boolean;
   helperText: (data:string) => JSX.Element;
@@ -66,12 +69,13 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
   }, [attributeType, helperText, label, mandatory, onUpdate, onValidate, reload, setCanSave, type]);  
 
   const updateFormValue = () => {
-    devLog("DEBUG","updateFormValue (value)",inputRef.current?.value)
-    devLog("DEBUG","updateFormValue (onValidate )",onValidate(inputRef.current?.value))
-    if(onValidate(inputRef.current?.value)) {
+    debugLog("updateFormValue (value)",inputRef.current?.value)
+    const valueIsValid = onValidate(inputRef.current?.value)
+    debugLog("updateFormValue (onValidate )",valueIsValid)
+    if(valueIsValid) {
       
       setIsValid(true)
-      devLog("DEBUG","updateFormValue (mandatory)",mandatory)
+      debugLog("updateFormValue (mandatory)",mandatory)
       if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
         setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
         setIsValid(false)
@@ -104,15 +108,17 @@ export default function InputForm({ object, type, isEditable=false, mandatory=fa
           variant="standard"
           placeholder={intl.formatMessage({
             defaultMessage: "Lisää {label}"},
-            { label: label} 
+            { label: label}
           )}
           defaultValue={defaultValue}
           fullWidth
           error={!isValid&&!noErros}
           helperText={usedHelperText}
-          inputProps={{
-            ref: inputRef,
-            autoComplete: "off",
+          inputRef={inputRef}
+          slotProps={{
+            htmlInput: {
+              autoComplete: "off",
+            },
           }}
           onChange={updateFormValue}
         />

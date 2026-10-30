@@ -2,7 +2,7 @@ import { useMe } from "@/api/käyttöoikeus";
 import { useLocalisations } from "@/api/localisation";
 import { category } from "@/config";
 import toLanguage from "@/utils/toLanguage";
-import type { PropsWithChildren } from "react";
+import type { JSX, PropsWithChildren } from "react";
 import { IntlProvider as ReactIntlProvider } from "react-intl";
 import defaultMessages_ from "../../lang/fi-FI.json";
 import useDocumentLang from "../utils/useDocumentLang";

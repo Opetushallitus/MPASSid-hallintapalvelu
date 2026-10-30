@@ -1,17 +1,23 @@
+import type { JSX } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { devLog } from './devLog';
+import { createLogger } from './devLog';
 import { X509Certificate } from '@peculiar/x509';
+
+const warnLog = createLogger("WARN");
+const debugLog = createLogger("DEBUG");
 
 const validateDn = (value:string) => {
 
-    var regExpPattern = new RegExp('^((UID|uid=([^,]*)),)?((CN=([^,]*)),)?((((?:CN|OU|cn|ou)=[^,]+,?)+),)?((?:DC|dc=[^,]+,?)+)$')
+    // Optional uid=, cn= and cn=/ou= parts, then one or more dc= parts;
+    // attribute names in any case.
+    const regExpPattern = new RegExp('^(uid=[^,]+,)?(cn=[^,]+,)?((cn|ou)=[^,]+,)*dc=[^,]+(,dc=[^,]+)*$','i')
     return !!regExpPattern.test(value);
 
 }
 
 const validateUri = (value:string) => {
     
-    var regExpPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
+    const regExpPattern = new RegExp('^((http|https):\\/\\/)'+ // validate protocol
       '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|localhost|'+ // validate domain name 
       '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
       '(\\:\\d+)?(\\/[-a-z\\d%_@.:~+]*)*'+ // validate port and path
@@ -23,21 +29,23 @@ const validateUri = (value:string) => {
 
   const validateHttps = (value:string) => {
       
-    var regExpPattern = new RegExp('^((https):\\/\\/)'); 
+    const regExpPattern = new RegExp('^((https):\\/\\/)'); 
       return !!regExpPattern.test(value);
 
   }  
 
 const validateIpAddress = (value:string) => {
       
-    const regExpPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
+    const regExpPattern = new RegExp('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$'); 
     return !!regExpPattern.test(value);
 
   }
 
 const validateHostname = (value:string) => {
       
-    const regExpPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])$'); 
+    // Labels separated by dots, and an optional port (some existing
+    // integrations have one, e.g. wilma.mansikkala.fi:8445).
+    const regExpPattern = new RegExp('^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9-]*[A-Za-z0-9])(:[0-9]{1,5})?$'); 
     return !!regExpPattern.test(value);
 
 }
@@ -77,8 +85,9 @@ const validateCert = (value:string) => {
     
     if(value||value!=='') {
         try {
-            devLog("DEBUG","trimmed cert",trimCertificate(value))
-            const cert = new X509Certificate(trimCertificate(value));
+            const trimmedCert = trimCertificate(value);
+            debugLog("trimmed cert",trimmedCert)
+            const cert = new X509Certificate(trimmedCert);
         
             const certDetails = {
                 subject: cert.subjectName,
@@ -87,26 +96,27 @@ const validateCert = (value:string) => {
                 validTo: cert.notAfter,
                 serialNumber: cert.serialNumber,
             };
-            devLog("DEBUG","certDetails",certDetails)
+            debugLog("certDetails",certDetails)
             const currentDate = new Date();
             const futureDate = new Date();
             futureDate.setMonth(currentDate.getMonth() + 6);
             if(currentDate  < certDetails.validFrom) {
-                devLog("DEBUG","Cert is not yet valid",certDetails.validFrom)
+                debugLog("Cert is not yet valid",certDetails.validFrom)
             } 
             if(currentDate  > certDetails.validTo) {
-                devLog("DEBUG","Cert is not valid",certDetails.validTo)
+                debugLog("Cert is not valid",certDetails.validTo)
             } else {
                 if(certDetails.validTo < futureDate) {
-                    devLog("DEBUG","Cert is valid less than 6kk",certDetails.validTo)
+                    debugLog("Cert is valid less than 6kk",certDetails.validTo)
                 } else {
-                devLog("DEBUG","Cert is valid more than 6kk",certDetails.validTo)
+                debugLog("Cert is valid more than 6kk",certDetails.validTo)
                 }
             }
             
             
             return true;
         } catch (error) {
+            debugLog("validateCert (sertifikaatin jäsennys epäonnistui)", error)
             return false
         }
         
@@ -120,8 +130,9 @@ const validateCertText = (value:string) => {
     
     if(value||value!=='') {
         try {
-            devLog("DEBUG","trimmed cert",trimCertificate(value))
-            const cert = new X509Certificate(trimCertificate(value));
+            const trimmedCert = trimCertificate(value);
+            debugLog("trimmed cert",trimmedCert)
+            const cert = new X509Certificate(trimmedCert);
                 
             const certDetails = {
                 subject: cert.subjectName,
@@ -130,7 +141,7 @@ const validateCertText = (value:string) => {
                 validTo: cert.notAfter,
                 serialNumber: cert.serialNumber,
             };
-            devLog("DEBUG","certDetails",certDetails)
+            debugLog("certDetails",certDetails)
             const currentDate = new Date();
             const futureDate = new Date();
             futureDate.setMonth(currentDate.getMonth() + 6);
@@ -146,6 +157,7 @@ const validateCertText = (value:string) => {
             }
             return(<></>);    
         } catch (error) {
+            debugLog("validateCertText (sertifikaatin jäsennys epäonnistui)", error)
             return (<FormattedMessage defaultMessage="Ei validi certificate!" />);
         }
         
@@ -173,8 +185,8 @@ let validateStatus:boolean=true;
                     break;
                 case "uri":
                         validateStatus=validateUri(value);
-                        devLog("DEBUG","validate uri",value)
-                        devLog("DEBUG","validate uri",validateStatus)
+                        debugLog("validate uri",value)
+                        debugLog("validate uri",validateStatus)
                     break;    
                 case "ip":
                     validateStatus=validateIpAddress(value);
@@ -205,7 +217,7 @@ let validateStatus:boolean=true;
                     break;         
                 default:
                     validateStatus=false;
-                    console.warn("Unknown validation: ",validator)
+                    warnLog("Unknown validation",validator)
                     break;
                 }
             }
@@ -254,7 +266,7 @@ export const helperText = (validators:string[],value:string) => {
                         }
                         break;  
                 case "number":
-                    validateStatus=validateIpAddress(value);
+                    validateStatus=validateNumber(value);
                     if(!validateStatus) {
                         helperText=<FormattedMessage defaultMessage="Kentän arvon pitää olla numero!" />
                     }

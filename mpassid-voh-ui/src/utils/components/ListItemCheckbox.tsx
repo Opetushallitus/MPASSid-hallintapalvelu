@@ -26,7 +26,7 @@ export function ListItemCheckbox({
             edge="start"
             tabIndex={-1}
             disableRipple
-            inputProps={{ "aria-labelledby": id }}
+            slotProps={{ input: { "aria-labelledby": id } }}
             {...checkboxProps}
           />
         </ListItemIcon>

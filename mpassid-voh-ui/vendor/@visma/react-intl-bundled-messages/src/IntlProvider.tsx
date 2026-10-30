@@ -9,7 +9,7 @@ export default function IntlProvider({
   defaultLocale,
   messages,
   ...otherProps
-}: Partial<ReactIntlProvider['props']>) {
+}: Partial<React.ComponentProps<typeof ReactIntlProvider>>) {
   const [localeSetting] = useLocale();
   defaultLocale ??= defaultLocaleValue;
   locale ??= (localeSetting as string) ?? defaultLocale;

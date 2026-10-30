@@ -21,6 +21,7 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
+import type { JSX } from "react";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { Link } from "react-router-dom";
 import type { DataRowProps } from "../integraatio/IntegrationTab/DataRow";
@@ -144,12 +145,14 @@ export default function IntegrationsTable() {
                   "configurationEntity.sp.type",
                 ]}
                 menuProps={{
-                  MenuListProps: {
-                    subheader: (
-                      <ListSubheader>
-                        <FormattedMessage defaultMessage="Suodata tyypin mukaan" />
-                      </ListSubheader>
-                    ),
+                  slotProps: {
+                    list: {
+                      subheader: (
+                        <ListSubheader>
+                          <FormattedMessage defaultMessage="Suodata tyypin mukaan" />
+                        </ListSubheader>
+                      ),
+                    },
                   },
                   active: typeFilter.modified,
                   children: typeFilter.children,
@@ -162,12 +165,14 @@ export default function IntegrationsTable() {
                        "configurationEntity.set",
                        "configurationEntity.sp"]}
                 menuProps={{
-                  MenuListProps: {
-                    subheader: (
-                      <ListSubheader>
-                        <FormattedMessage defaultMessage="Suodata roolin mukaan" />
-                      </ListSubheader>
-                    ),
+                  slotProps: {
+                    list: {
+                      subheader: (
+                        <ListSubheader>
+                          <FormattedMessage defaultMessage="Suodata roolin mukaan" />
+                        </ListSubheader>
+                      ),
+                    },
                   },
                   active: roleFilter.modified,
                   children: roleFilter.children,
@@ -178,12 +183,14 @@ export default function IntegrationsTable() {
             <TableHeaderCell 
                 sort={["deploymentPhase"]}
                 menuProps={{
-                  MenuListProps: {
-                    subheader: (
-                      <ListSubheader>
-                        <FormattedMessage defaultMessage="Suodata ympäristön mukaan" />
-                      </ListSubheader>
-                    ),
+                  slotProps: {
+                    list: {
+                      subheader: (
+                        <ListSubheader>
+                          <FormattedMessage defaultMessage="Suodata ympäristön mukaan" />
+                        </ListSubheader>
+                      ),
+                    },
                   },
                   active: envFilter.modified,
                   children: envFilter.children,
@@ -205,7 +212,7 @@ export default function IntegrationsTable() {
       {content?.length ? (
         <TablePaginationWithRouterIntegration count={totalPages} />
       ) : (
-        <Box display="flex" justifyContent="center" mt={3}>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
           <Secondary>
             <FormattedMessage
               defaultMessage={`Valitsemillasi hakuehdoilla ei löytynyt yhtään {type, select,

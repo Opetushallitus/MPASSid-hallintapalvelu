@@ -15,12 +15,12 @@ import { readPackageUp } from 'read-pkg-up';
 const source = 'lang';
 
 async function main() {
-  let appDirectory = 'src';
-
-  try {
-    const { readConfig } = await import('@remix-run/dev/dist/config.js');
-    appDirectory = (await readConfig()).appDirectory;
-  } catch {}
+  // App source lives in `src` (this is a Vite + React app, not Remix). The
+  // upstream package optionally read a Remix config here to override the app
+  // directory; that dependency (@remix-run/dev) dragged in a large, heavily
+  // CVE-flagged build chain (tar/cacache/esbuild/mdx) and was only ever a
+  // no-op fallback to 'src' for this project, so it has been dropped.
+  const appDirectory = 'src';
 
   const resultAsString = await extract(
     await fg([`${appDirectory}/**/*.{j,t}s{,x}`, `!**/*.d.ts`]),

@@ -1,0 +1,15 @@
+diff --git a/node_modules/openapi-client-axios/client.js b/node_modules/openapi-client-axios/client.js
+index 1f8cef4..429df57 100644
+--- a/node_modules/openapi-client-axios/client.js
++++ b/node_modules/openapi-client-axios/client.js
+@@ -386,9 +386,8 @@ var OpenAPIClientAxios = /** @class */ (function () {
+             // construct axios request config
+             var axiosConfig = {
+                 method: request.method,
+-                url: request.path,
++                url: request.url,
+                 data: request.payload,
+-                params: request.query,
+                 headers: request.headers,
+             };
+             // allow overriding baseURL with operation / path specific servers

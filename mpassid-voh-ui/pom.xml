@@ -11,8 +11,8 @@
 	<artifactId>mpassid-voh-ui</artifactId>
 
 	<properties>
-		<node.version>v22.13.1</node.version>
-		<npm.version>10.9.2</npm.version>
+		<node.version>v26.5.0</node.version>
+		<npm.version>11.17.0</npm.version>
 		<frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
 		<build.outDir>target/classes/public</build.outDir>
 	</properties>

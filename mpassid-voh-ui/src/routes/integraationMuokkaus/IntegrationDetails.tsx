@@ -1,15 +1,18 @@
 import type { Components } from "@/api";
+import { useIntegrationSafe } from "@/api";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { clone, cloneDeep, isEqual } from "lodash";
 import {
   Alert,
   AlertTitle,
+  Box,
+  CircularProgress,
   Grid,
   Link as MuiLink,
   Typography
 } from "@mui/material";
 import type { Dispatch, MutableRefObject} from "react";
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from "react-router-dom";
 import Role from "./Role";
@@ -21,7 +24,12 @@ import IntegrationBasicDetails from "./IntegrationBasicDetails";
 import type { IntegrationType, UiConfiguration } from '../../config';
 import { defaultDataConfiguration, defaultIntegrationType, integrationTypesDefault } from '../../config';
 import SchoolSelection from "./SchoolSelection";
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecrets } from "@/utils/devLog";
+import { computeDetailsCanSave } from "./integrationDetails/canSave";
+import { withUniqueId } from "./integrationDetails/uniqueId";
+import type { MetadataMap } from "./Form/types";
+
+const debugLog = createLogger("DEBUG");
 
 
 const integrationTypes = clone(integrationTypesDefault);
@@ -38,7 +46,9 @@ function removeStrings(source: Components.Schemas.Attribute[], toRemove: Compone
 
 interface Props {
   id: number;
-  deploymentPhase: MutableRefObject<number>;
+  // The environment chosen in the form (index.tsx saves it from here). A ref
+  // by name, so react-hooks treats writing .current as a ref update.
+  deploymentPhaseRef: MutableRefObject<number>;
   metadataFile: File[];
   setSaveDialogState: Dispatch<boolean>;
   setCanSave: Dispatch<boolean>;
@@ -51,58 +61,146 @@ interface Props {
 
 
 
-export default function IntegrationDetails({ id, setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile,dataConfiguration,deploymentPhase}: Props) {
-    
+/**
+ * The integration to edit comes with the navigation (location.state, the
+ * view page's edit button). Without it - the edit URL opened directly, from a
+ * bookmark or in a new tab - it is loaded by id. (It used to read
+ * location.state unconditionally and crashed on null, so the not-found
+ * message below was never shown.)
+ */
+export default function IntegrationDetails(props: Props) {
     const { state } = useLocation();
-    const integration: Components.Schemas.Integration = state;
+    const integration = state as Components.Schemas.Integration | null;
+    if(integration) {
+      return <IntegrationDetailsForm key={integration.id} {...props} integration={integration}/>
+    }
+    // id 0 is a new integration: it is created from "Luo uusi", never loaded.
+    if(props.id>0) {
+      return (
+        <Suspense fallback={<Box sx={{ display: "flex", justifyContent: "center", p: 3 }}><CircularProgress /></Box>}>
+          <LoadedIntegrationDetails {...props}/>
+        </Suspense>
+      )
+    }
+    return <IntegrationNotFound id={props.id}/>
+}
+
+function LoadedIntegrationDetails(props: Props) {
+    const [error, loaded] = useIntegrationSafe({ id: props.id })
+    // A copy: the loaded integration is shared with the view page through
+    // the cache, and the form must never change it.
+    const integration = useMemo(() => loaded ? cloneDeep(loaded) : undefined, [loaded])
+    if(error||!integration) {
+      return <IntegrationNotFound id={props.id}/>
+    }
+    return <IntegrationDetailsForm key={integration.id} {...props} integration={integration}/>
+}
+
+function IntegrationNotFound({ id }: { id: number }) {
+    return (
+      <Alert severity="error">
+        <FormattedMessage
+          defaultMessage="<title>Integraatiota {id} ei löydy</title>Siirry <link>etusivulle</link>."
+          values={{
+            id,
+            title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
+            link: (chunks) => (
+              <MuiLink color="error" component={Link} to="/">
+                {chunks}
+              </MuiLink>
+            ),
+          }}
+        />
+      </Alert>
+    );
+}
+
+function IntegrationDetailsForm({ setSaveDialogState, setCanSave, setNewIntegration, newIntegration, setLogo, metadataFile, setMetadataFile,dataConfiguration,deploymentPhaseRef, integration}: Props & { integration: Components.Schemas.Integration }) {
+    
     const [isValidSchoolSelection, setIsValidSchoolSelection] = useState(true);
     const [isValidDataAttribute, setIsValidDataAttribute] = useState(true);
     const [isValidUserAttribute, setIsValidUserAttribute] = useState(true);
     const [isValidMetadata, setIsValidMetadata] = useState(true);
     const [isValidRoleDetails, setIsValidRoleDetails] = useState(true);
     const [newLogo, setNewLogo] = useState(false);
-    const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
-    const [canSaveConfigurationEntity, setCanSaveConfigurationEntity] = useState(true);
-    const [canSaveDiscoveryInformation, setCanSaveDiscoveryInformation] = useState(true);
-    const [environmentChanged, setEnvironmentChanged] = useState(true);
-    const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation>();
-    const [ showConfigurationEntityData, setShowConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity>();
-    const environment = useRef<number>((state?.deploymentPhase)?state.deploymentPhase:-5);
+    // The drafts start from the integration in their initial state. The form
+    // is keyed by integration id, so another integration starts afresh.
+    const [ newConfigurationEntityData, setNewConfigurationEntityData] = useState<Components.Schemas.ConfigurationEntity|undefined>(() => cloneDeep(integration.configurationEntity));
+    // Nothing has changed on mount (the environment effect sets it).
+    const [environmentChanged, setEnvironmentChanged] = useState(false);
+    const [ newDiscoveryInformation, setNewDiscoveryInformation] = useState<Components.Schemas.DiscoveryInformation|undefined>(() => integration.discoveryInformation ? cloneDeep(integration.discoveryInformation) : undefined);
+    const environment = useRef<number>((integration.deploymentPhase)?integration.deploymentPhase:-5);
     const originalEnvironment = useRef<number>(-5);
-    const originalIntegration = useRef<Components.Schemas.Integration>();
-    const [ integrationEnvironment, setIntegrationEnvironment] = useState<number>((state?.deploymentPhase)?state.deploymentPhase:-5);
-    const [name, setName] = useState<string>('');
-    const [metadataUrl, setMetadataUrl] = useState<string>('');
-    const [metadata, setMetadata] = useState<any>((newConfigurationEntityData?.sp?.metadata&&newConfigurationEntityData?.sp?.metadata!==undefined)?newConfigurationEntityData.sp.metadata:{});
-    const [attributes, setAttributes] = useState<Components.Schemas.Attribute[]>((newConfigurationEntityData?.attributes&&newConfigurationEntityData?.attributes!==undefined)?newConfigurationEntityData.attributes:[]);
+    // The integration as opened, for "has anything changed" (state from the
+    // start: the validity derived during render needs it).
+    const [originalIntegration] = useState<Components.Schemas.Integration>(() => cloneDeep(integration));
+    const [ integrationEnvironment, setIntegrationEnvironment] = useState<number>((integration.deploymentPhase)?integration.deploymentPhase:-5);
+    const [name, setName] = useState<string>(() => integration.configurationEntity?.sp?.name || '');
+    const [metadataUrl, setMetadataUrl] = useState<string>(() => {
+      const idp = integration.configurationEntity?.idp
+      return idp&&(idp.type==='adfs'||idp.type==='azure'||idp.type==='gsuite')
+        ? (idp as Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite).metadataUrl || ''
+        : ''
+    });
+    // The schema types metadata values as objects; see Form/types.ts.
+    const [metadata, setMetadata] = useState<MetadataMap>(() => (integration.configurationEntity?.sp?.metadata as MetadataMap|undefined) ?? {});
+    const [attributes, setAttributes] = useState<Components.Schemas.Attribute[]>(() => integration.configurationEntity?.attributes ?? []);
     const [initUserAttributes, setInitUserAttributes] = useState<string[]>([]);
     const [initDataAttributes, setInitDataAttributes] = useState<string[]>([]);
-    const initAttr = useRef<String[]>([]);
+    const initAttr = useRef<string[]>([]);
     
     const role  = (integration.configurationEntity?.idp) ? "idp" : "sp"
-    const type = integration.configurationEntity?.idp?.type! || integration.configurationEntity?.sp?.type! || "unknown"
+    const type = integration.configurationEntity?.idp?.type || integration.configurationEntity?.sp?.type || "unknown"
     const oid: string = integration?.organization?.oid || "0"
     
     const uniqueIdConfiguration:UiConfiguration = dataConfiguration.filter(conf=>conf.name&&conf.name==='uniqueId')[0] || defaultDataConfiguration;
     const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType;     
+
+    // The configurationEntity draft with the unique id attribute copied into
+    // its idp/sp field (derived, the draft state is not modified). Everything
+    // that reads the draft uses this.
+    const draftConfigurationEntity = useMemo(
+      () => newConfigurationEntityData ? withUniqueId(newConfigurationEntityData, typeConf.attribute) : undefined,
+      [newConfigurationEntityData, typeConf.attribute]
+    );
+
+    // What IntegrationBasicDetails shows. For an sp the metadata's entityId /
+    // client_id and the service name are merged in. Not shown for a type
+    // without a unique id configuration (adfs, gsuite), as before.
+    const showConfigurationEntityData = useMemo(() => {
+      if(!draftConfigurationEntity||type==='unknown'||!typeConf.attribute) {
+        return undefined
+      }
+      const sp = draftConfigurationEntity.sp
+      if(!sp) {
+        return draftConfigurationEntity.idp ? draftConfigurationEntity : undefined
+      }
+      if(type==='saml'&&metadata.entityId) {
+        return { ...draftConfigurationEntity, sp: { ...sp, entityId: metadata.entityId as string | undefined, ...(name ? { name } : {}) } as Components.Schemas.SamlServiceProvider }
+      }
+      if(type==='oidc'&&metadata.client_id) {
+        return { ...draftConfigurationEntity, sp: { ...sp, clientId: metadata.client_id as string | undefined, ...(name ? { name } : {}) } as Components.Schemas.OidcServiceProvider }
+      }
+      return draftConfigurationEntity
+    }, [draftConfigurationEntity, type, typeConf.attribute, metadata, name]);
     
     useEffect(() => {
-      devLog("DEBUG","IntegrationDetails (integrationEnvironment)",integrationEnvironment)      
+      debugLog("IntegrationDetails (integrationEnvironment)",integrationEnvironment)      
       environment.current=integrationEnvironment   
-      deploymentPhase.current=integrationEnvironment;
+      deploymentPhaseRef.current=integrationEnvironment;
       if(environment.current!==originalEnvironment.current&&environment.current>=0&&originalEnvironment.current>=0) {
         setEnvironmentChanged(true) 
       } else {
         setEnvironmentChanged(false) 
       }
-    }, [deploymentPhase, integrationEnvironment]);
+    }, [deploymentPhaseRef, integrationEnvironment]);
 
     useEffect(() => {
 
       if(newConfigurationEntityData!==undefined) {
                 
         const unInitAttr = removeStrings(attributes.filter(a=>a.name!==undefined&&a.content!==''&&!initAttr.current.includes(a.name)),newConfigurationEntityData.attributes) 
-        devLog("DEBUG","IntegrationDetails (unInitAttr)",unInitAttr)
+        debugLog("IntegrationDetails (unInitAttr)",unInitAttr)
         //const unInitAttr = removeStrings(attributes,newConfigurationEntityData.attributes) 
 
         if(unInitAttr.length>0) {
@@ -117,322 +215,146 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               initAttr.current.push(attr.name);
             }
           })
-          devLog("DEBUG","IntegrationDetails (initialized done attributes)",attributes);                        
+          debugLog("IntegrationDetails (initialized done attributes)",redactSecrets(attributes));                        
           setNewConfigurationEntityData(updatedConfigurationEntityData);
           
         }
-        //devLog("DEBUG","Attributes (initialized done attribute.length)",attributes?.length); 
-        //devLog("DEBUG","Attributes (initialized done newConfigurationEntityData?.attributes)",newConfigurationEntityData?.attributes);
+        //debugLog("Attributes (initialized done attribute.length)",attributes?.length); 
+        //debugLog("Attributes (initialized done newConfigurationEntityData?.attributes)",newConfigurationEntityData?.attributes);
       }
       
             
     }, [attributes, newConfigurationEntityData, newConfigurationEntityData?.attributes])
 
-    useEffect(() => {          
-      if(newConfigurationEntityData?.idp&&metadataUrl!=='') {        
-        const changedIdp:Components.Schemas.Integration|Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite=clone(newConfigurationEntityData.idp);
-        if(changedIdp?.metadataUrl!==metadataUrl) {
-          devLog("DEBUG","IntegrationDetails (metadataUrl)",metadataUrl)  
-          changedIdp.metadataUrl=metadataUrl
-          const changedConfigurationEntityData=clone(newConfigurationEntityData)
-          changedConfigurationEntityData.idp=changedIdp;      
-          setNewConfigurationEntityData(changedConfigurationEntityData)
-        }        
-      }      
-    }, [metadataUrl, newConfigurationEntityData]);
+    // A metadata URL from Role goes into the idp draft as well. An empty URL
+    // leaves the draft as it is.
+    const handleMetadataUrl = (value: string) => {
+      setMetadataUrl(value)
+      if(value!=='') {
+        setNewConfigurationEntityData(prev => {
+          if(!prev?.idp||(prev.idp as Components.Schemas.Adfs).metadataUrl===value) {
+            return prev
+          }
+          debugLog("IntegrationDetails (metadataUrl)",value)
+          return { ...prev, idp: { ...prev.idp, metadataUrl: value } as Components.Schemas.IdentityProvider }
+        })
+      }
+    }
 
     useEffect(() => {
-      devLog("DEBUG","IntegrationDetails (integration)",integration)
-      if(integration?.configurationEntity?.sp?.name) {
-        setName(integration.configurationEntity.sp.name)
-      }
+      debugLog("IntegrationDetails (integration)",redactSecrets(integration))
       if(integration?.deploymentPhase!==undefined&&integration.deploymentPhase>=0) {
         if(environment.current===-5) {
-          devLog("DEBUG","IntegrationDetails (init environment)",integration.deploymentPhase)
+          debugLog("IntegrationDetails (init environment)",integration.deploymentPhase)
           environment.current=integration.deploymentPhase
         }        
         if(originalEnvironment.current===-5) {
-          devLog("DEBUG","IntegrationDetails (init originalEnvironment)",integration.deploymentPhase)
+          debugLog("IntegrationDetails (init originalEnvironment)",integration.deploymentPhase)
           originalEnvironment.current=integration.deploymentPhase
         }
       } 
-      if(!originalIntegration.current) {
-        devLog("DEBUG","IntegrationDetails (originalIntegration)",integration)
-        originalIntegration.current=cloneDeep(integration)
-      }
       
     }, [integration]);
 
+    // Derived from the current values.
+    const canSaveParts = computeDetailsCanSave({
+      role,
+      original: originalIntegration,
+      configurationEntity: draftConfigurationEntity,
+      discoveryInformation: newDiscoveryInformation,
+      valid: {
+        dataAttribute: isValidDataAttribute,
+        userAttribute: isValidUserAttribute,
+        metadata: isValidMetadata,
+        schoolSelection: isValidSchoolSelection,
+        roleDetails: isValidRoleDetails,
+      },
+      metadataFileCount: metadataFile.length,
+      metadataUrl,
+      newLogo,
+      environmentChanged,
+      name,
+    })
+    const canSaveAll = canSaveParts.configurationEntity && canSaveParts.discoveryInformation
+
     useEffect(() => {
-      devLog("DEBUG","IntegrationDetails (canSaveConfigurationEntity)",canSaveConfigurationEntity)
-      devLog("DEBUG","IntegrationDetails (canSaveDiscoveryInformation)",canSaveDiscoveryInformation)
-      if((canSaveConfigurationEntity&&canSaveDiscoveryInformation)) {
-        setCanSave(true)
-      } else {
-        setCanSave(false)
-      }
-      
-    }, [setCanSave,canSaveConfigurationEntity,canSaveDiscoveryInformation]);
+      debugLog("IntegrationDetails (canSave)", canSaveParts)
+      setCanSave(canSaveAll)
+      // canSaveParts is logged only.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [setCanSave, canSaveAll]);
     
-    useEffect(() => {
-      
-      if(role !== undefined) {
-        devLog("DEBUG","IntegrationDetails (deploymentPhase)",integration.deploymentPhase)
-        devLog("DEBUG","IntegrationDetails (environment)",environment.current)
-        if(environment.current>=0) {
-          integration.deploymentPhase=environment.current
-        }
-        
-        if(!newIntegration) {
-          setNewIntegration(cloneDeep(integration))
-        
-          setNewConfigurationEntityData(cloneDeep(integration.configurationEntity))
-          if(integration?.discoveryInformation){
-            setNewDiscoveryInformation(cloneDeep(integration.discoveryInformation))
-          }
-          if(integration?.configurationEntity) {
-            if(integration.configurationEntity.sp&&integration.configurationEntity.sp.metadata&&integration.configurationEntity.sp.metadata!==undefined) {
-              setMetadata(integration.configurationEntity.sp.metadata)
-            }
-            if(integration.configurationEntity.idp&&(integration.configurationEntity.idp.type==='adfs'||integration.configurationEntity.idp.type==='azure'||integration.configurationEntity.idp.type==='gsuite')) {
-              const idp:Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite = integration.configurationEntity.idp;
-              if(idp.metadataUrl) {
-                setMetadataUrl(idp.metadataUrl)
-              }        
-            }
-            if(integration.configurationEntity&&integration.configurationEntity.attributes&&integration.configurationEntity.attributes!== undefined) {                  
-              setAttributes(integration.configurationEntity.attributes)              
-            } 
-            
-            
-          }
-        }
-        
-        
-      }
-      
-    }, [role, integration, newIntegration, setNewIntegration, setMetadata]);
     
-    useEffect(() => {
-      //Update showConfigurationEntityData
-      if(newConfigurationEntityData&&type!=='unknown') {
-        
-        const testNewConfigurationEntityData:any=clone(newConfigurationEntityData);
-        
-        if(typeConf.attribute&&testNewConfigurationEntityData.idp){
-          const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.idp?.[typeConf.attribute]||''; 
-          devLog("DEBUG","uniqueIdType",uniqueIdType)
-          const updatedIdentityProvider: any = testNewConfigurationEntityData.idp;
-          devLog('DEBUG','updatedIdentityProvider[typeConf.attribute]',updatedIdentityProvider[typeConf.attribute])
-          updatedIdentityProvider[typeConf.attribute]=uniqueIdType;
-          newConfigurationEntityData.idp=updatedIdentityProvider;
-          devLog("DEBUG","newConfigurationEntityData for show",newConfigurationEntityData)
-          setShowConfigurationEntityData(newConfigurationEntityData);
-        }
-        if(typeConf.attribute&&testNewConfigurationEntityData.sp){
-          const uniqueIdType=newConfigurationEntityData.attributes?.filter(attribute=>attribute.name===typeConf.attribute).map(attribute=>attribute.content)[0]||testNewConfigurationEntityData.sp?.[typeConf.attribute]||''; 
-          devLog("DEBUG","uniqueIdType",uniqueIdType)
-          const updatedServiceProvider: any = testNewConfigurationEntityData.sp;
-          updatedServiceProvider[typeConf.attribute]=uniqueIdType;
-          newConfigurationEntityData.sp=updatedServiceProvider;
-          devLog("DEBUG","newConfigurationEntityData (metadata)",metadata)
-          if(type==='saml') {
-            if(metadata.entityId&&newConfigurationEntityData.sp) {
-              const samlServiceProvider:Components.Schemas.SamlServiceProvider = cloneDeep(newConfigurationEntityData.sp)
-              samlServiceProvider.entityId=metadata.entityId;
-              if(name) {
-                devLog("DEBUG","newConfigurationEntityData (saml name)",name)
-                samlServiceProvider.name=name;
-              }
-              const newConfiguration = cloneDeep(newConfigurationEntityData)
-              newConfiguration.sp=samlServiceProvider;
-              setShowConfigurationEntityData(newConfiguration)
-            }
-            
-          }
 
-          if(type==='oidc') {
-                    
-            if(metadata.client_id&&newConfigurationEntityData.sp) {
-              const oidcServiceProvider:Components.Schemas.OidcServiceProvider = cloneDeep(newConfigurationEntityData.sp)
-              oidcServiceProvider.clientId=metadata.client_id;
-              
-              if(name) {
-                devLog("DEBUG","newConfigurationEntityData (oidc name)",name)
-                oidcServiceProvider.name=name;
-              }
-              const newConfiguration = cloneDeep(newConfigurationEntityData)
-              newConfiguration.sp=oidcServiceProvider;
-              setShowConfigurationEntityData(newConfiguration);
-            }
-          }
-          
-          if(!metadata.entityId&&!metadata.client_id) {
-            setShowConfigurationEntityData(newConfigurationEntityData);
-          }
-          
-        }
+
+
+
+
+
+
+    // The environment as a render value. environment.current is updated in
+    // effects (above), so a child reading it during render saw a switch only
+    // on some later re-render. The fallback mirrors the init effect: a Testi
+    // integration (deploymentPhase 0, falsy) starts integrationEnvironment at -5.
+    const currentEnvironment = integrationEnvironment>=0
+      ? integrationEnvironment
+      : (integration?.deploymentPhase!==undefined&&integration.deploymentPhase>=0 ? integration.deploymentPhase : -5)
+
+    // The integration to save, composed from the current drafts on every
+    // change. (It used to be composed in two effects only while a draft
+    // differed from the original, so reverting a change left the previous
+    // composition - e.g. a reverted title - in newIntegration.) The drafts are
+    // not mutated: the title default and the sp merge go into copies.
+    const composedIntegration = useMemo(() => {
+      const composed = cloneDeep(integration)
+      if(currentEnvironment>=0) {
+        composed.deploymentPhase=currentEnvironment
       }
-
-    }, [newConfigurationEntityData, type, typeConf.attribute, uniqueIdConfiguration.integrationType,metadata,name]);
-
-
-    useEffect(() => {
-        //Update newConfigurationEntityData
-          if(newConfigurationEntityData) {
-            var isValidMetadataIdp=true  
-            if(newConfigurationEntityData.idp&&(newConfigurationEntityData.idp.type==='adfs'||newConfigurationEntityData.idp.type=='gsuite')&&(metadataFile.length===0&&metadataUrl==="")) {
-              isValidMetadataIdp=false
-            }
-        
-            const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails&&isValidMetadataIdp;
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidDataAttribute)",isValidDataAttribute)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidUserAttribute)",isValidUserAttribute)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata sp)",isValidMetadata)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidMetadata idp)",isValidMetadataIdp)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidSchoolSelection)",isValidSchoolSelection)
-            devLog("DEBUG","isvalid newConfigurationEntityData (isValidRoleDetails)",isValidRoleDetails)
-            
-            devLog("DEBUG","logoOK newConfigurationEntityData (role)",role)
-            devLog("DEBUG","logoOK newConfigurationEntityData (newLogo)",newLogo)
-            devLog("DEBUG","logoOK newConfigurationEntityData (metadataFile.length)",metadataFile.length)
-            devLog("DEBUG","logoOK newConfigurationEntityData (newConfigurationEntityData?.idp?.logoUrl)",newConfigurationEntityData?.idp?.logoUrl)
-            
-            const logoOK=(role==='sp'||
-                          newLogo||
-                          (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
-                        )
-            devLog("DEBUG","logoOK )",logoOK)
-
-            setSaveDialogState(true);
-            devLog("DEBUG","setCanSave (newConfigurationEntityData)",newConfigurationEntityData)
-            devLog("DEBUG","setCanSave (originalIntegration.current?.configurationEntity)",originalIntegration.current?.configurationEntity)
-            const nameChanged = role==='sp'&&name!==(originalIntegration.current?.configurationEntity?.sp?.name||'');
-            if(isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)&&!nameChanged){
-              devLog("DEBUG","setCanSave (environmentChanged)",environmentChanged)
-              devLog("DEBUG","setCanSave (isValid)",isValid)
-              devLog("DEBUG","setCanSave (logoOK)",logoOK)
-              if(newDiscoveryInformation&&(!isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)||metadataFile.length===1||newLogo||environmentChanged)&&isValid&&logoOK) {      
-                devLog("DEBUG","setCanSave","1")
-                setCanSaveConfigurationEntity(true)
-              } else {
-                devLog("DEBUG","setCanSave","2")
-                setCanSaveConfigurationEntity(false)
-              }       
-            } else {                      
-              if(isValid&&logoOK) {         
-                devLog("DEBUG","setCanSave","3")
-                setCanSaveConfigurationEntity(true)
-              } else {
-                devLog("DEBUG","setCanSave","4")
-                setCanSaveConfigurationEntity(false)
-              }
-              if(integration) {            
-                var changedIntegration=clone(integration)
-                changedIntegration.discoveryInformation=newDiscoveryInformation
-                changedIntegration.configurationEntity=newConfigurationEntityData
-                if(environment.current>=0) {
-                  changedIntegration.deploymentPhase=environment.current
-                }            
-                
-                if(role==='sp'&&integration.configurationEntity&&integration.configurationEntity.sp&&newConfigurationEntityData.sp&&integration.configurationEntity.sp.type==='saml') {
-                  const samlSP:Components.Schemas.SamlServiceProvider = clone(newConfigurationEntityData.sp);
-                  samlSP.entityId=metadata.entityId;
-                  samlSP.name=name;
-                  changedIntegration.configurationEntity.sp=samlSP
-                }
-                if(role==='sp'&&integration.configurationEntity&&integration.configurationEntity.sp&&newConfigurationEntityData.sp&&integration.configurationEntity.sp.type==='oidc') {
-                  const oidcSP:Components.Schemas.OidcServiceProvider = clone(newConfigurationEntityData.sp);
-                  oidcSP.clientId=metadata.client_id;
-                  oidcSP.name=name;
-                  changedIntegration.configurationEntity.sp=oidcSP
-                }
-                if(changedIntegration?.discoveryInformation&&changedIntegration.discoveryInformation?.showSchools&&(changedIntegration.discoveryInformation.title===''||changedIntegration.discoveryInformation.title===undefined)) {
-                  if(changedIntegration?.organization?.name) {
-                    changedIntegration.discoveryInformation.title=changedIntegration?.organization?.name;
-                  }
-                }
-                
-                if(!isEqual(changedIntegration,newIntegration)) {
-                  setNewIntegration(changedIntegration)
-                }
-                
-              }
-            }
-          } else {
-              setSaveDialogState(false);  
-          }
-        
-    }, [newConfigurationEntityData, integration, setCanSaveConfigurationEntity, setSaveDialogState, environmentChanged, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidSchoolSelection, isValidRoleDetails, setNewIntegration, newLogo, metadataFile, role, newDiscoveryInformation, metadata,metadataUrl, name, newIntegration]);
-
-    useEffect(() => {
-      
-      //Update newDiscoveryInformation
-      if(newDiscoveryInformation !== undefined) {
-        const isValid=isValidDataAttribute&&isValidUserAttribute&&isValidMetadata&&isValidSchoolSelection&&isValidRoleDetails;
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidDataAttribute)",isValidDataAttribute)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidUserAttribute)",isValidUserAttribute)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidMetadata)",isValidMetadata)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidSchoolSelection)",isValidSchoolSelection)
-        devLog("DEBUG","isvalid newDiscoveryInformation (isValidRoleDetails)",isValidRoleDetails)
-            
-        
-        const logoOK=(role==='sp'||
-                          newLogo||
-                          (newConfigurationEntityData?.idp?.logoUrl !== undefined && newConfigurationEntityData?.idp?.logoUrl !== '') 
-        )
-        setSaveDialogState(true);
-        devLog("DEBUG","setCanSave (newDiscoveryInformation)",newDiscoveryInformation)
-        devLog("DEBUG","setCanSave (originalIntegration.current?.discoveryInformation)",originalIntegration.current?.discoveryInformation)
-        const nameChanged = role==='sp'&&name!==(originalIntegration.current?.configurationEntity?.sp?.name||'');
-        if(isEqual(newDiscoveryInformation,originalIntegration.current?.discoveryInformation)){
-          if(newConfigurationEntityData !== undefined&&(!isEqual(newConfigurationEntityData,originalIntegration.current?.configurationEntity)||newLogo||metadataFile.length===1||environmentChanged||nameChanged)&&logoOK&&isValid) {
-            devLog("DEBUG","setCanSave","5")
-            setCanSaveDiscoveryInformation(true)
-          } else {
-            devLog("DEBUG","setCanSave","6")
-            setCanSaveDiscoveryInformation(false)
-          }  
-        } else {               
-          if(isValid) {                
-            devLog("DEBUG","setCanSave","7")
-            setCanSaveDiscoveryInformation(true)
-          } else {
-            devLog("DEBUG","setCanSave","8")
-            setCanSaveDiscoveryInformation(false)
-          }
-          if(integration) {            
-            var changedIntegration=clone(integration)
-            changedIntegration.discoveryInformation=newDiscoveryInformation
-            changedIntegration.configurationEntity=newConfigurationEntityData
-            changedIntegration.deploymentPhase=environment.current
-            if(changedIntegration?.discoveryInformation&&changedIntegration.discoveryInformation?.showSchools&&(changedIntegration.discoveryInformation.title===''||changedIntegration.discoveryInformation.title===undefined)) {
-              if(changedIntegration?.organization?.name) {
-                changedIntegration.discoveryInformation.title=changedIntegration?.organization?.name;
-              }
-            }
-            setNewIntegration(changedIntegration)
-          }
-        }
-      } else {
-  
-          if(role==='idp') {
-            setSaveDialogState(false);  
-          }
-          
+      // name (Palvelun nimi) lives in its own state, not in the draft.
+      const nameChanged = role==='sp'&&name!==(originalIntegration.configurationEntity?.sp?.name||'')
+      const changed = nameChanged||
+        !isEqual(draftConfigurationEntity,originalIntegration.configurationEntity)||
+        !isEqual(newDiscoveryInformation,originalIntegration.discoveryInformation)
+      if(!changed) {
+        return composed
       }
-    
-}, [newDiscoveryInformation, integration, setCanSaveDiscoveryInformation, setSaveDialogState, isValidSchoolSelection, setNewIntegration, newConfigurationEntityData, role, environmentChanged, newLogo, metadataFile, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidRoleDetails, name]);
+      composed.discoveryInformation=newDiscoveryInformation
+      composed.configurationEntity=draftConfigurationEntity
+      const sp = draftConfigurationEntity?.sp
+      const spType = integration.configurationEntity?.sp?.type
+      if(role==='sp'&&sp&&spType==='saml') {
+        const samlSP:Components.Schemas.SamlServiceProvider = { ...sp, entityId: metadata.entityId as string | undefined, name }
+        composed.configurationEntity = { ...draftConfigurationEntity, sp: samlSP }
+      }
+      if(role==='sp'&&sp&&spType==='oidc') {
+        const oidcSP:Components.Schemas.OidcServiceProvider = { ...sp, clientId: metadata.client_id as string | undefined, name }
+        composed.configurationEntity = { ...draftConfigurationEntity, sp: oidcSP }
+      }
+      if(newDiscoveryInformation?.showSchools&&(newDiscoveryInformation.title===''||newDiscoveryInformation.title===undefined)&&integration.organization?.name) {
+        composed.discoveryInformation = { ...newDiscoveryInformation, title: integration.organization.name }
+      }
+      return composed
+    }, [integration, originalIntegration, currentEnvironment, role, name, metadata, draftConfigurationEntity, newDiscoveryInformation])
 
-    var hasAttributes =
+    // Publishes the composition, and shows the save bar while there is a
+    // draft. Dependencies as the former composing effects had: they re-assert
+    // the save bar at the same moments (the parent hides it for its dialogs).
+    useEffect(() => {
+      setSaveDialogState(newDiscoveryInformation!==undefined||(role!=='idp'&&newConfigurationEntityData!==undefined))
+      if(!isEqual(composedIntegration,newIntegration)) {
+        setNewIntegration(composedIntegration)
+      }
+    }, [composedIntegration, newIntegration, setNewIntegration, setSaveDialogState, newConfigurationEntityData, newDiscoveryInformation, role, environmentChanged, isValidDataAttribute, isValidUserAttribute, isValidMetadata, isValidSchoolSelection, isValidRoleDetails, newLogo, metadataFile, metadata, metadataUrl, name]);
+
+    const hasAttributes =
                 role === "idp" &&
                 !["opinsys", "wilma"].includes(
-                  integration.configurationEntity?.[role]?.type!
+                  integration.configurationEntity?.[role]?.type ?? ""
                 );
-    var hasVisibleAttributes =
+    const hasVisibleAttributes =
                 role === "idp" &&
                 !["opinsys", "wilma","gsuite","adfs"].includes(
-                  integration.configurationEntity?.[role]?.type!
+                  integration.configurationEntity?.[role]?.type ?? ""
                 );
 
     const addInitAttributes = (initAttr:Components.Schemas.Attribute) => {
@@ -449,13 +371,12 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         }
       }      
     }
-    if(integration) {
-      return(<>
+    return(<>
       
         <Typography component={"div"} variant="h2" gutterBottom >
           <FormattedMessage defaultMessage="Organisaation tiedot" />
         </Typography>
-        <Grid container spacing={2} mb={3}>
+        <Grid container size={12} spacing={2} sx={{ mb: 3 }}>
           <DataRow object={integration} path="organization.name" />
           <DataRow object={integration} path="organization.oid" />
           <DataRow object={integration} path="organization.ytunnus" />
@@ -466,21 +387,21 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         )}    
         
         {newIntegration&&
-        <Role integration={newIntegration} oid={oid} environment={environment} setEnvironment={setIntegrationEnvironment} setMetadataUrl={setMetadataUrl} metadataUrl={metadataUrl} name={name} setName={setName} setCanSave={setIsValidRoleDetails} attributes={attributes} setMetadataFile={setMetadataFile} metadataFile={metadataFile}/>}
+        <Role integration={newIntegration} oid={oid} environment={currentEnvironment} setEnvironment={setIntegrationEnvironment} setMetadataUrl={handleMetadataUrl} metadataUrl={metadataUrl} name={name} setName={setName} setCanSave={setIsValidRoleDetails} attributes={attributes} setMetadataFile={setMetadataFile} metadataFile={metadataFile}/>}
 
-        {newConfigurationEntityData&&attributes&& <Grid mb={hasAttributes ? 3 : undefined}>
+        {newConfigurationEntityData&&attributes&& <Grid sx={{ mb: hasAttributes ? 3 : undefined }}>
           <ErrorBoundary>
             <Attributes
             key={"data"}
             dataConfiguration={dataConfiguration}
-              newConfigurationEntityData={newConfigurationEntityData}
+              newConfigurationEntityData={draftConfigurationEntity!}
               setNewConfigurationEntityData={setNewConfigurationEntityData}  
               attributes={attributes}
               setAttributes={setAttributes}
               initAttributes={initDataAttributes}
               addInitAttributes={addInitAttributes}              
               attributeType="data"
-              environment={environment.current}
+              environment={currentEnvironment}
               type={type}
               role={role}
               oid={oid}
@@ -498,14 +419,14 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
 
         <Metadata
           dataConfiguration={dataConfiguration}
-          newConfigurationEntityData={newConfigurationEntityData}
+          newConfigurationEntityData={draftConfigurationEntity!}
           setNewConfigurationEntityData={setNewConfigurationEntityData}
           configurationEntity={integration.configurationEntity!}
           role={role}
           type={type}
           setCanSave={setIsValidMetadata}
           oid={oid}
-          environment={integration.deploymentPhase||-5}
+          environment={currentEnvironment}
           metadata={metadata}
           setMetadata={setMetadata}
         />
@@ -523,7 +444,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
               <Attributes
               key={"user"}
                 dataConfiguration={dataConfiguration}
-                newConfigurationEntityData={newConfigurationEntityData}
+                newConfigurationEntityData={draftConfigurationEntity!}
                 setNewConfigurationEntityData={setNewConfigurationEntityData}  
                 attributes={attributes}
                 setAttributes={setAttributes}
@@ -531,7 +452,7 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
                 addInitAttributes={addInitAttributes}              
                 role={role}
                 attributeType="user"
-                environment={environment.current}
+                environment={currentEnvironment}
                 type={type}
                 oid={oid}
                 setCanSave={setIsValidUserAttribute}
@@ -544,38 +465,20 @@ export default function IntegrationDetails({ id, setSaveDialogState, setCanSave,
         {role === "idp" && integrationTypes.typesOKJ.includes(type) && newConfigurationEntityData && newDiscoveryInformation &&
             (<ErrorBoundary>
                 <SchoolSelection 
+                    key={integration.id}
                     integration={integration} 
                     setConfigurationEntity={setNewConfigurationEntityData} 
-                    configurationEntity={newConfigurationEntityData} 
+                    configurationEntity={draftConfigurationEntity!} 
                     discoveryInformation={newDiscoveryInformation} 
                     setDiscoveryInformation={setNewDiscoveryInformation} 
                     setCanSave={setIsValidSchoolSelection}
                     setLogo={setLogo}
                     newLogo={newLogo}
                     setNewLogo={setNewLogo}
-                    environment={environment.current}
-                    isEditable={true}/>
+                    environment={currentEnvironment}/>
                 </ErrorBoundary>
               )
         }
         
       </>)      
-    } else {
-      return (
-        <Alert severity="error">
-          <FormattedMessage
-            defaultMessage="<title>Integraatiota {id} ei löydy</title>Siirry <link>etusivulle</link>."
-            values={{
-              id,
-              title: (chunks) => <AlertTitle>{chunks}</AlertTitle>,
-              link: (chunks) => (
-                <MuiLink color="error" component={Link} to="/">
-                  {chunks}
-                </MuiLink>
-              ),
-            }}
-          />
-        </Alert>
-      );
-    }
 }

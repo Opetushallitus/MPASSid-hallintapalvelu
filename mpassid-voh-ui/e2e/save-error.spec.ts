@@ -1,16 +1,26 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewSpIntegration,
   fillServiceName,
-  logBrowserConsole,
 } from "./helpers";
+
+// Tallennuksen virhetilanteet -
+// integraationMuokkaus/index.tsx:151-200,367-406. There is no existing
+// magic value in the mock and no proven precedent in this repo for
+// page.route()-intercepting an MSW-service-worker-handled endpoint - a
+// synthetic Response manufactured inside the SW never touches the actual
+// network layer, so route() has nothing to intercept. Instead, src/mocks/requestLogicHandlers.ts's createIntegration/
+// updateIntegration now recognize two magic "Palvelun nimi" values
+// (E2E_TRIGGER_409/E2E_TRIGGER_GENERIC_ERROR) and return an error response
+// via the {status,mock} hook the underlying openapi-backend-integration
+// library already supports (same mechanism as the existing id===999995
+// special-case in getIntegration()) - this is mock-only test
+// infrastructure, not a production code change.
 
 const E2E_TRIGGER_409 = "__e2e_trigger_409__";
 const E2E_TRIGGER_GENERIC_ERROR = "__e2e_trigger_500__";
 
 test("409-konflikti näyttää palvelimen antaman viestin", async ({ page }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect");
   await fillServiceName(page, E2E_TRIGGER_409);
 
@@ -37,8 +47,6 @@ test("409-konflikti näyttää palvelimen antaman viestin", async ({ page }) => 
 });
 
 test("yleinen virhe näyttää geneerisen virheilmoituksen", async ({ page }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect");
   await fillServiceName(page, E2E_TRIGGER_GENERIC_ERROR);
 

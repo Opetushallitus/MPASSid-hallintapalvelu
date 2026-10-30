@@ -23,7 +23,7 @@ export default function AppBarNavLinkTabs(props: Props) {
         {
           minHeight: "inherit",
           [`.${tabsClasses.scroller}`]: { minHeight: "inherit" },
-          [`.${tabsClasses.flexContainer}`]: { minHeight: "inherit" },
+          [`.${tabsClasses.list}`]: { minHeight: "inherit" },
         },
         props.sx
       )}

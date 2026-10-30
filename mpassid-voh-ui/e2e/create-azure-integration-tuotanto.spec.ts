@@ -1,15 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillCommonIdpSteps,
-  logBrowserConsole,
   mockInstitutionTypes,
   selectEnvironment,
 } from "./helpers";
 
+// Tuotanto-versio create-azure-integration.spec.ts:sta - identtinen
+// muuten, paitsi Palveluympäristöksi valitaan "Tuotanto" ennen
+// tallennusta. Ks. create-wilma-integration-tuotanto.spec.ts:n kommentti
+// siitä, miksi koulunvalinta pysyy valinnaisena kun sibling-integraatiota
+// ei ole.
+
 test("luo uusi Azure-integraatio Tuotanto-ympäristöön", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Azure");
 

@@ -26,12 +26,12 @@ export default function SetProvider({ integration }: Props) {
         <FormattedMessage defaultMessage="Palvelun tiedot" />
       </Typography>
       
-      <Grid container spacing={2} mb={2}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
         <DataRow object={integration} path="id" />
-        <Grid item xs={4}>
+        <Grid size={4}>
           <FormattedMessage defaultMessage="Palveluympäristö" />
         </Grid>
-        <Grid item xs={8}>
+        <Grid size={8}>
           <FormattedMessage
             defaultMessage={`{deploymentPhase, select,
               0 {Testi}
@@ -47,7 +47,7 @@ export default function SetProvider({ integration }: Props) {
       <Typography variant="h2" gutterBottom>
             <FormattedMessage defaultMessage="Palvelun integraatiot" />
           </Typography>
-          <Grid container spacing={3} mb={3}>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
             <DataRow
               object={integration}
               path="integrationSets"

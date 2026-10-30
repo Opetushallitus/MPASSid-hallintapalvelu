@@ -33,7 +33,7 @@ formatRelative(subDays(new Date(), 3), new Date(), { locale });
 //=> "viime torstaina klo 19:26"
 ```
 
-### `useMUILocale` (`useMaterialUILocale` for `@material-ui/core@4`)
+### `useMUILocale`
 
 ```js
 import { createTheme, ThemeProvider } from '@mui/material/styles';

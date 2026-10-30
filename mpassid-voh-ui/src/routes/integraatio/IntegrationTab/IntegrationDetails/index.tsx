@@ -10,6 +10,7 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
+import type { JSX } from "react";
 import { FormattedMessage } from "react-intl";
 import Attributes from "./Attributes";
 import type { DataRowProps } from "../DataRow";
@@ -19,7 +20,6 @@ import Role from "./Role";
 import UniqueId from "./UniqueId";
 import EditIntegrationButton from "./EditIntegrationButton";
 import { integrationTypesDefault } from '../../../../config';
-import { useEffect, useState } from "react";
 import { clone } from "lodash";
 
 export const integrationTypes = clone(integrationTypesDefault);
@@ -30,15 +30,8 @@ interface Props {
 
 export default function IntegrationDetails({ integration }: Props) {
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>();
-  
-  
-
-  useEffect(() => {
-    if(me?.groups) {
-      setGroups(me.groups)
-    }
-  }, [me]);
+  // useMe suspends until loaded, so the groups are there on the first render.
+  const groups = me?.groups;
   
   const writeAccess = () => {
     
@@ -57,7 +50,7 @@ export default function IntegrationDetails({ integration }: Props) {
   const hasAttributes =
     role === "idp" &&
     !["opinsys", "wilma", "adfs", "gsuite" ].includes(
-      integration.configurationEntity?.[role]?.type!
+      integration.configurationEntity?.[role]?.type ?? ""
     );
 
   return (
@@ -66,7 +59,7 @@ export default function IntegrationDetails({ integration }: Props) {
       <Typography component={"div"} variant="h2" gutterBottom >
         <FormattedMessage defaultMessage="Organisaation tiedot" />
       </Typography>
-      <Grid container spacing={2} mb={3}>
+      <Grid container spacing={2} sx={{ mb: 3 }}>
         <DataRow object={integration} path="organization.name" />
         <DataRow object={integration} path="organization.oid" />
         <DataRow object={integration} path="organization.ytunnus" />
@@ -84,11 +77,11 @@ export default function IntegrationDetails({ integration }: Props) {
           <Typography variant="h2" gutterBottom>
             <FormattedMessage defaultMessage="Oppilaitoksen valintanäkymän tiedot" />
           </Typography>
-          <Grid container spacing={2} mb={3}>
-            <Grid item xs={4}>
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid size={4}>
               <FormattedMessage defaultMessage="Ympäristö" />
             </Grid>
-            <Grid item xs={8}>
+            <Grid size={8}>
               <FormattedMessage
                 defaultMessage={`{deploymentPhase, select,
                   0 {Testi}
@@ -132,33 +125,25 @@ export default function IntegrationDetails({ integration }: Props) {
               <FormattedMessage defaultMessage="Integraation perustiedot" />
             </Typography>
 
-            <Grid container spacing={2} mb={3}>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
               <DataRow object={integration} path="id" />
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <FormattedMessage defaultMessage="Jäsentyyppi" />
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <FormattedMessage {...typeAbbreviations[role]} /> (
                 <FormattedMessage {...typeTooltips[role]} />)
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <FormattedMessage defaultMessage="Yksilöllinen tunniste" />
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <UniqueId
                   configurationEntity={integration.configurationEntity!}
                   role={role}
                   ValueComponent={UniqueIdValue}
                 />
               </Grid>
-                  
-                {role === "sp" && false && (
-                    <DataRow
-                    object={integration}
-                    path="integrationSets"
-                    type="service-list"
-                  />
-                )}
             </Grid>
           </>
       )}    
@@ -169,7 +154,7 @@ export default function IntegrationDetails({ integration }: Props) {
         role={role}
       />
 
-      <Grid mb={hasAttributes ? 3 : undefined}>
+      <Grid sx={{ mb: hasAttributes ? 3 : undefined }}>
         <ErrorBoundary>
           <Attributes
             attributes={integration.configurationEntity?.attributes ?? []}

@@ -1,5 +1,5 @@
 import { IconButton, TextField } from "@mui/material";
-import type { Dispatch} from "react";
+import type { Dispatch, JSX } from "react";
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useIntl, FormattedMessage } from 'react-intl';
 import Box from '@mui/material/Box';
@@ -7,8 +7,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import ClearIcon from '@mui/icons-material/Clear';
+import type { FormObject, ListFormHandle } from "./types";
 interface Props {
-  object?: any;
+  object: FormObject<string[]> & { content: string[] };
   label: string;
   type: string;
   isEditable?: boolean;
@@ -17,13 +18,13 @@ interface Props {
   attributeType: string;
   index?: number;
   helperText: (data: string) => JSX.Element;
-  onUpdate: (name: string, data: any) => void;
-  onValidate: (data: any) => boolean;
+  onUpdate: (name: string, data: string) => void;
+  onValidate: (data: string) => boolean;
   setCanSave: Dispatch<boolean>;
-  pressButton?: any;
+  pressButton?: React.Ref<ListFormHandle>;
 }
 
-export default function ListForm({ object, type, isEditable=false, mandatory=false, index=0, label, attributeType, setCanSave,  helperText, onValidate, onUpdate, pressButton, noErrors=false }: Props) {
+export default function ListForm({ object, type, isEditable=false, mandatory=false, setCanSave,  helperText, onValidate, onUpdate, pressButton, noErrors=false }: Props) {
   const intl = useIntl();
   const defaultValue = object;
   const [isDirty, setIsDirty] = useState(false);
@@ -32,14 +33,6 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
   const inputRef = useRef<HTMLFormElement>(null);
   
   
-  useImperativeHandle(pressButton, () => ({
-    pressEnter() {
-      setIsValid(onValidate(inputRef.current!.value))
-      updateFormValue();
-    }
-    
-  }));
-
   const updateFormState = useCallback(
     function updateFormState() {
       if(inputRef.current) {
@@ -65,6 +58,14 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
       setCanSave(true)
       setIsValid(true)
       if(inputRef.current?.value) {
+        // Reject a value that's already in the list instead of silently
+        // calling onUpdate - Metadata.tsx's updateMultivalueMetadata()
+        // TOGGLES membership (removes if already present), so calling it
+        // again with an existing value would silently delete that entry
+        // rather than warn about the duplicate. This is the same guard
+        // the form's onSubmit handler below has - needed here too since
+        // this function (not onSubmit) is what actually runs on both
+        // Enter (onKeyUp) and the separate "Lisää" button.
         if(object.content.indexOf(inputRef.current.value)===-1) {
           setUsedHelperText(helperText(inputRef.current!.value))
           onUpdate(type,inputRef.current.value);
@@ -85,8 +86,17 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
 
   };
 
+  // After updateFormValue: the handle calls it.
+  useImperativeHandle(pressButton, () => ({
+    pressEnter() {
+      setIsValid(onValidate(inputRef.current!.value))
+      updateFormValue();
+    }
+    
+  }));
+
   const validateFormValue = () => {
-    var value=''
+    let value=''
     if(inputRef.current?.value) {
       value=inputRef.current.value
     }
@@ -144,7 +154,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
           }
           {object.content.length===0&&!mandatory&&(<FormattedMessage defaultMessage="ei arvoja" />)
           }
-          {object.content.map((value: any,index: number) => (
+          {object.content.map((value: string,index: number) => (
             <ListItem
               key={index}
               disableGutters
@@ -152,10 +162,10 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
                 <IconButton
                   type="button"
                   aria-label={intl.formatMessage({
-                    defaultMessage: "kommentti",
+                    defaultMessage: "poista",
                   })}
                   value={value}
-                  onClick={(e)=>{deleteFormValue(value); setUsedHelperText(<></>)}}>
+                  onClick={()=>{deleteFormValue(value); setUsedHelperText(<></>)}}>
                   <ClearIcon />
                 </IconButton>
               }
@@ -176,11 +186,22 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
           fullWidth
           error={!isValid&&!noErrors}
           helperText={usedHelperText}
-          inputProps={{
-            ref: inputRef,
-            autoComplete: "off",
+          inputRef={inputRef}
+          slotProps={{
+            htmlInput: {
+              autoComplete: "off",
+            },
           }}
           onKeyDown={(ev) => {
+            // Without this, pressing Enter in a text input inside a <form>
+            // also triggers the browser's own native implicit submission
+            // (firing onSubmit) IN ADDITION to onKeyUp below - two
+            // independent code paths reacting to one keypress, racing over
+            // the same `inputRef`/`object` state. onKeyUp's updateFormValue()
+            // already does everything onSubmit did (validate, dedupe, add),
+            // so the native submission is pure redundant risk, not a second
+            // required behavior - suppress it and let onKeyUp be the only
+            // handler.
             if (ev.key === 'Enter') {
               ev.preventDefault()
             }
@@ -198,7 +219,7 @@ export default function ListForm({ object, type, isEditable=false, mandatory=fal
     );
   } else {
     return(<List >
-      {object.content.map((value: any,index: number) => (
+      {object.content.map((value: string) => (
         <ListItem
           key={value}
           disableGutters

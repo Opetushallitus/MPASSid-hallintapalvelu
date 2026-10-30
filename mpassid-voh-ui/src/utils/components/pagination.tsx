@@ -11,7 +11,7 @@ export function TablePagination(
   props: React.ComponentProps<typeof Pagination>
 ) {
   return (
-    <Box display="flex" justifyContent="center" mt={3}>
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
       <Pagination {...props} />
     </Box>
   );
@@ -23,8 +23,9 @@ interface PaginationWithRouterIntegrationProps
 
 export const withRouterIntegration = (Component: typeof Pagination) =>
   function PaginationWithRouterIntegration({
-    searchParamName = defaults.searchParamName,
-    defaultPage = defaults.defaultPage,
+    // Not forwarded to <Pagination>; read by usePaginationPage via defaults.
+    searchParamName: _searchParamName,
+    defaultPage: _defaultPage,
     ...other
   }: PaginationWithRouterIntegrationProps) {
     const [page, setPage] = usePaginationPage();

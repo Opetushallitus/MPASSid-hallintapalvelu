@@ -1,17 +1,24 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillAzureFields,
   fillCommonIdpSteps,
-  logBrowserConsole,
   mockInstitutionTypes,
   openEditFromViewPage,
   saveIntegration,
 } from "./helpers";
 
+// See edit-wilma-integration.spec.ts for the general create-then-edit
+// rationale, and create-azure-integration.spec.ts for field provenance
+// (this is the most involved idp type - mandatory clientId/clientKey/
+// tenantId/azureApplicationIdUri/metadataUrl plus 5 mandatory user
+// attributes). Only clientId is changed here to keep the edit assertion
+// focused; the rest are re-filled identically via fillAzureFields() since
+// they were never touched by the create flow's own gating logic (the
+// existing values are pre-filled from location.state either way).
+
 test("muokkaa olemassa olevaa Azure-integraatiota", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Azure");
   await expect(page).toHaveURL(/\/muokkaa\/idp\/azure\/0/);

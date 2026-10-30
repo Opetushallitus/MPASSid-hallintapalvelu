@@ -1,29 +1,32 @@
 import { useParams } from "react-router-dom";
 import type { Components } from "@/api";
 import type { UiConfiguration } from "@/config";
-import { azureMetadataUrlTemplate, environments, testLink } from "@/config";
+import { environments, testLink } from "@/config";
 import { Box, Grid, Tooltip, Typography } from "@mui/material";
 import { FormattedMessage } from "react-intl";
 import { DataRow } from "../../integraatio/IntegrationTab/DataRow"
 import LinkValue from "../LinkValue";
 import Type from "./Type";
-import { type Dispatch, type MutableRefObject } from "react";
+import { type Dispatch, type JSX } from "react";
 import type { oneEnum } from "../Form/MultiSelectForm";
 import MultiSelectForm from "../Form/MultiSelectForm";
 import { useIntl } from 'react-intl';
 import { envAbbreviationValues } from "@/routes/home/IntegrationsTable";
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import InputForm from "../Form/InputForm";
 import { helperText, validate } from "@/utils/Validators";
 import { last, toPath } from "lodash";
 import FileUploader from "../Form/DragAndDropForm";
 
+const debugLog = createLogger("DEBUG");
+
 interface Props {
   integration: Components.Schemas.Integration;
   name?: string;
   tenantId?: string;
-  environment: MutableRefObject<number>;
+  /** The chosen environment (deploymentPhase); negative while unknown. */
+  environment: number;
   metadataUrl: string;
   metadataFile: File[];
   dataConfiguration: UiConfiguration[];
@@ -34,37 +37,29 @@ interface Props {
   setMetadataFile: Dispatch<File[]>;
 }
 
-export default function Koulutustoimija({ integration, environment, tenantId='', setEnvironment, setCanSave, setMetadataUrl,metadataUrl="",metadataFile, setMetadataFile,dataConfiguration }: Props) {
+export default function Koulutustoimija({ integration, environment, setEnvironment, setMetadataUrl,metadataUrl="",metadataFile, setMetadataFile }: Props) {
     const { role } = useParams();
     const intl = useIntl();
     const identityProvider: Components.Schemas.Integration|Components.Schemas.Adfs|Components.Schemas.Azure|Components.Schemas.Gsuite= integration.configurationEntity!.idp!;
-    const configurations:UiConfiguration[] = dataConfiguration.filter(conf=>conf.integrationType.filter(i=>i.name===identityProvider.type).length>0)
-    const environmentConfiguration:UiConfiguration[] = configurations.filter(conf=>conf.environment!==undefined&&conf.environment===environment.current) || [];
     
     const testLinkHref =
-      // eslint-disable-next-line no-new-func
       new Function("flowName", `return \`${testLink}\``)(
         identityProvider.flowName
       );
     
-    const metadataUrlTemplate =
-      // eslint-disable-next-line no-new-func
-        new Function("tenantId", `return (tenantId!=='')?\`${azureMetadataUrlTemplate}\`:''`)(
-          tenantId
-        );
     
     
     const canSave = (value: boolean) => {  
-      devLog("DEBUG","canSave (name)",name)
-      devLog("DEBUG","canSave (value)",value)
+      debugLog("canSave (name)",name)
+      debugLog("canSave (value)",value)
     }
 
     const updateMetadataUrl = (name: string, value: string, type: string) => {
 
       
-      devLog("DEBUG","updateMetadataUrl (name)",name)
-      devLog("DEBUG","updateMetadataUrl (value)",value)
-      devLog("DEBUG","updateMetadataUrl (type)",type)
+      debugLog("updateMetadataUrl (name)",name)
+      debugLog("updateMetadataUrl (value)",value)
+      debugLog("updateMetadataUrl (type)",type)
       setMetadataUrl(value);
       if(value!== undefined && value !== "") {
         setMetadataFile([])
@@ -72,12 +67,11 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
       
     }      
 
-    const updateEnvironment = (values: String[]) => {
+    const updateEnvironment = (values: string[]) => {
       if(values.length>0) {
-        environment.current=+values[0];
         setEnvironment(+values[0]);        
       }
-      devLog("DEBUG","updateEnvironment (values)",values)
+      debugLog("updateEnvironment (values)",values)
     }   
 
     const environmentValues: oneEnum[] = environments.filter(env=>(env!=="0"||integration.deploymentPhase===0)).map(env => {
@@ -136,18 +130,18 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                 <FormattedMessage defaultMessage="OKJ-integraatiotyyppikohtaiset tiedot" />
               </Typography>
         
-              <Grid container spacing={2} mb={2}>                
+              <Grid container spacing={2} sx={{ mb: 2 }}>                
                                       
-                    {environment.current>-1&&
+                    {environment>-1&&
                     (<>
-                      <Grid item xs={4}>
+                      <Grid size={4}>
                       <FormattedMessage defaultMessage="Palveluympäristö" />
                     </Grid>
-                    <Grid item xs={8}>
+                    <Grid size={8}>
                       <ErrorBoundary>
                         <MultiSelectForm 
                           key={"Palveluymparisto"}
-                          values={[String(environment.current)]}
+                          values={[String(environment)]}
                           isEditable={true}
                           //onValidate={onValidate}
                           mandatory={false}
@@ -159,9 +153,9 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                           createEmpty={false}
                           multiple={false}
                           onUpdate={value => updateEnvironment(value)} 
-                          helperText={function (data: string): JSX.Element { return(<></>);} } 
+                          helperText={function (_data: string): JSX.Element { return(<></>);} } 
                           setCanSave={canSave} 
-                          onValidate={function (data: string): boolean {
+                          onValidate={function (_data: string): boolean {
                             throw new Error("Function not implemented.");
                           } }/>
                       </ErrorBoundary>
@@ -217,10 +211,10 @@ export default function Koulutustoimija({ integration, environment, tenantId='',
                         
                 {identityProvider.flowName&&(
                   <>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                       <FormattedMessage defaultMessage="Testauslinkki" />
                     </Grid>
-                    <Grid item xs={8} zeroMinWidth>
+                    <Grid size={8} sx={{ minWidth: 0 }}>
                       <LinkValue href={testLinkHref} />
                     </Grid>
                   </>
@@ -250,12 +244,12 @@ function DataRowTitle({path}:DataRowProps) {
 
   return (
     <>
-      <Grid item xs={4}>
+      <Grid size={4}>
         <Tooltip
           title={
             <>
               {tooltip && (
-                <Box mb={1}>
+                <Box sx={{ mb: 1 }}>
                   <FormattedMessage {...tooltip} />
                 </Box>
               )}
@@ -274,7 +268,7 @@ function DataRowTitle({path}:DataRowProps) {
 function DataRowValue({children}:DataRowProps) {
 
   return (
-      <Grid item xs={8}>
+      <Grid size={8}>
         {children}
       </Grid>
   );

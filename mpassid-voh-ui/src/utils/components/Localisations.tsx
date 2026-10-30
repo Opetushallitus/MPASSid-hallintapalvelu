@@ -1,7 +1,5 @@
 import * as localisations from "@/api/localisation";
 import { refetchLocalisations, useLocalisations } from "@/api/localisation";
-import { LoadingButton } from "@mui/lab";
-import type { LoadingButtonProps } from "@mui/lab/LoadingButton";
 import {
   Paper,
   Table,
@@ -12,7 +10,6 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
 import type { MessageDescriptor } from "react-intl";
 import { defineMessages, FormattedMessage } from "react-intl";
 import toLanguage from "../toLanguage";
@@ -239,21 +236,5 @@ export default function Localisations({ category, defaultMessages }: Props) {
         </Table>
       </TableContainer>
     </>
-  );
-}
-
-function LoadingStateButton(props: LoadingButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
-  return (
-    <LoadingButton
-      {...props}
-      onClick={async (...args) => {
-        setIsLoading(true);
-        await props.onClick?.(...args);
-        setIsLoading(false);
-      }}
-      loading={isLoading}
-    />
   );
 }

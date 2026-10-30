@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   columnHeaderCell,
   createNewIdpIntegration,
@@ -7,17 +7,34 @@ import {
   fillServiceName,
   fillWilmaFields,
   goHomeWithoutReload,
-  logBrowserConsole,
   mockInstitutionTypes,
   saveIntegration,
 } from "./helpers";
 
+// Etusivun haku/suodatus/lajittelu/sivutus -
+// src/routes/home/index.tsx, SearchForm.tsx, IntegrationsTable.tsx.
+// NOTE on search: the mock's getIntegrationsSpecSearchPageable
+// (requestLogicHandlers.ts:305-317) matches "search" only against
+// configurationEntity.name (never populated by anything in this app) and
+// organization.name/oid/ytunnus - NOT against hostname/customDisplayName/
+// any per-integration field. Every integration in this mock belongs to the
+// same single fixture organization ("Mansikkalan testi kunta"), so a
+// meaningful search test can only assert "matches the (shared) organization
+// name" vs. "matches nothing" - not "finds this one specific integration by
+// its own name", which the app's own mock doesn't actually support.
+//
+// True multi-page pagination (page 2 of results) is deliberately NOT
+// covered here - the mock has no seeded fixtures (schemas/response.json is
+// an empty array) and the default page size is 10, so exercising it would
+// mean creating 11+ integrations through the full multi-step UI flow per
+// test, which is slow and not worth it just to prove MUI's own
+// <Pagination> component works. Rows-per-page IS covered below since it's
+// a single, cheap interaction.
 
 test("haku organisaation nimellä, tyhjennys ja tyhjä tulos", async ({
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Wilma");
   const hostname = "hakutesti.inschool.fi";
@@ -56,7 +73,6 @@ test("haku organisaation nimellä, tyhjennys ja tyhjä tulos", async ({
 
 test("Tunniste-sarakkeen lajittelu", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Wilma");
   await fillWilmaFields(page, "lajittelu-eka.inschool.fi");
@@ -101,8 +117,6 @@ test("Tunniste-sarakkeen lajittelu", async ({ page }) => {
 });
 
 test("Näytä sivulla -valinta vaihtaa rivimäärän", async ({ page }) => {
-  logBrowserConsole(page);
-
   await page.goto("/");
 
   const rowsPerPage = page.getByRole("combobox", { name: /Näytä sivulla/ });
@@ -122,7 +136,6 @@ test("Ympäristö-suodatin näyttää vain valitun ympäristön integraatiot", a
   page,
 }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   // idp integrations always default to Tuotanto and can never reach Testi
   // again once past it (see environment-switch.spec.ts's file comment), so

@@ -19,11 +19,11 @@ export default function Metadata({
         : JSON.stringify(providerData.metadata, null, 2);
 
       return (
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid size={4}>
             <FormattedMessage defaultMessage="Metatiedot" />
           </Grid>
-          <Grid item xs={8} sx={{}}>
+          <Grid size={8} sx={{}}>
             <Typography
               sx={{
                 whiteSpace: "pre-wrap",
@@ -42,11 +42,11 @@ export default function Metadata({
     const providerData:Components.Schemas.Azure|Components.Schemas.Gsuite|Components.Schemas.Adfs = configurationEntity[role]!;
     if ((providerData.type==="azure"||providerData.type==="gsuite"||providerData.type==="adfs")&&providerData.metadataUrl) {
       return (
-        <Grid container spacing={2} mb={3}>
-          <Grid item xs={4}>
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid size={4}>
             <FormattedMessage defaultMessage="Metatiedot" />
           </Grid>
-          <Grid item xs={8}>
+          <Grid size={8}>
             <LinkValue href={providerData.metadataUrl} />
           </Grid>
         </Grid>

@@ -1,17 +1,18 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillCommonIdpSteps,
   fillOpinsysFields,
-  logBrowserConsole,
   mockInstitutionTypes,
   openEditFromViewPage,
   saveIntegration,
 } from "./helpers";
 
+// See edit-wilma-integration.spec.ts for the general create-then-edit
+// rationale, and create-opinsys-integration.spec.ts for field provenance.
+
 test("muokkaa olemassa olevaa Opinsys-integraatiota", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Opinsys");
   await expect(page).toHaveURL(/\/muokkaa\/idp\/opinsys\/0/);
