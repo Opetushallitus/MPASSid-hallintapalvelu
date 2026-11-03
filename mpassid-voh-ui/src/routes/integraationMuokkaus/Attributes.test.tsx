@@ -604,3 +604,21 @@ describe("ympäristö- ja organisaatiokohtaiset määritykset", () => {
     await waitFor(() => expect(lastCanSave(latest)).toBe(true));
   });
 });
+
+describe("ei-muokattavat attribuutit", () => {
+  it("SAML: piilotetun entityId:n muoto (URN, ei 'uri') ei estä tallennusta", async () => {
+    // entityId (data) is copied from the SAML metadata's entityID, which
+    // may be a URN. It is hidden and not editable for saml, so its 'uri'
+    // validation used to block every later edit.
+    const saml: Components.Schemas.ConfigurationEntity = {
+      attributes: [
+        attribute("data", "allowtestlearnerid", "false"),
+        attribute("data", "entityId", "urn:mace:esimerkki.fi:sp"),
+      ],
+      sp: { type: "saml", name: "Palvelu" } as Components.Schemas.ServiceProvider,
+    };
+    const { latest } = renderAttributes(saml);
+    await settled();
+    await waitFor(() => expect(lastCanSave(latest)).toBe(true));
+  });
+});

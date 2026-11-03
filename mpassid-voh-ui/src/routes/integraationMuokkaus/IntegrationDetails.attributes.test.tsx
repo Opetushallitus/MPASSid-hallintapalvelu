@@ -1,5 +1,5 @@
 import type { Components } from "@/api";
-import { render, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { cloneDeep } from "lodash";
 import { useRef, useState } from "react";
 import { IntlProvider } from "react-intl";
@@ -116,21 +116,33 @@ describe("avattu integraatio: idp-kentän arvo ja attribuutit", () => {
     expect(latest.canSave).toBe(false);
   });
 
-  it("wilma: hostname vain idp-kentässä -> kopioidaan attribuutiksi, ja integraation voi tallentaa heti", async () => {
+  // The attribute the form initializes from the idp field is not a change
+  // (IntegrationDetails compares against withProviderFieldAttributes): an
+  // unchanged integration is not saveable. It is saved with the next change.
+  it("wilma: hostname vain idp-kentässä -> attribuutiksi kopiointi ei ole muutos; seuraava muutos tallentaa sen", async () => {
     const integration = integrationWith({ type: "wilma", hostname: "a.inschool.fi" }, [data("datasource", "wilma")]);
     const latest = renderDetails(integration);
+    await waitFor(() => expect(latest.newIntegration).toBeDefined());
+    await settle();
 
-    await waitFor(() => expect(attributesOf(latest)).toContainEqual(data("hostname", "a.inschool.fi")));
+    expect(latest.newIntegration).toEqual(integration);
+    expect(latest.canSave).toBe(false);
+
+    fireEvent.change(screen.getByPlaceholderText("Lisää hostname"), { target: { value: "b.inschool.fi" } });
+    await waitFor(() => expect(attributesOf(latest)).toContainEqual(data("hostname", "b.inschool.fi")));
     expect(attributesOf(latest)).toContainEqual(data("datasource", "wilma"));
-    expect(latest.newIntegration?.configurationEntity?.idp).toEqual(integration.configurationEntity?.idp);
     await waitFor(() => expect(latest.canSave).toBe(true));
   });
 
-  it("opinsys: tenantId vain idp-kentässä -> kopioidaan attribuutiksi", async () => {
-    const attributes = [data("clientId", "c"), data("clientKey", "k"), data("datasource", "opinsys")];
-    const latest = renderDetails(integrationWith({ type: "opinsys", tenantId: "t1" }, attributes));
+  it("opinsys: tenantId vain idp-kentässä -> attribuutiksi kopiointi ei ole muutos", async () => {
+    const attributes = [data("clientId", "dc=example,dc=fi"), data("clientKey", "k"), data("datasource", "opinsys")];
+    const integration = integrationWith({ type: "opinsys", tenantId: "t1" }, attributes);
+    const latest = renderDetails(integration);
+    await waitFor(() => expect(latest.newIntegration).toBeDefined());
+    await settle();
 
-    await waitFor(() => expect(attributesOf(latest)).toContainEqual(data("tenantId", "t1")));
+    expect(latest.newIntegration).toEqual(integration);
+    expect(latest.canSave).toBe(false);
   });
 
   it("opinsys: tenantId idp-kentässä ja attribuuttina -> luonnos ei muutu", async () => {

@@ -64,3 +64,37 @@ test("muokkaa olemassa olevaa SAML-palveluintegraatiota", async ({ page }) => {
     page.getByPlaceholder("Lisää palvelun nimi", { exact: true })
   ).toHaveValue("Mansikkalan testi SAML-palvelu v2");
 });
+
+// Reported 2026-11-03: a saved SAML integration could not be edited at all -
+// no change enabled "Tallenna". The first save copies the entityID into the
+// hidden data attribute "entityId" (validation ['uri'] in config.ts), and a
+// URN entityID - valid in SAML - failed it, so the form stayed invalid
+// (Attributes.tsx validateAttributes now skips non-editable attributes'
+// format).
+test("SAML, jonka Entity-ID on URN, on muokattavissa tallennuksen jälkeen", async ({ page }) => {
+  const urn = "urn:mace:esimerkki.fi:e2e-sp";
+  await createNewSpIntegration(page, "SAML");
+  await fillServiceName(page, "URN-palvelu");
+  await fillSamlMetadata(page, urn);
+  await saveIntegration(page);
+  await expect(page).toHaveURL(/\/integraatio\/\d+/);
+
+  // Opened again (as from the list): loaded by id.
+  await page.reload();
+  await openEditFromViewPage(page);
+  await expect(page.getByPlaceholder("Lisää Entity-ID")).toHaveValue(urn);
+  const saveButton = page.getByRole("button", { name: "Tallenna", exact: true });
+  // Unchanged: nothing to save. (The create does not store the data
+  // attribute entityId; opening the form adds it from sp.entityId, which is
+  // not a change - IntegrationDetails compares against
+  // withProviderFieldAttributes.)
+  await expect(saveButton).toBeDisabled();
+
+  await fillServiceName(page, "URN-palvelu v2");
+  await expect(saveButton).toBeEnabled({ timeout: 15_000 });
+  await saveIntegration(page);
+  await expect(page).toHaveURL(/\/integraatio\/\d+/);
+
+  await openEditFromViewPage(page);
+  await expect(page.getByPlaceholder("Lisää palvelun nimi", { exact: true })).toHaveValue("URN-palvelu v2");
+});

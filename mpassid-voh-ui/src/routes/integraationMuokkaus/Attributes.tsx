@@ -82,8 +82,13 @@ export default function Attributes({ attributes, role, type, attributeType, newC
         if(currentAttribute) {
           if((currentAttribute.content === undefined || currentAttribute.content === ''|| (currentAttribute.content !== null && currentAttribute.content.length===0)) && configuration.mandatory ){
             result = false
-          } else {                     
-            if(currentAttribute.content) {
+          } else {
+            // A non-editable attribute's format is not checked: the user
+            // cannot change it (e.g. the hidden entityId, copied from a SAML
+            // entityID that may be a URN - it failed 'uri' and no edit could
+            // be saved any more).
+            const editable = configuration.integrationType.find(i=>i.name===type)?.editable
+            if(currentAttribute.content&&editable) {
               result = validate(configuration.validation,currentAttribute.content)
             } else {
               //result = validate(configuration.validation,'')         
