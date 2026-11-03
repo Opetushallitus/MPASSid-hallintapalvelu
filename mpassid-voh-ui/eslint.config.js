@@ -19,6 +19,8 @@ export default tseslint.config(
       "target/**",
       "playwright-report/**",
       "test-results/**",
+      // Generated e2e coverage report (npm run test:e2e:coverage).
+      "coverage-e2e/**",
       "node_modules/**",
       "vendor/**",
       "src/api/**",

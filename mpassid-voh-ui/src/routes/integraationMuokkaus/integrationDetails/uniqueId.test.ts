@@ -1,6 +1,6 @@
 import type { Components } from "@/api";
 import { describe, expect, it } from "vitest";
-import { withUniqueId } from "./uniqueId";
+import { withProviderFieldAttributes, withUniqueId } from "./uniqueId";
 
 type Entity = Components.Schemas.ConfigurationEntity;
 const field = (entity: Entity, provider: "idp" | "sp", name: string) =>
@@ -47,5 +47,43 @@ describe("withUniqueId", () => {
       sp: { type: "saml", entityId: "https://vanha.example.test" } as Components.Schemas.ServiceProvider,
     };
     expect(field(withUniqueId(entity, "entityId"), "sp", "entityId")).toBe("https://uusi.example.test");
+  });
+});
+
+describe("withProviderFieldAttributes", () => {
+  const configurations = [
+    { name: "entityId", type: "data", integrationType: [{ name: "saml" }, { name: "azure" }] },
+    { name: "allowtestlearnerid", type: "data", integrationType: [{ name: "saml" }] },
+    { name: "entityId", type: "metadata", integrationType: [{ name: "saml" }] },
+  ];
+  const saml = (attributes: Components.Schemas.Attribute[]): Components.Schemas.ConfigurationEntity => ({
+    attributes,
+    sp: { type: "saml", entityId: "urn:mace:esimerkki.fi:sp" } as Components.Schemas.ServiceProvider,
+  });
+
+  it("lisää puuttuvan attribuutin samannimisestä sp-kentästä, kuten lomake avattaessa", () => {
+    const result = withProviderFieldAttributes(
+      saml([{ type: "data", name: "allowtestlearnerid", content: "false" }]),
+      configurations,
+      "saml"
+    );
+    expect(result?.attributes).toEqual([
+      { type: "data", name: "allowtestlearnerid", content: "false" },
+      { type: "data", name: "entityId", content: "urn:mace:esimerkki.fi:sp" },
+    ]);
+  });
+
+  it("olemassa olevaa attribuuttia ei muuteta, ja sama olio palautetaan", () => {
+    const entity = saml([{ type: "data", name: "entityId", content: "vanha" }]);
+    expect(withProviderFieldAttributes(entity, configurations, "saml")).toBe(entity);
+  });
+
+  it("tyhjää kenttää, toisen tyypin määrityksiä eikä metadataa käytetä", () => {
+    const entity: Components.Schemas.ConfigurationEntity = {
+      attributes: [],
+      sp: { type: "saml", entityId: "" } as Components.Schemas.ServiceProvider,
+    };
+    expect(withProviderFieldAttributes(entity, configurations, "saml")).toBe(entity);
+    expect(withProviderFieldAttributes(saml([]), configurations, "oidc")?.attributes).toEqual([]);
   });
 });

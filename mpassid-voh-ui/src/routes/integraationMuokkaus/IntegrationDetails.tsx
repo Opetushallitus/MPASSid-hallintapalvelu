@@ -26,7 +26,7 @@ import { defaultDataConfiguration, defaultIntegrationType, integrationTypesDefau
 import SchoolSelection from "./SchoolSelection";
 import { createLogger, redactSecrets } from "@/utils/devLog";
 import { computeDetailsCanSave } from "./integrationDetails/canSave";
-import { withUniqueId } from "./integrationDetails/uniqueId";
+import { withProviderFieldAttributes, withUniqueId } from "./integrationDetails/uniqueId";
 import type { MetadataMap } from "./Form/types";
 
 const debugLog = createLogger("DEBUG");
@@ -154,7 +154,14 @@ function IntegrationDetailsForm({ setSaveDialogState, setCanSave, setNewIntegrat
     const oid: string = integration?.organization?.oid || "0"
     
     const uniqueIdConfiguration:UiConfiguration = dataConfiguration.filter(conf=>conf.name&&conf.name==='uniqueId')[0] || defaultDataConfiguration;
-    const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType;     
+    const typeConf:IntegrationType = uniqueIdConfiguration.integrationType.filter(i=>i.name===type)[0] || defaultIntegrationType;
+    // What the drafts are compared against: the integration as opened, with
+    // the attributes the attribute forms initialize from the idp/sp fields
+    // (withProviderFieldAttributes) - those are not a user's change.
+    const [comparedOriginal] = useState<Components.Schemas.Integration>(() => ({
+      ...originalIntegration,
+      configurationEntity: withProviderFieldAttributes(originalIntegration.configurationEntity, dataConfiguration, type),
+    }));     
 
     // The configurationEntity draft with the unique id attribute copied into
     // its idp/sp field (derived, the draft state is not modified). Everything
@@ -259,7 +266,7 @@ function IntegrationDetailsForm({ setSaveDialogState, setCanSave, setNewIntegrat
     // Derived from the current values.
     const canSaveParts = computeDetailsCanSave({
       role,
-      original: originalIntegration,
+      original: comparedOriginal,
       configurationEntity: draftConfigurationEntity,
       discoveryInformation: newDiscoveryInformation,
       valid: {
@@ -313,8 +320,8 @@ function IntegrationDetailsForm({ setSaveDialogState, setCanSave, setNewIntegrat
       // name (Palvelun nimi) lives in its own state, not in the draft.
       const nameChanged = role==='sp'&&name!==(originalIntegration.configurationEntity?.sp?.name||'')
       const changed = nameChanged||
-        !isEqual(draftConfigurationEntity,originalIntegration.configurationEntity)||
-        !isEqual(newDiscoveryInformation,originalIntegration.discoveryInformation)
+        !isEqual(draftConfigurationEntity,comparedOriginal.configurationEntity)||
+        !isEqual(newDiscoveryInformation,comparedOriginal.discoveryInformation)
       if(!changed) {
         return composed
       }
@@ -334,7 +341,7 @@ function IntegrationDetailsForm({ setSaveDialogState, setCanSave, setNewIntegrat
         composed.discoveryInformation = { ...newDiscoveryInformation, title: integration.organization.name }
       }
       return composed
-    }, [integration, originalIntegration, currentEnvironment, role, name, metadata, draftConfigurationEntity, newDiscoveryInformation])
+    }, [integration, originalIntegration, comparedOriginal, currentEnvironment, role, name, metadata, draftConfigurationEntity, newDiscoveryInformation])
 
     // Publishes the composition, and shows the save bar while there is a
     // draft. Dependencies as the former composing effects had: they re-assert
