@@ -5,14 +5,18 @@ import { getOrganisaatioNimet } from "@/api/organisaatio";
 import type { SelectChangeEvent} from "@mui/material";
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, InputLabel, MenuItem, Select, Grid } from "@mui/material";
 import type { Dispatch} from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from "react-router-dom";
 import toLanguage from "@/utils/toLanguage";
-import { devLog } from "@/utils/devLog";
+import { createLogger, redactSecrets } from "@/utils/devLog";
 import PossibleServices from "./PossibleServices";
+import Suspense from "@/utils/components/Suspense";
 import { integrationTypesDefault } from "@/config";
 import { clone } from "lodash";
+
+const debugLog = createLogger("DEBUG");
+const warnLog = createLogger("WARN");
 
 const defaults = clone(integrationTypesDefault);
 
@@ -41,14 +45,23 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     const [organization, setOrganization] = useState('');
     const [integration, setIntegration] = useState('sp');
     const [type, setType] = useState(defaults.typePI);
-    const [types, setTypes] = useState(defaults.typesPI);
     const [service, setService] = useState<serviceProps>();
     const me = useMe();
     const [organizations, setOrganizations] = useState<Organization[]>();
     const navigate = useNavigate();
     const language = toLanguage(useIntl().locale).toLowerCase();
-    const possibleOrganizationsOidsIdp = useRef<string[]>([]);
-    const possibleOrganizationsOidsAll = useRef<string[]>([]);
+    // The organizations the user may create integrations for: idp (OKJ)
+    // ones, and all (idp + service integration ones).
+    const { idp: possibleOrganizationsOidsIdp, all: possibleOrganizationsOidsAll } = useMemo(() => {
+        const idp = me?.groups?.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) ?? [];
+        const sp = me?.groups?.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')) ?? [];
+        return { idp, all: [...idp, ...sp] };
+    }, [me]);
+    // Once the user explicitly picks an integration type, a new organization
+    // must stop auto-overriding it. Under React 19 the async organization
+    // (re)resolution can change it after the user has chosen, snapping
+    // "Palveluintegraatio" back to "Koulutustoimija".
+    const [userChoseIntegration, setUserChoseIntegration] = useState(false);
     
     const intl = useIntl();
     useEffect(() => {
@@ -56,19 +69,11 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         
         if(me?.groups) {
             const organizationNames: Organization[] = [];
-            possibleOrganizationsOidsIdp.current=[];
-            possibleOrganizationsOidsAll.current=[];
-            me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).forEach(o=>{
-                possibleOrganizationsOidsIdp.current.push(o.replace('APP_MPASSID_TALLENTAJA_',''))
-                possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_TALLENTAJA_',''))
-            });
-            me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).forEach(o=>possibleOrganizationsOidsAll.current.push(o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')));
-            
-            devLog("DEBUG","NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll.current)
-            possibleOrganizationsOidsAll.current.forEach(oid=>{
+            debugLog("NewIntegrationSelection (possibleOrganizationsOidsAll)",possibleOrganizationsOidsAll)
+            possibleOrganizationsOidsAll.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
-                    var found=false;
+                    let found=false;
                     response.forEach(organisation=>{
                         if(organisation?.oid===oid&&organisation?.nimi) {
                             if(organisation?.nimi[language]) {
@@ -83,15 +88,16 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         newOrganizationName.name=oid;
                     }
                     organizationNames.push(newOrganizationName);
-                    if(possibleOrganizationsOidsAll.current.length===organizationNames.length) {
+                    if(possibleOrganizationsOidsAll.length===organizationNames.length) {
                         setOrganizations(organizationNames)
                         setOrganization(organizationNames[0].oid)
                     }
                 })
                 .catch(error=>{
+                    warnLog("NewIntegrationSelection (organisaation nimen haku epäonnistui, näytetään OID)", oid, error)
                     const newOrganizationName = { oid: oid, name: oid }
                     organizationNames.push(newOrganizationName)
-                    if(possibleOrganizationsOidsAll.current.length===organizationNames.length) {
+                    if(possibleOrganizationsOidsAll.length===organizationNames.length) {
                         setOrganizations(organizationNames)
                         setOrganization(organizationNames[0].oid)
                     }
@@ -103,7 +109,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             
             
         }
-    }, [language, me]);
+    }, [language, me, possibleOrganizationsOidsAll]);
     /*
     useEffect(() => {
         
@@ -112,7 +118,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
             const organizationNames: Organization[] = [];
             const possibleOrganizationsOids = me?.groups.filter(o=>o.startsWith('APP_MPASSID_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_TALLENTAJA_','')) || [];
             //possibleOrganizationsOids.concat(me?.groups.filter(o=>o.startsWith('APP_MPASSID_PALVELU_TALLENTAJA_')).map(o=>o.replace('APP_MPASSID_PALVELU_TALLENTAJA_','')) || []);
-            devLog("DEBUG","NewIntegrationSelection (possibleOrganizationsOids)",possibleOrganizationsOids)
+            debugLog("NewIntegrationSelection (possibleOrganizationsOids)",possibleOrganizationsOids)
             possibleOrganizationsOids.forEach(oid=>{
                 const newOrganizationName = { oid: oid, name: '' }
                 getOrganisaatioNimet(oid).then(response=>{
@@ -153,44 +159,52 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         }
     }, [language, me]);
     */
-    useEffect(() => {
-        
-        
+    const organizationHasIdp = possibleOrganizationsOidsIdp.indexOf(organization)>=0;
+    const types = integration==="sp" ? defaults.typesPI : defaults.typesOKJ;
+
+    // Adjusted while rendering instead of in effects (same triggers):
+    // opening the dialog clears the service and the user's integration choice,
+    const [prevOpen, setPrevOpen] = useState(open);
+    if(open!==prevOpen) {
+        setPrevOpen(open);
         if(open) {
             setService(undefined)
+            setUserChoseIntegration(false)
         }
-    }, [open]);
-
-    useEffect(() => {
-        if(integration==="sp") {
-            setType(defaults.typePI)
-            setTypes(defaults.typesPI)
-        } else {
-            setType(defaults.typeOKJ)
-            setTypes(defaults.typesOKJ)
+    }
+    // a new integration (idp/sp) resets the type to its default,
+    const [prevIntegration, setPrevIntegration] = useState(integration);
+    if(integration!==prevIntegration) {
+        setPrevIntegration(integration);
+        setType(integration==="sp" ? defaults.typePI : defaults.typeOKJ)
+    }
+    // and a new organization picks the integration, unless the user chose one.
+    const [prevOrganization, setPrevOrganization] = useState(organization);
+    if(organization!==prevOrganization) {
+        setPrevOrganization(organization);
+        if(!userChoseIntegration) {
+            setIntegration(organizationHasIdp ? 'idp' : 'sp')
         }
-    }, [integration]);
+    }
 
-    useEffect(() => {
-        if(possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0) {
-            setIntegration('idp')
-        } else {
-            setIntegration('sp')
-        }
-    }, [organization]);
-
-
-    
 
     const createIntegration = async () => {
         getBlankIntegration({role: integration, type: type.toLowerCase(), organization: organization})
             .then(result=>{
-                devLog("DEBUG","createIntegration (result)",result)
+                debugLog("createIntegration (result)",redactSecrets(result))
                 result.id=0;
                 if(result?.configurationEntity?.sp) {
-                    devLog("DEBUG","createIntegration (oldSet)",service)
+                    debugLog("createIntegration (oldSet)",service)
                     if(service!==undefined) {
                         if(service.setId!==0) {
+                          // setId 0 marks the "create a brand-new environment"
+                          // options in PossibleServices.tsx, whose `name` is
+                          // just the literal sentinel "uusi" used to render
+                          // their dropdown label ("Testi - uusi") - not a real
+                          // service name to carry over. Only an actual existing
+                          // set (setId!==0) has a real name worth reusing, so
+                          // that a service keeps the same display name across
+                          // its environments.
                           result.configurationEntity.sp.name=service.name
                         }
                         result.deploymentPhase=service.environment
@@ -198,8 +212,8 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         result.integrationSets.push( { id: service.setId })
 
                         
-                        devLog("DEBUG","createIntegration (type service.environment)",(typeof service.environment))
-                        devLog("DEBUG","createIntegration (service.environment)",service.environment)
+                        debugLog("createIntegration (type service.environment)",(typeof service.environment))
+                        debugLog("createIntegration (service.environment)",service.environment)
                     }
                     
                 }
@@ -209,7 +223,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                 if(result?.configurationEntity?.sp&&result.configurationEntity.sp.metadata===null) {
                     result.configurationEntity.sp.metadata={}
                 }
-                devLog("DEBUG","createIntegration (integration)",result)
+                debugLog("createIntegration (integration)",redactSecrets(result))
                 navigate(`/muokkaa/`+integration+`/`+type+`/`+result.id, { state: result });
             })       
       };
@@ -221,8 +235,9 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
       
       const handleIntegration = (event: SelectChangeEvent) => {
 
-        devLog("DEBUG","handleIntegration (value)",String(event.target.value))
+        debugLog("handleIntegration (value)",String(event.target.value))
         const value = String(event.target.value);
+        setUserChoseIntegration(true)
         setIntegration(value)
         
         
@@ -240,7 +255,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
     }; 
 
     const handleService = (value: serviceProps) => {
-        devLog("DEBUG","handleService",value)
+        debugLog("handleService",value)
         setService(value)
     }; 
     
@@ -256,12 +271,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
         </DialogTitle>
         <DialogContent>
             <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid size={4}>
                     <InputLabel id="organisaatio" sx={{ mr: 1, display: "inline", ml: "auto" }}>
                         <FormattedMessage defaultMessage="Organisaatio" />:
                     </InputLabel>
                 </Grid>
-                <Grid item xs={8} >
+                <Grid size={8} >
                     <Select
                         
                         labelId="organisaatio"
@@ -278,12 +293,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         ))}
                     </Select>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                     <InputLabel id="integraatio" sx={{ mr: 1, display: "inline", marginLeft: "auto" }}>
                         <FormattedMessage defaultMessage="integraatio" />:
                     </InputLabel>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                     <Select
                         labelId="integraatio"
                         id="integraatio"
@@ -293,7 +308,7 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         sx={{ marginRight: "auto"}}
                     >
 
-                        {possibleOrganizationsOidsIdp.current.length>0&&possibleOrganizationsOidsIdp.current.indexOf(organization)>=0&&
+                        {organizationHasIdp&&
                             <MenuItem key={'koulutustoimija'} value={'idp'}>
                                 <FormattedMessage defaultMessage='Koulutustoimija'/>
                             </MenuItem>}
@@ -302,12 +317,12 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                         </MenuItem>
                     </Select>
                 </Grid>
-                <Grid item xs={4}>
+                <Grid size={4}>
                     <InputLabel id="tyyppi" sx={{ mr: 1, display: "inline", marginLeft: "auto" }}>
                         <FormattedMessage defaultMessage="tyyppi" />:
                     </InputLabel>
                 </Grid>
-                <Grid item xs={8}>
+                <Grid size={8}>
                     <Select
                         labelId="tyyppi"
                         id="tyyppi"
@@ -327,17 +342,15 @@ function NewIntegrationSelection({ open, setOpen}: Props) {
                     </Select>
                 </Grid>
                 {integration==='sp'&&(<>
-                    <Grid item xs={4}>
+                    <Grid size={4}>
                         <InputLabel id="palvelu" sx={{ mr: 1, display: "inline", marginLeft: "auto" }}>
                             <FormattedMessage defaultMessage="palvelu" />:
                         </InputLabel>
                     </Grid>
-                    <Grid item xs={8}>
-                        
-                            
+                    <Grid size={8}>
+                        <Suspense inline>
                             <PossibleServices oid={organization} handleService={handleService} />
-                            
-                        
+                        </Suspense>
                     </Grid>
                 </>)}
             </Grid>

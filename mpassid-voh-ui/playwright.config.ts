@@ -8,8 +8,22 @@ export default defineConfig({
   // timing out under load, not a real app bug) - a retried test is still
   // flagged as flaky in the report, just not reported as a hard failure.
   retries: process.env.CI ? 2 : 1,
-  timeout: 200_000,
+  // Per-test timeout (Playwright default is 30_000). The azure-attribute
+  // tests build a full IdP integration before asserting, so under a cold
+  // Vite dev server + parallel workers they occasionally exceed 30s and
+  // time out at whichever step the clock happens to run out on. Note: this
+  // is the top-level per-test timeout, distinct from webServer.timeout
+  // below (dev-server startup) which is unrelated.
+  timeout: 60_000,
   reporter: "html",
+  // e2e-kattavuus (npm run test:e2e:coverage, ks. e2e/coverage/options.ts):
+  // setup tyhjentää edellisen raportin, teardown yhdistää workereiden datan.
+  ...(process.env.E2E_COVERAGE === "1"
+    ? {
+        globalSetup: "./e2e/coverage/setup.ts",
+        globalTeardown: "./e2e/coverage/teardown.ts",
+      }
+    : {}),
   use: {
     // App runs unprefixed in dev (App.tsx only applies ENV.BASENAME when
     // ENV.PROD is true), and the dev server listens on :3000, not Vite's
@@ -33,5 +47,17 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        // Runs the tests in a locally installed browser instead of
+        // Playwright's bundled Chromium. Usage:
+        //   PW_CHANNEL=chrome npm run test:e2e -- --headed
+        // (also e.g. "msedge", "chrome-beta"). Unset = bundled Chromium.
+        channel: process.env.PW_CHANNEL || undefined,
+      },
+    },
+  ],
 });

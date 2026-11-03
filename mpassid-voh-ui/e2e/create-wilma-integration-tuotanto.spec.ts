@@ -1,16 +1,23 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillCommonIdpSteps,
   fillWilmaFields,
-  logBrowserConsole,
   mockInstitutionTypes,
   selectEnvironment,
 } from "./helpers";
 
+// Tuotanto-versio create-wilma-integration.spec.ts:sta - identtinen muuten,
+// paitsi Palveluympäristöksi valitaan "Tuotanto" (IdentityProvider.tsx:141-
+// 169) ennen tallennusta. Ei sibling-integraatioita samalle
+// oppilaitostyypille tässä testissä (fresh test = fresh mock state), niin
+// getIntegrationDiscoveryInformation palauttaa eSI=eSE=null ja
+// koulunvalinta pysyy valinnaisena - täsmälleen kuin
+// school-selection.spec.ts:n s0-testissä, joka on jo vahvistanut tämän
+// polun toimivan Tuotannossa.
+
 test("luo uusi Wilma-integraatio Tuotanto-ympäristöön", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Wilma");
 

@@ -1,4 +1,4 @@
-export const inits:any = {
+export const inits = {
     idp: {
       wilma: {
         id: 0,
@@ -12,7 +12,7 @@ export const inits:any = {
                 {
                     type: "data",
                     name: "hostname",
-                    content: "nykarleby.inschool.fi"
+                    content: "mansikkala.inschool.fi"
                 }
             ],
             idp: {
@@ -21,14 +21,14 @@ export const inits:any = {
                     11,
                     15
                 ],
-                idpId: "wilma_nykarleby",
-                logoUrl: "https://mpass-proxy.csc.fi/images/buttons/btn-nykarleby.png",
-                flowName: "WilmaNykarleby",
-                hostname: "nykarleby.inschool.fi"
+                idpId: "wilma_mansikkala",
+                logoUrl: "https://mpass-proxy.csc.fi/images/buttons/btn-mansikkala.png",
+                flowName: "WilmaMansikkala",
+                hostname: "mansikkala.inschool.fi"
             }
         },
         discoveryInformation: {
-            title: "Nykarleby",
+            title: "Mansikkala",
             showSchools: true,
             schools: [],
             excludedSchools: [],

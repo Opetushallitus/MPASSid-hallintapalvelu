@@ -1,5 +1,12 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
+// NOTE: shared by all e2e specs. Like create-wilma-integration.spec.ts, none
+// of this could be run/iterated in the authoring environment (no network
+// access to download Playwright's browser binaries there) - selectors are
+// derived from source (src/config.ts dataConfiguration, src/routes/home/*,
+// src/routes/integraationMuokkaus/*) and from the Wilma spec's proven
+// selectors. Expect to adjust a selector or two on first real run.
+
 /**
  * Overrides the koodisto lookup for institution types so it matches the
  * fixture organization's only "peruskoulu" school (oppilaitostyyppi_11, see
@@ -27,33 +34,19 @@ export async function mockInstitutionTypes(page: Page) {
   );
 }
 
-/** Surfaces browser console/page errors in the test output - see
- * create-wilma-integration.spec.ts for why this matters (MSW worker.start()
- * has no .catch() in src/main.tsx, so failures there show up as a silent
- * blank page otherwise). */
-export function logBrowserConsole(page: Page) {
-  page.on("console", (msg) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:${msg.type()}] ${msg.text()}`);
-  });
-  page.on("pageerror", (err) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:pageerror] ${err.message}`);
-  });
-}
-
 /**
  * Navigates back to "/" via the app's own client-side router (clicking the
  * "Integraatiot" nav tab) instead of page.goto("/"). page.goto() is a real
- * browser navigation - it re-executes every JS module from scratch, which
- * resets requestLogicHandlers.ts's module-scope `let allIntegrations =
- * exampleData...` back to its pristine initial state. That's invisible to
- * single-integration-per-test specs (goto only ever happens once, at the very
- * start), but school-selection.spec.ts's tests create a "sibling" integration
- * and then a second, tested one in the SAME test - if anything between them
- * did a hard navigation, the sibling saved into the mock's in-memory
- * "database" would vanish before the second integration's
- * getIntegrationDiscoveryInformation call ever sees it.
+ * browser navigation - it re-executes every JS module from scratch, including
+ * requestLogicHandlers.ts's mock "database".
+ *
+ * Until 2026-10-14 that reset the database, so school-selection.spec.ts's
+ * tests (a "sibling" integration, then a second, tested one in the SAME test)
+ * had to avoid any hard navigation in between - the comments throughout this
+ * suite saying a page.goto() "would wipe" the mock refer to that. The mock now
+ * keeps its integrations in sessionStorage, so a reload in the same test keeps
+ * them (each test still starts empty: a fresh browser context). The SPA
+ * navigation is kept: it is faster and does not re-start the mock worker.
  */
 export async function goHomeWithoutReload(page: Page) {
   // exact:true - a substring match against "Integraatiot" also matches the
@@ -276,12 +269,13 @@ export async function toggleExtraSchoolsConfiguration(page: Page) {
   // this label goes through DataRowTitle (SchoolSelection.tsx:1046,
   // 1261-1291), which wraps it in a Tooltip+<span> - siblingRow()'s
   // following-sibling::*[1] would look for a sibling of that inner <span>
-  // (there isn't one) instead of the label's own <Grid item>, so walk up to
-  // the nearest MuiGrid-item first.
+  // (there isn't one) instead of the label's own grid cell, so walk up to
+  // the nearest MuiGrid-root first. (MUI v9's Grid v2 no longer emits the
+  // v5 "MuiGrid-item" class - every grid cell is just "MuiGrid-root".)
   await page
     .getByText("Lisää kouluvalinta säännöt", { exact: true })
     .locator(
-      'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " MuiGrid-item ")][1]/following-sibling::*[1]'
+      'xpath=ancestor::*[contains(concat(" ", normalize-space(@class), " "), " MuiGrid-root ")][1]/following-sibling::*[1]'
     )
     .getByRole("checkbox")
     .click();
@@ -502,12 +496,17 @@ export async function saveIntegration(page: Page) {
   await expect(saveButton).toBeEnabled({ timeout: 15_000 });
   await saveButton.click();
 
+  await expect(page.getByText("Olet muuttamassa integraation tietoja")).toBeVisible();
+  await expect(page.getByText("Haluatko varmasti tallentaa?")).toBeVisible();
   const okButton = page.getByRole("button", { name: "OK" });
   await okButton.click();
 
   await expect(
     page.getByText("Muutokset tallennettu onnistuneesti")
   ).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByText(/Muutokset astuvat voimaan viimeistään 2 arkipäivän kuluessa/)
+  ).toBeVisible();
 
   await okButton.click();
 }
@@ -521,9 +520,9 @@ export async function saveIntegration(page: Page) {
  * `<Link state={props.integration}>` to `/muokkaa/<role>/<type>/<id>` with
  * the real, already-saved integration as `location.state`
  * (EditIntegrationButton.tsx:18-27,34-36) - unlike a fresh
- * `page.goto('/muokkaa/...')`, which would NOT work here since
- * IntegrationDetails.tsx:56-57 reads the integration unconditionally from
- * `useLocation().state`, with no id-based fallback fetch.
+ * `page.goto('/muokkaa/...')`, which reloads the page and makes
+ * IntegrationDetails.tsx load the integration by id (no location.state; see
+ * edit-direct-url.spec.ts).
  */
 export async function openEditFromViewPage(page: Page) {
   await page.getByLabel("lisää").click();

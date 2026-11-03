@@ -1,18 +1,21 @@
 
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
 import { Switch } from "@mui/material";
-import type { Dispatch} from "react";
-import { useEffect, useState } from "react";
+import type { Dispatch, JSX } from "react";
+import { useState, type ChangeEvent } from "react";
+import type { FormObject } from "./types";
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
-  object: any;
+  object: FormObject;
   type: string;
   label: string;
   attributeType: string;
   isEditable: boolean;
   mandatory: boolean;
-  path: any;
-  values: any[];
+  path: string;
+  values: string[];
   resetValue?: boolean;
   helperText: (data:string) => JSX.Element;
   setCanSave: Dispatch<boolean>;
@@ -20,31 +23,38 @@ interface Props {
   onValidate: (data:string) => boolean;
 }
 
-export default function SwitchForm({ object, type, isEditable=false, mandatory=false, values=[], helperText, path, onUpdate, onValidate, attributeType, label,setCanSave,resetValue=false }: Props) {
+export default function SwitchForm({ object, type, isEditable=false, onUpdate, attributeType, setCanSave,resetValue=false }: Props) {
 
-  const [value, setValue] = useState<boolean>((object?.content)?JSON.parse(object.content):false);
+  const [value, setValue] = useState<boolean>((object?.content)?JSON.parse(String(object.content)):false);
 
 
-  useEffect(() => {
-      devLog("DEBUG","SwitchForm (object)",object)
-      devLog("DEBUG","SwitchForm (resetValue)",resetValue)    
+  // With resetValue a new object (or resetValue turning on) resets the value
+  // from its content (adjusted while rendering instead of in an effect).
+  const [prevObject, setPrevObject] = useState(object);
+  const [prevResetValue, setPrevResetValue] = useState(resetValue);
+  if(object!==prevObject||resetValue!==prevResetValue) {
+      setPrevObject(object);
+      setPrevResetValue(resetValue);
+      debugLog("SwitchForm (object)",object)
+      debugLog("SwitchForm (resetValue)",resetValue)    
       if(resetValue) {
-        setValue((object.content!==undefined)?JSON.parse(object.content):false)
-        devLog("DEBUG","SwitchForm (value)",(object.content!==undefined)?JSON.parse(object.content):false)        
+        // Same check as the initial value: a missing or empty content is false.
+        setValue((object.content)?JSON.parse(String(object.content)):false)
+        debugLog("SwitchForm (value)",(object.content)?JSON.parse(String(object.content)):false)        
       }  
-  }, [object, resetValue, setValue]);
+  }
 
 
-  const updateFormValue = (event: any) => {
+  const updateFormValue = (event: ChangeEvent<HTMLInputElement>) => {
     
-        devLog("DEBUG","SwitchForm (event.target.checked)",event.target.checked)   
+        debugLog("SwitchForm (event.target.checked)",event.target.checked)   
         setCanSave(true) 
         onUpdate(type,event.target.checked,attributeType);
-        setValue(JSON.parse(event.target.checked))
+        setValue(event.target.checked)
       
   };
-  devLog("DEBUG","SwitchForm (value for "+object.name+")",object)
-  devLog("DEBUG","SwitchForm (value for "+object.name+")",value)
+  debugLog("SwitchForm (value for "+object.name+")",object)
+  debugLog("SwitchForm (value for "+object.name+")",value)
   if(isEditable) {
     return (
         <Switch checked={value}

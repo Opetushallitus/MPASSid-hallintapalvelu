@@ -1,11 +1,13 @@
 import { useIntegrationsSpecSearchPageable } from "@/api/client";
 import MenuItem from "@mui/material/MenuItem";
-import type { Components } from "@/api";
+import type { Components, Paths } from "@/api";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import Select from "@mui/material/Select";
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
 import { useState } from "react";
 import { FormattedMessage } from 'react-intl';
+
+const debugLog = createLogger("DEBUG");
 
 interface Props {
     oid:string;
@@ -24,7 +26,7 @@ function PossibleServices({oid,handleService}: Props) {
 
     const handleServiceView = (event: SelectChangeEvent) => {
         
-        devLog('DEBUG','handleServiceView',event.target.value)
+        debugLog('handleServiceView',event.target.value)
         if(Number(event.target.value)===-2) {
             handleService({environment: 0, name: 'uusi', setId: 0})
             setServiceIndex(Number(event.target.value))
@@ -34,7 +36,7 @@ function PossibleServices({oid,handleService}: Props) {
             setServiceIndex(Number(event.target.value))
         }
         if(Number(event.target.value)>-1&&possibleServices.content&&possibleServices.content.length>0) {
-            devLog('DEBUG','handleServiceView (possibleService)',possibleServices.content[Number(event.target.value)])
+            debugLog('handleServiceView (possibleService)',possibleServices.content[Number(event.target.value)])
             const integration=possibleServices.content[Number(event.target.value)]
             if(integration.deploymentPhase!==undefined&&integration?.configurationEntity?.set?.name&&integration.id!==undefined) {
                 handleService({environment: integration.deploymentPhase, name: integration.configurationEntity.set.name, setId: integration.id})
@@ -64,17 +66,20 @@ function PossibleServices({oid,handleService}: Props) {
         
     }
     
-    const possibleServices: Components.Schemas.PageIntegration = useIntegrationsSpecSearchPageable(
-        {
+    // Spring flattens Pageable into page/size query parameters, whereas the
+    // generated parameter type models it as a nested `pageable` object.
+    const query: Omit<Paths.GetIntegrationsSpecSearchPageable.QueryParameters, "pageable"> & { page: number; size: number } = {
             search: oid,
             role: 'set',
             page: 0,
             size: 100,
-          } as any
+          };
+    const possibleServices: Components.Schemas.PageIntegration = useIntegrationsSpecSearchPageable(
+        query as unknown as Parameters<typeof useIntegrationsSpecSearchPageable>[0]
     );
 
     if(possibleServices.content) {
-        devLog("DEBUG","possibleServices (content)",possibleServices.content)
+        debugLog("possibleServices (content)",possibleServices.content)
         return (<Select
             labelId="palvelu"
             id="palvelu"
@@ -86,10 +91,10 @@ function PossibleServices({oid,handleService}: Props) {
             <MenuItem key={'valitse'} value={-3} tabIndex={0}>
                 <FormattedMessage defaultMessage="Valitse" />
             </MenuItem>
-            <MenuItem key={'uusi_2'} value={-2} tabIndex={1}>
+            <MenuItem key={'uusi_2'} value={-2}>
                 {addEnv(0)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
-            <MenuItem key={'uusi_1'} value={-1} tabIndex={2}>
+            <MenuItem key={'uusi_1'} value={-1}>
                 {addEnv(1)} - <FormattedMessage defaultMessage="uusi" />
             </MenuItem>
             {possibleServices.content.map((integration,index) => {          

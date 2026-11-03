@@ -102,6 +102,17 @@ const theme = (theme: Theme): ThemeOptions => {
         },
       },
       MuiSwitch: {
+        defaultProps: {
+          // MUI v9 changed the Switch input's ARIA role from the implicit
+          // "checkbox" (v5) to "switch". The app's tests (and any assistive
+          // tooling that predates v9) locate these toggles as role="checkbox",
+          // so restore that role for compatibility.
+          slotProps: {
+            input: {
+              role: "checkbox",
+            },
+          },
+        },
         styleOverrides: {
           root: {
             padding: 8,

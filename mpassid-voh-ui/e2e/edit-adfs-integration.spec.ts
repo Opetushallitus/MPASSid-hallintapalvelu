@@ -1,17 +1,18 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillAdfsFields,
   fillCommonIdpSteps,
-  logBrowserConsole,
   mockInstitutionTypes,
   openEditFromViewPage,
   saveIntegration,
 } from "./helpers";
 
+// See edit-wilma-integration.spec.ts for the general create-then-edit
+// rationale, and create-adfs-integration.spec.ts for field provenance.
+
 test("muokkaa olemassa olevaa ADFS-integraatiota", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "ADFS");
   await expect(page).toHaveURL(/\/muokkaa\/idp\/adfs\/0/);

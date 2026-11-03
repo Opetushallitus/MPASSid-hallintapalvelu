@@ -2,6 +2,16 @@
 
 [Vite](https://vitejs.dev/) plugin for super-template.
 
+> **Vendored note (mpassid-voh-ui):** the composed `superTemplate()` default
+> export and its vite-3-era build path (`main`, `craLikePlugin`, `dynamicBase`,
+> `faviconsPlugin` + `@vitejs/plugin-react@2`, `rollup-plugin-node-polyfills`,
+> `@esbuild-plugins/*`, old `vite`) were **removed** — they pulled vulnerable /
+> deprecated transitive deps and this app no longer uses them. `vite.config.ts`
+> now composes the individual sub-plugins directly, importing only the surviving
+> `./lib/*.js` (`gitInfoPlugin`, `optimizeOpenAPIPatchPlugin`, `projectAliasPlugin`,
+> `defaultExport`). The `Usage` example below is the ORIGINAL upstream API and no
+> longer applies here.
+
 ## Usage
 
 `vite.config.js`:

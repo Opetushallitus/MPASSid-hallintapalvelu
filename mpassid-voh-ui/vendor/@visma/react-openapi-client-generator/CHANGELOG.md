@@ -1,3 +1,10 @@
+# 1.0.2
+
+- Load the JSON definition from disk (`readFile` + `JSON.parse`) and pass the
+  parsed object to `OpenAPIClientAxios`, so `init()` no longer hands a local
+  file path to `axios.get()` — which throws `ERR_INVALID_URL` ("Invalid URL")
+  under axios 1.x. Local fork for mpassid-voh-ui.
+
 # 1.0.1
 
 - Fix `Uncaught TypeError: import_openapi_client_axios.default is not a constructor` in Vite

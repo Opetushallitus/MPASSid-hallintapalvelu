@@ -1,0 +1,10 @@
+diff --git a/node_modules/react-markdown/lib/complex-types.ts b/node_modules/react-markdown/lib/complex-types.ts
+index 5319a88..efd64bf 100644
+--- a/node_modules/react-markdown/lib/complex-types.ts
++++ b/node_modules/react-markdown/lib/complex-types.ts
+@@ -1,4 +1,4 @@
+-import type {ReactNode, ComponentType, ComponentPropsWithoutRef} from 'react'
++import type {ReactNode, ComponentType, ComponentPropsWithoutRef, JSX} from 'react'
+ import type {Position} from 'unist'
+ import type {Element} from 'hast'
+ 

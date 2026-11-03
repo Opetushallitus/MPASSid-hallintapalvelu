@@ -6,5 +6,5 @@ export declare const defaultOptions: {
 interface Options {
     noParser?: boolean;
 }
-declare const reactIntlBundledMessagesPlugin: (options?: Options) => (false | Plugin)[];
+declare const reactIntlBundledMessagesPlugin: (options?: Options) => (false | Plugin<any>)[];
 export default reactIntlBundledMessagesPlugin;

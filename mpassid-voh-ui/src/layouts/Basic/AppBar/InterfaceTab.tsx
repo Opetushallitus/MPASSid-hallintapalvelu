@@ -13,11 +13,23 @@ interface TabProps {
 export default function InterfaceTab({ id, ...otherProps }: TabProps) {
   const [hover, setHover] = useState(false);
   const navigate = useNavigate();
-  const [, setTabs] = useSessionStorage<string[]>(
+  const [tabs, setTabs] = useSessionStorage<string[]>(
     openIntegrationsSessionStorageKey,
     []
   );
   const { integrationId } = useParams();
+
+  const close = () => {
+    const remaining = tabs.filter((tab) => tab !== id);
+    setTabs(remaining);
+    // Closing the open integration's tab moves to the tab now in its place
+    // (or the one before it, if it was the last); without tabs, to the
+    // home page. Closing another tab stays on the page.
+    if (id === integrationId) {
+      const next = remaining[Math.min(tabs.indexOf(id), remaining.length - 1)];
+      navigate(next === undefined ? "/" : `/integraatio/${next}`);
+    }
+  };
 
   return (
     <TabLink
@@ -34,25 +46,7 @@ export default function InterfaceTab({ id, ...otherProps }: TabProps) {
             onClick={(event) => {
               event.stopPropagation();
               event.preventDefault();
-
-              setTabs((tabs) => {
-                const filteredTabs = tabs.filter((tab) => tab !== id);
-
-                if (integrationId) {
-                  if (filteredTabs.length && tabs.includes(id)) {
-                    const nextTabIndex =
-                      id === integrationId
-                        ? Math.min(tabs.indexOf(id), filteredTabs.length - 1)
-                        : filteredTabs.indexOf(integrationId);
-
-                    navigate(`/integraatio/${filteredTabs[nextTabIndex]}`);
-                  } else {
-                    navigate("");
-                  }
-                }
-
-                return filteredTabs;
-              });
+              close();
             }}
           />
         </Fade>

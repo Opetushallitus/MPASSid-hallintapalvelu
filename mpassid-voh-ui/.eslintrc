@@ -1,4 +1,0 @@
-{
-  "extends": ["@visma/eslint-config-super-template"],
-  "root": true
-}
