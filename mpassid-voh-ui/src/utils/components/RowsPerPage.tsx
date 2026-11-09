@@ -46,6 +46,12 @@ export default function RowsPerPage(props: Props) {
 
   const labelId = useId();
   const id = useId();
+  // MUI v9's Select sets the combobox's aria-labelledby to the label id only,
+  // dropping the v5 self-reference to the display element. That excluded the
+  // selected value (e.g. "25") from the accessible name. Give the display
+  // element its own id and point aria-labelledby at both the label and itself,
+  // so the accessible name is "Näytä sivulla: <value>" again.
+  const buttonId = useId();
 
   return (
     <>
@@ -58,6 +64,10 @@ export default function RowsPerPage(props: Props) {
         value={value}
         onChange={handleChange}
         variant="standard"
+        SelectDisplayProps={{
+          id: buttonId,
+          "aria-labelledby": `${labelId} ${buttonId}`,
+        }}
         sx={
           // Hide border
           {

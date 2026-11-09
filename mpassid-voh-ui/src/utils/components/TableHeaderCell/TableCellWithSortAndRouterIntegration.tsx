@@ -40,26 +40,33 @@ function TableSortLabelWithRouterIntegration({
     <TableSortLabel
       active={Boolean(direction)}
       direction={direction || undefined}
-      onClick={() =>
-        setSearchParams((searchParams) => {
-          searchParams.delete("sort");
+      onClick={() => {
+        // react-router v7 defers the committed searchParams under
+        // React.startTransition, so the `direction` closure can be stale on
+        // rapid clicks. The browser URL is updated synchronously by
+        // history.pushState, so derive the current direction from the live
+        // query string to always toggle off the latest committed state.
+        const searchParams = new URLSearchParams(window.location.search);
+        const pathsArray = Array.isArray(paths) ? paths : [paths];
+        const liveDirection: SortDirection =
+          (searchParams
+            .getAll("sort")
+            .map((sort) => sort.split(",") as [string, SortDirection])
+            .find(([path]) => pathsArray.includes(path))?.[1] ?? false);
 
-          if (!Array.isArray(paths)) {
-            paths = [paths];
-          }
+        searchParams.delete("sort");
 
-          paths.forEach((path) => {
-            searchParams.append(
-              "sort",
-              [path, { asc: "desc", desc: "asc" }[direction || "desc"]].join(
-                ","
-              )
-            );
-          });
+        pathsArray.forEach((path) => {
+          searchParams.append(
+            "sort",
+            [path, { asc: "desc", desc: "asc" }[liveDirection || "desc"]].join(
+              ","
+            )
+          );
+        });
 
-          return searchParams;
-        })
-      }
+        setSearchParams(searchParams);
+      }}
     >
       {children}
       {direction ? (
@@ -88,11 +95,9 @@ function useSortDirection(paths: string | string[]) {
     [searchParams]
   );
 
-  if (!Array.isArray(paths)) {
-    paths = [paths];
-  }
+  const pathList = Array.isArray(paths) ? paths : [paths];
 
-  const [, direction] = sort.find(([path]) => paths.includes(path)) ?? [
+  const [, direction] = sort.find(([path]) => pathList.includes(path)) ?? [
     undefined,
     false,
   ];

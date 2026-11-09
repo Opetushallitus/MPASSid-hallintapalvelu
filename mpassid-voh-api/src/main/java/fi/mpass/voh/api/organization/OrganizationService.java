@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
@@ -29,7 +30,11 @@ public class OrganizationService {
     this.organizationRepository = organizationRepository;
     this.externalOrganizationServiceUrl = url;
 
-    restClient = RestClient.builder().requestFactory(new HttpComponentsClientHttpRequestFactory())
+    // content compression is disabled, since httpclient5 5.6.x keeps the compressed Content-Length
+    // after decompression, which truncates String response bodies
+    restClient = RestClient.builder()
+        .requestFactory(new HttpComponentsClientHttpRequestFactory(
+            HttpClients.custom().useSystemProperties().disableContentCompression().build()))
         .baseUrl(this.externalOrganizationServiceUrl)
         .defaultHeaders(httpHeaders -> httpHeaders.set("Accept-Charset", "utf-8"))
         .build();

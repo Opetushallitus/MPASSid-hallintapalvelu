@@ -60,19 +60,10 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   const [searchParams, setSearchParams] = useSearchParams();
   const [openNotice, setOpenNotice] = useState(false);
   const [openConfirmation, setOpenConfirmation] = useState(false);
-  const [saveDialogState, setSaveDialogState] = useState(false);
   const me = useMe();
-  const [groups, setGroups] = useState<string[]>();
+  // useMe suspends until loaded, so the groups are there on the first render.
+  const groups = me?.groups;
   const intl = useIntl();
-
-  useEffect(() => {
-    if(me?.groups) {
-      console.log("me?.groups: ",me?.groups)
-      setGroups(me.groups)
-    } else {
-      console.log("me?.groups: false")
-    }
-  }, [me]);
 
   const snackbarLocation: {
     vertical: 'top' | 'bottom';
@@ -91,36 +82,18 @@ export default function IntegrationSelection({ integration, newIntegration, setN
   useEffect(() => {
     if((newIntegration===undefined||(integration !== undefined)&&(newIntegration?.id !== integration?.id))) {
       setNewIntegration(integration);
-      setSaveDialogState(false);
     }
-  }, [integration,newIntegration,setNewIntegration,setSaveDialogState]);
+  }, [integration,newIntegration,setNewIntegration]);
 
-  useEffect(() => {
-    if(integration!==undefined&&newIntegration!==undefined&&eqCheck(integration,newIntegration)) {
-      setSaveDialogState(false);
-    } else {
-      if(!openConfirmation&&!openNotice) {
-        setSaveDialogState(true);
-      } else {
-        setSaveDialogState(false);
-      }
-    }
-  }, [openConfirmation,openNotice,integration,newIntegration,setSaveDialogState]);
+  // The save bar, derived (it used to be set by three effects with these
+  // rules): shown while no dialog is open and the selection differs from the
+  // saved one, or no service is chosen without "allow all".
+  const dialogsClosed = !openConfirmation&&!openNotice;
+  const selectionUnchanged = integration!==undefined&&newIntegration!==undefined&&eqCheck(integration,newIntegration);
+  const noServicesChosen = newIntegration!==undefined&&!activateAllServices&&(newIntegration.permissions === undefined||newIntegration.permissions.length===0);
+  const saveDialogState = dialogsClosed&&(!selectionUnchanged||noServicesChosen);
 
-  useEffect(() => {
-    if(newIntegration) {
-      if(!activateAllServices&&(newIntegration.permissions === undefined||newIntegration.permissions.length===0)) {
-        if(!openConfirmation&&!openNotice) {
-          setSaveDialogState(true);
-        } else {
-          setSaveDialogState(false);
-        }
-      }
-    }
-    
-  }, [activateAllServices,newIntegration,setSaveDialogState,openConfirmation,openNotice]);
-
-  const handleSwitchAllChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSwitchAllChange = (_e: ChangeEvent<HTMLInputElement>) => {
     if(writeAccess()) {
       const copy = structuredClone(newIntegration)
 
@@ -147,7 +120,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const cannotSave = () => {
     
-    if(newIntegration&&newIntegration.permissions&&(newIntegration?.permissions?.length>1||activateAllServices)) {
+    // At least one service besides the always allowed test service.
+    if(newIntegration&&newIntegration.permissions&&(newIntegration.permissions.some(i=>i.to?.id!==mpassIdUserAttributeTestService)||activateAllServices)) {
       return true;
     }
     return false;
@@ -180,10 +154,16 @@ export default function IntegrationSelection({ integration, newIntegration, setN
     setSearchParams((searchParams) => resetPage(copy(searchParams)));
   }
 
+  // Saving "allow all" removes the individually allowed services of the saved
+  // integration (the backend stores allow all as an empty list; the test
+  // service is never stored), so it is confirmed first.
+  const removesIndividualServices = () =>
+    activateAllServices&&(integration.permissions ?? []).some(i=>i.to?.id!==mpassIdUserAttributeTestService)
+
   const saveIntegrations = async () => {
     if(writeAccess()) {
       if(newIntegration!==undefined) {
-        if(newIntegration.permissions?.length == 0&&openConfirmation == false) {
+        if((newIntegration.permissions?.length == 0||removesIndividualServices())&&openConfirmation == false) {
           setOpenConfirmation(true);
         } else {
           const id = newIntegration.id!;
@@ -203,8 +183,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
 
   const clearIntegrations = () => {
     setNewIntegration(integration);
-    setSaveDialogState(false);
-    if(integration?.permissions === undefined || integration?.permissions?.length===0) {
+    // Same rule as IntegrationTab: only the test service also means "all allowed".
+    if(integration?.permissions === undefined || integration?.permissions?.length===0 || (integration?.permissions?.length===1&&integration.permissions.map(i=>i.to?.id).indexOf(mpassIdUserAttributeTestService)>=0 )) {
       setActivateAllServices(true);
     } else {
       setActivateAllServices(false);
@@ -222,7 +202,6 @@ export default function IntegrationSelection({ integration, newIntegration, setN
         copy.permissions=[];
         copy.permissions.push(newServiceIntgeration);
         setNewIntegration(copy);
-        setSaveDialogState(true);
       }
     } else {
       setNewIntegration(integration);
@@ -269,11 +248,11 @@ export default function IntegrationSelection({ integration, newIntegration, setN
             </Secondary>
             </Typography>
             <FormattedMessage defaultMessage="Sivulla MPASSid-pääkäyttäjä voi hallinnoida palveluita, joissa on sallittu kirjautuminen MPASSid-tunnistuksenvälityspalveluun." />
-            <Box display="flex" justifyContent="left" mt={3}> 
+            <Box sx={{ display: "flex", justifyContent: "left", mt: 3 }}> 
               <ServiceLinkButton></ServiceLinkButton>
             </Box>
             <Divider variant="middle" ></Divider>
-            <Box display="flex" justifyContent="center" mt={3}> 
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}> 
             
             <FormControlLabel sx={{ marginRight: "auto" }} control={<Switch checked={activateAllServices} onChange={e=>handleSwitchAllChange(e)}/>} label={<FormattedMessage defaultMessage="Salli kaikki palvelut" />} />
                   <Button aria-label={intl.formatMessage({
@@ -306,8 +285,8 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                                     <br></br>
                                     </>}                      
              
-              <Stack direction="row" alignItems="center">
-                <Box flex={1} sx={{ mr: 2 }}>
+              <Stack direction="row" sx={{ alignItems: "center" }}>
+                <Box sx={{ flex: 1, mr: 2 }}>
                   <SearchForm formData={searchParams as unknown as FormData} onSearch={handleSearch} />
                 </Box>
                 <RowsPerPage />
@@ -347,7 +326,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
               {content?.length ? (
                   <TablePaginationWithRouterIntegration count={totalPages} />
               ) : (
-                  <Box display="flex" justifyContent="center" mt={3}>
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
                   <Secondary>
                       <FormattedMessage
                       defaultMessage={`Valitsemillasi hakuehdoilla ei löytynyt yhtään {type, select,
@@ -361,7 +340,7 @@ export default function IntegrationSelection({ integration, newIntegration, setN
               )}
               <Dialog
                 open={openConfirmation}
-                onClose={()=>setOpenNotice(false)}
+                onClose={()=>setOpenConfirmation(false)}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
               >
@@ -406,14 +385,14 @@ export default function IntegrationSelection({ integration, newIntegration, setN
                   open={saveDialogState}
                   anchorOrigin={snackbarLocation}>
                   
-                    <Box boxShadow={5} sx={{ width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
+                    <Box sx={{ boxShadow: 5, width: '100%', backgroundColor: 'white', border: '1px line grey' }} >
                     <Container maxWidth="sm">
                     
                         <Typography variant="h6" component="h2" sx={{ my: 2, marginLeft: 'auto', marginRight: 'auto', marginTop: '6%' }}>
                             <FormattedMessage defaultMessage="Tallenna muutokset" />
                         </Typography>
         
-                        <Box display="flex" justifyContent="center" mt={2}> 
+                        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}> 
                             <Button onClick={clearIntegrations} sx={{ marginRight: "auto" }}><FormattedMessage defaultMessage="Peruuta" /></Button> 
                             {!cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }} disabled><FormattedMessage defaultMessage="Tallenna" /></Button>}
                             {cannotSave()&&<Button onClick={saveIntegrations} sx={{ marginLeft: "auto" }}><FormattedMessage defaultMessage="Tallenna" /></Button>}

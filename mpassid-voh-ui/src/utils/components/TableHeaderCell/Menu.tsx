@@ -65,10 +65,6 @@ export default function Menu({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          ...otherProps?.MenuListProps,
-          "aria-labelledby": buttonId,
-        }}
         anchorOrigin={{
           vertical: "top",
           horizontal: "right",
@@ -78,15 +74,26 @@ export default function Menu({
           horizontal: "right",
         }}
         {...otherProps}
+        // MUI v9 renamed MenuListProps to slotProps.list. Placed after the
+        // spread so the aria-labelledby merge always wins over any incoming
+        // slotProps from callers.
+        slotProps={{
+          ...otherProps?.slotProps,
+          list: {
+            ...otherProps?.slotProps?.list,
+            "aria-labelledby": buttonId,
+          },
+        }}
       >
-        <OmitFragment>{children}</OmitFragment>
+        {OmitFragment({ children })}
       </MuiMenu>
     </>
   );
 }
 
 function OmitFragment({ children }: React.PropsWithChildren) {
-  return isValidElement(children) && children.type === Fragment
-    ? children.props.children
-    : children;
+  return isValidElement<React.PropsWithChildren>(children) &&
+    children.type === Fragment
+    ? children.props.children ?? null
+    : children ?? null;
 }

@@ -22,7 +22,6 @@ export default function IdentityProvider({ integration }: Props) {
   const identityProvider = integration.configurationEntity!.idp!;
 
   const testLinkHref =
-    // eslint-disable-next-line no-new-func
     new Function("flowName", `return \`${testLink}\``)(
       identityProvider.flowName
     );
@@ -33,12 +32,12 @@ export default function IdentityProvider({ integration }: Props) {
         <FormattedMessage defaultMessage="OKJ-integraatiotyyppikohtaiset tiedot" />
       </Typography>
 
-      <Grid container spacing={2} mb={2}>
+      <Grid container spacing={2} sx={{ mb: 2 }}>
         <DataRow object={identityProvider} path="type" type={Type} />
-        <Grid item xs={4}>
+        <Grid size={4}>
           <FormattedMessage defaultMessage="Oppilaitostyypit" />
         </Grid>
-        <Grid item xs={8}>
+        <Grid size={8}>
           <TextList
             value={
               identityProvider.institutionTypes?.length
@@ -73,10 +72,10 @@ export default function IdentityProvider({ integration }: Props) {
             />
           </>
         )}
-        <Grid item xs={4}>
+        <Grid size={4}>
           <FormattedMessage defaultMessage="Testauslinkki" />
         </Grid>
-        <Grid item xs={8} zeroMinWidth>
+        <Grid size={8} sx={{ minWidth: 0 }}>
           <LinkValue href={testLinkHref} />
         </Grid>
       </Grid>

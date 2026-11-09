@@ -12,27 +12,27 @@ import Toolbar from "@mui/material/Toolbar";
 import { useIntl } from "react-intl";
 import { useSessionStorage } from "usehooks-ts";
 import InterfaceTab from "./InterfaceTab";
-import { useEffect, useState } from "react";
+
+// The oid of the user whose open tabs are stored (kept across page reloads).
+const openIntegrationsOidSessionStorageKey = `${openIntegrationsSessionStorageKey}-oid`;
 
 export default function AppBar() {
   const intl = useIntl();
 
   const me=useMe();
-  const [ oid, setOid ] = useState("");
 
   const [tabs] = useSessionStorage<string[]>(
     openIntegrationsSessionStorageKey,
     []
   );
-    
-  useEffect(() => {
-    if(me?.oid) {
-      setOid(me.oid)
-    }
-  }, [me]);
 
-  if(me.oid!=undefined&&oid!=me.oid) {
-    sessionStorage.removeItem(openIntegrationsSessionStorageKey);
+  // Clear the open tabs only when the user changes (not on every mount).
+  const tabsOid = sessionStorage.getItem(openIntegrationsOidSessionStorageKey);
+  if(me.oid!=undefined&&tabsOid!=me.oid) {
+    if(tabsOid!=null) {
+      sessionStorage.removeItem(openIntegrationsSessionStorageKey);
+    }
+    sessionStorage.setItem(openIntegrationsOidSessionStorageKey, me.oid);
   }
   
   const mainNavLinkTabs = [

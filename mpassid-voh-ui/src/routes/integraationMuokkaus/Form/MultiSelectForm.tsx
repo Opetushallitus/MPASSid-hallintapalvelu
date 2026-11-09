@@ -1,19 +1,24 @@
 
 import type { SelectChangeEvent } from "@mui/material";
 import { Box, Checkbox, Chip, FormControl, FormHelperText, Input, ListItemText, MenuItem, Select } from "@mui/material";
-import type { Dispatch} from "react";
-import { useEffect, useRef, useState } from "react";
-import { useIntl, FormattedMessage } from 'react-intl';
+import type { Dispatch, JSX } from "react";
+import { useEffect, useState } from "react";
+import { useIntl } from 'react-intl';
 import type { Components } from '@/api';
-import { devLog } from "@/utils/devLog";
+import { createLogger } from "@/utils/devLog";
+
+const debugLog = createLogger("DEBUG");
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+  // MUI v9 moved Select/Menu's PaperProps under slotProps.paper.
+  slotProps: {
+    paper: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
     },
   },
 };
@@ -39,28 +44,26 @@ interface Props {
   onValidate: (data:string) => boolean;
 }
 
-export default function MultiSelectForm({ values, isEditable=false, mandatory=false, multiple=true, createEmpty=true, helperText, onUpdate, onValidate, attributeType, label,setCanSave,enums }: Props) {
+export default function MultiSelectForm({ values, isEditable=false, mandatory=false, multiple=true, createEmpty=true, helperText, onUpdate, setCanSave,enums }: Props) {
   const intl = useIntl();
-  const [usedHelperText, setUsedHelperText] = useState<JSX.Element>(<></>);
-  const inputRef = useRef<HTMLFormElement>(null);
+  const [selection, setSelection] = useState<string[]>(values);
 
-  const [selection, setSelection] = useState<string[]>([]);
-
-  useEffect(() => {
-    if(values.length>0) {
-      setSelection(values)
-    }
-    
-  },[ values ])
+  // New values from the parent replace the selection; empty values (cleared
+  // by the parent) clear it too. Adjusted while rendering, not in an effect.
+  const [prevValues, setPrevValues] = useState(values);
+  if(values!==prevValues) {
+    setPrevValues(values);
+    setSelection(values);
+  }
 
   const handleChange = (event: SelectChangeEvent<typeof selection>) => {
     
-    devLog("DEBUG","MultiSelectForm (handleChange event)",event )
+    debugLog("MultiSelectForm (handleChange event)",event )
     const {
       target: { value },
     } = event;
     
-    devLog("DEBUG","MultiSelectForm (handleChange value)",value )
+    debugLog("MultiSelectForm (handleChange value)",value )
     
 
     
@@ -68,24 +71,23 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
       setSelection(['null']);
       onUpdate(['null']);
     } else {
-      setSelection(
-        // On autofill we get a stringified value.
-        typeof value === 'string' ? value.split(',') : value,
-      );
-      onUpdate(typeof value === 'string' ? value.split(',') : value);
+      // On autofill we get a stringified value; a single-select value is
+      // never a list, so it may contain commas.
+      const selected = typeof value === 'string' ? (multiple ? value.split(',') : [value]) : value;
+      setSelection(selected);
+      onUpdate(selected);
     }
     
   };
 
 
   useEffect(() => {
-    devLog("DEBUG","MultiSelectForm (mandatory)",inputRef?.current?.value)
-    if((!inputRef.current?.value||inputRef.current.value==="")&&mandatory) {
-      setUsedHelperText(<FormattedMessage defaultMessage="{label} on pakollinen kenttä" values={{label: label}} />)
+    debugLog("MultiSelectForm (mandatory)",values)
+    if(values.length===0&&mandatory) {
       setCanSave(false)  
     }
     
-  }, [ label, mandatory, setUsedHelperText, setCanSave ]);
+  }, [ mandatory, values, setCanSave ]);
   
   if(isEditable&&(createEmpty||selection.length>0)) {
     return (
@@ -101,7 +103,7 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                 value={selection}
                 onChange={handleChange}
                 input={<Input id="select-multiple-chip"  />}
-                renderValue={(selected) => {
+                renderValue={() => {
                     const renderValues:string[]=[];
                     enums.filter(e=>selection.indexOf(e.value) > -1).forEach(e=>renderValues.push(e.label))
 
@@ -124,7 +126,8 @@ export default function MultiSelectForm({ values, isEditable=false, mandatory=fa
                     </MenuItem>
                 ))}
                 {createEmpty&&enums&&enums.length===0&&(
-                    <MenuItem key='none' >
+                    // A placeholder, not a value: selecting it added undefined to the selection.
+                    <MenuItem key='none' disabled>
                     <ListItemText primary={<span >{intl.formatMessage({
                     defaultMessage: "Ei valintoja",
                   })}</span>} />

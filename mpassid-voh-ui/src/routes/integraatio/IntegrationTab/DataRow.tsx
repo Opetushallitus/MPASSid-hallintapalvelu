@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Paper, Tooltip } from "@mui/material";
 import { get, last, toPath } from "lodash";
-import type { PropsWithChildren } from "react";
+import type { JSX, PropsWithChildren } from "react";
 import { cloneElement } from "react";
 import type { MessageDescriptor } from "react-intl";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -22,11 +22,14 @@ export function DataRowContainer({
   const label = id in intl.messages ? { id } : undefined;
   const tooltip = tooltipId in intl.messages ? { id: tooltipId } : undefined;
 
-  const TypeComponent =
-    typeof type === "function" ? type : typeComponents[type];
+  // Each value component expects its own value type; the value at `path`
+  // is whatever the integration holds there.
+  const TypeComponent = (
+    typeof type === "function" ? type : typeComponents[type]
+  ) as (props: { value: unknown }) => JSX.Element;
 
   return cloneElement(
-    children as React.ReactElement,
+    children as React.ReactElement<DataRowProps>,
     {
       name,
       label,
@@ -41,8 +44,14 @@ interface Props {
   path: Parameters<typeof get>[1];
   type?:
     | keyof typeof typeComponents
-    | (({ value }: { value: any }) => JSX.Element);
+    | ValueComponent;
 }
+
+/**
+ * A component rendering one value. `never` lets any component with a
+ * `value` prop of its own type be passed (e.g. `Type`).
+ */
+export type ValueComponent = (props: { value: never }) => JSX.Element;
 
 export function DataRow(props: Props) {
   return (
@@ -61,12 +70,12 @@ export type DataRowProps = PropsWithChildren<{
 export function DataRowBase({ name, label, tooltip, children }: DataRowProps) {
   return (
     <>
-      <Grid item xs={4}>
+      <Grid size={4}>
         <Tooltip
           title={
             <>
               {tooltip && (
-                <Box mb={1}>
+                <Box sx={{ mb: 1 }}>
                   <FormattedMessage {...tooltip} />
                 </Box>
               )}
@@ -77,7 +86,7 @@ export function DataRowBase({ name, label, tooltip, children }: DataRowProps) {
           <span>{label ? <FormattedMessage {...label} /> : name}</span>
         </Tooltip>
       </Grid>
-      <Grid item xs={8}>
+      <Grid size={8}>
         {children}
       </Grid>
     </>
@@ -133,7 +142,7 @@ export function TextList({ value = [] }: { value?: string[] }) {
   );
 }
 
-export function ServiceList({ value = [] }: { value?: { name?: String ; id?: BigInteger;  }[] }) {
+export function ServiceList({ value = [] }: { value?: { name?: string ; id?: BigInteger;  }[] }) {
   return (
     <>
       {value.length
@@ -185,7 +194,7 @@ const getType = (sp: ServiceProvider|undefined) => {
   
 };
 
-export function SPList({ value = [] }: { value?: { configurationEntity?: { sp?: { name?: String } }; organization?: { name?: String };  }[] } ) {
+export function SPList({ value = [] }: { value?: { configurationEntity?: { sp?: { name?: string } }; organization?: { name?: string };  }[] } ) {
   return (
     <>
       {value.length

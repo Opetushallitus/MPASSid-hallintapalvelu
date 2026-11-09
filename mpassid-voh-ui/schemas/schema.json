@@ -6,7 +6,7 @@
             "name": "EUPL Version 1.1",
             "url": "http://www.osor.eu/eupl/"
         },
-        "version": "2.6.6"
+        "version": "2.6.7"
     },
     "servers": [
         {
@@ -75,6 +75,15 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "set",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
                         }
                     }
                 ],
@@ -356,123 +365,6 @@
                     },
                     "409": {
                         "description": "Integration update conflict",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IntegrationError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v2/integration": {
-            "get": {
-                "tags": [
-                    "integration-controller"
-                ],
-                "summary": "Get a blank integration",
-                "operationId": "getBlankIntegration",
-                "parameters": [
-                    {
-                        "name": "role",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "type",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "organization",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "set",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Integration creation successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Integration"
-                                },
-                                "examples": {
-                                    "integration": {
-                                        "description": "integration",
-                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "405": {
-                        "description": "Integration creation error",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IntegrationError"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "integration-controller"
-                ],
-                "summary": "Create an integration",
-                "operationId": "createIntegration",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/Integration"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Integration creation successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Integration"
-                                },
-                                "examples": {
-                                    "integration": {
-                                        "description": "integration",
-                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "405": {
-                        "description": "Integration creation error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -858,54 +750,6 @@
                 ]
             }
         },
-        "/api/v2/integration/since/{timestamp}": {
-            "get": {
-                "tags": [
-                    "integration-controller"
-                ],
-                "summary": "Get integrations since a point in time",
-                "operationId": "getIntegrationsSince",
-                "parameters": [
-                    {
-                        "name": "timestamp",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    }
-                ],
-                "responses": {
-                    "404": {
-                        "description": "Integration not found",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/IntegrationError"
-                                }
-                            }
-                        }
-                    },
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Integration"
-                                },
-                                "examples": {
-                                    "integration": {
-                                        "description": "integration",
-                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/v2/integration/search": {
             "get": {
                 "tags": [
@@ -1000,33 +844,6 @@
                 }
             }
         },
-        "/api/v2/integration/list": {
-            "get": {
-                "tags": [
-                    "integration-controller"
-                ],
-                "summary": "Get all integrations",
-                "operationId": "getIntegrations_1",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Integration"
-                                },
-                                "examples": {
-                                    "integrations": {
-                                        "description": "integrations",
-                                        "externalValue": "https://mpassid-rr-test.csc.fi/integrations.json"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/v2/integration/discoveryinformation": {
             "get": {
                 "tags": [
@@ -1046,7 +863,7 @@
                     {
                         "name": "id",
                         "in": "query",
-                        "required": false,
+                        "required": true,
                         "schema": {
                             "type": "integer",
                             "format": "int64"
@@ -1152,7 +969,9 @@
         },
         "/api/v2/idp/saml/metadata/{id}": {
             "post": {
-                "tags": ["identity-provider-controller"],
+                "tags": [
+                    "identity-provider-controller"
+                ],
                 "summary": "Update SAML metadata",
                 "operationId": "uploadSAMLMetadata",
                 "parameters": [
@@ -1167,49 +986,108 @@
                     }
                 ],
                 "requestBody": {
-                "content": {
-                    "multipart/form-data": {
-                    "schema": {
-                        "required": ["file"],
-                        "type": "object",
-                        "properties": {
-                        "file": { "type": "string", "format": "binary" }
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
                         }
                     }
-                    }
-                }
                 },
                 "responses": {
                     "200": {
                         "description": "SAML metadata update successful",
                         "content": {
-                                "application/json": {
-                                    "schema": {
-                                        "$ref": "#/components/schemas/Integration"
-                                    },
-                                    "examples": {
-                                        "integration": {
-                                            "description": "integration",
-                                            "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
-                                        }
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Integration"
+                                },
+                                "examples": {
+                                    "integration": {
+                                        "description": "integration",
+                                        "externalValue": "https://mpassid-rr-test.csc.fi/integration-idp.json"
                                     }
                                 }
+                            }
                         }
                     },
                     "405": {
                         "description": "SAML metadata update error",
                         "content": {
-                        "application/json": {
-                            "schema": { "$ref": "#/components/schemas/IntegrationError" }
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
                         }
-                        }
-                    },                    
+                    },
                     "403": {
                         "description": "Forbidden",
                         "content": {
-                        "application/json": {
-                            "schema": { "$ref": "#/components/schemas/IntegrationError" }
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
                         }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "identity-provider-controller"
+                ],
+                "summary": "Get SAML metadata",
+                "operationId": "getSAMLMetadata",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
                         }
                     }
                 }
@@ -1445,6 +1323,52 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/v2/loading/start": {
+            "post": {
+                "tags": [
+                    "loading-controller"
+                ],
+                "summary": "Start integration loading",
+                "operationId": "start",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Loading"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Loading"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Loading conflict",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "loading": []
+                    }
+                ]
             }
         }
     },
@@ -2041,7 +1965,6 @@
                         "type": "integer",
                         "format": "int64"
                     },
-                    "tenantId": { "type": "string" },
                     "clientId": {
                         "type": "string"
                     },

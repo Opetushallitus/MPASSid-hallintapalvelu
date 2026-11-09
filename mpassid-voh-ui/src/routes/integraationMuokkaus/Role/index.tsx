@@ -3,16 +3,19 @@ import { getRole } from "../../home/IntegrationsTable";
 import IdentityProvider from "./IdentityProvider";
 import ServiceProvider from "./ServiceProvider";
 import SetProvider from "./SetProvider";
-import type { Dispatch, MutableRefObject } from "react";
-import { devLog } from "@/utils/devLog";
+import type { Dispatch } from "react";
+import { createLogger } from "@/utils/devLog";
 import { dataConfiguration } from "@/config";
+
+const debugLog = createLogger("DEBUG");
 
 
 
 interface Props {
   integration: Components.Schemas.Integration;
   oid: string;
-  environment: MutableRefObject<number>;
+  /** The chosen environment (deploymentPhase); negative while unknown. */
+  environment: number;
   name: string;
   attributes?: Components.Schemas.Attribute[];
   metadataUrl: string;
@@ -36,12 +39,12 @@ export default function Role({ integration, oid, environment, setName, setCanSav
   const Component = roleComponents[role];
 
   const canSave = (value: boolean) => {
-    devLog("DEBUG","Role (setCanSave)",value)
+    debugLog("Role (setCanSave)",value)
     setCanSave(value)
   }
 
   const tenantId: Components.Schemas.Attribute=attributes?.find(att=>att.name==='tenantId')||{}
-  devLog("DEBUG","Role (tenantId)",tenantId?.content)
+  debugLog("Role (tenantId)",tenantId?.content)
 
   return (
     <>

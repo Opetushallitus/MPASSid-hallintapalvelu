@@ -1,14 +1,20 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillCommonIdpSteps,
-  logBrowserConsole,
   mockInstitutionTypes,
 } from "./helpers";
 
+// See create-wilma-integration.spec.ts and helpers.ts for the general
+// caveats (unverified against a real browser, koodisto override rationale,
+// etc). Opinsys-specific fields come from src/config.ts dataConfiguration:
+// clientId/clientKey/tenantId are the only mandatory "data" fields for type
+// 'opinsys' (config.ts:133-146,163-181,227-245) - unlike Wilma there is no
+// `hostname` field, and unlike Azure there are no mandatory user attributes
+// (opinsys is excluded from every user-attribute integrationType entry).
+
 test("luo uusi Opinsys-integraatio", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Opinsys");
 

@@ -12,7 +12,7 @@ function AddIntegrationButton({setOpen}:Props) {
   const intl = useIntl();
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="center">
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Fab
         color="primary"
         onClick={()=>setOpen(true)}

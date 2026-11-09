@@ -1,15 +1,28 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewSpIntegration,
   fillServiceName,
-  logBrowserConsole,
   openEditFromViewPage,
   saveIntegration,
 } from "./helpers";
 
-test("luo uusi OIDC-palveluintegraatio", async ({ page }) => {
-  logBrowserConsole(page);
+// See create-wilma-integration.spec.ts, create-saml-integration.spec.ts and
+// helpers.ts for general caveats. OIDC needs far less manual input than
+// SAML: most of its mandatory metadata fields self-populate on mount and
+// never require interaction (config.ts dataConfiguration, all
+// integrationType 'oidc'):
+//  - grant_types / response_types: multiselect with a `defaultValue`
+//    ('authorization_code'/'code') - Metadata.tsx:280-284 auto-fills array
+//    fields that have enum+defaultValue as soon as they mount.
+//  - client_id / client_secret: `generate: 'randomsha1'`/'name_randomsha1'
+//    - Form/index.tsx MetadataForm:330-338 SHA1-generates these on mount
+//    and they are not editable, so there is nothing to fill.
+//  - scope: fixed default 'openid profile', not editable, not mandatory.
+// That leaves only `redirect_uris` (mandatory array, no default) needing a
+// manual entry, plus the shared "Palvelun nimi" field from
+// ServiceProvider.tsx.
 
+test("luo uusi OIDC-palveluintegraatio", async ({ page }) => {
   await createNewSpIntegration(page, "OpenID Connect");
 
   await expect(page).toHaveURL(/\/muokkaa\/sp\/oidc\/0/);
@@ -52,8 +65,6 @@ test("luo uusi OIDC-palveluintegraatio", async ({ page }) => {
 test("OIDC:n client_secret-muistutus ei toistu seuraavissa tallennuksissa", async ({
   page,
 }) => {
-  logBrowserConsole(page);
-
   await createNewSpIntegration(page, "OpenID Connect");
   await fillServiceName(page, "Mansikkalan client_secret-testi");
 

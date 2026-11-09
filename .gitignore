@@ -9,3 +9,6 @@
 *.sln
 *.sw?
 target/
+.claude/.credentials.json
+.claude/credentials.json
+.claude/settings.local.json

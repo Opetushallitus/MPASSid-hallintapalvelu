@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash-es';
 import { OpenAPIClientAxios } from 'openapi-client-axios';
 import { generateTypesForDocument } from 'openapi-client-axios-typegen';
@@ -16,7 +16,17 @@ const isYaml = /.\ya?ml/.test(extname(definition));
 
 const isTypeScript = extname(target) === '.ts';
 
-const api = new OpenAPIClientAxios({ definition });
+// openapi-client-axios's loadDocument() only accepts an object or a URL for the
+// definition — a local file PATH string is handed straight to axios.get(),
+// which throws "Invalid URL" (ERR_INVALID_URL) under axios 1.x. Pre-load JSON
+// schemas from disk and pass the parsed object so init() uses it directly with
+// no HTTP fetch. (typegen below keeps the path so its ref-parser can still
+// resolve any external $refs relative to the file.)
+const definitionDocument = isYaml
+  ? definition
+  : JSON.parse(await readFile(definition, 'utf8'));
+
+const api = new OpenAPIClientAxios({ definition: definitionDocument });
 await api.init();
 
 const operations = api.getOperations().map((operation) => ({

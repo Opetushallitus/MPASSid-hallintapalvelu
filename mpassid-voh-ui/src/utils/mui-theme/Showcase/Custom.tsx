@@ -17,7 +17,10 @@ import { useEffect, useState } from "react";
 export default function Custom() {
   const [update, setUpdate] = useState(false);
 
+  // Showcase: the "Update" tabs suspend on a re-render after mount, which is
+  // what this effect deliberately triggers.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUpdate(true);
   }, []);
 
@@ -66,7 +69,7 @@ export default function Custom() {
             { title: "Ready" },
             { title: "Update", children: update && <Suspend /> },
           ].map(({ title, children }, index) => (
-            <Grid key={index} item xs={4}>
+            <Grid key={index} size={4}>
               <Typography variant="subtitle1" gutterBottom>
                 {title}
               </Typography>
@@ -90,7 +93,7 @@ export default function Custom() {
             { title: "Ready" },
             { title: "Update", children: update && <Suspend /> },
           ].map(({ title, children }, index) => (
-            <Grid key={index} item xs={4}>
+            <Grid key={index} size={4}>
               <Typography variant="subtitle1" gutterBottom>
                 {title}
               </Typography>

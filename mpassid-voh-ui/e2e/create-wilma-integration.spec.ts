@@ -1,7 +1,27 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
+
+// NOTE: this spec could not be run/iterated in the authoring environment
+// (no network access to download Playwright's browser binaries there), so
+// unlike the rest of this app's test history it has NOT been empirically
+// verified against a real browser. The selectors below are derived directly
+// from the source (src/routes/home/NewIntegrationSelection.tsx,
+// src/routes/integraationMuokkaus/*) and from an earlier React Testing
+// Library version of the same flow that WAS run and passed against the
+// identical components. Run with `npx playwright test --headed --debug`
+// first and expect to adjust a selector or two.
 
 test("luo uusi Wilma-integraatio", async ({ page }) => {
-  
+  // The mock backend's default koodisto example for
+  // "mpassidnsallimatoppilaitostyypit" only returns koodiArvo "12", which
+  // doesn't match the fixture organization's only school
+  // (oppilaitostyyppi "11", see schemas/blankIdpIntegration.json) - without
+  // this the save button never enables because SchoolSelection can't match
+  // any school to the chosen institution type. This override was proven
+  // necessary in the Vitest/MSW version of this test; if Playwright's
+  // page.route() doesn't intercept requests that end up going through the
+  // MSW service worker in your Playwright version, this route.fulfill()
+  // simply won't fire and you'll see the same "Tallenna" stays disabled
+  // symptom - check the Network tab for this request first.
   await page.route(
     "**/koodisto-service/rest/json/mpassidnsallimatoppilaitostyypit/koodi",
     (route) =>
@@ -14,15 +34,6 @@ test("luo uusi Wilma-integraatio", async ({ page }) => {
       })
   );
 
-  page.on("console", (msg) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:${msg.type()}] ${msg.text()}`);
-  });
-  page.on("pageerror", (err) => {
-    // eslint-disable-next-line no-console
-    console.log(`[browser:pageerror] ${err.message}`);
-  });
-
   await page.goto("/");
 
   // AddIntegrationButton.tsx: <Fab aria-label={intl.formatMessage({defaultMessage:"lisää"})}>
@@ -31,6 +42,13 @@ test("luo uusi Wilma-integraatio", async ({ page }) => {
   const dialog = page.getByRole("dialog", { name: "Luo uusi integraatio" });
   await expect(dialog).toBeVisible();
 
+  // organisaatio/integraatio auto-select to the first
+  // APP_MPASSID_TALLENTAJA_* organization once /cas/me + organisaatio-nimet
+  // resolve (NewIntegrationSelection.tsx useEffects) - the mock's default
+  // /cas/me example already includes that group, so no manual organisaatio
+  // pick should be needed. Each <Select id="..."> shares its id with its
+  // sibling <InputLabel id="...">, so a bare #id locator is ambiguous
+  // (strict-mode violation) - getByRole targets the combobox specifically.
   await expect(
     page.getByRole("combobox", { name: "integraatio:" })
   ).toHaveText(/Koulutustoimija/i, { timeout: 15_000 });

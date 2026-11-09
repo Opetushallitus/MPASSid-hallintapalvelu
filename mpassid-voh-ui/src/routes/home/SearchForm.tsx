@@ -48,12 +48,13 @@ export default function SearchForm({ formData, onSearch }: Props) {
         name={SEARCH_PARAM_NANE}
         defaultValue={defaultValue}
         fullWidth
-        inputProps={{
-          ref: inputRef,
-          autoComplete: "off",
-        }}
-        InputProps={{
-          endAdornment: (
+        inputRef={inputRef}
+        slotProps={{
+          htmlInput: {
+            autoComplete: "off",
+          },
+          input: {
+            endAdornment: (
             <>
               {!isEmpty && (
                 <InputAdornment position="end">
@@ -87,6 +88,7 @@ export default function SearchForm({ formData, onSearch }: Props) {
               </InputAdornment>
             </>
           ),
+          },
         }}
       />
     </form>

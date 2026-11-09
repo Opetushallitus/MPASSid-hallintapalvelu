@@ -1,14 +1,29 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import {
   createNewIdpIntegration,
   fillCommonIdpSteps,
-  logBrowserConsole,
   mockInstitutionTypes,
 } from "./helpers";
 
+// See create-wilma-integration.spec.ts and helpers.ts for general caveats -
+// this is the most involved of the idp specs, since Azure is the only idp
+// type with mandatory user attributes (config.ts: 'firstName','surname',
+// 'schoolIds','learnerId','roles' all have `mandatory:true` under the
+// 'azure' integrationType, rendered under the "Attribuutit" heading -
+// IntegrationDetails.tsx:513-517 only shows that heading for azure, since
+// hasVisibleAttributes excludes opinsys/wilma/gsuite/adfs). Azure also has
+// its own mandatory data fields: clientId/clientKey/tenantId (like opinsys)
+// plus azureApplicationIdUri and metadataUrl (config.ts:1098-1137).
+//
+// NOTE: IntegrationDetails.tsx:284 only requires a non-empty metadataUrl
+// for type 'adfs'/'gsuite', not 'azure' - so unlike those two, an empty
+// Azure metadataUrl likely does NOT block "Tallenna" even though
+// config.ts marks the field mandatory:true. This test fills it anyway
+// since the field is rendered and it's realistic to do so; if "Tallenna"
+// enables before this line runs, that's expected and not a test bug.
+
 test("luo uusi Azure-integraatio", async ({ page }) => {
   await mockInstitutionTypes(page);
-  logBrowserConsole(page);
 
   await createNewIdpIntegration(page, "Azure");
 

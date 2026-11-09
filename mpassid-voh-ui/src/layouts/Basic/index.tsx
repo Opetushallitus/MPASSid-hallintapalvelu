@@ -19,7 +19,7 @@ export default function Basic() {
     <>
       <AppBar />
       <Container>
-        <Box py={3}>
+        <Box sx={{ py: 3 }}>
           <Typography variant="h1" gutterBottom>
             <FormattedMessage defaultMessage="MPASSid-hallinta" />
           </Typography>

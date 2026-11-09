@@ -1,37 +1,35 @@
 import type { Components} from '@/api';
 import { testAttributes, testAttributesAuthorization } from '@/api';
 import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, InputAdornment, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import type { Dispatch} from 'react';
-import { useEffect, useState } from 'react';
+import type { Dispatch, JSX } from 'react';
+import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import type { UiConfiguration } from '@/config';
 import { attributePreferredOrder } from '@/config';
+import { createLogger } from "@/utils/devLog";
+
+const warnLog = createLogger("WARN");
 
 interface Props {
     id: string;
     attributes: Components.Schemas.Attribute[];
     open: boolean;
     oid: string;
-    tenantId: string| undefined;
     environment: number;
     dataConfiguration: UiConfiguration[];
     setOpen: Dispatch<boolean>;
   }
 
 
-export default function AttributeTest({ id,attributes, open, setOpen, oid, environment,tenantId,dataConfiguration }: Props){
+export default function AttributeTest({ id,attributes, open, setOpen, oid, environment,dataConfiguration }: Props){
     const intl = useIntl();
-    const [isValidPrincipal, setIsValidPrincipal] = useState(true);
     const [isKnown, setIsKnown] = useState(true);
-    const [isValidClientId, setIsValidClientId] = useState(true);
-    const [isValidClientSecret, setIsValidClientSecret] = useState(true);
     const [sessionAuthenticated, setSessionAuthenticated] = useState(false);
     const [authenticationAlert, setAuthenticationAlert ] = useState(false);
     const [usedHelperTextPrincipal, setUsedHelperTextPrincipal] = useState<JSX.Element>(<></>);
-    const [usedHelperTextClientId, setUsedHelperTextClientId] = useState<JSX.Element>(<></>);
-    const [usedHelperTextClientSecret, setUsedHelperTextClientSecret] = useState<JSX.Element>(<></>);
-    const [attributeResult, setAttributeResult] = useState<any>({});
+    // Attribute values keyed by attribute name (the schema types the response as string[]).
+    const [attributeResult, setAttributeResult] = useState<Record<string, unknown>>({});
     const [showClientSecret, setShowClientSecret] = useState(false);
     const [principal, setPrincipal] = useState<string>();
     const [clientId, setClientId] = useState<string>();
@@ -62,46 +60,66 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
     )
     
     
-    useEffect(() => {
+    // Adjusted while rendering instead of in effects: closing the dialog
+    // clears the result,
+    const [prevOpen, setPrevOpen] = useState(open);
+    if(open!==prevOpen) {
+        setPrevOpen(open);
         if(!open){
             setAttributeResult({})
             setAuthenticationAlert(false)
             setLoading(false)
-        } 
-      }, [open]);
-
-      useEffect(() => {
-        if((principal==="")) {
-            setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValidPrincipal(false)
-        } else {
-            setIsValidPrincipal(true)               
-            setUsedHelperTextPrincipal(<></>)
         }
-      }, [principal]);  
+    }
 
-      useEffect(() => {
-        if((clientId==="")) {
-            setUsedHelperTextClientId(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValidClientId(false)
-        } else {
-            setIsValidClientId(true)               
-            setUsedHelperTextClientId(<></>)
-        }
-      }, [clientId]);  
+    // and a changed principal resets its helper text (a failed test may set
+    // "Tuntematon tilaaja" there until the principal changes again).
+    const [prevPrincipal, setPrevPrincipal] = useState(principal);
+    if(principal!==prevPrincipal) {
+        setPrevPrincipal(principal);
+        setUsedHelperTextPrincipal(principal==="" ? <FormattedMessage defaultMessage="Pakollinen kenttä" /> : <></>)
+    }
 
-      useEffect(() => {
-        if((clientSecret==="")) {
-            setUsedHelperTextClientSecret(<FormattedMessage defaultMessage="Pakollinen kenttä" />)
-            setIsValidClientSecret(false)
-        } else {
-            setIsValidClientSecret(true)               
-            setUsedHelperTextClientSecret(<></>)
-        }
-      }, [clientSecret]);  
+    // A field emptied by the user is invalid (untouched, undefined, is not).
+    const isValidPrincipal = principal!=="";
+    const isValidClientId = clientId!=="";
+    const isValidClientSecret = clientSecret!=="";
+    const usedHelperTextClientId = isValidClientId ? <></> : <FormattedMessage defaultMessage="Pakollinen kenttä" />;
+    const usedHelperTextClientSecret = isValidClientSecret ? <></> : <FormattedMessage defaultMessage="Pakollinen kenttä" />;
 
     const onlyUnique = (value: string, index: number, array: string[]) => {
         return array.indexOf(value) === index;
+    }
+
+    // Attribuutin content on polku testAttributes-vastaukseen ("nimi",
+    // "nimi.attribuutti", "nimi.attribuutti.taso1", ...). Polku puretaan
+    // askel kerrallaan, joten vastaus saa olla miten syvästi tahansa
+    // sisäkkäinen - aiemmin luettiin vain kaksi ensimmäistä tasoa.
+    const resolveAttributeValue = (source: unknown, path: string): unknown =>
+        path
+            .split(".")
+            .reduce<unknown>(
+                (current, key) =>
+                    current !== null && typeof current === "object"
+                        ? (current as Record<string, unknown>)[key]
+                        : undefined,
+                source
+            );
+
+    // Polku voi osoittaa myös välitasolle tai monikolliseen arvoon, ja React
+    // kaatuu jos soluun päätyy objekti, joten muu kuin alkeisarvo muunnetaan
+    // näytettävään muotoon.
+    const formatAttributeValue = (value: unknown): string => {
+        if (value === undefined || value === null) {
+            return "";
+        }
+        if (Array.isArray(value)) {
+            return value.map(formatAttributeValue).join(", ");
+        }
+        if (typeof value === "object") {
+            return JSON.stringify(value);
+        }
+        return String(value);
     }
 
     const readyToTest = () => {
@@ -147,7 +165,7 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
     }
       
     const onUpdate = () => {
-        var attributeList:string[] = [];
+        let attributeList:string[] = [];
         setAuthenticationAlert(false)
         setLoading(true);
         setIsKnown(true);
@@ -155,25 +173,34 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
             if(principal&&clientId&&clientSecret) {
                 attributeList=getAttributeList()||[];
                 if(!sessionAuthenticated){
+                    // The backend reads the tenant id from the saved integration.
                     const authRequest:Components.Schemas.AttributeTestAuthorizationRequestBody={};
                     authRequest.id=parseInt(id);
-                    if(id==='0'&&tenantId&&tenantId!=="") {
-                        authRequest.tenantId=tenantId;
-                    }
                     authRequest.clientId=clientId;
                     authRequest.clientSecret=clientSecret;
                     
-                    testAttributesAuthorization({},authRequest).then(result=>{ 
+                    testAttributesAuthorization({},authRequest).then((authorized)=>{ 
+                        // false (HTTP 200): the backend could not authorize, e.g.
+                        // the integration is not saved yet.
+                        if(authorized!==true) {
+                            warnLog("testAttributesAuthorization (istuntoa ei valtuutettu)", authorized)
+                            setSessionAuthenticated(false)
+                            setAuthenticationAlert(true)
+                            setLoading(false);
+                            return
+                        }
                         setSessionAuthenticated(true)
                         testAttributes({ principal: principal, select: attributeList}).then(result=>{
-                            setAttributeResult(result)                            
+                            setAttributeResult(result as unknown as Record<string, unknown>)                            
                             setLoading(false);
                         }).catch(error=>{
+                            warnLog("testAttributes (attribuuttihaku epäonnistui)", error)
                             setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
                             setLoading(false);
                             setIsKnown(false);
                         })
                     }).catch(error=>{
+                        warnLog("testAttributesAuthorization (istunnon valtuutus epäonnistui)", error)
                         setSessionAuthenticated(false)
                         setAuthenticationAlert(true)
                         setLoading(false);
@@ -186,9 +213,10 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                 attributeList=getAttributeList();                
                 setSessionAuthenticated(true)
                 testAttributes({ principal: principal, select: attributeList}).then(result=>{
-                    setAttributeResult(result)                            
+                    setAttributeResult(result as unknown as Record<string, unknown>)                            
                     setLoading(false);
                 }).catch(error=>{
+                    warnLog("testAttributes (attribuuttihaku epäonnistui)", error)
                     setUsedHelperTextPrincipal(<FormattedMessage defaultMessage="Tuntematon tilaaja" />)
                     setLoading(false);
                     setIsKnown(false);
@@ -233,8 +261,10 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     required={true}
                     error={!isValidClientId}
                     helperText={usedHelperTextClientId}
-                    inputProps={{
-                        autoComplete: "off",
+                    slotProps={{
+                        htmlInput: {
+                            autoComplete: "off",
+                        },
                     }}
                 />
                 <TextField 
@@ -253,7 +283,8 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     onChange={(e) => setClientSecret(e.target.value)}
                     required={true}
                     helperText={usedHelperTextClientSecret}
-                    InputProps={{
+                    slotProps={{
+                        input: {
                         endAdornment: (
                             <InputAdornment position="end">
                             <IconButton
@@ -268,6 +299,7 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                             </InputAdornment>
                         ),
                         autoComplete: "off",
+                        },
                     }}
                     error={!isValidClientSecret}
                     fullWidth />
@@ -290,8 +322,10 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     error={!isValidPrincipal||!isKnown}
                     helperText={usedHelperTextPrincipal}
                     required={true}
-                    inputProps={{
-                        autoComplete: "off",
+                    slotProps={{
+                        htmlInput: {
+                            autoComplete: "off",
+                        },
                     }}
                 />}
                 
@@ -306,26 +340,15 @@ export default function AttributeTest({ id,attributes, open, setOpen, oid, envir
                     <TableBody>
                     {configurations
                     .map((configuration) => {
-                        var value="";
+                        let value="";
                         
                         
                         const visible = (configuration.integrationType.filter(type=>type.name==="azure"||type.name==="default").length>0&&configuration.integrationType.filter(type=>type.name==="azure"||type.name==="default")[0].visible);
                         if(visible&&attributes.filter(attribute=>attribute.name===configuration.name).length>0) {
                             const attrib=attributes.filter(attribute=>attribute.name===configuration.name)[0];
                             const key=attrib.content||"";
-                            if(key.includes(".")) {                                                      
-                                if(attrib.content?.split(".",2)[1]) {
-                                    const key1=attrib.content?.split(".",2)[0]
-                                    const key2=attrib.content?.split(".",2)[1]
-                                    if(attributeResult[key1]&&key2) {
-                                        value=(attributeResult[key1])[key2]
-                                    } 
-                                }                                                                    
-                            } else {
-                                if(attrib.content&&attributeResult[attrib.content]) {
-                                    value=attributeResult[attrib.content];
-                                }
-                                
+                            if(key) {
+                                value=formatAttributeValue(resolveAttributeValue(attributeResult,key));
                             }
 
                             return (<TableRow key={key}>

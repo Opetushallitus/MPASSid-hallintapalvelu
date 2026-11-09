@@ -24,7 +24,15 @@ dist-ssr
 /src/api/organisaatio.ts
 /target/*
 
+# Vite plugins' runtime output inside the vendored packages' lib/
+/vendor/@visma/*/lib/.temp/
+# Turborepo build logs of the vendored packages (from their original monorepo)
+/vendor/@visma/*/.turbo/
+
 # Playwright
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# e2e-kattavuusraportti (npm run test:e2e:coverage)
+/coverage-e2e
